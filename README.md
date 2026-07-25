@@ -10,6 +10,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Built-in dev tools** — read files, search code, git diff, lint Python, measure complexity
 - **Agents** — ReAct-style tool-calling loop with `Agent` and `CoderAgent`
 - **Chains** — compose prompt templates with LLM calls into reusable pipelines
+- **Sequential chains** — multi-step pipelines that pass outputs between steps
+- **JSON mode** — structured JSON responses via `chat_json()`
+- **Automatic retries** — exponential backoff on rate limits and server errors
 - **Conversation memory** — multi-turn history with message and token limits
 - **Utilities** — token estimation, code block extraction, text truncation
 
@@ -89,6 +92,34 @@ from devai import LLMClient, Message
 client = LLMClient()
 for token in client.stream([Message.user("Write a fibonacci function in Python")]):
     print(token, end="", flush=True)
+```
+
+### Structured JSON Output
+
+```python
+from devai import LLMClient, Message
+
+client = LLMClient()
+data = client.chat_json([
+    Message.system("Respond with valid JSON only."),
+    Message.user("List 3 Python web frameworks with a one-line description each."),
+])
+print(data)
+```
+
+### Multi-Step Pipelines
+
+```python
+from devai import SequentialChain
+from devai.prompts.dev_prompts import CODE_REVIEW, REFACTOR
+
+pipeline = SequentialChain([
+    (CODE_REVIEW, "review"),
+    (REFACTOR.partial(goal="readability"), "refactored"),
+])
+result = pipeline.run(language="python", code="def f(x): return x*2")
+print(result["review"])
+print(result["refactored"])
 ```
 
 ## Configuration

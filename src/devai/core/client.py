@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+import time
 from collections.abc import AsyncIterator, Iterator
 from typing import Any
 
@@ -56,6 +58,8 @@ class LLMClient:
     messages: list[Message],
     tools: list[ToolDefinition] | None = None,
     stream: bool = False,
+    *,
+    json_mode: bool = False,
     **kwargs: Any,
   ) -> dict[str, Any]:
     payload: dict[str, Any] = {
@@ -67,6 +71,8 @@ class LLMClient:
     }
     if tools:
       payload["tools"] = [t.to_api_dict() for t in tools]
+    if json_mode:
+      payload["response_format"] = {"type": "json_object"}
     return payload
 
   def _parse_response(self, data: dict[str, Any]) -> ChatResponse:
@@ -95,6 +101,62 @@ class LLMClient:
     if response.status_code >= 400:
       raise LLMError(f"API error {response.status_code}: {response.text}")
 
+  def _is_retryable(self, exc: Exception) -> bool:
+    if isinstance(exc, RateLimitError):
+      return True
+    if isinstance(exc, LLMError):
+      return any(code in str(exc) for code in ("500", "502", "503", "504"))
+    return False
+
+  def _backoff_delay(self, attempt: int) -> float:
+    return min(2 ** attempt, 30)
+
+  def _request_with_retry(
+    self,
+    messages: list[Message],
+    tools: list[ToolDefinition] | None = None,
+    **kwargs: Any,
+  ) -> ChatResponse:
+    json_mode = kwargs.pop("json_mode", False)
+    payload = self._build_payload(messages, tools, stream=False, json_mode=json_mode, **kwargs)
+    last_error: Exception | None = None
+
+    for attempt in range(self.config.max_retries + 1):
+      try:
+        response = self._get_client().post("/chat/completions", json=payload)
+        self._handle_error(response)
+        return self._parse_response(response.json())
+      except Exception as exc:
+        last_error = exc
+        if attempt >= self.config.max_retries or not self._is_retryable(exc):
+          raise
+        time.sleep(self._backoff_delay(attempt))
+
+    raise last_error  # pragma: no cover
+
+  async def _arequest_with_retry(
+    self,
+    messages: list[Message],
+    tools: list[ToolDefinition] | None = None,
+    **kwargs: Any,
+  ) -> ChatResponse:
+    json_mode = kwargs.pop("json_mode", False)
+    payload = self._build_payload(messages, tools, stream=False, json_mode=json_mode, **kwargs)
+    last_error: Exception | None = None
+
+    for attempt in range(self.config.max_retries + 1):
+      try:
+        response = await self._get_async_client().post("/chat/completions", json=payload)
+        self._handle_error(response)
+        return self._parse_response(response.json())
+      except Exception as exc:
+        last_error = exc
+        if attempt >= self.config.max_retries or not self._is_retryable(exc):
+          raise
+        await asyncio.sleep(self._backoff_delay(attempt))
+
+    raise last_error  # pragma: no cover
+
   def chat(
     self,
     messages: list[Message],
@@ -102,10 +164,7 @@ class LLMClient:
     **kwargs: Any,
   ) -> ChatResponse:
     """Send a chat completion request."""
-    payload = self._build_payload(messages, tools, stream=False, **kwargs)
-    response = self._get_client().post("/chat/completions", json=payload)
-    self._handle_error(response)
-    return self._parse_response(response.json())
+    return self._request_with_retry(messages, tools, **kwargs)
 
   async def achat(
     self,
@@ -114,10 +173,31 @@ class LLMClient:
     **kwargs: Any,
   ) -> ChatResponse:
     """Async chat completion request."""
-    payload = self._build_payload(messages, tools, stream=False, **kwargs)
-    response = await self._get_async_client().post("/chat/completions", json=payload)
-    self._handle_error(response)
-    return self._parse_response(response.json())
+    return await self._arequest_with_retry(messages, tools, **kwargs)
+
+  def chat_json(
+    self,
+    messages: list[Message],
+    **kwargs: Any,
+  ) -> dict[str, Any]:
+    """Request a JSON object response and parse it."""
+    response = self._request_with_retry(messages, json_mode=True, **kwargs)
+    try:
+      return json.loads(response.content)
+    except json.JSONDecodeError as exc:
+      raise LLMError(f"Failed to parse JSON response: {exc}") from exc
+
+  async def achat_json(
+    self,
+    messages: list[Message],
+    **kwargs: Any,
+  ) -> dict[str, Any]:
+    """Async version of chat_json."""
+    response = await self._arequest_with_retry(messages, json_mode=True, **kwargs)
+    try:
+      return json.loads(response.content)
+    except json.JSONDecodeError as exc:
+      raise LLMError(f"Failed to parse JSON response: {exc}") from exc
 
   def stream(
     self,

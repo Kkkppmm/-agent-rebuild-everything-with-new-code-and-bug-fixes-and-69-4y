@@ -3,6 +3,7 @@
 from devai.agents.agent import Agent
 from devai.agents.coder_agent import CoderAgent
 from devai.chains.chain import Chain
+from devai.chains.sequential import SequentialChain
 from devai.core.client import LLMClient
 from devai.core.config import DevAIConfig
 from devai.core.models import Message, Role, ToolCall, ToolDefinition
@@ -16,6 +17,7 @@ __all__ = [
     "Agent",
     "CoderAgent",
     "Chain",
+    "SequentialChain",
     "ConversationMemory",
     "DevAIConfig",
     "LLMClient",
