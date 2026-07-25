@@ -8,6 +8,9 @@ from devai.prompts.dev_prompts import (
     EXPLAIN_CODE,
     WRITE_TESTS,
     DOCSTRING,
+    SECURITY_REVIEW,
+    SQL_OPTIMIZE,
+    README_GEN,
 )
 
 __all__ = [
@@ -20,4 +23,7 @@ __all__ = [
     "EXPLAIN_CODE",
     "WRITE_TESTS",
     "DOCSTRING",
+    "SECURITY_REVIEW",
+    "SQL_OPTIMIZE",
+    "README_GEN",
 ]

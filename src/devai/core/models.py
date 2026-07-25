@@ -80,3 +80,10 @@ class CompletionResponse(BaseModel):
     tool_calls: list[ToolCall] | None = None
     finish_reason: str | None = None
     usage: dict[str, int] | None = None
+
+
+class StreamChunk(BaseModel):
+    """A single chunk from a streaming completion."""
+
+    content: str = ""
+    finish_reason: str | None = None

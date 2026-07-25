@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from typing import Any
 
 from devai.core.client import LLMClient
@@ -40,6 +41,17 @@ class Chain:
         import asyncio
 
         return asyncio.run(self.run(**kwargs))
+
+    async def stream(self, **kwargs: Any) -> AsyncIterator[str]:
+        """Stream the LLM response token by token."""
+        user_content = self.prompt.format(**kwargs)
+        messages: list[Message] = []
+        if self.system_prompt:
+            messages.append(Message(role=Role.SYSTEM, content=self.system_prompt))
+        messages.append(Message(role=Role.USER, content=user_content))
+        async for chunk in self.client.stream(messages):
+            if chunk.content:
+                yield chunk.content
 
     async def close(self) -> None:
         await self.client.close()

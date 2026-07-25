@@ -32,3 +32,7 @@ class ToolExecutionError(DevAIError):
 
 class AgentError(DevAIError):
     """Raised when an agent encounters an unrecoverable error."""
+
+
+class ParseError(DevAIError):
+    """Raised when structured output parsing fails."""

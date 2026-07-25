@@ -5,13 +5,14 @@ from __future__ import annotations
 import asyncio
 import json
 import time
+from collections.abc import AsyncIterator
 from typing import Any
 
 import httpx
 
 from devai.core.config import DevAIConfig
 from devai.core.exceptions import APIError, AuthenticationError, ConfigurationError, RateLimitError
-from devai.core.models import CompletionResponse, Message, Tool, ToolCall
+from devai.core.models import CompletionResponse, Message, StreamChunk, Tool, ToolCall
 
 
 class LLMClient:
@@ -66,6 +67,64 @@ class LLMClient:
     ) -> CompletionResponse:
         """Synchronous wrapper around chat()."""
         return asyncio.run(self.chat(messages, **kwargs))
+
+    async def stream(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        json_mode: bool | None = None,
+        model: str | None = None,
+    ) -> AsyncIterator[StreamChunk]:
+        """Stream chat completion chunks."""
+        payload = self._build_payload(
+            messages, tools, temperature, max_tokens, json_mode, model
+        )
+        payload["stream"] = True
+
+        async with self._client.stream("POST", "/chat/completions", json=payload) as response:
+            if response.status_code == 429:
+                raise RateLimitError("Rate limit exceeded", status_code=429)
+            if response.status_code == 401:
+                raise AuthenticationError("Authentication failed", status_code=401)
+            if response.status_code >= 400:
+                body = await response.aread()
+                raise APIError(
+                    f"API error: {response.status_code}",
+                    status_code=response.status_code,
+                    body=body.decode(),
+                )
+
+            async for line in response.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data = line[6:].strip()
+                if data == "[DONE]":
+                    break
+                chunk_data = json.loads(data)
+                choice = chunk_data["choices"][0]
+                delta = choice.get("delta", {})
+                yield StreamChunk(
+                    content=delta.get("content") or "",
+                    finish_reason=choice.get("finish_reason"),
+                )
+
+    def stream_sync(
+        self,
+        messages: list[Message],
+        **kwargs: Any,
+    ) -> list[StreamChunk]:
+        """Synchronous wrapper that collects all stream chunks."""
+
+        async def _collect() -> list[StreamChunk]:
+            chunks: list[StreamChunk] = []
+            async for chunk in self.stream(messages, **kwargs):
+                chunks.append(chunk)
+            return chunks
+
+        return asyncio.run(_collect())
 
     def _build_payload(
         self,

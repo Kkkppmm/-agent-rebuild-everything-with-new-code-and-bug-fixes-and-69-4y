@@ -4,13 +4,14 @@ A Python AI library built for developers and programmers. DevAI provides an Open
 
 ## Features
 
-- **LLM Client** — OpenAI-compatible async client with retries, JSON mode, and tool calling
-- **Developer Prompts** — Ready-made templates for code review, debugging, commit messages, API design, and more
+- **LLM Client** — OpenAI-compatible async client with retries, JSON mode, streaming, and tool calling
+- **Developer Prompts** — Ready-made templates for code review, debugging, commit messages, API design, security audits, and more
 - **Tool Registry** — Register Python functions as LLM tools with automatic schema inference
 - **Agents** — Tool-calling agent loop with `CoderAgent` pre-loaded with code utilities
-- **Chains** — Compose prompt → LLM pipelines, including sequential multi-step chains
+- **Chains** — Compose prompt → LLM pipelines, including sequential multi-step and structured Pydantic output chains
 - **Memory** — Conversation history with token-based truncation
 - **Code Utils** — Built-in tools: `read_file`, `search_code`, `git_diff`, `lint_python`, `count_complexity`
+- **CLI** — Command-line tools for quick code review, debugging, test generation, and more
 
 ## Installation
 
@@ -33,12 +34,42 @@ export DEVAI_API_KEY=sk-...
 ### Simple prompt chain
 
 ```python
-from devai import Chain
+from devai import Chain, DevAIConfig
 from devai.prompts import CODE_REVIEW
 
 chain = Chain(CODE_REVIEW, config=DevAIConfig(api_key="sk-..."))
 result = chain.run_sync(code="def add(a, b): return a + b", language="python")
 print(result)
+```
+
+### Streaming responses
+
+```python
+from devai import Chain, DevAIConfig
+from devai.prompts import EXPLAIN_CODE
+
+chain = Chain(EXPLAIN_CODE, config=DevAIConfig(api_key="sk-..."))
+async for token in chain.stream(code="...", language="python", audience="beginner"):
+    print(token, end="", flush=True)
+```
+
+### Structured output with Pydantic
+
+```python
+from pydantic import BaseModel
+from devai import StructuredChain, DevAIConfig
+
+class ReviewResult(BaseModel):
+    summary: str
+    severity: str
+
+chain = StructuredChain(
+    "Review this code: {code}",
+    output_model=ReviewResult,
+    config=DevAIConfig(api_key="sk-...", json_mode=True),
+)
+result = chain.run_sync(code="def foo(): pass")
+print(result.summary)
 ```
 
 ### Coder agent with tools
@@ -69,7 +100,7 @@ result = agent.run_sync("What's the weather in Tokyo?")
 ### Developer prompts
 
 ```python
-from devai.prompts import DEBUG, COMMIT_MESSAGE, API_DESIGN, WRITE_TESTS
+from devai.prompts import DEBUG, COMMIT_MESSAGE, API_DESIGN, WRITE_TESTS, SECURITY_REVIEW
 
 prompt = DEBUG.format(
     language="python",
@@ -77,6 +108,17 @@ prompt = DEBUG.format(
     code="result = '5' + 5",
     context="User input validation",
 )
+```
+
+### CLI
+
+```bash
+devai review main.py
+devai explain app.py --audience beginner
+devai debug --error "TypeError" --file main.py
+devai commit --staged
+devai tests utils.py --framework pytest
+devai security auth.py
 ```
 
 ## Configuration
@@ -106,9 +148,11 @@ src/devai/
 ├── prompts/    # PromptTemplate + dev prompt library
 ├── tools/      # ToolRegistry + code utilities
 ├── agents/     # Agent, CoderAgent
-├── chains/     # Chain, SequentialChain
+├── chains/     # Chain, SequentialChain, StructuredChain
 ├── memory/     # ConversationMemory
-└── utils/      # Token estimation, code block extraction
+├── output/     # Structured output parsers
+├── utils/      # Token estimation, code block extraction
+└── cli.py      # Command-line interface
 ```
 
 ## Testing

@@ -116,3 +116,49 @@ DOCSTRING = PromptTemplate(
 
 Return the complete code with docstrings added. Do not change the logic."""
 )
+
+SECURITY_REVIEW = PromptTemplate(
+    """You are a security engineer. Audit the following {language} code for vulnerabilities.
+
+```{language}
+{code}
+```
+
+Provide:
+1. Identified vulnerabilities (with CWE IDs where applicable)
+2. Severity rating (critical/high/medium/low) for each
+3. Exploit scenario
+4. Recommended fix with code example
+5. General hardening suggestions"""
+)
+
+SQL_OPTIMIZE = PromptTemplate(
+    """You are a database performance expert. Optimize the following SQL query.
+
+**Database:** {database}
+**Schema context:** {schema}
+
+```sql
+{query}
+```
+
+Provide:
+1. Performance analysis
+2. Optimized query
+3. Recommended indexes
+4. Explanation of changes"""
+)
+
+README_GEN = PromptTemplate(
+    """Generate a professional README.md for the following project.
+
+**Project name:** {name}
+**Description:** {description}
+**Tech stack:** {stack}
+
+**Source files summary:**
+{files}
+
+Include sections for: Overview, Features, Installation, Usage, Configuration, Development, and License.
+Use clear markdown formatting."""
+)
