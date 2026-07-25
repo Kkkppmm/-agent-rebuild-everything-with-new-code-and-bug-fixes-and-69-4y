@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from typing import Any
 
 from devai.core.client import LLMClient
+from devai.core.mock import MockLLMClient
 from devai.core.config import DevAIConfig
 from devai.core.models import Message, Role
 from devai.prompts.template import PromptTemplate
@@ -17,7 +18,7 @@ class Chain:
     def __init__(
         self,
         prompt: PromptTemplate | str,
-        client: LLMClient | None = None,
+        client: LLMClient | MockLLMClient | None = None,
         config: DevAIConfig | None = None,
         system_prompt: str | None = None,
     ):

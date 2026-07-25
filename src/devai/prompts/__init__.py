@@ -11,6 +11,9 @@ from devai.prompts.dev_prompts import (
     SECURITY_REVIEW,
     SQL_OPTIMIZE,
     README_GEN,
+    TYPE_HINTS,
+    REGEX_BUILD,
+    LOG_ANALYSIS,
 )
 
 __all__ = [
@@ -26,4 +29,7 @@ __all__ = [
     "SECURITY_REVIEW",
     "SQL_OPTIMIZE",
     "README_GEN",
+    "TYPE_HINTS",
+    "REGEX_BUILD",
+    "LOG_ANALYSIS",
 ]

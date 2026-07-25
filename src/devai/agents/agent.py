@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from devai.core.client import LLMClient
+from devai.core.mock import MockLLMClient
 from devai.core.config import DevAIConfig
 from devai.core.models import Message, Role, ToolCall
 from devai.core.exceptions import AgentError
@@ -17,7 +18,7 @@ class Agent:
 
     def __init__(
         self,
-        client: LLMClient | None = None,
+        client: LLMClient | MockLLMClient | None = None,
         config: DevAIConfig | None = None,
         tools: ToolRegistry | None = None,
         system_prompt: str = "You are a helpful AI assistant for developers.",

@@ -10,6 +10,9 @@ A Python AI library built for developers and programmers. DevAI provides an Open
 - **Agents** — Tool-calling agent loop with `CoderAgent` pre-loaded with code utilities
 - **Chains** — Compose prompt → LLM pipelines, including sequential multi-step and structured Pydantic output chains
 - **Memory** — Conversation history with token-based truncation
+- **RAG** — In-memory vector store, text chunking, and retrieval-augmented generation chains
+- **Mock clients** — Test chains and agents without API keys using `MockLLMClient` and `MockEmbeddingClient`
+- **Embeddings** — OpenAI-compatible embedding client for semantic search
 - **Code Utils** — Built-in tools: `read_file`, `search_code`, `git_diff`, `lint_python`, `count_complexity`
 - **CLI** — Command-line tools for quick code review, debugging, test generation, and more
 
@@ -97,6 +100,32 @@ agent = Agent(config=DevAIConfig(api_key="sk-..."), tools=registry)
 result = agent.run_sync("What's the weather in Tokyo?")
 ```
 
+### RAG over docs or code
+
+```python
+from devai import RAGChain, MockLLMClient, DevAIConfig
+
+mock = MockLLMClient(responses=["Use connection pooling for better throughput."])
+rag = RAGChain(client=mock, config=DevAIConfig(api_key="test"))
+
+rag.ingest_sync([
+    "PostgreSQL connection pooling reduces latency.",
+    "Index foreign keys for faster joins.",
+])
+answer = rag.run_sync("How do I speed up database access?")
+```
+
+### Testing without API calls
+
+```python
+from devai import Chain, MockLLMClient, DevAIConfig
+from devai.prompts import CODE_REVIEW
+
+mock = MockLLMClient(responses=["No issues found."])
+chain = Chain(CODE_REVIEW, client=mock, config=DevAIConfig(api_key="test"))
+assert "issues" in chain.run_sync(code="x = 1", language="python").lower()
+```
+
 ### Developer prompts
 
 ```python
@@ -150,6 +179,7 @@ src/devai/
 ├── agents/     # Agent, CoderAgent
 ├── chains/     # Chain, SequentialChain, StructuredChain
 ├── memory/     # ConversationMemory
+├── rag/        # VectorStore, chunking, RAGChain
 ├── output/     # Structured output parsers
 ├── utils/      # Token estimation, code block extraction
 └── cli.py      # Command-line interface

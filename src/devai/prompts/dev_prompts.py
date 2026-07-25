@@ -162,3 +162,49 @@ README_GEN = PromptTemplate(
 Include sections for: Overview, Features, Installation, Usage, Configuration, Development, and License.
 Use clear markdown formatting."""
 )
+
+TYPE_HINTS = PromptTemplate(
+    """Add complete type hints to the following {language} code.
+
+```{language}
+{code}
+```
+
+Requirements:
+1. Add annotations to all function parameters and return types
+2. Use modern {language} typing conventions
+3. Do not change runtime behavior
+4. Return the full updated code"""
+)
+
+REGEX_BUILD = PromptTemplate(
+    """Build a regular expression for the following requirement.
+
+**Requirement:** {requirement}
+**Target language:** {language}
+**Test cases that must match:** {matches}
+**Test cases that must NOT match:** {non_matches}
+
+Provide:
+1. The regex pattern (with flags if needed)
+2. Explanation of each part
+3. Example usage in {language}
+4. Edge cases to watch for"""
+)
+
+LOG_ANALYSIS = PromptTemplate(
+    """You are an SRE expert. Analyze the following application logs and identify issues.
+
+**Service:** {service}
+**Time range:** {time_range}
+
+```
+{logs}
+```
+
+Provide:
+1. Summary of what happened
+2. Errors and warnings ranked by severity
+3. Likely root cause
+4. Recommended next debugging steps"""
+)
