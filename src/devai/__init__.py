@@ -3,8 +3,9 @@
 from devai.core.config import DevAIConfig
 from devai.core.client import LLMClient, MockLLMClient, EmbeddingClient
 from devai.core.models import Message, ToolCall, ToolDefinition, LLMResponse
+from devai.assistant import CodeAssistant
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
 __all__ = [
     "DevAIConfig",
@@ -15,5 +16,6 @@ __all__ = [
     "ToolCall",
     "ToolDefinition",
     "LLMResponse",
+    "CodeAssistant",
     "__version__",
 ]

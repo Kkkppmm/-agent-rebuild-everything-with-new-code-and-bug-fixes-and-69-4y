@@ -36,6 +36,17 @@ response = client.complete(prompt.format(code="def foo(): pass"))
 print(response.content)
 ```
 
+### CodeAssistant (simple API)
+
+```python
+from devai import CodeAssistant
+
+assistant = CodeAssistant.mock()
+print(assistant.review("def foo(): pass"))
+print(assistant.explain("x = [i**2 for i in range(10)]"))
+print(assistant.full_review("def bar(): pass"))
+```
+
 ### Mock client (no API key needed)
 
 ```python
