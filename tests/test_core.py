@@ -77,6 +77,20 @@ class TestMockLLMClient:
         assert len(client.calls) == 1
         assert client.calls[0]["system"] == "sys"
 
+    @pytest.mark.asyncio
+    async def test_acomplete(self):
+        client = MockLLMClient(responses=["Async hello"])
+        response = await client.acomplete("test")
+        assert response.content == "Async hello"
+
+    @pytest.mark.asyncio
+    async def test_astream(self):
+        from devai.core.streaming import collect_stream_async
+
+        client = MockLLMClient(responses=["Hi"])
+        content = await collect_stream_async(client.astream("test"))
+        assert content == "Hi"
+
 
 class TestLLMClient:
     def test_requires_api_key(self):

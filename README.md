@@ -54,6 +54,11 @@ from devai.core.client import MockLLMClient
 
 client = MockLLMClient(responses=["This code looks fine."])
 print(client.complete("review this").content)
+
+# Async usage
+import asyncio
+response = asyncio.run(client.acomplete("review this"))
+print(response.content)
 ```
 
 ### Agent with tools

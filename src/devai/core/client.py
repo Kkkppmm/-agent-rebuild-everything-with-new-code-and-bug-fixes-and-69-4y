@@ -1,5 +1,6 @@
 """LLM client implementations."""
 
+import asyncio
 import json
 import time
 import uuid
@@ -198,6 +199,27 @@ class LLMClient:
                     time.sleep(_retry_delay(attempt))
         raise ProviderError(f"Request failed after retries: {last_error}")
 
+    async def acomplete(
+        self,
+        prompt: str | list[Message],
+        *,
+        system: str | None = None,
+        tools: list[ToolDefinition] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> LLMResponse:
+        """Async version of :meth:`complete`."""
+        return await asyncio.to_thread(
+            self.complete,
+            prompt,
+            system=system,
+            tools=tools,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
     def stream(
         self,
         prompt: str | list[Message],
@@ -293,6 +315,37 @@ class MockLLMClient:
         for char in response.content:
             yield StreamChunk(content=char)
         yield StreamChunk(content="", done=True)
+
+    async def acomplete(
+        self,
+        prompt: str | list[Message],
+        *,
+        system: str | None = None,
+        tools: list[ToolDefinition] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> LLMResponse:
+        """Async version of :meth:`complete`."""
+        return await asyncio.to_thread(
+            self.complete,
+            prompt,
+            system=system,
+            tools=tools,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+    async def astream(
+        self,
+        prompt: str | list[Message],
+        *,
+        system: str | None = None,
+    ) -> AsyncIterator[StreamChunk]:
+        """Async version of :meth:`stream`."""
+        for chunk in self.stream(prompt, system=system):
+            yield chunk
 
 
 class EmbeddingClient:
