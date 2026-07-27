@@ -15,6 +15,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Tools** — Code utilities: lint, search, git diff, complexity analysis
 - **CLI** — Command-line interface for common developer workflows
 - **Pipeline** — Composable review/debug/test workflows
+- **DevProgram** — Declarative JSON programs for scripted multi-step AI workflows
+- **OpenAI Adapter** — Optional official OpenAI SDK integration
 
 ## Installation
 
@@ -124,6 +126,49 @@ assistant = CodeAssistant(client=MockLLMClient())
 review = assistant.review_project("./my-app", query="authentication")
 ```
 
+## DevProgram (Scripted Workflows)
+
+```python
+from devai import CodeAssistant, DevProgram
+from devai.core import MockLLMClient
+
+assistant = CodeAssistant(client=MockLLMClient(default_response="Looks good."))
+
+# Build a program in code
+program = (
+    DevProgram("pre-commit-audit", assistant)
+    .add("review", "review")
+    .add("security", "security")
+)
+results = program.run({"code": open("app.py").read()})
+
+# Or load from JSON
+program = DevProgram.from_file("audit.json", assistant)
+print(program.run_and_summarize({"code": "..."}))
+```
+
+Example `audit.json`:
+
+```json
+{
+  "name": "pre-commit-audit",
+  "tasks": [
+    {"name": "review", "action": "review"},
+    {"name": "security", "action": "security"}
+  ]
+}
+```
+
+## OpenAI SDK Adapter
+
+```python
+from devai.core.config import DevAIConfig
+from devai.core.openai_adapter import OpenAIAdapter
+
+adapter = OpenAIAdapter(DevAIConfig(api_key="...", model="gpt-4o-mini"))
+response = adapter.complete([Message.user("Hello")])
+```
+
 ## Observability
 
 ```python
@@ -157,6 +202,7 @@ devai fix-lint path/to/module.py "E501 line too long"
 devai deps requirements.txt --context "production web app"
 devai architecture path/to/main.py --context "microservice"
 devai agent "Refactor the auth module"
+devai run audit.json --code path/to/app.py
 ```
 
 ## Configuration

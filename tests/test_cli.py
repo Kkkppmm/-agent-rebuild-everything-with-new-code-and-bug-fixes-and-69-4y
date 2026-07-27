@@ -71,3 +71,18 @@ class TestCLI:
         ])
         assert args.source == "v1"
         assert args.target == "v2"
+
+    def test_run_args(self):
+        parser = build_parser()
+        args = parser.parse_args([
+            "--mock",
+            "run",
+            "program.json",
+            "--code",
+            "def foo(): pass",
+            "--context",
+            "env=prod",
+        ])
+        assert args.command == "run"
+        assert args.program == "program.json"
+        assert args.context == ["env=prod"]

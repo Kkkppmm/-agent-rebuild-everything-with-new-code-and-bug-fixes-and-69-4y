@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "0.9.0"
+        assert devai.__version__ == "1.0.0"
 
     def test_exports(self):
         expected = {
@@ -18,10 +18,13 @@ class TestPublicAPI:
             "CoderAgent",
             "DevAIConfig",
             "DevPipeline",
+            "DevProgram",
             "LLMClient",
             "MockLLMClient",
             "PerfIssue",
             "PerfReviewResult",
+            "ProgramResult",
+            "ProgramTask",
             "SecurityAuditResult",
             "SecurityFinding",
             "__version__",

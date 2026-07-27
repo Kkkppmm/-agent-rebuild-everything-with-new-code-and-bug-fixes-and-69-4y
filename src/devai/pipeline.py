@@ -81,3 +81,38 @@ class DevPipeline:
         results = self.run(code, **kwargs)
         parts = [f"## {r.step.title()}\n\n{r.output}" for r in results]
         return "\n\n---\n\n".join(parts)
+
+    async def arun(self, code: str, **kwargs: Any) -> list[PipelineResult]:
+        """Run pipeline steps asynchronously where supported."""
+        results: list[PipelineResult] = []
+        async_handlers = {
+            PipelineStep.REVIEW: lambda c, **kw: self.assistant.areview(c),
+        }
+        sync_handlers: dict[PipelineStep, Callable[..., str]] = {
+            PipelineStep.REVIEW: lambda c, **kw: self.assistant.review(c),
+            PipelineStep.SECURITY: lambda c, **kw: self.assistant.security(c),
+            PipelineStep.DEBUG: lambda c, **kw: self.assistant.debug(
+                c, kw.get("error", "Unknown error")
+            ),
+            PipelineStep.REFACTOR: lambda c, **kw: self.assistant.refactor(
+                c, kw.get("goals", "improve readability")
+            ),
+            PipelineStep.TESTS: lambda c, **kw: self.assistant.tests(
+                c, kw.get("framework", "pytest")
+            ),
+            PipelineStep.DOCSTRING: lambda c, **kw: self.assistant.docstring(c),
+            PipelineStep.EXPLAIN: lambda c, **kw: self.assistant.explain(c),
+        }
+
+        for step in self.steps:
+            if step in async_handlers:
+                output = await async_handlers[step](code, **kwargs)
+            else:
+                handler = sync_handlers.get(step)
+                if handler:
+                    output = handler(code, **kwargs)
+                else:
+                    continue
+            results.append(PipelineResult(step=step.value, output=output))
+
+        return results

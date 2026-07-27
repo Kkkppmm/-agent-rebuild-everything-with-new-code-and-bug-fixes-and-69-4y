@@ -1,5 +1,7 @@
 """Tests for DevAI pipeline."""
 
+import pytest
+
 from devai import CodeAssistant
 from devai.core import MockLLMClient
 from devai.pipeline import DevPipeline, PipelineStep
@@ -44,3 +46,12 @@ class TestDevPipeline:
         result = pipeline.add("review").add("security")
         assert result is pipeline
         assert len(pipeline.steps) == 2
+
+    @pytest.mark.asyncio
+    async def test_arun(self):
+        client = MockLLMClient(default_response="async review")
+        assistant = CodeAssistant(client=client)
+        pipeline = DevPipeline(assistant).add(PipelineStep.REVIEW)
+        results = await pipeline.arun("def bar(): pass")
+        assert len(results) == 1
+        assert results[0].output == "async review"
