@@ -78,6 +78,45 @@ def cmd_docstring(args: argparse.Namespace) -> None:
     print(assistant.docstring(code))
 
 
+def cmd_api(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.api_design(code, context=args.context))
+
+
+def cmd_sql(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    query = _read_input(args.query)
+    print(assistant.optimize_sql(query, context=args.context))
+
+
+def cmd_readme(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    print(assistant.readme(args.project, args.description))
+
+
+def cmd_types(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.type_hints(code))
+
+
+def cmd_regex(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    print(assistant.regex(args.description, test_cases=args.test_cases))
+
+
+def cmd_logs(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    logs = _read_input(args.logs)
+    print(assistant.analyze_logs(logs))
+
+
+def cmd_project(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    print(assistant.review_project(args.directory, query=args.query))
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     client = MockLLMClient() if args.mock else _get_assistant(args).client
     registry = ToolRegistry()
@@ -154,6 +193,39 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("docstring", help="Generate docstrings")
     p.add_argument("code", help="Code or file path")
     p.set_defaults(func=cmd_docstring)
+
+    p = sub.add_parser("api", help="Review API design")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument("--context", default="", help="Additional context")
+    p.set_defaults(func=cmd_api)
+
+    p = sub.add_parser("sql", help="Optimize SQL query")
+    p.add_argument("query", help="SQL query or file path")
+    p.add_argument("--context", default="", help="Schema or context")
+    p.set_defaults(func=cmd_sql)
+
+    p = sub.add_parser("readme", help="Generate README")
+    p.add_argument("--project", required=True, help="Project name")
+    p.add_argument("--description", required=True, help="Project description")
+    p.set_defaults(func=cmd_readme)
+
+    p = sub.add_parser("types", help="Add Python type hints")
+    p.add_argument("code", help="Code or file path")
+    p.set_defaults(func=cmd_types)
+
+    p = sub.add_parser("regex", help="Build a regex")
+    p.add_argument("description", help="What the regex should match")
+    p.add_argument("--test-cases", default="", help="Test cases")
+    p.set_defaults(func=cmd_regex)
+
+    p = sub.add_parser("logs", help="Analyze log output")
+    p.add_argument("logs", help="Log text or file path")
+    p.set_defaults(func=cmd_logs)
+
+    p = sub.add_parser("project", help="Review an entire project")
+    p.add_argument("directory", help="Project directory")
+    p.add_argument("--query", help="Focus query for relevant files")
+    p.set_defaults(func=cmd_project)
 
     p = sub.add_parser("agent", help="Run coding agent")
     p.add_argument("task", help="Task description")

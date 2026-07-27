@@ -10,6 +10,7 @@ from devai.core.client import LLMClient, LLMClientProtocol
 from devai.core.config import DevAIConfig
 from devai.core.models import Message
 from devai.prompts import (
+    API_DESIGN,
     CHANGELOG,
     CODE_REVIEW,
     CODE_TRANSLATE,
@@ -18,10 +19,15 @@ from devai.prompts import (
     DOCSTRING_GEN,
     ERROR_HANDLER,
     EXPLAIN,
+    LOG_ANALYSIS,
     PR_DESCRIPTION,
+    README_GEN,
     REFACTOR,
+    REGEX_BUILD,
     SECURITY_REVIEW,
+    SQL_OPTIMIZE,
     TEST_GEN,
+    TYPE_HINTS,
 )
 
 
@@ -94,6 +100,38 @@ class CodeAssistant:
     def add_error_handling(self, code: str) -> str:
         """Add error handling to code."""
         return self._run_chain(ERROR_HANDLER, code=code)
+
+    def api_design(self, code: str, context: str = "") -> str:
+        """Review and improve API design."""
+        return self._run_chain(API_DESIGN, code=code, context=context)
+
+    def optimize_sql(self, query: str, context: str = "") -> str:
+        """Optimize a SQL query."""
+        return self._run_chain(SQL_OPTIMIZE, query=query, context=context)
+
+    def readme(self, project: str, description: str) -> str:
+        """Generate a README for a project."""
+        return self._run_chain(README_GEN, project=project, description=description)
+
+    def type_hints(self, code: str) -> str:
+        """Add Python type hints to code."""
+        return self._run_chain(TYPE_HINTS, code=code)
+
+    def regex(self, description: str, test_cases: str = "") -> str:
+        """Build a regular expression from a description."""
+        return self._run_chain(REGEX_BUILD, description=description, test_cases=test_cases)
+
+    def analyze_logs(self, logs: str) -> str:
+        """Analyze log output for errors and patterns."""
+        return self._run_chain(LOG_ANALYSIS, logs=logs)
+
+    def review_project(self, directory: str, query: str | None = None) -> str:
+        """Review a project directory with optional focus query."""
+        from devai.project import CodeProject
+
+        project = CodeProject(directory)
+        context = project.build_context(query=query)
+        return self._run_chain(CODE_REVIEW, code=context)
 
     def review_file(self, path: str) -> str:
         """Review a file by path."""

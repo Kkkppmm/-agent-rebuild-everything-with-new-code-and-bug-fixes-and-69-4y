@@ -62,6 +62,35 @@ class TestCodeAssistant:
         result = assistant.add_error_handling(SAMPLE_CODE)
         assert result == "Analysis complete."
 
+    def test_api_design(self, assistant):
+        result = assistant.api_design(SAMPLE_CODE, context="REST API")
+        assert result == "Analysis complete."
+
+    def test_optimize_sql(self, assistant):
+        result = assistant.optimize_sql("SELECT * FROM users", context="users table")
+        assert result == "Analysis complete."
+
+    def test_readme(self, assistant):
+        result = assistant.readme("MyApp", "A cool app")
+        assert result == "Analysis complete."
+
+    def test_type_hints(self, assistant):
+        result = assistant.type_hints(SAMPLE_CODE)
+        assert result == "Analysis complete."
+
+    def test_regex(self, assistant):
+        result = assistant.regex("match email addresses", test_cases="a@b.com")
+        assert result == "Analysis complete."
+
+    def test_analyze_logs(self, assistant):
+        result = assistant.analyze_logs("ERROR: connection refused")
+        assert result == "Analysis complete."
+
+    def test_review_project(self, assistant, tmp_path):
+        (tmp_path / "app.py").write_text(SAMPLE_CODE)
+        result = assistant.review_project(str(tmp_path))
+        assert result == "Analysis complete."
+
     def test_review_file(self, assistant, tmp_path):
         f = tmp_path / "test.py"
         f.write_text(SAMPLE_CODE)

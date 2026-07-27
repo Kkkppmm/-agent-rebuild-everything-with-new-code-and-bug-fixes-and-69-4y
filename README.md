@@ -5,7 +5,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 ## Features
 
 - **LLM Client** — OpenAI-compatible API with sync/async, streaming, JSON mode, retries, and caching
-- **Code Assistant** — High-level facade for review, explain, debug, refactor, security audit, tests, docstrings, and more
+- **Code Assistant** — High-level facade for review, explain, debug, refactor, security audit, tests, docstrings, API design, SQL optimization, type hints, regex, log analysis, and more
+- **CodeProject** — Scan, index, and build context from an entire codebase
+- **Observability** — Callback hooks for logging and tracing LLM calls
 - **Agents** — Tool-calling agents with a built-in coder agent
 - **Chains** — Simple, sequential, and structured (Pydantic) output chains
 - **RAG** — Text chunking, vector store, and retrieval-augmented generation
@@ -92,6 +94,34 @@ chain = RAGChain(client=MockLLMClient(), store=store)
 answer = chain.query("How does Python handle blocks?")
 ```
 
+## CodeProject
+
+```python
+from devai import CodeProject, CodeAssistant
+from devai.core import MockLLMClient
+
+project = CodeProject("./my-app")
+print(project.summary())
+
+# Index for RAG
+store = project.to_vector_store()
+
+# Review with project context
+assistant = CodeAssistant(client=MockLLMClient())
+review = assistant.review_project("./my-app", query="authentication")
+```
+
+## Observability
+
+```python
+from devai.core import MockLLMClient, LoggingCallback, ObservedLLMClient
+
+callback = LoggingCallback()
+client = ObservedLLMClient(MockLLMClient(), callbacks=[callback])
+client.complete([...])
+print(callback.events)  # [{"event": "start", ...}, {"event": "end", ...}]
+```
+
 ## CLI
 
 ```bash
@@ -100,6 +130,11 @@ devai explain "def factorial(n): ..."
 devai debug --code file.py --error "TypeError: ..."
 devai commit --diff "$(git diff)"
 devai security path/to/module.py
+devai api path/to/routes.py --context "REST API v2"
+devai sql "SELECT * FROM users" --context "users table has 1M rows"
+devai types path/to/module.py
+devai logs error.log
+devai project ./my-app --query "error handling"
 devai agent "Refactor the auth module"
 ```
 
