@@ -1,4 +1,4 @@
-"""DevAI configuration."""
+"""Configuration for DevAI."""
 
 from __future__ import annotations
 
@@ -6,17 +6,16 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
-from devai.core.exceptions import ConfigurationError
+from devai.core.exceptions import ConfigError
 
 
 @dataclass
 class DevAIConfig:
-    """Configuration for DevAI clients and agents."""
+    """Configuration for LLM clients and assistants."""
 
     api_key: str | None = None
     base_url: str = "https://api.openai.com/v1"
     model: str = "gpt-4o-mini"
-    embedding_model: str = "text-embedding-3-small"
     max_tokens: int = 4096
     temperature: float = 0.2
     timeout: float = 60.0
@@ -33,17 +32,15 @@ class DevAIConfig:
         env_model = os.environ.get("DEVAI_MODEL")
         if env_model:
             self.model = env_model
-        env_max = os.environ.get("DEVAI_MAX_TOKENS")
-        if env_max:
-            self.max_tokens = int(env_max)
-        env_temp = os.environ.get("DEVAI_TEMPERATURE")
-        if env_temp:
-            self.temperature = float(env_temp)
+        if max_tokens_env := os.environ.get("DEVAI_MAX_TOKENS"):
+            self.max_tokens = int(max_tokens_env)
+        if temp_env := os.environ.get("DEVAI_TEMPERATURE"):
+            self.temperature = float(temp_env)
 
     def validate(self) -> None:
-        """Raise ConfigurationError if required settings are missing."""
+        """Validate that required configuration is present."""
         if not self.api_key:
-            raise ConfigurationError(
+            raise ConfigError(
                 "API key is required. Set DEVAI_API_KEY or pass api_key to DevAIConfig."
             )
 
@@ -51,9 +48,9 @@ class DevAIConfig:
         return {
             "base_url": self.base_url,
             "model": self.model,
-            "embedding_model": self.embedding_model,
             "max_tokens": self.max_tokens,
             "temperature": self.temperature,
             "timeout": self.timeout,
             "max_retries": self.max_retries,
+            "retry_delay": self.retry_delay,
         }

@@ -1,44 +1,49 @@
-"""Tests for CLI."""
+"""Tests for DevAI CLI."""
 
-import subprocess
-import sys
+from unittest.mock import patch
 
+import pytest
 
-def test_cli_help():
-    result = subprocess.run(
-        [sys.executable, "-m", "devai.cli", "--help"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert "DevAI" in result.stdout
+from devai.cli import _read_input, build_parser, main
 
 
-def test_cli_review_mock():
-    result = subprocess.run(
-        [sys.executable, "-m", "devai.cli", "--mock", "review"],
-        input="def foo(): pass",
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
-    assert len(result.stdout) > 0
+class TestCLI:
+    def test_parser_help(self):
+        parser = build_parser()
+        assert parser.prog == "devai"
 
+    def test_parser_subcommands(self):
+        parser = build_parser()
+        args = parser.parse_args(["--mock", "review", "def foo(): pass"])
+        assert args.command == "review"
+        assert args.mock is True
 
-def test_cli_explain_mock():
-    result = subprocess.run(
-        [sys.executable, "-m", "devai.cli", "--mock", "explain", "x = 1"],
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
+    def test_read_input_file(self, tmp_path):
+        f = tmp_path / "code.py"
+        f.write_text("x = 1")
+        assert _read_input(str(f)) == "x = 1"
 
+    def test_read_input_string(self):
+        assert _read_input("def foo(): pass") == "def foo(): pass"
 
-def test_cli_commit_mock():
-    result = subprocess.run(
-        [sys.executable, "-m", "devai.cli", "--mock", "commit"],
-        input="+ def new(): pass",
-        capture_output=True,
-        text=True,
-    )
-    assert result.returncode == 0
+    @patch("devai.cli.cmd_review")
+    def test_main_review(self, mock_cmd):
+        main(["--mock", "review", "code"])
+        mock_cmd.assert_called_once()
+
+    def test_no_command_exits(self):
+        with pytest.raises(SystemExit):
+            main([])
+
+    def test_debug_args(self):
+        parser = build_parser()
+        args = parser.parse_args([
+            "--mock", "debug", "--code", "x=1", "--error", "NameError"
+        ])
+        assert args.command == "debug"
+        assert args.error == "NameError"
+
+    def test_agent_args(self):
+        parser = build_parser()
+        args = parser.parse_args(["--mock", "agent", "find bugs"])
+        assert args.task == "find bugs"

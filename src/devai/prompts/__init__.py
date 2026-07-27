@@ -1,1 +1,45 @@
-"""Prompt templates for developer workflows."""
+"""Prompt templates for DevAI."""
+
+from devai.prompts.templates import (
+    API_DESIGN,
+    CHANGELOG,
+    CODE_REVIEW,
+    CODE_TRANSLATE,
+    COMMIT_MESSAGE,
+    DEBUG,
+    DOCSTRING_GEN,
+    ERROR_HANDLER,
+    EXPLAIN,
+    LOG_ANALYSIS,
+    PR_DESCRIPTION,
+    README_GEN,
+    REFACTOR,
+    REGEX_BUILD,
+    SECURITY_REVIEW,
+    SQL_OPTIMIZE,
+    TEST_GEN,
+    TYPE_HINTS,
+    PromptTemplate,
+)
+
+__all__ = [
+    "API_DESIGN",
+    "CHANGELOG",
+    "CODE_REVIEW",
+    "CODE_TRANSLATE",
+    "COMMIT_MESSAGE",
+    "DEBUG",
+    "DOCSTRING_GEN",
+    "ERROR_HANDLER",
+    "EXPLAIN",
+    "LOG_ANALYSIS",
+    "PR_DESCRIPTION",
+    "PromptTemplate",
+    "README_GEN",
+    "REFACTOR",
+    "REGEX_BUILD",
+    "SECURITY_REVIEW",
+    "SQL_OPTIMIZE",
+    "TEST_GEN",
+    "TYPE_HINTS",
+]

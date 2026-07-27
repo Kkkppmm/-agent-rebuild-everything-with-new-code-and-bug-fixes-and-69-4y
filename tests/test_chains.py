@@ -1,42 +1,51 @@
-"""Tests for chains."""
+"""Tests for DevAI chains."""
 
+import pytest
 from pydantic import BaseModel
 
-from devai.chains.chain import Chain, SequentialChain, StructuredChain
-from devai.core.client import MockLLMClient
+from devai.chains import SequentialChain, SimpleChain, StructuredChain
+from devai.core import MockLLMClient
+from devai.prompts import CODE_REVIEW, EXPLAIN
 
 
-def test_chain_run():
-    client = MockLLMClient(responses=["Review complete."])
-    chain = Chain(client, "Review this code: {code}")
-    result = chain.run(code="def foo(): pass")
-    assert "Review complete" in result
+class TestSimpleChain:
+    def test_run(self):
+        client = MockLLMClient(default_response="Looks good")
+        chain = SimpleChain(client, CODE_REVIEW)
+        result = chain.run(code="def foo(): pass")
+        assert result == "Looks good"
 
 
-def test_chain_callable():
-    client = MockLLMClient(responses=["ok"])
-    chain = Chain(client, "Test {x}")
-    assert chain(x="1") == "ok"
+class TestSequentialChain:
+    def test_multiple_steps(self):
+        client = MockLLMClient(responses=["Review done", "Explanation done"])
+        chain = SequentialChain(client)
+        chain.add_step(CODE_REVIEW, "review").add_step(EXPLAIN, "explanation")
+        results = chain.run(code="x = 1")
+        assert "review" in results
+        assert "explanation" in results
 
 
-def test_sequential_chain():
-    client = MockLLMClient(responses=["step1 output", "step2 output"])
-    step1 = Chain(client, "Step 1: {input}", output_key="step1")
-    step2 = Chain(client, "Step 2: {input}", output_key="step2")
-    seq = SequentialChain([step1, step2])
-    results = seq.run(input="data")
-    assert "step1" in results
-    assert "final" in results
+class TestStructuredChain:
+    def test_parse_output(self):
+        class ReviewResult(BaseModel):
+            score: int
+            summary: str
 
+        client = MockLLMClient(
+            default_response='{"score": 8, "summary": "Good code"}'
+        )
+        chain = StructuredChain(client, CODE_REVIEW, ReviewResult)
+        result = chain.run(code="def foo(): pass")
+        assert result.score == 8
+        assert result.summary == "Good code"
 
-class ReviewResult(BaseModel):
-    score: int
-    summary: str
+    @pytest.mark.asyncio
+    async def test_arun(self):
+        class Result(BaseModel):
+            value: str
 
-
-def test_structured_chain():
-    client = MockLLMClient(responses=['{"score": 8, "summary": "Good code"}'])
-    chain = StructuredChain(client, "Review: {code}", ReviewResult)
-    result = chain.run(code="def foo(): pass")
-    assert result.score == 8
-    assert result.summary == "Good code"
+        client = MockLLMClient(default_response='{"value": "test"}')
+        chain = StructuredChain(client, EXPLAIN, Result)
+        result = await chain.arun(code="x=1")
+        assert result.value == "test"

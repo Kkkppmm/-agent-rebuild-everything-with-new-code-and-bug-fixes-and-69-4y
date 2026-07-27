@@ -1,4 +1,4 @@
-"""DevAI command-line interface."""
+"""Command-line interface for DevAI."""
 
 from __future__ import annotations
 
@@ -6,141 +6,168 @@ import argparse
 import sys
 from pathlib import Path
 
-from devai import (
-    CODE_REVIEW,
-    COMMIT_MESSAGE,
-    DEBUG,
-    EXPLAIN_CODE,
-    GENERATE_TESTS,
-    REFACTOR,
-    SECURITY_REVIEW,
-    DevAIConfig,
-    LLMClient,
-    MockLLMClient,
-    PromptTemplate,
-)
+from devai import CodeAssistant, DevAIConfig
+from devai.agents import CoderAgent
+from devai.core import MockLLMClient
+from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
 
 
-def _get_client(use_mock: bool = False) -> LLMClient | MockLLMClient:
-    if use_mock:
-        return MockLLMClient()
-    config = DevAIConfig()
-    try:
-        config.validate()
-    except Exception:
-        print("Warning: No API key found. Using mock client. Set DEVAI_API_KEY to use a real LLM.", file=sys.stderr)
-        return MockLLMClient()
-    return LLMClient(config)
-
-
-def _read_input(path: str | None, stdin_default: str = "") -> str:
-    if path:
-        return Path(path).read_text(encoding="utf-8")
-    if not sys.stdin.isatty():
-        return sys.stdin.read()
-    return stdin_default
+def _read_input(path_or_code: str) -> str:
+    p = Path(path_or_code)
+    if p.exists() and p.is_file():
+        return p.read_text(encoding="utf-8", errors="replace")
+    return path_or_code
 
 
 def cmd_review(args: argparse.Namespace) -> None:
-    code = _read_input(args.file)
-    prompt = PromptTemplate(CODE_REVIEW).format(code=code, context=args.context or "")
-    client = _get_client(args.mock)
-    response = client.chat([{"role": "user", "content": prompt}])
-    print(response.content)
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.review(code))
 
 
 def cmd_explain(args: argparse.Namespace) -> None:
-    code = args.code or _read_input(args.file)
-    prompt = PromptTemplate(EXPLAIN_CODE).format(code=code, language=args.language)
-    client = _get_client(args.mock)
-    response = client.chat([{"role": "user", "content": prompt}])
-    print(response.content)
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.explain(code))
 
 
 def cmd_debug(args: argparse.Namespace) -> None:
-    code = _read_input(args.file)
-    prompt = PromptTemplate(DEBUG).format(error=args.error, code=code, context=args.context or "")
-    client = _get_client(args.mock)
-    response = client.chat([{"role": "user", "content": prompt}])
-    print(response.content)
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.debug(code, args.error))
 
 
 def cmd_commit(args: argparse.Namespace) -> None:
-    diff = args.diff or _read_input(None)
-    prompt = PromptTemplate(COMMIT_MESSAGE).format(diff=diff)
-    client = _get_client(args.mock)
-    response = client.chat([{"role": "user", "content": prompt}])
-    print(response.content)
+    assistant = _get_assistant(args)
+    diff = args.diff or git_diff()
+    print(assistant.commit_message(diff))
 
 
-def cmd_security(args: argparse.Namespace) -> None:
-    code = _read_input(args.file)
-    prompt = PromptTemplate(SECURITY_REVIEW).format(code=code)
-    client = _get_client(args.mock)
-    response = client.chat([{"role": "user", "content": prompt}])
-    print(response.content)
+def cmd_pr(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    diff = args.diff or git_diff()
+    print(assistant.pr_description(args.title, diff))
 
 
-def cmd_refactor(args: argparse.Namespace) -> None:
-    code = _read_input(args.file)
-    prompt = PromptTemplate(REFACTOR).format(code=code, goal=args.goal)
-    client = _get_client(args.mock)
-    response = client.chat([{"role": "user", "content": prompt}])
-    print(response.content)
+def cmd_changelog(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    print(assistant.changelog(args.version, args.changes))
 
 
 def cmd_tests(args: argparse.Namespace) -> None:
-    code = _read_input(args.file)
-    prompt = PromptTemplate(GENERATE_TESTS).format(code=code, framework=args.framework)
-    client = _get_client(args.mock)
-    response = client.chat([{"role": "user", "content": prompt}])
-    print(response.content)
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.tests(code, framework=args.framework))
 
 
-def main() -> None:
+def cmd_security(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.security(code))
+
+
+def cmd_refactor(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.refactor(code, goals=args.goals))
+
+
+def cmd_docstring(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.docstring(code))
+
+
+def cmd_agent(args: argparse.Namespace) -> None:
+    client = MockLLMClient() if args.mock else _get_assistant(args).client
+    registry = ToolRegistry()
+    registry.register(read_file)
+    registry.register(search_code)
+    registry.register(list_files)
+    registry.register(git_diff)
+    agent = CoderAgent(client=client, tools=registry)
+    print(agent.run(args.task))
+
+
+def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
+    if getattr(args, "mock", False):
+        return CodeAssistant(client=MockLLMClient())
+    config = DevAIConfig(
+        api_key=getattr(args, "api_key", None),
+        model=getattr(args, "model", "gpt-4o-mini"),
+    )
+    return CodeAssistant(config=config)
+
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="devai",
         description="DevAI — AI tools for developers",
     )
-    parser.add_argument("--mock", action="store_true", help="Use mock LLM client")
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    parser.add_argument("--mock", action="store_true", help="Use mock LLM (no API key)")
+    parser.add_argument("--api-key", help="API key override")
+    parser.add_argument("--model", default="gpt-4o-mini", help="Model name")
 
-    review = subparsers.add_parser("review", help="Review code for issues")
-    review.add_argument("file", nargs="?", help="Source file to review")
-    review.add_argument("--context", help="Additional context")
-    review.set_defaults(func=cmd_review)
+    sub = parser.add_subparsers(dest="command", help="Available commands")
 
-    explain = subparsers.add_parser("explain", help="Explain code")
-    explain.add_argument("code", nargs="?", help="Code to explain")
-    explain.add_argument("--file", "-f", help="Source file")
-    explain.add_argument("--language", "-l", default="python")
-    explain.set_defaults(func=cmd_explain)
+    p = sub.add_parser("review", help="Review code")
+    p.add_argument("code", help="Code or file path")
+    p.set_defaults(func=cmd_review)
 
-    debug = subparsers.add_parser("debug", help="Debug an error")
-    debug.add_argument("--error", "-e", required=True, help="Error message")
-    debug.add_argument("file", nargs="?", help="Source file")
-    debug.add_argument("--context", help="Additional context")
-    debug.set_defaults(func=cmd_debug)
+    p = sub.add_parser("explain", help="Explain code")
+    p.add_argument("code", help="Code or file path")
+    p.set_defaults(func=cmd_explain)
 
-    commit = subparsers.add_parser("commit", help="Generate commit message from diff")
-    commit.add_argument("--diff", "-d", help="Git diff text")
-    commit.set_defaults(func=cmd_commit)
+    p = sub.add_parser("debug", help="Debug code with error")
+    p.add_argument("--code", required=True, help="Code or file path")
+    p.add_argument("--error", required=True, help="Error message")
+    p.set_defaults(func=cmd_debug)
 
-    security = subparsers.add_parser("security", help="Security review")
-    security.add_argument("file", help="Source file")
-    security.set_defaults(func=cmd_security)
+    p = sub.add_parser("commit", help="Generate commit message")
+    p.add_argument("--diff", help="Git diff (defaults to git diff)")
+    p.set_defaults(func=cmd_commit)
 
-    refactor = subparsers.add_parser("refactor", help="Refactor code")
-    refactor.add_argument("file", help="Source file")
-    refactor.add_argument("--goal", "-g", default="readability and maintainability")
-    refactor.set_defaults(func=cmd_refactor)
+    p = sub.add_parser("pr", help="Generate PR description")
+    p.add_argument("--title", required=True, help="PR title")
+    p.add_argument("--diff", help="Git diff")
+    p.set_defaults(func=cmd_pr)
 
-    tests = subparsers.add_parser("tests", help="Generate unit tests")
-    tests.add_argument("file", help="Source file")
-    tests.add_argument("--framework", default="pytest")
-    tests.set_defaults(func=cmd_tests)
+    p = sub.add_parser("changelog", help="Generate changelog entry")
+    p.add_argument("--version", required=True)
+    p.add_argument("--changes", required=True)
+    p.set_defaults(func=cmd_changelog)
 
-    args = parser.parse_args()
+    p = sub.add_parser("tests", help="Generate unit tests")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument("--framework", default="pytest")
+    p.set_defaults(func=cmd_tests)
+
+    p = sub.add_parser("security", help="Security review")
+    p.add_argument("code", help="Code or file path")
+    p.set_defaults(func=cmd_security)
+
+    p = sub.add_parser("refactor", help="Refactor code")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument("--goals", default="improve readability")
+    p.set_defaults(func=cmd_refactor)
+
+    p = sub.add_parser("docstring", help="Generate docstrings")
+    p.add_argument("code", help="Code or file path")
+    p.set_defaults(func=cmd_docstring)
+
+    p = sub.add_parser("agent", help="Run coding agent")
+    p.add_argument("task", help="Task description")
+    p.set_defaults(func=cmd_agent)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if not args.command:
+        parser.print_help()
+        sys.exit(1)
     args.func(args)
 
 

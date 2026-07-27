@@ -1,27 +1,70 @@
-"""LLM and embedding clients."""
+"""LLM client implementations for DevAI."""
 
 from __future__ import annotations
 
 import json
-import time
-from collections.abc import Iterator
-from typing import Any
+from collections.abc import AsyncIterator, Iterator
+from typing import Any, Protocol
 
 import httpx
 
 from devai.core.config import DevAIConfig
-from devai.core.exceptions import APIError, AuthenticationError, RateLimitError
-from devai.core.models import Message, Response, ToolCall, ToolDefinition
+from devai.core.exceptions import LLMError
+from devai.core.models import Message, Tool
+from devai.core.retries import async_with_retries, with_retries
+
+
+class LLMClientProtocol(Protocol):
+    """Protocol for LLM clients."""
+
+    def complete(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str: ...
+
+    def stream(
+        self,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> Iterator[str]: ...
+
+    async def acomplete(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str: ...
+
+    async def astream(
+        self,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> AsyncIterator[str]: ...
 
 
 class LLMClient:
-    """OpenAI-compatible LLM client with retries, streaming, and JSON mode."""
+    """OpenAI-compatible LLM client with sync/async and streaming support."""
 
-    def __init__(self, config: DevAIConfig | None = None):
-        self.config = config or DevAIConfig()
+    def __init__(self, config: DevAIConfig | None = None, **kwargs: Any) -> None:
+        if config is None:
+            config = DevAIConfig(**kwargs)
+        self.config = config
+        self._sync_client: httpx.Client | None = None
+        self._async_client: httpx.AsyncClient | None = None
 
     def _headers(self) -> dict[str, str]:
-        self.config.validate()
         headers = {
             "Authorization": f"Bearer {self.config.api_key}",
             "Content-Type": "application/json",
@@ -31,197 +74,401 @@ class LLMClient:
 
     def _build_payload(
         self,
-        messages: list[dict[str, Any] | Message],
+        messages: list[Message],
         *,
-        tools: list[ToolDefinition] | None = None,
+        tools: list[Tool] | None = None,
         json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
         stream: bool = False,
-        **kwargs: Any,
     ) -> dict[str, Any]:
-        msgs = [m.to_dict() if isinstance(m, Message) else m for m in messages]
         payload: dict[str, Any] = {
-            "model": kwargs.get("model", self.config.model),
-            "messages": msgs,
-            "max_tokens": kwargs.get("max_tokens", self.config.max_tokens),
-            "temperature": kwargs.get("temperature", self.config.temperature),
-            "stream": stream,
+            "model": self.config.model,
+            "messages": [m.to_dict() for m in messages],
+            "temperature": temperature if temperature is not None else self.config.temperature,
+            "max_tokens": max_tokens if max_tokens is not None else self.config.max_tokens,
         }
+        if stream:
+            payload["stream"] = True
         if tools:
             payload["tools"] = [t.to_dict() for t in tools]
         if json_mode:
             payload["response_format"] = {"type": "json_object"}
         return payload
 
-    def _request(self, method: str, path: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
-        url = f"{self.config.base_url.rstrip('/')}/{path.lstrip('/')}"
-        last_error: Exception | None = None
+    def _extract_content(self, data: dict[str, Any]) -> str:
+        choices = data.get("choices", [])
+        if not choices:
+            raise LLMError("No choices in LLM response")
+        message = choices[0].get("message", {})
+        content = message.get("content", "")
+        tool_calls = message.get("tool_calls")
+        if tool_calls and not content:
+            return json.dumps({"tool_calls": tool_calls})
+        return content or ""
 
-        for attempt in range(self.config.max_retries):
-            try:
-                with httpx.Client(timeout=self.config.timeout) as client:
-                    response = client.request(method, url, headers=self._headers(), json=payload)
-                if response.status_code == 401:
-                    raise AuthenticationError("Invalid API key", status_code=401)
-                if response.status_code == 429:
-                    if attempt < self.config.max_retries - 1:
-                        time.sleep(self.config.retry_delay * (2**attempt))
-                        continue
-                    raise RateLimitError("Rate limit exceeded", status_code=429)
-                if response.status_code >= 400:
-                    raise APIError(
-                        f"API error: {response.status_code}",
-                        status_code=response.status_code,
-                        body=response.text,
-                    )
-                return response.json()
-            except (httpx.TimeoutException, httpx.ConnectError) as exc:
-                last_error = exc
-                if attempt < self.config.max_retries - 1:
-                    time.sleep(self.config.retry_delay * (2**attempt))
-                    continue
-                raise APIError(f"Request failed: {exc}") from exc
+    def _extract_tool_calls(self, data: dict[str, Any]) -> list[dict[str, Any]]:
+        choices = data.get("choices", [])
+        if not choices:
+            return []
+        return choices[0].get("message", {}).get("tool_calls", [])
 
-        raise APIError(f"Request failed after retries: {last_error}")
+    @property
+    def sync_client(self) -> httpx.Client:
+        if self._sync_client is None:
+            self._sync_client = httpx.Client(
+                base_url=self.config.base_url,
+                headers=self._headers(),
+                timeout=self.config.timeout,
+            )
+        return self._sync_client
 
-    def _parse_response(self, data: dict[str, Any]) -> Response:
-        choice = data["choices"][0]
-        message = choice["message"]
-        tool_calls = []
-        if message.get("tool_calls"):
-            tool_calls = [ToolCall.from_dict(tc) for tc in message["tool_calls"]]
-        return Response(
-            content=message.get("content"),
-            tool_calls=tool_calls,
-            model=data.get("model", ""),
-            usage=data.get("usage", {}),
-            finish_reason=choice.get("finish_reason"),
-            raw=data,
+    @property
+    def async_client(self) -> httpx.AsyncClient:
+        if self._async_client is None:
+            self._async_client = httpx.AsyncClient(
+                base_url=self.config.base_url,
+                headers=self._headers(),
+                timeout=self.config.timeout,
+            )
+        return self._async_client
+
+    def complete(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str:
+        self.config.validate()
+        payload = self._build_payload(
+            messages,
+            tools=tools,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
         )
 
-    def chat(
+        def _call() -> str:
+            resp = self.sync_client.post("/chat/completions", json=payload)
+            if resp.status_code != 200:
+                raise LLMError(f"LLM API error {resp.status_code}: {resp.text}")
+            return self._extract_content(resp.json())
+
+        return with_retries(
+            _call,
+            max_retries=self.config.max_retries,
+            delay=self.config.retry_delay,
+            exceptions=(LLMError, httpx.HTTPError),
+        )
+
+    def complete_with_tools(
         self,
-        messages: list[dict[str, Any] | Message],
+        messages: list[Message],
+        tools: list[Tool],
         *,
-        tools: list[ToolDefinition] | None = None,
-        json_mode: bool = False,
-        **kwargs: Any,
-    ) -> Response:
-        """Send a chat completion request."""
-        payload = self._build_payload(messages, tools=tools, json_mode=json_mode, **kwargs)
-        data = self._request("POST", "/chat/completions", payload)
-        return self._parse_response(data)
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> tuple[str, list[dict[str, Any]]]:
+        """Complete and return both content and tool calls."""
+        self.config.validate()
+        payload = self._build_payload(
+            messages, tools=tools, temperature=temperature, max_tokens=max_tokens
+        )
+
+        def _call() -> tuple[str, list[dict[str, Any]]]:
+            resp = self.sync_client.post("/chat/completions", json=payload)
+            if resp.status_code != 200:
+                raise LLMError(f"LLM API error {resp.status_code}: {resp.text}")
+            data = resp.json()
+            return self._extract_content(data), self._extract_tool_calls(data)
+
+        return with_retries(
+            _call,
+            max_retries=self.config.max_retries,
+            delay=self.config.retry_delay,
+            exceptions=(LLMError, httpx.HTTPError),
+        )
 
     def stream(
         self,
-        messages: list[dict[str, Any] | Message],
-        **kwargs: Any,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> Iterator[str]:
-        """Stream chat completion tokens."""
-        payload = self._build_payload(messages, stream=True, **kwargs)
-        url = f"{self.config.base_url.rstrip('/')}/chat/completions"
-
-        with httpx.Client(timeout=self.config.timeout) as client:
-            with client.stream("POST", url, headers=self._headers(), json=payload) as response:
-                if response.status_code >= 400:
-                    raise APIError(f"Stream error: {response.status_code}", status_code=response.status_code)
-                for line in response.iter_lines():
-                    if not line.startswith("data: "):
-                        continue
-                    data_str = line[6:]
-                    if data_str.strip() == "[DONE]":
-                        break
+        self.config.validate()
+        payload = self._build_payload(
+            messages, temperature=temperature, max_tokens=max_tokens, stream=True
+        )
+        with self.sync_client.stream("POST", "/chat/completions", json=payload) as resp:
+            if resp.status_code != 200:
+                raise LLMError(f"LLM API error {resp.status_code}: {resp.text}")
+            for line in resp.iter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data_str = line[6:]
+                if data_str.strip() == "[DONE]":
+                    break
+                try:
                     chunk = json.loads(data_str)
                     delta = chunk["choices"][0].get("delta", {})
-                    content = delta.get("content")
+                    content = delta.get("content", "")
                     if content:
                         yield content
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    continue
 
-    def chat_json(
+    async def acomplete(
         self,
-        messages: list[dict[str, Any] | Message],
-        **kwargs: Any,
-    ) -> dict[str, Any]:
-        """Chat with JSON mode and parse the response."""
-        response = self.chat(messages, json_mode=True, **kwargs)
-        if not response.content:
-            return {}
-        return json.loads(response.content)
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str:
+        self.config.validate()
+        payload = self._build_payload(
+            messages,
+            tools=tools,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
+        async def _call() -> str:
+            resp = await self.async_client.post("/chat/completions", json=payload)
+            if resp.status_code != 200:
+                raise LLMError(f"LLM API error {resp.status_code}: {resp.text}")
+            return self._extract_content(resp.json())
+
+        return await async_with_retries(
+            _call,
+            max_retries=self.config.max_retries,
+            delay=self.config.retry_delay,
+            exceptions=(LLMError, httpx.HTTPError),
+        )
+
+    async def astream(
+        self,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> AsyncIterator[str]:
+        self.config.validate()
+        payload = self._build_payload(
+            messages, temperature=temperature, max_tokens=max_tokens, stream=True
+        )
+        async with self.async_client.stream("POST", "/chat/completions", json=payload) as resp:
+            if resp.status_code != 200:
+                raise LLMError(f"LLM API error {resp.status_code}: {resp.text}")
+            async for line in resp.aiter_lines():
+                if not line.startswith("data: "):
+                    continue
+                data_str = line[6:]
+                if data_str.strip() == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(data_str)
+                    delta = chunk["choices"][0].get("delta", {})
+                    content = delta.get("content", "")
+                    if content:
+                        yield content
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    continue
+
+    def close(self) -> None:
+        if self._sync_client:
+            self._sync_client.close()
+            self._sync_client = None
+
+    async def aclose(self) -> None:
+        if self._async_client:
+            await self._async_client.aclose()
+            self._async_client = None
 
 
 class MockLLMClient:
-    """Mock LLM client for testing without API calls."""
+    """Mock LLM client for testing without an API key."""
 
     def __init__(
         self,
+        default_response: str = "Mock response from DevAI.",
         responses: list[str] | None = None,
-        tool_responses: list[list[ToolCall]] | None = None,
-    ):
-        self.responses = list(responses or ["Mock response"])
-        self.tool_responses = list(tool_responses or [])
-        self._call_count = 0
-        self.call_history: list[list[dict[str, Any] | Message]] = []
+    ) -> None:
+        self.default_response = default_response
+        self.responses = list(responses) if responses else []
+        self.call_history: list[list[Message]] = []
 
-    def chat(
+    def _next_response(self) -> str:
+        if self.responses:
+            return self.responses.pop(0)
+        return self.default_response
+
+    def complete(
         self,
-        messages: list[dict[str, Any] | Message],
+        messages: list[Message],
         *,
-        tools: list[ToolDefinition] | None = None,
+        tools: list[Tool] | None = None,
         json_mode: bool = False,
-        **kwargs: Any,
-    ) -> Response:
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str:
         self.call_history.append(messages)
-        idx = min(self._call_count, len(self.responses) - 1)
+        return self._next_response()
 
-        if self.tool_responses and self._call_count < len(self.tool_responses):
-            tcs = self.tool_responses[self._call_count]
-            self._call_count += 1
-            return Response(content=None, tool_calls=tcs, model="mock", finish_reason="tool_calls")
-
-        content = self.responses[idx]
-        if json_mode and not content.strip().startswith("{"):
-            content = json.dumps({"result": content})
-
-        self._call_count += 1
-        return Response(content=content, model="mock", finish_reason="stop")
+    def complete_with_tools(
+        self,
+        messages: list[Message],
+        tools: list[Tool],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> tuple[str, list[dict[str, Any]]]:
+        self.call_history.append(messages)
+        response = self._next_response()
+        try:
+            data = json.loads(response)
+            if "tool_calls" in data:
+                return "", data["tool_calls"]
+        except (json.JSONDecodeError, TypeError):
+            pass
+        return response, []
 
     def stream(
         self,
-        messages: list[dict[str, Any] | Message],
-        **kwargs: Any,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> Iterator[str]:
-        response = self.chat(messages, **kwargs)
-        if response.content:
-            for word in response.content.split():
-                yield word + " "
+        self.call_history.append(messages)
+        response = self._next_response()
+        for word in response.split():
+            yield word + " "
 
-    def chat_json(
+    async def acomplete(
         self,
-        messages: list[dict[str, Any] | Message],
-        **kwargs: Any,
-    ) -> dict[str, Any]:
-        response = self.chat(messages, json_mode=True, **kwargs)
-        return json.loads(response.content or "{}")
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str:
+        return self.complete(
+            messages,
+            tools=tools,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
 
-    def reset(self) -> None:
-        self._call_count = 0
-        self.call_history.clear()
+    async def astream(
+        self,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> AsyncIterator[str]:
+        for chunk in self.stream(messages, temperature=temperature, max_tokens=max_tokens):
+            yield chunk
 
 
-class EmbeddingClient:
-    """Client for generating text embeddings."""
+class CachedLLMClient:
+    """LLM client wrapper that caches responses by message hash."""
 
-    def __init__(self, config: DevAIConfig | None = None):
-        self.config = config or DevAIConfig()
-        self._llm = LLMClient(self.config)
+    def __init__(self, client: LLMClientProtocol) -> None:
+        self.client = client
+        self._cache: dict[str, str] = {}
 
-    def embed(self, texts: list[str], **kwargs: Any) -> list[list[float]]:
-        """Generate embeddings for a list of texts."""
-        model = kwargs.get("model", self.config.embedding_model)
-        payload = {"model": model, "input": texts}
-        data = self._llm._request("POST", "/embeddings", payload)
-        sorted_data = sorted(data["data"], key=lambda x: x["index"])
-        return [item["embedding"] for item in sorted_data]
+    def _cache_key(self, messages: list[Message], **kwargs: Any) -> str:
+        parts = [json.dumps(m.to_dict(), sort_keys=True) for m in messages]
+        parts.append(json.dumps(kwargs, sort_keys=True, default=str))
+        return "|".join(parts)
 
-    def embed_one(self, text: str, **kwargs: Any) -> list[float]:
-        """Generate embedding for a single text."""
-        return self.embed([text], **kwargs)[0]
+    def complete(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str:
+        key = self._cache_key(
+            messages,
+            tools=tools,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        if key not in self._cache:
+            self._cache[key] = self.client.complete(
+                messages,
+                tools=tools,
+                json_mode=json_mode,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        return self._cache[key]
+
+    def stream(
+        self,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> Iterator[str]:
+        return self.client.stream(
+            messages, temperature=temperature, max_tokens=max_tokens
+        )
+
+    async def acomplete(
+        self,
+        messages: list[Message],
+        *,
+        tools: list[Tool] | None = None,
+        json_mode: bool = False,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> str:
+        key = self._cache_key(
+            messages,
+            tools=tools,
+            json_mode=json_mode,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+        if key not in self._cache:
+            self._cache[key] = await self.client.acomplete(
+                messages,
+                tools=tools,
+                json_mode=json_mode,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+        return self._cache[key]
+
+    async def astream(
+        self,
+        messages: list[Message],
+        *,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> AsyncIterator[str]:
+        async for chunk in self.client.astream(
+            messages, temperature=temperature, max_tokens=max_tokens
+        ):
+            yield chunk
+
+    def clear_cache(self) -> None:
+        self._cache.clear()
+
+    @property
+    def cache_size(self) -> int:
+        return len(self._cache)

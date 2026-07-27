@@ -1,79 +1,60 @@
-"""Core data models."""
+"""Message and tool models for DevAI."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any
+
+
+class Role(str, Enum):
+    SYSTEM = "system"
+    USER = "user"
+    ASSISTANT = "assistant"
+    TOOL = "tool"
 
 
 @dataclass
 class Message:
     """A chat message."""
 
-    role: str
-    content: str | None = None
-    tool_calls: list[ToolCall] | None = None
-    tool_call_id: str | None = None
+    role: Role | str
+    content: str
     name: str | None = None
+    tool_call_id: str | None = None
+    tool_calls: list[dict[str, Any]] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        d: dict[str, Any] = {"role": self.role}
-        if self.content is not None:
-            d["content"] = self.content
-        if self.tool_calls:
-            d["tool_calls"] = [tc.to_dict() for tc in self.tool_calls]
-        if self.tool_call_id:
-            d["tool_call_id"] = self.tool_call_id
+        d: dict[str, Any] = {"role": self.role if isinstance(self.role, str) else self.role.value}
+        d["content"] = self.content
         if self.name:
             d["name"] = self.name
+        if self.tool_call_id:
+            d["tool_call_id"] = self.tool_call_id
+        if self.tool_calls:
+            d["tool_calls"] = self.tool_calls
         return d
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Message:
-        tool_calls = None
-        if data.get("tool_calls"):
-            tool_calls = [ToolCall.from_dict(tc) for tc in data["tool_calls"]]
-        return cls(
-            role=data["role"],
-            content=data.get("content"),
-            tool_calls=tool_calls,
-            tool_call_id=data.get("tool_call_id"),
-            name=data.get("name"),
-        )
-
-
-@dataclass
-class ToolCall:
-    """A tool call from the LLM."""
-
-    id: str
-    name: str
-    arguments: str
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "id": self.id,
-            "type": "function",
-            "function": {"name": self.name, "arguments": self.arguments},
-        }
+    def system(cls, content: str) -> Message:
+        return cls(role=Role.SYSTEM, content=content)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> ToolCall:
-        fn = data.get("function", data)
-        return cls(
-            id=data.get("id", ""),
-            name=fn["name"],
-            arguments=fn.get("arguments", "{}"),
-        )
+    def user(cls, content: str) -> Message:
+        return cls(role=Role.USER, content=content)
+
+    @classmethod
+    def assistant(cls, content: str, tool_calls: list[dict[str, Any]] | None = None) -> Message:
+        return cls(role=Role.ASSISTANT, content=content, tool_calls=tool_calls)
 
 
 @dataclass
-class ToolDefinition:
-    """Definition of a tool available to the LLM."""
+class Tool:
+    """A tool definition for function calling."""
 
     name: str
     description: str
-    parameters: dict[str, Any]
+    parameters: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -87,16 +68,19 @@ class ToolDefinition:
 
 
 @dataclass
-class Response:
-    """Response from an LLM call."""
+class ToolCall:
+    """A tool call from the assistant."""
 
-    content: str | None = None
-    tool_calls: list[ToolCall] = field(default_factory=list)
-    model: str = ""
-    usage: dict[str, int] = field(default_factory=dict)
-    finish_reason: str | None = None
-    raw: dict[str, Any] = field(default_factory=dict)
+    id: str
+    name: str
+    arguments: dict[str, Any]
 
-    @property
-    def has_tool_calls(self) -> bool:
-        return len(self.tool_calls) > 0
+    @classmethod
+    def from_api(cls, data: dict[str, Any]) -> ToolCall:
+        import json
+
+        func = data.get("function", {})
+        args = func.get("arguments", "{}")
+        if isinstance(args, str):
+            args = json.loads(args)
+        return cls(id=data.get("id", ""), name=func.get("name", ""), arguments=args)

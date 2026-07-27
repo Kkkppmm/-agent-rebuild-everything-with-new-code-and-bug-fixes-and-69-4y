@@ -1,80 +1,67 @@
-"""Tool registry for agent tool-calling."""
+"""Tool registry for DevAI agents."""
 
 from __future__ import annotations
 
-import json
+import inspect
 from collections.abc import Callable
-from typing import Any
+from typing import Any, get_type_hints
 
-from devai.core.exceptions import ToolExecutionError
-from devai.core.models import ToolDefinition
-from devai.tools.code_utils import BUILTIN_TOOLS
+from devai.core.exceptions import ToolError
+from devai.core.models import Tool
 
 
 class ToolRegistry:
-    """Registry of tools available to agents."""
+    """Registry for agent tools with automatic schema generation."""
 
-    def __init__(self):
-        self._tools: dict[str, dict[str, Any]] = {}
+    def __init__(self) -> None:
+        self._tools: dict[str, Callable[..., str]] = {}
+        self._schemas: dict[str, Tool] = {}
 
-    def register(
-        self,
-        name: str,
-        fn: Callable[..., str],
-        description: str,
-        parameters: dict[str, Any],
-    ) -> None:
-        """Register a custom tool."""
-        self._tools[name] = {"fn": fn, "description": description, "parameters": parameters}
+    def register(self, func: Callable[..., str], name: str | None = None) -> None:
+        """Register a function as a tool."""
+        tool_name = name or func.__name__
+        self._tools[tool_name] = func
+        self._schemas[tool_name] = self._generate_schema(func, tool_name)
 
-    def register_builtins(self) -> None:
-        """Register all built-in developer tools."""
-        for name, spec in BUILTIN_TOOLS.items():
-            self._tools[name] = spec
+    def _generate_schema(self, func: Callable[..., str], name: str) -> Tool:
+        sig = inspect.signature(func)
+        hints = get_type_hints(func)
+        properties: dict[str, Any] = {}
+        required: list[str] = []
 
-    def unregister(self, name: str) -> None:
-        self._tools.pop(name, None)
+        for param_name, param in sig.parameters.items():
+            if param_name in ("self", "cls"):
+                continue
+            param_type = hints.get(param_name, str)
+            type_map = {str: "string", int: "integer", float: "number", bool: "boolean"}
+            json_type = type_map.get(param_type, "string")
+            properties[param_name] = {"type": json_type}
+            if param.default is inspect.Parameter.empty:
+                required.append(param_name)
 
-    def get(self, name: str) -> dict[str, Any] | None:
-        return self._tools.get(name)
+        parameters: dict[str, Any] = {
+            "type": "object",
+            "properties": properties,
+        }
+        if required:
+            parameters["required"] = required
 
-    def list_tools(self) -> list[str]:
-        return list(self._tools.keys())
+        doc = inspect.getdoc(func) or f"Execute {name}"
+        return Tool(name=name, description=doc.split("\n")[0], parameters=parameters)
 
-    def get_definitions(self) -> list[ToolDefinition]:
-        """Get tool definitions for LLM tool-calling."""
-        return [
-            ToolDefinition(
-                name=name,
-                description=spec["description"],
-                parameters=spec["parameters"],
-            )
-            for name, spec in self._tools.items()
-        ]
+    def get_tools(self) -> list[Tool]:
+        return list(self._schemas.values())
 
-    def execute(self, name: str, arguments: str | dict[str, Any]) -> str:
-        """Execute a tool by name with JSON arguments."""
-        spec = self._tools.get(name)
-        if not spec:
-            raise ToolExecutionError(f"Unknown tool: {name}")
-
-        if isinstance(arguments, str):
-            try:
-                args = json.loads(arguments)
-            except json.JSONDecodeError as exc:
-                raise ToolExecutionError(f"Invalid JSON arguments: {exc}") from exc
-        else:
-            args = arguments
-
+    def execute(self, name: str, arguments: dict[str, Any]) -> str:
+        if name not in self._tools:
+            raise ToolError(f"Unknown tool: {name}")
         try:
-            return spec["fn"](**args)
-        except TypeError as exc:
-            raise ToolExecutionError(f"Tool {name} argument error: {exc}") from exc
-        except Exception as exc:
-            raise ToolExecutionError(f"Tool {name} failed: {exc}") from exc
-
-    def __len__(self) -> int:
-        return len(self._tools)
+            return self._tools[name](**arguments)
+        except Exception as e:
+            raise ToolError(f"Tool '{name}' failed: {e}") from e
 
     def __contains__(self, name: str) -> bool:
         return name in self._tools
+
+    def __len__(self) -> int:
+        return len(self._tools)

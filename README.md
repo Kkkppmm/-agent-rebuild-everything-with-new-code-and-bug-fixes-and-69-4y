@@ -1,91 +1,119 @@
 # DevAI
 
-A Python AI library built for developers and programmers. DevAI provides LLM clients, prompt templates, tool-calling agents, chains, RAG, and a CLI for common dev workflows.
+A Python AI library built for developers and programmers. DevAI provides a clean, composable toolkit for LLM-powered code review, debugging, refactoring, agents, RAG, and more.
 
 ## Features
 
-- **LLM Clients** — OpenAI-compatible API client with streaming, JSON mode, retries, and a mock client for testing
-- **Prompt Templates** — Ready-made prompts for code review, debugging, commit messages, security review, and more
-- **Tool Registry** — Built-in tools for code analysis, file reading, git diff, and complexity counting
-- **Agents** — Tool-calling agent loop with a specialized `CoderAgent`
-- **Chains** — Sequential and structured output chains with Pydantic models
+- **LLM Client** — OpenAI-compatible API with sync/async, streaming, JSON mode, retries, and caching
+- **Code Assistant** — High-level facade for review, explain, debug, refactor, security audit, tests, docstrings, and more
+- **Agents** — Tool-calling agents with a built-in coder agent
+- **Chains** — Simple, sequential, and structured (Pydantic) output chains
 - **RAG** — Text chunking, vector store, and retrieval-augmented generation
-- **CLI** — Command-line interface for review, explain, debug, commit, tests, security, and refactor
+- **Tools** — Code utilities: lint, search, git diff, complexity analysis
+- **CLI** — Command-line interface for common developer workflows
+- **Pipeline** — Composable review/debug/test workflows
 
 ## Installation
 
 ```bash
-pip install -e .
-# with dev dependencies
+pip install devai
+
+# With OpenAI SDK support
+pip install "devai[openai]"
+
+# Development
 pip install -e ".[dev]"
 ```
 
 ## Quick Start
 
 ```python
-from devai import DevAIConfig, LLMClient, PromptTemplate, CODE_REVIEW
+from devai import CodeAssistant, DevAIConfig
 
-config = DevAIConfig(api_key="sk-...", model="gpt-4o-mini")
-client = LLMClient(config)
+# Use with any OpenAI-compatible API
+config = DevAIConfig(
+    api_key="your-api-key",
+    base_url="https://api.openai.com/v1",
+    model="gpt-4o-mini",
+)
+assistant = CodeAssistant(config)
 
-prompt = PromptTemplate(CODE_REVIEW).format(code="def foo(): pass")
-response = client.chat([{"role": "user", "content": prompt}])
-print(response.content)
+# Review code
+result = assistant.review("""
+def add(a, b):
+    return a + b
+""")
+print(result)
+
+# Explain code
+explanation = assistant.explain("async def fetch(): ...")
+
+# Debug an error
+fix = assistant.debug(code="...", error="NameError: name 'x' is not defined")
 ```
 
-### Mock Client (no API key needed)
+## Mock Client (No API Key Required)
 
 ```python
-from devai import MockLLMClient
+from devai.core import MockLLMClient
+from devai import CodeAssistant
 
-client = MockLLMClient(responses=["Looks good! No issues found."])
-response = client.chat([{"role": "user", "content": "Review this code"}])
+client = MockLLMClient(default_response="This code looks good.")
+assistant = CodeAssistant(client=client)
+print(assistant.review("def foo(): pass"))
 ```
 
-### Agent with Tools
+## Agents
 
 ```python
-from devai import Agent, LLMClient, DevAIConfig, ToolRegistry
+from devai.agents import CoderAgent
+from devai.core import MockLLMClient
+from devai.tools import ToolRegistry, read_file, search_code
 
 registry = ToolRegistry()
-registry.register_builtins()
+registry.register(read_file)
+registry.register(search_code)
 
-agent = Agent(
-    client=LLMClient(DevAIConfig(api_key="sk-...")),
-    tools=registry,
-    system_prompt="You are a helpful coding assistant.",
-)
-result = agent.run("Explain the complexity of this project")
+agent = CoderAgent(client=MockLLMClient(), tools=registry)
+response = agent.run("Find all TODO comments in the codebase")
 ```
 
-### CLI
+## RAG
+
+```python
+from devai.rag import chunk_text, VectorStore, RAGChain
+from devai.core import MockLLMClient
+
+docs = ["Python uses indentation.", "List comprehensions are concise."]
+chunks = chunk_text("\n".join(docs))
+store = VectorStore()
+store.add_documents(chunks)
+chain = RAGChain(client=MockLLMClient(), store=store)
+answer = chain.query("How does Python handle blocks?")
+```
+
+## CLI
 
 ```bash
 devai review path/to/file.py
-devai explain "def fib(n): ..."
-devai debug --error "NameError: name 'x' is not defined"
-devai commit --diff "$(git diff --staged)"
-devai security path/to/file.py
+devai explain "def factorial(n): ..."
+devai debug --code file.py --error "TypeError: ..."
+devai commit --diff "$(git diff)"
+devai security path/to/module.py
+devai agent "Refactor the auth module"
 ```
 
 ## Configuration
 
 Set environment variables or pass a `DevAIConfig`:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DEVAI_API_KEY` | API key for the LLM provider | — |
-| `DEVAI_BASE_URL` | API base URL | `https://api.openai.com/v1` |
-| `DEVAI_MODEL` | Model name | `gpt-4o-mini` |
-| `DEVAI_MAX_TOKENS` | Max response tokens | `4096` |
-| `DEVAI_TEMPERATURE` | Sampling temperature | `0.2` |
-
-## Development
-
-```bash
-pip install -e ".[dev]"
-python -m pytest
-```
+| Variable | Description |
+|----------|-------------|
+| `DEVAI_API_KEY` | API key for the LLM provider |
+| `DEVAI_BASE_URL` | Base URL (default: OpenAI) |
+| `DEVAI_MODEL` | Model name (default: `gpt-4o-mini`) |
+| `DEVAI_MAX_TOKENS` | Max tokens per request |
+| `DEVAI_TEMPERATURE` | Sampling temperature |
 
 ## License
 

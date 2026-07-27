@@ -1,216 +1,164 @@
-"""Built-in developer tools."""
+"""Code utility tools for DevAI agents."""
 
 from __future__ import annotations
 
 import ast
-import os
 import re
 import subprocess
 from pathlib import Path
-from typing import Any
 
 
 def explain_code(code: str, language: str = "python") -> str:
-    """Provide a structural explanation of code."""
+    """Provide a structural explanation of code without an LLM."""
     if language == "python":
         try:
             tree = ast.parse(code)
-            functions = [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
-            classes = [n.name for n in ast.walk(tree) if isinstance(n, ast.ClassDef)]
+            functions = [
+                node.name for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)
+            ]
+            classes = [node.name for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
             imports = []
-            for n in ast.walk(tree):
-                if isinstance(n, ast.Import):
-                    imports.extend(a.name for a in n.names)
-                elif isinstance(n, ast.ImportFrom):
-                    imports.append(n.module or "")
-            lines = len(code.splitlines())
-            return (
-                f"Language: Python\n"
-                f"Lines: {lines}\n"
-                f"Functions: {', '.join(functions) or 'none'}\n"
-                f"Classes: {', '.join(classes) or 'none'}\n"
-                f"Imports: {', '.join(imports) or 'none'}"
-            )
-        except SyntaxError as exc:
-            return f"Syntax error in code: {exc}"
-    return f"Language: {language}, Lines: {len(code.splitlines())}"
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    imports.extend(alias.name for alias in node.names)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    imports.append(node.module)
+            lines = [f"Lines: {code.count(chr(10)) + 1}"]
+            if functions:
+                lines.append(f"Functions: {', '.join(functions)}")
+            if classes:
+                lines.append(f"Classes: {', '.join(classes)}")
+            if imports:
+                lines.append(f"Imports: {', '.join(imports)}")
+            return "\n".join(lines)
+        except SyntaxError as e:
+            return f"Syntax error: {e}"
+    return f"Code ({language}): {len(code)} characters, {code.count(chr(10)) + 1} lines"
 
 
 def lint_python(code: str) -> str:
-    """Basic Python lint checks without external dependencies."""
+    """Run basic Python lint checks using AST."""
     issues: list[str] = []
     try:
         tree = ast.parse(code)
-    except SyntaxError as exc:
-        return f"SyntaxError: {exc}"
+    except SyntaxError as e:
+        return f"Syntax error on line {e.lineno}: {e.msg}"
 
     for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and not node.name.startswith("_"):
-            if not ast.get_docstring(node) and len(node.body) > 3:
-                issues.append(f"Line {node.lineno}: Function '{node.name}' missing docstring")
+        if isinstance(node, ast.FunctionDef):
+            if not node.body:
+                issues.append(f"Empty function: {node.name}")
+            if not ast.get_docstring(node) and not node.name.startswith("_"):
+                issues.append(f"Missing docstring: {node.name}")
         if isinstance(node, ast.ExceptHandler) and node.type is None:
-            issues.append(f"Line {node.lineno}: Bare except clause")
+            issues.append(f"Bare except on line {node.lineno}")
 
-    lines = code.splitlines()
+    lines = code.split("\n")
     for i, line in enumerate(lines, 1):
         if len(line) > 120:
-            issues.append(f"Line {i}: Line too long ({len(line)} chars)")
-        if re.search(r"\bprint\(", line) and not line.strip().startswith("#"):
-            issues.append(f"Line {i}: print() statement found")
+            issues.append(f"Line {i} exceeds 120 characters")
+        if re.search(r"\bprint\(", line) and "test" not in line.lower():
+            issues.append(f"Line {i}: print statement found")
 
-    return "\n".join(issues) if issues else "No issues found"
+    return "\n".join(issues) if issues else "No issues found."
 
 
-def search_code(directory: str, pattern: str, file_glob: str = "*.py") -> str:
-    """Search for a regex pattern in files."""
+def search_code(pattern: str, directory: str = ".", file_pattern: str = "*.py") -> str:
+    """Search for a regex pattern in code files."""
+    results: list[str] = []
     root = Path(directory)
     if not root.exists():
         return f"Directory not found: {directory}"
 
-    results: list[str] = []
-    regex = re.compile(pattern)
-    for path in root.rglob(file_glob):
-        if not path.is_file():
+    try:
+        compiled = re.compile(pattern)
+    except re.error as e:
+        return f"Invalid regex: {e}"
+
+    for path in root.rglob(file_pattern):
+        if any(part.startswith(".") for part in path.parts):
             continue
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
-        except OSError:
+            for i, line in enumerate(text.split("\n"), 1):
+                if compiled.search(line):
+                    results.append(f"{path}:{i}: {line.strip()}")
+        except (OSError, UnicodeDecodeError):
             continue
-        for i, line in enumerate(text.splitlines(), 1):
-            if regex.search(line):
-                results.append(f"{path}:{i}: {line.strip()}")
 
-    return "\n".join(results[:50]) if results else "No matches found"
+    if not results:
+        return f"No matches for '{pattern}'"
+    return "\n".join(results[:50])
 
 
-def git_diff(staged: bool = False) -> str:
+def git_diff(staged: bool = False, path: str | None = None) -> str:
     """Get git diff output."""
     cmd = ["git", "diff"]
     if staged:
         cmd.append("--staged")
+    if path:
+        cmd.extend(["--", path])
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-        return result.stdout or "No changes"
-    except (subprocess.SubprocessError, FileNotFoundError):
-        return "Git not available or command failed"
+        return result.stdout or "No changes."
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        return f"Git diff failed: {e}"
 
 
 def read_file(path: str, max_lines: int = 500) -> str:
-    """Read a file with line limit."""
-    file_path = Path(path)
-    if not file_path.exists():
-        return f"File not found: {path}"
-    if not file_path.is_file():
-        return f"Not a file: {path}"
-
+    """Read a file's contents."""
     try:
-        lines = file_path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError as exc:
-        return f"Error reading file: {exc}"
-
-    if len(lines) > max_lines:
-        truncated = lines[:max_lines]
-        truncated.append(f"... ({len(lines) - max_lines} more lines)")
-        return "\n".join(truncated)
-    return "\n".join(lines)
+        p = Path(path)
+        if not p.exists():
+            return f"File not found: {path}"
+        lines = p.read_text(encoding="utf-8", errors="replace").split("\n")
+        if len(lines) > max_lines:
+            content = "\n".join(lines[:max_lines])
+            return f"{content}\n... [{len(lines) - max_lines} more lines]"
+        return "\n".join(lines)
+    except OSError as e:
+        return f"Error reading file: {e}"
 
 
 def count_complexity(code: str) -> str:
     """Calculate cyclomatic complexity for Python code."""
     try:
         tree = ast.parse(code)
-    except SyntaxError as exc:
-        return f"SyntaxError: {exc}"
+    except SyntaxError as e:
+        return f"Syntax error: {e}"
 
-    def _complexity(node: ast.AST) -> int:
-        complexity = 1
-        for child in ast.walk(node):
-            if isinstance(child, (ast.If, ast.While, ast.For, ast.ExceptHandler)):
-                complexity += 1
-            elif isinstance(child, ast.BoolOp):
-                complexity += len(child.values) - 1
-            elif isinstance(child, (ast.And, ast.Or)):
-                complexity += 1
-        return complexity
+    complexities: dict[str, int] = {}
 
-    results: list[str] = []
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-            c = _complexity(node)
-            level = "low" if c <= 5 else "medium" if c <= 10 else "high"
-            results.append(f"{node.name}: complexity={c} ({level})")
+            complexity = 1
+            for child in ast.walk(node):
+                if isinstance(child, (ast.If, ast.While, ast.For, ast.ExceptHandler)):
+                    complexity += 1
+                elif isinstance(child, ast.BoolOp):
+                    complexity += len(child.values) - 1
+            complexities[node.name] = complexity
 
-    return "\n".join(results) if results else "No functions found"
+    if not complexities:
+        return "No functions found."
+
+    lines = [f"{name}: complexity {score}" for name, score in complexities.items()]
+    avg = sum(complexities.values()) / len(complexities)
+    lines.append(f"Average complexity: {avg:.1f}")
+    return "\n".join(lines)
 
 
-BUILTIN_TOOLS: dict[str, dict[str, Any]] = {
-    "explain_code": {
-        "fn": explain_code,
-        "description": "Analyze and explain code structure",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "code": {"type": "string", "description": "Source code to analyze"},
-                "language": {"type": "string", "description": "Programming language", "default": "python"},
-            },
-            "required": ["code"],
-        },
-    },
-    "lint_python": {
-        "fn": lint_python,
-        "description": "Run basic lint checks on Python code",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "code": {"type": "string", "description": "Python source code"},
-            },
-            "required": ["code"],
-        },
-    },
-    "search_code": {
-        "fn": search_code,
-        "description": "Search for a regex pattern in source files",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "directory": {"type": "string", "description": "Directory to search"},
-                "pattern": {"type": "string", "description": "Regex pattern"},
-                "file_glob": {"type": "string", "description": "File glob pattern", "default": "*.py"},
-            },
-            "required": ["directory", "pattern"],
-        },
-    },
-    "git_diff": {
-        "fn": git_diff,
-        "description": "Get the current git diff",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "staged": {"type": "boolean", "description": "Show staged changes only", "default": False},
-            },
-        },
-    },
-    "read_file": {
-        "fn": read_file,
-        "description": "Read contents of a file",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "path": {"type": "string", "description": "File path to read"},
-                "max_lines": {"type": "integer", "description": "Maximum lines to read", "default": 500},
-            },
-            "required": ["path"],
-        },
-    },
-    "count_complexity": {
-        "fn": count_complexity,
-        "description": "Calculate cyclomatic complexity of Python functions",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "code": {"type": "string", "description": "Python source code"},
-            },
-            "required": ["code"],
-        },
-    },
-}
+def list_files(directory: str = ".", pattern: str = "*") -> str:
+    """List files in a directory."""
+    root = Path(directory)
+    if not root.exists():
+        return f"Directory not found: {directory}"
+
+    files = sorted(
+        str(p.relative_to(root))
+        for p in root.rglob(pattern)
+        if p.is_file() and not any(part.startswith(".") for part in p.parts)
+    )
+    if not files:
+        return f"No files matching '{pattern}' in {directory}"
+    return "\n".join(files[:100])

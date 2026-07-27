@@ -1,57 +1,55 @@
-"""Tests for agents."""
+"""Tests for DevAI agents."""
 
 import json
 
-from devai.agents.agent import Agent
-from devai.agents.coder import CoderAgent
-from devai.core.client import MockLLMClient
-from devai.core.models import ToolCall
-from devai.tools.registry import ToolRegistry
+from devai.agents import Agent, CoderAgent
+from devai.core import MockLLMClient
+from devai.tools import ToolRegistry
 
 
-def test_agent_simple_response():
-    client = MockLLMClient(responses=["The answer is 42."])
-    agent = Agent(client=client)
-    result = agent.run("What is the meaning of life?")
-    assert "42" in result
+def _greet_tool(name: str) -> str:
+    """Greet someone by name."""
+    return f"Hello, {name}!"
 
 
-def test_agent_with_tools():
-    tc = ToolCall(id="1", name="explain_code", arguments=json.dumps({"code": "x=1"}))
-    client = MockLLMClient(
-        responses=["Based on analysis, x is assigned 1."],
-        tool_responses=[[tc]],
-    )
-    registry = ToolRegistry()
-    registry.register_builtins()
-    agent = Agent(client=client, tools=registry)
-    result = agent.run("Analyze this code")
-    assert "analysis" in result.lower() or "1" in result
+class TestAgent:
+    def test_simple_response(self):
+        client = MockLLMClient(default_response="Task completed.")
+        agent = Agent(client=client)
+        result = agent.run("Do something")
+        assert result == "Task completed."
+
+    def test_with_tools(self):
+        tool_calls = [
+            {
+                "id": "call_1",
+                "function": {
+                    "name": "greet",
+                    "arguments": json.dumps({"name": "Dev"}),
+                },
+            }
+        ]
+        client = MockLLMClient(
+            responses=[
+                json.dumps({"tool_calls": tool_calls}),
+                "Greeted Dev successfully.",
+            ]
+        )
+        registry = ToolRegistry()
+        registry.register(_greet_tool, name="greet")
+        agent = Agent(client=client, tools=registry)
+        result = agent.run("Greet Dev")
+        assert "Greeted" in result
 
 
-def test_agent_run_with_steps():
-    client = MockLLMClient(responses=["Done."])
-    agent = Agent(client=client)
-    output = agent.run_with_steps("Hello")
-    assert "answer" in output
-    assert len(output["steps"]) >= 1
+class TestCoderAgent:
+    def test_default_system_prompt(self):
+        client = MockLLMClient(default_response="Done")
+        agent = CoderAgent(client=client)
+        assert "software engineer" in agent.system_prompt.lower()
 
-
-def test_coder_agent():
-    client = MockLLMClient(responses=["Code looks good."])
-    agent = CoderAgent(client=client)
-    assert len(agent.tools) == 6
-
-
-def test_coder_agent_review():
-    client = MockLLMClient(responses=["No issues found."])
-    agent = CoderAgent(client=client)
-    result = agent.review("def foo(): pass")
-    assert "issues" in result.lower() or "good" in result.lower()
-
-
-def test_coder_agent_debug():
-    client = MockLLMClient(responses=["Variable not defined."])
-    agent = CoderAgent(client=client)
-    result = agent.debug("NameError: x", "print(x)")
-    assert len(result) > 0
+    def test_run_task(self):
+        client = MockLLMClient(default_response="Refactored the module.")
+        agent = CoderAgent(client=client)
+        result = agent.run("Refactor auth module")
+        assert "Refactored" in result
