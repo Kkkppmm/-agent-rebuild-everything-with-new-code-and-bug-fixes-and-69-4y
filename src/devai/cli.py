@@ -9,6 +9,7 @@ from pathlib import Path
 from devai import CodeAssistant, DevAIConfig
 from devai.agents import CoderAgent
 from devai.core import MockLLMClient
+from devai.program import DevProgram
 from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
 
 
@@ -183,6 +184,21 @@ def cmd_agent(args: argparse.Namespace) -> None:
     print(agent.run(args.task))
 
 
+def cmd_run(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    program = DevProgram.from_file(args.program, assistant)
+    context: dict[str, str] = {}
+    if args.code:
+        context["code"] = _read_input(args.code)
+    if args.diff:
+        context["diff"] = _read_input(args.diff)
+    if args.context:
+        for pair in args.context:
+            key, _, value = pair.partition("=")
+            context[key] = value
+    print(program.run_and_summarize(context))
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -325,6 +341,18 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("agent", help="Run coding agent")
     p.add_argument("task", help="Task description")
     p.set_defaults(func=cmd_agent)
+
+    p = sub.add_parser("run", help="Run a DevAI program from JSON")
+    p.add_argument("program", help="Program JSON file")
+    p.add_argument("--code", help="Code input or file path")
+    p.add_argument("--diff", help="Diff input or file path")
+    p.add_argument(
+        "--context",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Additional context values",
+    )
+    p.set_defaults(func=cmd_run)
 
     return parser
 
