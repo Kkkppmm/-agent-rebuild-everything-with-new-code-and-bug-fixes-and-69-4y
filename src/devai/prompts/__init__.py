@@ -1,0 +1,39 @@
+"""Prompt templates for developer tasks."""
+
+from devai.prompts.templates import (
+  ALL_TEMPLATES,
+  API_DESIGN,
+  CODE_REVIEW,
+  COMMIT_MESSAGE,
+  DEBUG,
+  DOCSTRING_GEN,
+  EXPLAIN,
+  GENERATE_TESTS,
+  LOG_ANALYSIS,
+  README_GEN,
+  REFACTOR,
+  REGEX_BUILD,
+  SECURITY_REVIEW,
+  SQL_OPTIMIZE,
+  TYPE_HINTS,
+  PromptTemplate,
+)
+
+__all__ = [
+  "ALL_TEMPLATES",
+  "API_DESIGN",
+  "CODE_REVIEW",
+  "COMMIT_MESSAGE",
+  "DEBUG",
+  "DOCSTRING_GEN",
+  "EXPLAIN",
+  "GENERATE_TESTS",
+  "LOG_ANALYSIS",
+  "README_GEN",
+  "REFACTOR",
+  "REGEX_BUILD",
+  "SECURITY_REVIEW",
+  "SQL_OPTIMIZE",
+  "TYPE_HINTS",
+  "PromptTemplate",
+]
