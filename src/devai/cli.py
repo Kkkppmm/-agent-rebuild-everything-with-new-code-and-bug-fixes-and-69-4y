@@ -9,6 +9,8 @@ from pathlib import Path
 from devai import CodeAssistant, DevAIConfig
 from devai.agents import CoderAgent
 from devai.core import MockLLMClient
+from devai.kit import DevKit
+from devai.presets import list_presets
 from devai.program import DevProgram
 from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
 
@@ -199,6 +201,33 @@ def cmd_run(args: argparse.Namespace) -> None:
     print(program.run_and_summarize(context))
 
 
+def cmd_presets(args: argparse.Namespace) -> None:
+    for preset in list_presets():
+        print(f"{preset['name']}: {preset['description']}")
+
+
+def cmd_kit(args: argparse.Namespace) -> None:
+    kit = DevKit.from_client(
+        _get_assistant(args).client,
+        project_path=args.project,
+    )
+    code = _read_input(args.code) if args.code else None
+    handlers = {
+        "audit": lambda: kit.audit(code),
+        "pre-commit": lambda: kit.pre_commit(code),
+        "release": lambda: kit.release_check(code),
+        "onboard": lambda: kit.onboard(code),
+        "pr-review": lambda: kit.review_pr(
+            diff=_read_input(args.diff) if args.diff else None,
+            code=code,
+        ),
+    }
+    if args.workflow not in handlers:
+        print(f"Unknown workflow: {args.workflow}", file=sys.stderr)
+        sys.exit(1)
+    print(handlers[args.workflow]())
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -353,6 +382,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Additional context values",
     )
     p.set_defaults(func=cmd_run)
+
+    p = sub.add_parser("presets", help="List built-in program presets")
+    p.set_defaults(func=cmd_presets)
+
+    p = sub.add_parser("kit", help="Run a DevKit workflow")
+    p.add_argument(
+        "workflow",
+        choices=["audit", "pre-commit", "release", "onboard", "pr-review"],
+        help="Workflow to run",
+    )
+    p.add_argument("code", nargs="?", help="Code or file path")
+    p.add_argument("--project", help="Project directory for context")
+    p.add_argument("--diff", help="Diff for pr-review workflow")
+    p.set_defaults(func=cmd_kit)
 
     return parser
 

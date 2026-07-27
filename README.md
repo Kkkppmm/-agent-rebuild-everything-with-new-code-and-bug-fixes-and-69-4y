@@ -16,6 +16,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **CLI** — Command-line interface for common developer workflows
 - **Pipeline** — Composable review/debug/test workflows
 - **DevProgram** — Declarative JSON programs for scripted multi-step AI workflows
+- **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
+- **Program Presets** — Ready-made workflows for common developer tasks
 - **OpenAI Adapter** — Optional official OpenAI SDK integration
 
 ## Installation
@@ -126,6 +128,31 @@ assistant = CodeAssistant(client=MockLLMClient())
 review = assistant.review_project("./my-app", query="authentication")
 ```
 
+## DevKit (Unified Workspace)
+
+```python
+from devai import DevKit, MockLLMClient
+
+kit = DevKit.from_client(MockLLMClient(default_response="Looks good."))
+
+# Built-in workflows
+print(kit.pre_commit("def divide(a, b): return a / b"))
+print(kit.audit("class UserService: ..."))
+print(kit.onboard("def main(): ..."))
+
+# List and load presets
+for preset in kit.presets():
+    print(preset["name"], preset["description"])
+
+program = kit.preset("release")
+results = kit.run_program(program, {"code": open("app.py").read()})
+print(kit.summarize(results))
+
+# Project-aware workflows
+kit = DevKit.from_client(MockLLMClient(), project_path="./my-app")
+print(kit.review_project(query="authentication"))
+```
+
 ## DevProgram (Scripted Workflows)
 
 ```python
@@ -203,6 +230,10 @@ devai deps requirements.txt --context "production web app"
 devai architecture path/to/main.py --context "microservice"
 devai agent "Refactor the auth module"
 devai run audit.json --code path/to/app.py
+devai presets
+devai kit audit path/to/app.py
+devai kit pre-commit path/to/app.py
+devai kit pr-review --project ./my-app --diff "$(git diff)"
 ```
 
 ## Configuration

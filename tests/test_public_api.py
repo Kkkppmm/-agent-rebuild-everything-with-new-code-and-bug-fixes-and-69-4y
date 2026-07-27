@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "1.0.0"
+        assert devai.__version__ == "1.1.0"
 
     def test_exports(self):
         expected = {
@@ -17,6 +17,7 @@ class TestPublicAPI:
             "CodeReviewResult",
             "CoderAgent",
             "DevAIConfig",
+            "DevKit",
             "DevPipeline",
             "DevProgram",
             "LLMClient",
@@ -27,6 +28,8 @@ class TestPublicAPI:
             "ProgramTask",
             "SecurityAuditResult",
             "SecurityFinding",
+            "get_preset",
+            "list_presets",
             "__version__",
         }
         assert set(devai.__all__) == expected

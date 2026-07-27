@@ -86,3 +86,14 @@ class TestCLI:
         assert args.command == "run"
         assert args.program == "program.json"
         assert args.context == ["env=prod"]
+
+    def test_presets_args(self):
+        parser = build_parser()
+        args = parser.parse_args(["presets"])
+        assert args.command == "presets"
+
+    def test_kit_args(self):
+        parser = build_parser()
+        args = parser.parse_args(["--mock", "kit", "audit", "def foo(): pass"])
+        assert args.command == "kit"
+        assert args.workflow == "audit"

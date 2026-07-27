@@ -72,6 +72,13 @@ class DevProgram:
             "generate",
             "type_hints",
             "review_diff",
+            "fix_lint",
+            "audit_deps",
+            "dockerfile",
+            "migration_plan",
+            "api_design",
+            "optimize_sql",
+            "analyze_logs",
         }
     )
 
@@ -139,6 +146,13 @@ class DevProgram:
             "generate": self.assistant.generate,
             "type_hints": self.assistant.type_hints,
             "review_diff": self.assistant.review_diff,
+            "fix_lint": self.assistant.fix_lint,
+            "audit_deps": self.assistant.audit_deps,
+            "dockerfile": self.assistant.dockerfile,
+            "migration_plan": self.assistant.migration_plan,
+            "api_design": self.assistant.api_design,
+            "optimize_sql": self.assistant.optimize_sql,
+            "analyze_logs": self.assistant.analyze_logs,
         }
         handler = handlers.get(action)
         if handler is None:
