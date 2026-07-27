@@ -15,6 +15,7 @@ from devai.prompts import (
     REFACTOR,
     EXPLAIN_CODE,
     TEST_GEN,
+    DOCSTRING_GEN,
 )
 from devai.agents import CoderAgent
 from devai.tools import ToolRegistry, explain_code, lint_python, read_file, search_code, count_complexity, list_files
@@ -112,6 +113,17 @@ def cmd_tests(args: argparse.Namespace) -> None:
     print(response.content)
 
 
+def cmd_docstring(args: argparse.Namespace) -> None:
+    client = _get_client(args.mock)
+    code = _read_code(args)
+    if not code:
+        print("Error: provide --code or --file")
+        sys.exit(1)
+    prompt = PromptTemplate(DOCSTRING_GEN).format(code=code, style=args.style)
+    response = client.complete(prompt)
+    print(response.content)
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     client = _get_client(args.mock)
     registry = ToolRegistry()
@@ -180,6 +192,13 @@ def main() -> None:
     p_tests.add_argument("--code", "-c", help="Code string")
     p_tests.add_argument("--framework", default="pytest")
     p_tests.set_defaults(func=cmd_tests)
+
+    # docstring
+    p_docstring = subparsers.add_parser("docstring", help="Generate docstrings")
+    p_docstring.add_argument("--file", "-f", help="File to document")
+    p_docstring.add_argument("--code", "-c", help="Code string")
+    p_docstring.add_argument("--style", "-s", default="google", help="Docstring style")
+    p_docstring.set_defaults(func=cmd_docstring)
 
     # agent
     p_agent = subparsers.add_parser("agent", help="Run coding agent")

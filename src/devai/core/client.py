@@ -28,7 +28,7 @@ class LLMClient:
             raise ConfigurationError(
                 "Use MockLLMClient for mock provider instead of LLMClient"
             )
-        if not self.config.api_key:
+        if not self.config.api_key and not self.config.is_ollama:
             raise ConfigurationError(
                 "API key required. Set DEVAI_API_KEY or pass api_key to DevAIConfig."
             )
@@ -60,7 +60,7 @@ class LLMClient:
         if system:
             messages.insert(0, {"role": "system", "content": system})
 
-        if self.config.provider == "openai":
+        if self.config.uses_openai_api:
             return self._complete_openai(
                 messages, tools=tools, json_mode=json_mode,
                 temperature=temperature, max_tokens=max_tokens,
@@ -242,7 +242,7 @@ class LLMClient:
         if system:
             messages.insert(0, {"role": "system", "content": system})
 
-        if self.config.provider == "openai":
+        if self.config.uses_openai_api:
             return await self._acomplete_openai(
                 messages,
                 tools=tools,
@@ -361,8 +361,8 @@ class LLMClient:
         *,
         system: str | None = None,
     ) -> Iterator[StreamChunk]:
-        """Stream completion chunks (OpenAI only)."""
-        if self.config.provider != "openai":
+        """Stream completion chunks (OpenAI-compatible providers)."""
+        if not self.config.uses_openai_api:
             response = self.complete(prompt, system=system)
             yield StreamChunk(content=response.content, done=True)
             return
@@ -404,8 +404,8 @@ class LLMClient:
         *,
         system: str | None = None,
     ) -> AsyncIterator[StreamChunk]:
-        """Stream completion chunks asynchronously (OpenAI only)."""
-        if self.config.provider != "openai":
+        """Stream completion chunks asynchronously (OpenAI-compatible providers)."""
+        if not self.config.uses_openai_api:
             response = await self.acomplete(prompt, system=system)
             yield StreamChunk(content=response.content, done=True)
             return

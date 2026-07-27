@@ -182,3 +182,19 @@ Include:
 - Edge cases
 - Error handling tests
 - Use descriptive test names"""
+
+DOCSTRING_GEN = """Generate comprehensive docstrings for this code.
+
+Code:
+```python
+{code}
+```
+
+Style: {style}
+
+Requirements:
+- Use Google-style docstrings unless otherwise specified
+- Document all public functions, classes, and methods
+- Include Args, Returns, and Raises sections where applicable
+- Add module-level docstring if missing
+- Return the complete code with docstrings added"""

@@ -79,6 +79,30 @@ class CodeAssistant:
         """Generate unit tests for code."""
         return self._pipeline.generate_tests(code, framework=framework)
 
+    def generate_docstring(self, code: str, style: str = "google") -> str:
+        """Generate docstrings for code."""
+        return self._pipeline.generate_docstring(code, style=style)
+
+    def review_directory(
+        self,
+        path: str | Path,
+        *,
+        pattern: str = "*.py",
+        recursive: bool = True,
+    ) -> dict[str, str]:
+        """Review all matching files in a directory."""
+        root = Path(path)
+        if not root.is_dir():
+            raise ValueError(f"Not a directory: {path}")
+
+        glob_pattern = f"**/{pattern}" if recursive else pattern
+        results: dict[str, str] = {}
+        for file_path in sorted(root.glob(glob_pattern)):
+            if file_path.is_file():
+                rel = str(file_path.relative_to(root))
+                results[rel] = self.review(file_path.read_text(encoding="utf-8"))
+        return results
+
     def run_agent(self, task: str) -> str:
         """Run an autonomous coding agent on a task."""
         return self._pipeline.run_agent(task)

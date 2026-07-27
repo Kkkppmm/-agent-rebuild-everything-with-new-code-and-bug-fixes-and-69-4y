@@ -40,3 +40,13 @@ def test_cli_agent_mock():
         text=True,
     )
     assert result.returncode == 0
+
+
+def test_cli_docstring_mock():
+    result = subprocess.run(
+        [sys.executable, "-m", "devai.cli", "--mock", "docstring", "--code", "def foo(): pass"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+    assert len(result.stdout) > 0

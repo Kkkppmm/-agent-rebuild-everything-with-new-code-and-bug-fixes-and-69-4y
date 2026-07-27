@@ -2,7 +2,7 @@
 
 import pytest
 
-from devai.prompts import PromptTemplate, CODE_REVIEW, DEBUG, COMMIT_MESSAGE
+from devai.prompts import PromptTemplate, CODE_REVIEW, DEBUG, COMMIT_MESSAGE, DOCSTRING_GEN
 
 
 class TestPromptTemplate:
@@ -43,3 +43,9 @@ class TestDevPrompts:
         tmpl = PromptTemplate(COMMIT_MESSAGE)
         result = tmpl.format(diff="+ added feature")
         assert "added feature" in result
+
+    def test_docstring_gen(self):
+        tmpl = PromptTemplate(DOCSTRING_GEN)
+        result = tmpl.format(code="def foo(): pass", style="google")
+        assert "def foo(): pass" in result
+        assert "google" in result

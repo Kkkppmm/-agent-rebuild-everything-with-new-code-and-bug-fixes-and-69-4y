@@ -76,3 +76,27 @@ def test_from_config_mock() -> None:
 def test_from_env() -> None:
     a = CodeAssistant.from_env(provider="mock")
     assert a.explain("pass") == "Mock response"
+
+
+def test_generate_docstring(assistant: CodeAssistant) -> None:
+    result = assistant.generate_docstring("def add(a, b): return a + b")
+    assert isinstance(result, str)
+
+
+def test_review_directory(tmp_path: Path) -> None:
+    (tmp_path / "a.py").write_text("def a(): pass\n")
+    (tmp_path / "b.py").write_text("def b(): pass\n")
+    (tmp_path / "skip.txt").write_text("not code\n")
+
+    assistant = CodeAssistant.mock(responses=["Review ok."])
+    results = assistant.review_directory(tmp_path)
+    assert set(results.keys()) == {"a.py", "b.py"}
+    assert all(v == "Review ok." for v in results.values())
+
+
+def test_review_directory_not_dir(tmp_path: Path) -> None:
+    f = tmp_path / "file.py"
+    f.write_text("x = 1\n")
+    assistant = CodeAssistant.mock()
+    with pytest.raises(ValueError, match="Not a directory"):
+        assistant.review_directory(f)

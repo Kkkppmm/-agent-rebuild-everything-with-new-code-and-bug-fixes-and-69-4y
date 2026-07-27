@@ -15,6 +15,7 @@ from devai.prompts import (
     REFACTOR,
     SECURITY_REVIEW,
     TEST_GEN,
+    DOCSTRING_GEN,
 )
 
 
@@ -75,6 +76,12 @@ class DevPipeline:
         chain = SimpleChain(client=self.client, template=EXPLAIN_CODE)
         output = chain.run(language=self.language, code=code)
         self.results.append(PipelineResult(step="explain", output=output))
+        return output
+
+    def generate_docstring(self, code: str, style: str = "google") -> str:
+        chain = SimpleChain(client=self.client, template=DOCSTRING_GEN)
+        output = chain.run(code=code, style=style)
+        self.results.append(PipelineResult(step="docstring", output=output))
         return output
 
     def run_agent(self, task: str) -> str:

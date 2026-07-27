@@ -4,7 +4,7 @@ A Python AI library built for developers and programmers. DevAI provides LLM cli
 
 ## Features
 
-- **Provider-agnostic LLM client** — OpenAI, Anthropic, and a mock client for testing
+- **Provider-agnostic LLM client** — OpenAI, Anthropic, Ollama (local), and a mock client for testing
 - **Developer prompts** — Code review, debugging, commit messages, security review, refactoring, and more
 - **Tool registry** — Register and invoke tools in agent loops
 - **Agents** — `CoderAgent` with automatic tool-calling
@@ -118,9 +118,19 @@ Set environment variables or pass a `DevAIConfig`:
 | Variable | Description |
 |----------|-------------|
 | `DEVAI_API_KEY` | API key for the provider |
-| `DEVAI_PROVIDER` | `openai`, `anthropic`, or `mock` |
+| `DEVAI_PROVIDER` | `openai`, `anthropic`, `ollama`, or `mock` |
 | `DEVAI_MODEL` | Model name (e.g. `gpt-4o-mini`) |
 | `DEVAI_BASE_URL` | Custom API base URL |
+
+### Local models with Ollama
+
+```python
+from devai import LLMClient, DevAIConfig
+
+config = DevAIConfig(provider="ollama", model="llama3.2")
+client = LLMClient(config)
+print(client.complete("Explain Python generators").content)
+```
 
 ## Development
 

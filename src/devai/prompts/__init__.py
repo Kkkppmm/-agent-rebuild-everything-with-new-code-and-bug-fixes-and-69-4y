@@ -15,6 +15,7 @@ from devai.prompts.dev_prompts import (
     REFACTOR,
     EXPLAIN_CODE,
     TEST_GEN,
+    DOCSTRING_GEN,
 )
 
 __all__ = [
@@ -32,4 +33,5 @@ __all__ = [
     "REFACTOR",
     "EXPLAIN_CODE",
     "TEST_GEN",
+    "DOCSTRING_GEN",
 ]

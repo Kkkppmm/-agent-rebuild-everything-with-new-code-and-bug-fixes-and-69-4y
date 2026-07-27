@@ -29,6 +29,18 @@ class TestDevAIConfig:
         config = DevAIConfig(provider="mock")
         assert config.is_mock
 
+    def test_ollama_defaults(self):
+        config = DevAIConfig(provider="ollama")
+        assert config.is_ollama
+        assert config.uses_openai_api
+        assert config.base_url == "http://localhost:11434/v1"
+        assert config.api_key == "ollama"
+        assert config.model == "llama3.2"
+
+    def test_ollama_custom_model(self):
+        config = DevAIConfig(provider="ollama", model="codellama")
+        assert config.model == "codellama"
+
 
 class TestModels:
     def test_message(self):
@@ -100,6 +112,10 @@ class TestLLMClient:
     def test_rejects_mock_provider(self):
         with pytest.raises(ConfigurationError):
             LLMClient(DevAIConfig(provider="mock"))
+
+    def test_ollama_no_api_key_required(self):
+        client = LLMClient(DevAIConfig(provider="ollama"))
+        assert client.config.is_ollama
 
 
 class TestEmbeddingClient:
