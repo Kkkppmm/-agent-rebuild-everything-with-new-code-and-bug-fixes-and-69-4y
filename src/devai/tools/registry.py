@@ -178,6 +178,30 @@ def read_file(path: str, max_lines: int = 200) -> str:
         return f"Error reading file: {e}"
 
 
+def list_files(directory: str, pattern: str = "*", max_results: int = 100) -> str:
+    """List files in a directory matching a glob pattern."""
+    path = Path(directory)
+    if not path.exists():
+        return f"Directory not found: {directory}"
+    if not path.is_dir():
+        return f"Not a directory: {directory}"
+
+    results: list[str] = []
+    for file_path in sorted(path.rglob(pattern)):
+        if any(part.startswith(".") for part in file_path.parts):
+            continue
+        rel = file_path.relative_to(path)
+        suffix = "/" if file_path.is_dir() else ""
+        results.append(f"{rel}{suffix}")
+        if len(results) >= max_results:
+            break
+
+    if not results:
+        return f"No files matching '{pattern}' in {directory}"
+    header = f"Files in {directory} (pattern={pattern}):"
+    return header + "\n" + "\n".join(results)
+
+
 def count_complexity(code: str) -> str:
     """Estimate cyclomatic complexity of Python code."""
     try:

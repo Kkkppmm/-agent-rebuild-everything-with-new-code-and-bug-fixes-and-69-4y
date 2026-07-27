@@ -9,6 +9,7 @@ from devai.tools.registry import (
     git_diff,
     read_file,
     count_complexity,
+    list_files,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "git_diff",
     "read_file",
     "count_complexity",
+    "list_files",
 ]

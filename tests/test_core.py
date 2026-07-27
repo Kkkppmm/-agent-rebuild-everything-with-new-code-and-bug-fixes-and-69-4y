@@ -77,6 +77,20 @@ class TestMockLLMClient:
         assert len(client.calls) == 1
         assert client.calls[0]["system"] == "sys"
 
+    @pytest.mark.asyncio
+    async def test_acomplete(self):
+        client = MockLLMClient(responses=["Async hello"])
+        response = await client.acomplete("test")
+        assert response.content == "Async hello"
+
+    @pytest.mark.asyncio
+    async def test_astream(self):
+        client = MockLLMClient(responses=["Hi"])
+        chunks = [chunk async for chunk in client.astream("test")]
+        content = "".join(c.content for c in chunks)
+        assert content == "Hi"
+        assert chunks[-1].done
+
 
 class TestLLMClient:
     def test_requires_api_key(self):
@@ -105,3 +119,14 @@ class TestStreaming:
     def test_collect_stream(self):
         chunks = [StreamChunk("a"), StreamChunk("b"), StreamChunk("", done=True)]
         assert collect_stream(iter(chunks)) == "ab"
+
+    @pytest.mark.asyncio
+    async def test_collect_stream_async(self):
+        async def _chunks():
+            for chunk in [StreamChunk("a"), StreamChunk("b"), StreamChunk("", done=True)]:
+                yield chunk
+
+        from devai.core.streaming import collect_stream_async
+
+        result = await collect_stream_async(_chunks())
+        assert result == "ab"

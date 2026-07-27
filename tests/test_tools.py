@@ -12,6 +12,7 @@ from devai.tools import (
     search_code,
     read_file,
     count_complexity,
+    list_files,
 )
 from devai.core.exceptions import ToolExecutionError
 
@@ -107,3 +108,20 @@ class TestCountComplexity:
         code = "def branch(x):\n    if x > 0:\n        return 1\n    else:\n        return 0"
         result = count_complexity(code)
         assert "complexity=2" in result
+
+
+class TestListFiles:
+    def test_list_python_files(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with open(os.path.join(tmpdir, "main.py"), "w") as f:
+                f.write("print('hi')")
+            os.makedirs(os.path.join(tmpdir, "pkg"), exist_ok=True)
+            with open(os.path.join(tmpdir, "pkg", "util.py"), "w") as f:
+                f.write("x = 1")
+            result = list_files(tmpdir, "*.py")
+            assert "main.py" in result
+            assert "pkg/util.py" in result
+
+    def test_missing_directory(self):
+        result = list_files("/nonexistent/path")
+        assert "not found" in result.lower()

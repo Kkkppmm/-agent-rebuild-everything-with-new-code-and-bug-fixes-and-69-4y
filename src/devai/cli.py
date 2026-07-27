@@ -17,7 +17,7 @@ from devai.prompts import (
     TEST_GEN,
 )
 from devai.agents import CoderAgent
-from devai.tools import ToolRegistry, explain_code, lint_python, read_file, search_code, count_complexity
+from devai.tools import ToolRegistry, explain_code, lint_python, read_file, search_code, count_complexity, list_files
 
 
 def _get_client(use_mock: bool = False) -> LLMClient | MockLLMClient:
@@ -120,6 +120,7 @@ def cmd_agent(args: argparse.Namespace) -> None:
     registry.register(read_file)
     registry.register(search_code)
     registry.register(count_complexity)
+    registry.register(list_files)
     agent = CoderAgent(client=client, tools=registry)
     result = agent.run(args.task)
     print(result)

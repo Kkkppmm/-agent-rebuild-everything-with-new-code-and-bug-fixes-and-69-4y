@@ -11,6 +11,7 @@ A Python AI library built for developers and programmers. DevAI provides LLM cli
 - **Chains** — Sequential and structured output chains
 - **RAG** — Text chunking, vector store, and retrieval-augmented generation
 - **CLI** — `devai review`, `explain`, `debug`, `commit`, `agent`, and more
+- **Async API** — `acomplete` and `astream` for async workflows
 
 ## Installation
 
@@ -54,6 +55,24 @@ from devai.core.client import MockLLMClient
 
 client = MockLLMClient(responses=["This code looks fine."])
 print(client.complete("review this").content)
+```
+
+### Async usage
+
+```python
+import asyncio
+from devai.core.client import MockLLMClient
+from devai.core.streaming import collect_stream_async
+
+async def main():
+    client = MockLLMClient(responses=["Async review complete."])
+    response = await client.acomplete("review this code")
+    print(response.content)
+
+    text = await collect_stream_async(client.astream("explain this"))
+    print(text)
+
+asyncio.run(main())
 ```
 
 ### Agent with tools
