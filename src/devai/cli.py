@@ -117,6 +117,42 @@ def cmd_project(args: argparse.Namespace) -> None:
     print(assistant.review_project(args.directory, query=args.query))
 
 
+def cmd_generate(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    print(assistant.generate(args.spec, language=args.language))
+
+
+def cmd_performance(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.performance(code, context=args.context))
+
+
+def cmd_fix_lint(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    lint = _read_input(args.lint_output)
+    print(assistant.fix_lint(code, lint))
+
+
+def cmd_deps(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    deps = _read_input(args.dependencies)
+    print(assistant.audit_deps(deps, context=args.context))
+
+
+def cmd_diff(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    diff = args.diff or git_diff()
+    print(assistant.review_diff(diff))
+
+
+def cmd_architecture(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.architecture(code, context=args.context))
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     client = MockLLMClient() if args.mock else _get_assistant(args).client
     registry = ToolRegistry()
@@ -226,6 +262,35 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("directory", help="Project directory")
     p.add_argument("--query", help="Focus query for relevant files")
     p.set_defaults(func=cmd_project)
+
+    p = sub.add_parser("generate", help="Generate code from a specification")
+    p.add_argument("spec", help="Code specification")
+    p.add_argument("--language", default="python", help="Target language")
+    p.set_defaults(func=cmd_generate)
+
+    p = sub.add_parser("performance", help="Analyze code performance")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument("--context", default="", help="Additional context")
+    p.set_defaults(func=cmd_performance)
+
+    p = sub.add_parser("fix-lint", help="Fix linter issues")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument("lint_output", help="Linter output or file path")
+    p.set_defaults(func=cmd_fix_lint)
+
+    p = sub.add_parser("deps", help="Audit dependencies")
+    p.add_argument("dependencies", help="Dependencies list or file path")
+    p.add_argument("--context", default="", help="Project context")
+    p.set_defaults(func=cmd_deps)
+
+    p = sub.add_parser("diff", help="Review a git diff")
+    p.add_argument("--diff", help="Git diff (defaults to git diff)")
+    p.set_defaults(func=cmd_diff)
+
+    p = sub.add_parser("architecture", help="Describe codebase architecture")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument("--context", default="", help="Additional context")
+    p.set_defaults(func=cmd_architecture)
 
     p = sub.add_parser("agent", help="Run coding agent")
     p.add_argument("task", help="Task description")

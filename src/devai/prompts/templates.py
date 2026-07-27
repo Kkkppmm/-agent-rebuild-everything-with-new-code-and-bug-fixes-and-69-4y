@@ -146,3 +146,70 @@ TEST_GEN = PromptTemplate(
     template="Generate unit tests for this code using $framework:\n\n```\n$code\n```",
     input_variables=["code", "framework"],
 )
+
+CODE_GEN = PromptTemplate(
+    system="You write clean, production-ready code with proper error handling.",
+    template=(
+        "Generate $language code for this specification:\n\n$spec\n\n"
+        "Include comments only where logic is non-obvious."
+    ),
+    input_variables=["spec", "language"],
+)
+
+PERF_REVIEW = PromptTemplate(
+    system=(
+        "You are a performance engineering expert. "
+        "Identify bottlenecks and suggest optimizations."
+    ),
+    template=(
+        "Analyze this code for performance issues, bottlenecks, and optimization opportunities:\n\n"
+        "```\n$code\n```\n\nContext: $context"
+    ),
+    input_variables=["code", "context"],
+)
+
+FIX_LINT = PromptTemplate(
+    system="You fix linter and static analysis issues while preserving behavior.",
+    template=(
+        "Fix the linter issues in this code:\n\nLinter output:\n```\n$lint_output\n```\n\n"
+        "Code:\n```\n$code\n```"
+    ),
+    input_variables=["code", "lint_output"],
+)
+
+DEP_AUDIT = PromptTemplate(
+    system="You audit dependencies for security risks, outdated packages, and licensing issues.",
+    template=(
+        "Audit these project dependencies for security vulnerabilities, outdated versions, "
+        "and licensing concerns:\n\n```\n$dependencies\n```\n\nProject context: $context"
+    ),
+    input_variables=["dependencies", "context"],
+)
+
+REVIEW_DIFF = PromptTemplate(
+    system="You review code diffs for bugs, regressions, and style issues.",
+    template=(
+        "Review this git diff for bugs, regressions, security issues, and improvements:\n\n"
+        "```diff\n$diff\n```"
+    ),
+    input_variables=["diff"],
+)
+
+ARCHITECTURE = PromptTemplate(
+    system="You describe software architecture clearly, including Mermaid diagrams when helpful.",
+    template=(
+        "Describe the architecture of this codebase. Include a Mermaid diagram if appropriate:\n\n"
+        "```\n$code\n```\n\nContext: $context"
+    ),
+    input_variables=["code", "context"],
+)
+
+STRUCTURED_REVIEW = PromptTemplate(
+    system=(
+        "You are an expert code reviewer. Respond with valid JSON matching this schema: "
+        '{"summary": "string", "score": 1-10, "issues": [{"severity": "low|medium|high|critical", '
+        '"line": null or int, "message": "string", "suggestion": "string or null"}]}'
+    ),
+    template="Review this code and return structured JSON:\n\n```\n$code\n```",
+    input_variables=["code"],
+)

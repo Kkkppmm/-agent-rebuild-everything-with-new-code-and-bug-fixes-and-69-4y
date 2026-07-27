@@ -117,3 +117,49 @@ class TestCodeAssistant:
     async def test_areview(self, assistant):
         result = await assistant.areview(SAMPLE_CODE)
         assert result == "Analysis complete."
+
+    def test_generate(self, assistant):
+        result = assistant.generate("HTTP client with retries")
+        assert result == "Analysis complete."
+
+    def test_performance(self, assistant):
+        result = assistant.performance(SAMPLE_CODE, context="web API")
+        assert result == "Analysis complete."
+
+    def test_fix_lint(self, assistant):
+        result = assistant.fix_lint(SAMPLE_CODE, "E501 line too long")
+        assert result == "Analysis complete."
+
+    def test_audit_deps(self, assistant):
+        result = assistant.audit_deps("requests==2.28.0", context="web app")
+        assert result == "Analysis complete."
+
+    def test_review_diff(self, assistant):
+        result = assistant.review_diff("+ def new(): pass")
+        assert result == "Analysis complete."
+
+    def test_architecture(self, assistant):
+        result = assistant.architecture(SAMPLE_CODE, context="microservice")
+        assert result == "Analysis complete."
+
+    def test_structured_review(self):
+        json_response = (
+            '{"summary": "Good code", "score": 9, '
+            '"issues": [{"severity": "low", "message": "ok", "suggestion": null}]}'
+        )
+        client = MockLLMClient(default_response=json_response)
+        assistant = CodeAssistant(client=client)
+        result = assistant.structured_review(SAMPLE_CODE)
+        assert result.score == 9
+        assert result.summary == "Good code"
+
+    @pytest.mark.asyncio
+    async def test_astructured_review(self):
+        json_response = (
+            '{"summary": "Good code", "score": 9, '
+            '"issues": [{"severity": "low", "message": "ok", "suggestion": null}]}'
+        )
+        client = MockLLMClient(default_response=json_response)
+        assistant = CodeAssistant(client=client)
+        result = await assistant.astructured_review(SAMPLE_CODE)
+        assert result.score == 9

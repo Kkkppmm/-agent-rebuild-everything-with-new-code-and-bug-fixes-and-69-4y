@@ -5,7 +5,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 ## Features
 
 - **LLM Client** — OpenAI-compatible API with sync/async, streaming, JSON mode, retries, and caching
-- **Code Assistant** — High-level facade for review, explain, debug, refactor, security audit, tests, docstrings, API design, SQL optimization, type hints, regex, log analysis, and more
+- **Code Assistant** — High-level facade for review, explain, debug, refactor, security audit, tests, docstrings, API design, SQL optimization, type hints, regex, log analysis, code generation, performance review, lint fixes, dependency audits, diff review, and architecture analysis
+- **Structured Output** — Pydantic schemas for code reviews, security audits, and performance analysis
 - **CodeProject** — Scan, index, and build context from an entire codebase
 - **Observability** — Callback hooks for logging and tracing LLM calls
 - **Agents** — Tool-calling agents with a built-in coder agent
@@ -52,6 +53,14 @@ explanation = assistant.explain("async def fetch(): ...")
 
 # Debug an error
 fix = assistant.debug(code="...", error="NameError: name 'x' is not defined")
+
+# Generate code from a spec
+code = assistant.generate("REST endpoint that returns user profile by ID")
+
+# Structured review with Pydantic output
+from devai import CodeReviewResult
+result = assistant.structured_review("def foo(): pass")
+print(result.score, result.issues)
 ```
 
 ## Mock Client (No API Key Required)
@@ -135,6 +144,12 @@ devai sql "SELECT * FROM users" --context "users table has 1M rows"
 devai types path/to/module.py
 devai logs error.log
 devai project ./my-app --query "error handling"
+devai generate "async HTTP client with retries" --language python
+devai performance path/to/hot_path.py
+devai fix-lint path/to/module.py ruff_output.txt
+devai deps requirements.txt
+devai diff
+devai architecture path/to/main.py
 devai agent "Refactor the auth module"
 ```
 

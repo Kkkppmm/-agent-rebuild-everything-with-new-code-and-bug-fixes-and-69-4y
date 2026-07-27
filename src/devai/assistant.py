@@ -5,30 +5,38 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from devai.chains import SimpleChain
+from devai.chains import SimpleChain, StructuredChain
 from devai.core.client import LLMClient, LLMClientProtocol
 from devai.core.config import DevAIConfig
 from devai.core.models import Message
 from devai.prompts import (
     API_DESIGN,
+    ARCHITECTURE,
     CHANGELOG,
+    CODE_GEN,
     CODE_REVIEW,
     CODE_TRANSLATE,
     COMMIT_MESSAGE,
     DEBUG,
+    DEP_AUDIT,
     DOCSTRING_GEN,
     ERROR_HANDLER,
     EXPLAIN,
+    FIX_LINT,
     LOG_ANALYSIS,
+    PERF_REVIEW,
     PR_DESCRIPTION,
     README_GEN,
     REFACTOR,
     REGEX_BUILD,
+    REVIEW_DIFF,
     SECURITY_REVIEW,
     SQL_OPTIMIZE,
+    STRUCTURED_REVIEW,
     TEST_GEN,
     TYPE_HINTS,
 )
+from devai.schemas import CodeReviewResult
 
 
 class CodeAssistant:
@@ -124,6 +132,40 @@ class CodeAssistant:
     def analyze_logs(self, logs: str) -> str:
         """Analyze log output for errors and patterns."""
         return self._run_chain(LOG_ANALYSIS, logs=logs)
+
+    def generate(self, spec: str, language: str = "python") -> str:
+        """Generate code from a specification."""
+        return self._run_chain(CODE_GEN, spec=spec, language=language)
+
+    def performance(self, code: str, context: str = "") -> str:
+        """Analyze code for performance issues."""
+        return self._run_chain(PERF_REVIEW, code=code, context=context)
+
+    def fix_lint(self, code: str, lint_output: str) -> str:
+        """Fix linter issues in code."""
+        return self._run_chain(FIX_LINT, code=code, lint_output=lint_output)
+
+    def audit_deps(self, dependencies: str, context: str = "") -> str:
+        """Audit project dependencies for security and licensing."""
+        return self._run_chain(DEP_AUDIT, dependencies=dependencies, context=context)
+
+    def review_diff(self, diff: str) -> str:
+        """Review a git diff for bugs and regressions."""
+        return self._run_chain(REVIEW_DIFF, diff=diff)
+
+    def architecture(self, code: str, context: str = "") -> str:
+        """Describe codebase architecture with optional Mermaid diagram."""
+        return self._run_chain(ARCHITECTURE, code=code, context=context)
+
+    def structured_review(self, code: str) -> CodeReviewResult:
+        """Return a structured code review as a Pydantic model."""
+        chain = StructuredChain(self.client, STRUCTURED_REVIEW, CodeReviewResult)
+        return chain.run(code=code)
+
+    async def astructured_review(self, code: str) -> CodeReviewResult:
+        """Async structured code review."""
+        chain = StructuredChain(self.client, STRUCTURED_REVIEW, CodeReviewResult)
+        return await chain.arun(code=code)
 
     def review_project(self, directory: str, query: str | None = None) -> str:
         """Review a project directory with optional focus query."""
