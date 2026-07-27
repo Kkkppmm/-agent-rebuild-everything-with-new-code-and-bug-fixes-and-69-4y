@@ -117,6 +117,37 @@ def cmd_project(args: argparse.Namespace) -> None:
     print(assistant.review_project(args.directory, query=args.query))
 
 
+def cmd_diff(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    diff = args.diff or git_diff()
+    print(assistant.review_diff(diff))
+
+
+def cmd_performance(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.performance(code, context=args.context))
+
+
+def cmd_dockerfile(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    content = _read_input(args.dockerfile)
+    print(assistant.dockerfile(content))
+
+
+def cmd_migrate(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(
+        assistant.migration_plan(
+            code,
+            source=args.source,
+            target=args.target,
+            constraints=args.constraints,
+        )
+    )
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     client = MockLLMClient() if args.mock else _get_assistant(args).client
     registry = ToolRegistry()
@@ -226,6 +257,26 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("directory", help="Project directory")
     p.add_argument("--query", help="Focus query for relevant files")
     p.set_defaults(func=cmd_project)
+
+    p = sub.add_parser("diff", help="Review a git diff")
+    p.add_argument("--diff", help="Diff text or file path (defaults to git diff)")
+    p.set_defaults(func=cmd_diff)
+
+    p = sub.add_parser("performance", help="Analyze code performance")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument("--context", default="", help="Runtime or workload context")
+    p.set_defaults(func=cmd_performance)
+
+    p = sub.add_parser("dockerfile", help="Review a Dockerfile")
+    p.add_argument("dockerfile", help="Dockerfile or file path")
+    p.set_defaults(func=cmd_dockerfile)
+
+    p = sub.add_parser("migrate", help="Generate a migration plan")
+    p.add_argument("code", help="Current code or file path")
+    p.add_argument("--source", required=True, help="Source technology or version")
+    p.add_argument("--target", required=True, help="Target technology or version")
+    p.add_argument("--constraints", default="", help="Migration constraints")
+    p.set_defaults(func=cmd_migrate)
 
     p = sub.add_parser("agent", help="Run coding agent")
     p.add_argument("task", help="Task description")

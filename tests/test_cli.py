@@ -47,3 +47,27 @@ class TestCLI:
         parser = build_parser()
         args = parser.parse_args(["--mock", "agent", "find bugs"])
         assert args.task == "find bugs"
+
+    def test_diff_args(self):
+        parser = build_parser()
+        args = parser.parse_args(["--mock", "diff"])
+        assert args.command == "diff"
+
+    def test_performance_args(self):
+        parser = build_parser()
+        args = parser.parse_args(["--mock", "performance", "def slow(): pass"])
+        assert args.command == "performance"
+
+    def test_migrate_args(self):
+        parser = build_parser()
+        args = parser.parse_args([
+            "--mock",
+            "migrate",
+            "code",
+            "--source",
+            "v1",
+            "--target",
+            "v2",
+        ])
+        assert args.source == "v1"
+        assert args.target == "v2"

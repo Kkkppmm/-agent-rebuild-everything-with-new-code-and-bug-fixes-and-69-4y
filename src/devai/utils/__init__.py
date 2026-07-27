@@ -4,6 +4,18 @@ from __future__ import annotations
 
 import re
 
+from devai.utils.diff import get_git_diff, parse_changed_files, read_diff, summarize_diff
+
+__all__ = [
+    "estimate_tokens",
+    "extract_code_blocks",
+    "get_git_diff",
+    "parse_changed_files",
+    "read_diff",
+    "summarize_diff",
+    "truncate_to_tokens",
+]
+
 
 def estimate_tokens(text: str) -> int:
     """Rough token estimate (1 token ≈ 4 characters for English)."""

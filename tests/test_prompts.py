@@ -2,7 +2,7 @@
 
 import pytest
 
-from devai.prompts import CODE_REVIEW, DEBUG, EXPLAIN, PromptTemplate
+from devai.prompts import CODE_REVIEW, DEBUG, DIFF_REVIEW, EXPLAIN, PromptTemplate
 
 
 class TestPromptTemplate:
@@ -31,3 +31,7 @@ class TestPromptTemplate:
         result = DEBUG.format(code="x", error="NameError")
         assert "NameError" in result
         assert "x" in result
+
+    def test_diff_review_template(self):
+        result = DIFF_REVIEW.format(diff="+added line")
+        assert "added line" in result

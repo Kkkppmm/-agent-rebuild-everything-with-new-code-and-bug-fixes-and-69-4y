@@ -16,10 +16,14 @@ from devai.prompts import (
     CODE_TRANSLATE,
     COMMIT_MESSAGE,
     DEBUG,
+    DIFF_REVIEW,
+    DOCKERFILE_REVIEW,
     DOCSTRING_GEN,
     ERROR_HANDLER,
     EXPLAIN,
     LOG_ANALYSIS,
+    MIGRATION_PLAN,
+    PERFORMANCE_REVIEW,
     PR_DESCRIPTION,
     README_GEN,
     REFACTOR,
@@ -124,6 +128,51 @@ class CodeAssistant:
     def analyze_logs(self, logs: str) -> str:
         """Analyze log output for errors and patterns."""
         return self._run_chain(LOG_ANALYSIS, logs=logs)
+
+    def review_diff(self, diff: str) -> str:
+        """Review a git diff for regressions and risky changes."""
+        return self._run_chain(DIFF_REVIEW, diff=diff)
+
+    def performance(self, code: str, context: str = "") -> str:
+        """Analyze code for performance issues."""
+        return self._run_chain(PERFORMANCE_REVIEW, code=code, context=context)
+
+    def dockerfile(self, dockerfile: str) -> str:
+        """Review a Dockerfile for security and best practices."""
+        return self._run_chain(DOCKERFILE_REVIEW, dockerfile=dockerfile)
+
+    def migration_plan(
+        self,
+        code: str,
+        source: str,
+        target: str,
+        constraints: str = "",
+    ) -> str:
+        """Generate a migration plan between technologies or versions."""
+        return self._run_chain(
+            MIGRATION_PLAN,
+            code=code,
+            source=source,
+            target=target,
+            constraints=constraints,
+        )
+
+    def batch_review(self, code_files: dict[str, str]) -> dict[str, str]:
+        """Review multiple files in parallel. Keys are paths, values are code."""
+        from devai.core.batch import BatchRunner
+        from devai.core.models import Message
+
+        paths = list(code_files.keys())
+        runner = BatchRunner(self.client)
+
+        def to_messages(path: str) -> list[Message]:
+            return [
+                Message.system(CODE_REVIEW.system),
+                Message.user(CODE_REVIEW.format(code=code_files[path])),
+            ]
+
+        results = runner.map(paths, to_messages)
+        return dict(zip(paths, results))
 
     def review_project(self, directory: str, query: str | None = None) -> str:
         """Review a project directory with optional focus query."""

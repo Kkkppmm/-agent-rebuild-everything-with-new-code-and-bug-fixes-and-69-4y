@@ -5,7 +5,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 ## Features
 
 - **LLM Client** — OpenAI-compatible API with sync/async, streaming, JSON mode, retries, and caching
-- **Code Assistant** — High-level facade for review, explain, debug, refactor, security audit, tests, docstrings, API design, SQL optimization, type hints, regex, log analysis, and more
+- **Code Assistant** — High-level facade for review, explain, debug, refactor, security audit, tests, docstrings, API design, SQL optimization, type hints, regex, log analysis, diff review, performance analysis, Dockerfile review, and migration planning
 - **CodeProject** — Scan, index, and build context from an entire codebase
 - **Observability** — Callback hooks for logging and tracing LLM calls
 - **Agents** — Tool-calling agents with a built-in coder agent
@@ -30,7 +30,7 @@ pip install -e ".[dev]"
 ## Quick Start
 
 ```python
-from devai import CodeAssistant, DevAIConfig
+from devai import CodeAssistant, CodeProject, CoderAgent, DevAIConfig, MockLLMClient
 
 # Use with any OpenAI-compatible API
 config = DevAIConfig(
@@ -52,13 +52,18 @@ explanation = assistant.explain("async def fetch(): ...")
 
 # Debug an error
 fix = assistant.debug(code="...", error="NameError: name 'x' is not defined")
+
+# Review a git diff
+review = assistant.review_diff("diff --git a/app.py ...")
+
+# Batch review multiple files
+results = assistant.batch_review({"a.py": "...", "b.py": "..."})
 ```
 
 ## Mock Client (No API Key Required)
 
 ```python
-from devai.core import MockLLMClient
-from devai import CodeAssistant
+from devai import CodeAssistant, MockLLMClient
 
 client = MockLLMClient(default_response="This code looks good.")
 assistant = CodeAssistant(client=client)
@@ -68,8 +73,7 @@ print(assistant.review("def foo(): pass"))
 ## Agents
 
 ```python
-from devai.agents import CoderAgent
-from devai.core import MockLLMClient
+from devai import CoderAgent, MockLLMClient
 from devai.tools import ToolRegistry, read_file, search_code
 
 registry = ToolRegistry()
@@ -135,6 +139,10 @@ devai sql "SELECT * FROM users" --context "users table has 1M rows"
 devai types path/to/module.py
 devai logs error.log
 devai project ./my-app --query "error handling"
+devai diff --diff "$(git diff)"
+devai performance path/to/hot_path.py --context "10k RPS"
+devai dockerfile Dockerfile
+devai migrate path/to/app.py --source "Django 3" --target "Django 5"
 devai agent "Refactor the auth module"
 ```
 

@@ -146,3 +146,45 @@ TEST_GEN = PromptTemplate(
     template="Generate unit tests for this code using $framework:\n\n```\n$code\n```",
     input_variables=["code", "framework"],
 )
+
+DIFF_REVIEW = PromptTemplate(
+    system=(
+        "You are an expert code reviewer focused on pull request diffs. "
+        "Highlight regressions, missing tests, and risky changes."
+    ),
+    template=(
+        "Review this git diff and provide actionable feedback on the changes:\n\n"
+        "```diff\n$diff\n```\n\n"
+        "Focus on: correctness, edge cases, test coverage, and breaking changes."
+    ),
+    input_variables=["diff"],
+)
+
+PERFORMANCE_REVIEW = PromptTemplate(
+    system="You are a performance engineering expert.",
+    template=(
+        "Analyze this code for performance issues and suggest optimizations:\n\n"
+        "```\n$code\n```\n\n"
+        "Context: $context"
+    ),
+    input_variables=["code", "context"],
+)
+
+DOCKERFILE_REVIEW = PromptTemplate(
+    system="You are a container and DevOps expert.",
+    template=(
+        "Review this Dockerfile for security, size, and best practices:\n\n"
+        "```dockerfile\n$dockerfile\n```"
+    ),
+    input_variables=["dockerfile"],
+)
+
+MIGRATION_PLAN = PromptTemplate(
+    system="You plan safe, incremental software migrations.",
+    template=(
+        "Create a migration plan from $source to $target:\n\n"
+        "Current code or setup:\n```\n$code\n```\n\n"
+        "Constraints: $constraints"
+    ),
+    input_variables=["source", "target", "code", "constraints"],
+)

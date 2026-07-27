@@ -117,3 +117,29 @@ class TestCodeAssistant:
     async def test_areview(self, assistant):
         result = await assistant.areview(SAMPLE_CODE)
         assert result == "Analysis complete."
+
+    def test_review_diff(self, assistant):
+        result = assistant.review_diff("diff --git a/foo.py")
+        assert result == "Analysis complete."
+
+    def test_performance(self, assistant):
+        result = assistant.performance(SAMPLE_CODE, context="high traffic API")
+        assert result == "Analysis complete."
+
+    def test_dockerfile(self, assistant):
+        result = assistant.dockerfile("FROM python:3.12")
+        assert result == "Analysis complete."
+
+    def test_migration_plan(self, assistant):
+        result = assistant.migration_plan(
+            SAMPLE_CODE,
+            source="Python 2",
+            target="Python 3",
+            constraints="no downtime",
+        )
+        assert result == "Analysis complete."
+
+    def test_batch_review(self, assistant):
+        results = assistant.batch_review({"a.py": "x=1", "b.py": "y=2"})
+        assert results["a.py"] == "Analysis complete."
+        assert results["b.py"] == "Analysis complete."
