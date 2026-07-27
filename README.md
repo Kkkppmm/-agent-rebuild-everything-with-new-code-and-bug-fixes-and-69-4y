@@ -10,8 +10,10 @@ A Python AI library built for developers and programmers. DevAI provides LLM cli
 - **Agents** — `CoderAgent` with automatic tool-calling
 - **Chains** — Sequential and structured output chains
 - **RAG** — Text chunking, vector store, and retrieval-augmented generation
-- **CLI** — `devai review`, `explain`, `debug`, `commit`, `agent`, and more
+- **CLI** — `devai review`, `explain`, `debug`, `commit`, `pr`, `changelog`, `agent`, and more
 - **Async API** — `acomplete` and `astream` for async workflows
+- **Batch processing** — `BatchRunner` for concurrent LLM requests
+- **Response caching** — `CachedLLMClient` to avoid duplicate API calls
 
 ## Installation
 
@@ -100,12 +102,35 @@ pipeline.review("def foo(): pass")
 print(pipeline.summary())
 ```
 
+### Batch processing
+
+```python
+from devai import BatchRunner, MockLLMClient
+
+client = MockLLMClient(responses=["Review 1", "Review 2"])
+runner = BatchRunner(client)
+results = runner.run_prompts(["review file a", "review file b"])
+```
+
+### Response caching
+
+```python
+from devai import CachedLLMClient, MockLLMClient
+
+client = CachedLLMClient(MockLLMClient(responses=["Cached response"]))
+print(client.complete("same prompt").content)
+print(client.complete("same prompt").content)  # served from cache
+print(client.stats)
+```
+
 ### CLI
 
 ```bash
 devai review --file mycode.py
 devai explain --code "def add(a, b): return a + b"
 devai commit --diff "$(git diff)"
+devai pr --staged
+devai changelog --changes "$(git log --oneline -5)"
 devai agent --task "Find bugs in src/"
 ```
 

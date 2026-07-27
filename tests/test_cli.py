@@ -50,3 +50,21 @@ def test_cli_docstring_mock():
     )
     assert result.returncode == 0
     assert len(result.stdout) > 0
+
+
+def test_cli_pr_mock():
+    result = subprocess.run(
+        [sys.executable, "-m", "devai.cli", "--mock", "pr", "--diff", "diff --git a/foo"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0
+
+
+def test_cli_changelog_mock():
+    result = subprocess.run(
+        [sys.executable, "-m", "devai.cli", "--mock", "changelog", "--changes", "feat: add cache"],
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0

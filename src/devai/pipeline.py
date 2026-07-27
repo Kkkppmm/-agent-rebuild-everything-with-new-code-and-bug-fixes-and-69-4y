@@ -16,6 +16,10 @@ from devai.prompts import (
     SECURITY_REVIEW,
     TEST_GEN,
     DOCSTRING_GEN,
+    PR_DESCRIPTION,
+    CHANGELOG,
+    CODE_TRANSLATE,
+    ERROR_HANDLER,
 )
 
 
@@ -82,6 +86,40 @@ class DevPipeline:
         chain = SimpleChain(client=self.client, template=DOCSTRING_GEN)
         output = chain.run(code=code, style=style)
         self.results.append(PipelineResult(step="docstring", output=output))
+        return output
+
+    def pr_description(self, diff: str, context: str = "") -> str:
+        chain = SimpleChain(client=self.client, template=PR_DESCRIPTION)
+        output = chain.run(diff=diff, context=context)
+        self.results.append(PipelineResult(step="pr", output=output))
+        return output
+
+    def changelog(self, changes: str, version: str = "Unreleased") -> str:
+        chain = SimpleChain(client=self.client, template=CHANGELOG)
+        output = chain.run(changes=changes, version=version)
+        self.results.append(PipelineResult(step="changelog", output=output))
+        return output
+
+    def translate_code(
+        self,
+        code: str,
+        *,
+        source_language: str = "python",
+        target_language: str = "typescript",
+    ) -> str:
+        chain = SimpleChain(client=self.client, template=CODE_TRANSLATE)
+        output = chain.run(
+            code=code,
+            source_language=source_language,
+            target_language=target_language,
+        )
+        self.results.append(PipelineResult(step="translate", output=output))
+        return output
+
+    def add_error_handling(self, code: str) -> str:
+        chain = SimpleChain(client=self.client, template=ERROR_HANDLER)
+        output = chain.run(code=code, language=self.language)
+        self.results.append(PipelineResult(step="error_handler", output=output))
         return output
 
     def run_agent(self, task: str) -> str:

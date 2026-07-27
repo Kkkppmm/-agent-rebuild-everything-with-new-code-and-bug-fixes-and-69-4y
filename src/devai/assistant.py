@@ -83,6 +83,32 @@ class CodeAssistant:
         """Generate docstrings for code."""
         return self._pipeline.generate_docstring(code, style=style)
 
+    def pr_description(self, diff: str, context: str = "") -> str:
+        """Generate a pull request description from a diff."""
+        return self._pipeline.pr_description(diff, context=context)
+
+    def changelog(self, changes: str, version: str = "Unreleased") -> str:
+        """Generate a changelog entry from commits or diffs."""
+        return self._pipeline.changelog(changes, version=version)
+
+    def translate_code(
+        self,
+        code: str,
+        *,
+        source_language: str = "python",
+        target_language: str = "typescript",
+    ) -> str:
+        """Translate code between programming languages."""
+        return self._pipeline.translate_code(
+            code,
+            source_language=source_language,
+            target_language=target_language,
+        )
+
+    def add_error_handling(self, code: str) -> str:
+        """Add robust error handling to code."""
+        return self._pipeline.add_error_handling(code)
+
     def review_directory(
         self,
         path: str | Path,

@@ -183,6 +183,70 @@ Include:
 - Error handling tests
 - Use descriptive test names"""
 
+PR_DESCRIPTION = """Write a pull request description for these changes.
+
+Diff:
+```
+{diff}
+```
+
+Context: {context}
+
+Include:
+1. Summary of what changed and why
+2. Type of change (feature, fix, refactor, docs, etc.)
+3. Testing done
+4. Breaking changes (if any)
+5. Checklist for reviewers
+
+Use markdown formatting suitable for GitHub."""
+
+CHANGELOG = """Generate a changelog entry from these commits or diffs.
+
+Changes:
+```
+{changes}
+```
+
+Version: {version}
+
+Format as Keep a Changelog style:
+- Added
+- Changed
+- Fixed
+- Removed
+- Security
+
+Be concise and user-facing."""
+
+CODE_TRANSLATE = """Translate this code from {source_language} to {target_language}.
+
+Source code:
+```{source_language}
+{code}
+```
+
+Requirements:
+- Preserve logic and behavior
+- Use idiomatic {target_language} patterns
+- Add brief comments only where the translation is non-obvious
+- Return only the translated code"""
+
+ERROR_HANDLER = """Design robust error handling for this code.
+
+Code:
+```
+{code}
+```
+
+Language: {language}
+
+Provide:
+1. Error types to define or catch
+2. Improved code with proper error handling
+3. Logging recommendations
+4. User-facing error messages (if applicable)"""
+
 DOCSTRING_GEN = """Generate comprehensive docstrings for this code.
 
 Code:

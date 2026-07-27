@@ -100,3 +100,23 @@ def test_review_directory_not_dir(tmp_path: Path) -> None:
     assistant = CodeAssistant.mock()
     with pytest.raises(ValueError, match="Not a directory"):
         assistant.review_directory(f)
+
+
+def test_pr_description(assistant: CodeAssistant) -> None:
+    result = assistant.pr_description("diff content", context="bug fix")
+    assert isinstance(result, str)
+
+
+def test_changelog(assistant: CodeAssistant) -> None:
+    result = assistant.changelog("feat: add caching", version="1.0.0")
+    assert isinstance(result, str)
+
+
+def test_translate_code(assistant: CodeAssistant) -> None:
+    result = assistant.translate_code("def foo(): pass", target_language="javascript")
+    assert isinstance(result, str)
+
+
+def test_add_error_handling(assistant: CodeAssistant) -> None:
+    result = assistant.add_error_handling("def risky(): return 1/0")
+    assert isinstance(result, str)

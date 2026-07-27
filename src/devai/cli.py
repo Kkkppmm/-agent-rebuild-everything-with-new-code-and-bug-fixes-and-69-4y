@@ -16,6 +16,8 @@ from devai.prompts import (
     EXPLAIN_CODE,
     TEST_GEN,
     DOCSTRING_GEN,
+    PR_DESCRIPTION,
+    CHANGELOG,
 )
 from devai.agents import CoderAgent
 from devai.tools import ToolRegistry, explain_code, lint_python, read_file, search_code, count_complexity, list_files
@@ -124,6 +126,28 @@ def cmd_docstring(args: argparse.Namespace) -> None:
     print(response.content)
 
 
+def cmd_pr(args: argparse.Namespace) -> None:
+    client = _get_client(args.mock)
+    diff = args.diff or ""
+    if args.staged:
+        from devai.tools import git_diff
+        diff = git_diff(staged=True)
+    prompt = PromptTemplate(PR_DESCRIPTION).format(diff=diff, context=args.context)
+    response = client.complete(prompt)
+    print(response.content)
+
+
+def cmd_changelog(args: argparse.Namespace) -> None:
+    client = _get_client(args.mock)
+    changes = args.changes or ""
+    if args.staged:
+        from devai.tools import git_diff
+        changes = git_diff(staged=True)
+    prompt = PromptTemplate(CHANGELOG).format(changes=changes, version=args.version)
+    response = client.complete(prompt)
+    print(response.content)
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     client = _get_client(args.mock)
     registry = ToolRegistry()
@@ -199,6 +223,20 @@ def main() -> None:
     p_docstring.add_argument("--code", "-c", help="Code string")
     p_docstring.add_argument("--style", "-s", default="google", help="Docstring style")
     p_docstring.set_defaults(func=cmd_docstring)
+
+    # pr
+    p_pr = subparsers.add_parser("pr", help="Generate PR description")
+    p_pr.add_argument("--diff", "-d", help="Diff text")
+    p_pr.add_argument("--staged", action="store_true", help="Use staged git diff")
+    p_pr.add_argument("--context", "-x", default="", help="Additional context")
+    p_pr.set_defaults(func=cmd_pr)
+
+    # changelog
+    p_changelog = subparsers.add_parser("changelog", help="Generate changelog entry")
+    p_changelog.add_argument("--changes", "-c", help="Commits or diff text")
+    p_changelog.add_argument("--staged", action="store_true", help="Use staged git diff")
+    p_changelog.add_argument("--version", "-v", default="Unreleased", help="Version number")
+    p_changelog.set_defaults(func=cmd_changelog)
 
     # agent
     p_agent = subparsers.add_parser("agent", help="Run coding agent")

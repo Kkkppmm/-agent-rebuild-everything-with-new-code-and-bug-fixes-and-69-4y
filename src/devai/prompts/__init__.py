@@ -16,6 +16,10 @@ from devai.prompts.dev_prompts import (
     EXPLAIN_CODE,
     TEST_GEN,
     DOCSTRING_GEN,
+    PR_DESCRIPTION,
+    CHANGELOG,
+    CODE_TRANSLATE,
+    ERROR_HANDLER,
 )
 
 __all__ = [
@@ -34,4 +38,8 @@ __all__ = [
     "EXPLAIN_CODE",
     "TEST_GEN",
     "DOCSTRING_GEN",
+    "PR_DESCRIPTION",
+    "CHANGELOG",
+    "CODE_TRANSLATE",
+    "ERROR_HANDLER",
 ]
