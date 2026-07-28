@@ -21,10 +21,13 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
 - **CI Integration** — GitHub Actions annotations, PR comments, and CI gate helpers
 - **Cost Estimation** — Token counting and per-model cost estimates
-- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update, docs-gen)
+- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update, docs-gen, test-gen)
 - **DevRuntime** — One-line bootstrap for programs, presets, and quick dev workflows
 - **Local LLM Support** — Ollama and any OpenAI-compatible endpoint via config presets
 - **Program Validation** — Validate JSON/YAML program files before execution
+- **DevApp** — Build and ship AI-powered CLI tools from programs
+- **Program Dry-Run** — Preview execution steps without calling the LLM
+- **Program Schema** — JSON Schema for IDE validation of program files
 
 ## Installation
 
@@ -106,6 +109,25 @@ print(runtime.summarize(results))
 
 # Local Ollama (requires running Ollama server)
 # runtime = DevRuntime.create(provider="ollama", model="llama3.2")
+```
+
+## DevApp (Ship Your Own Tool)
+
+```python
+from devai import DevApp
+
+# Build a code auditor app in a few lines
+app = (
+    DevApp.create(name="code-auditor", use_mock=True)
+    .use_preset("pre-commit")
+    .with_context(code=open("app.py").read())
+)
+
+results = app.run()
+print(app.summarize(results))
+
+# Or expose as a CLI
+# app.cli(["--dry-run", "--code", "app.py"])
 ```
 
 ## Agents
@@ -315,6 +337,9 @@ devai deps requirements.txt --context "production web app"
 devai architecture path/to/main.py --context "microservice"
 devai agent "Refactor the auth module"
 devai run audit.json --code path/to/app.py
+devai validate audit.json
+devai dry-run audit.json --code path/to/app.py
+devai schema
 devai presets
 devai kit audit path/to/app.py
 devai kit pre-commit path/to/app.py

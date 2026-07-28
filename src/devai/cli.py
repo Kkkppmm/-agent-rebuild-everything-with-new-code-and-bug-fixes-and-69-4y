@@ -12,6 +12,7 @@ from devai.core import MockLLMClient
 from devai.kit import DevKit
 from devai.presets import list_presets
 from devai.program import DevProgram
+from devai.program_schema import program_schema
 from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
 
 
@@ -217,6 +218,45 @@ def cmd_agent(args: argparse.Namespace) -> None:
     registry.register(git_diff)
     agent = CoderAgent(client=client, tools=registry)
     print(agent.run(args.task))
+
+
+def cmd_validate(args: argparse.Namespace) -> None:
+    assistant = CodeAssistant(client=MockLLMClient())
+    program = DevProgram.from_file(args.program, assistant)
+    errors = program.validate()
+    if errors:
+        for error in errors:
+            print(f"error: {error}", file=sys.stderr)
+        sys.exit(1)
+    print(f"OK: {program.name} ({len(program.tasks)} tasks)")
+
+
+def cmd_dry_run(args: argparse.Namespace) -> None:
+    assistant = CodeAssistant(client=MockLLMClient())
+    program = DevProgram.from_file(args.program, assistant)
+    context: dict[str, str] = {}
+    if args.code:
+        context["code"] = _read_input(args.code)
+    if args.diff:
+        context["diff"] = _read_input(args.diff)
+    if args.context:
+        for pair in args.context:
+            key, _, value = pair.partition("=")
+            context[key] = value
+    for step in program.dry_run(context):
+        preview = step.input_preview[:60]
+        if len(step.input_preview) > 60:
+            preview += "..."
+        print(f"{step.index}. {step.name} ({step.action})")
+        print(f"   input[{step.input_key}]: {preview!r}")
+        if step.kwargs:
+            print(f"   kwargs: {step.kwargs}")
+
+
+def cmd_schema(args: argparse.Namespace) -> None:
+    import json
+
+    print(json.dumps(program_schema(), indent=2))
 
 
 def cmd_run(args: argparse.Namespace) -> None:
@@ -473,6 +513,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Additional context values",
     )
     p.set_defaults(func=cmd_run)
+
+    p = sub.add_parser("validate", help="Validate a program file without running it")
+    p.add_argument("program", help="Program JSON or YAML file")
+    p.set_defaults(func=cmd_validate)
+
+    p = sub.add_parser("dry-run", help="Preview program steps without calling the LLM")
+    p.add_argument("program", help="Program JSON or YAML file")
+    p.add_argument("--code", help="Code input or file path")
+    p.add_argument("--diff", help="Diff input or file path")
+    p.add_argument(
+        "--context",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Additional context values",
+    )
+    p.set_defaults(func=cmd_dry_run)
+
+    p = sub.add_parser("schema", help="Print the JSON Schema for program files")
+    p.set_defaults(func=cmd_schema)
 
     p = sub.add_parser("presets", help="List built-in program presets")
     p.set_defaults(func=cmd_presets)

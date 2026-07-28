@@ -39,3 +39,11 @@ class TestPresets:
         results = program.run({"code": "def foo(): pass"})
         assert len(results) == 3
         assert results[0].action == "explain"
+
+    def test_test_gen_preset(self):
+        assistant = CodeAssistant(client=MockLLMClient(default_response="ok"))
+        program = get_preset("test-gen", assistant)
+        assert program.name == "test-gen"
+        assert len(program.tasks) == 3
+        results = program.run({"code": "def add(a, b): return a + b"})
+        assert results[-1].action == "tests"

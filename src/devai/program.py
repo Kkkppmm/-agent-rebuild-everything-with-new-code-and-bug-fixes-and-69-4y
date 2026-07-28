@@ -51,6 +51,18 @@ class ProgramResult:
 
 
 @dataclass
+class ProgramStepPlan:
+    """Preview of a single program step (dry-run output)."""
+
+    index: int
+    name: str
+    action: str
+    input_key: str
+    input_preview: str
+    kwargs: dict[str, Any]
+
+
+@dataclass
 class DevProgram:
     """Scriptable multi-step AI workflow for developers and programs."""
 
@@ -229,6 +241,26 @@ class DevProgram:
             "review": self.assistant.areview,
         }
         return async_handlers.get(action)
+
+    def dry_run(self, context: dict[str, str]) -> list[ProgramStepPlan]:
+        """Preview program execution without calling the LLM."""
+        plan: list[ProgramStepPlan] = []
+        preview_context = dict(context)
+        for index, task in enumerate(self.tasks, start=1):
+            primary = preview_context.get(task.input_key, "")
+            kwargs = self._resolve_kwargs(task.kwargs, preview_context)
+            plan.append(
+                ProgramStepPlan(
+                    index=index,
+                    name=task.name,
+                    action=task.action,
+                    input_key=task.input_key,
+                    input_preview=primary,
+                    kwargs=kwargs,
+                )
+            )
+            preview_context[task.name] = f"<{task.action} output>"
+        return plan
 
     def run(self, context: dict[str, str]) -> list[ProgramResult]:
         """Execute all tasks and return ordered results."""
