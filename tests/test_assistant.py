@@ -156,6 +156,29 @@ class TestCodeAssistant:
         result = assistant.audit_deps("requests==2.28.0\nflask==2.0.0")
         assert result == "Analysis complete."
 
+    def test_dependency_upgrade(self, assistant):
+        result = assistant.dependency_upgrade("requests==2.28.0", constraints="no major bumps")
+        assert result == "Analysis complete."
+
+    def test_incident_triage(self, assistant):
+        result = assistant.incident_triage("500 errors", logs="timeout in logs")
+        assert result == "Analysis complete."
+
+    def test_summarize_changes(self, assistant):
+        result = assistant.summarize_changes("diff content", audience="reviewers")
+        assert result == "Analysis complete."
+
+    def test_generate_and_verify_success(self):
+        code_response = "def add(a, b):\n    return a + b"
+        client = MockLLMClient(default_response=code_response)
+        assistant = CodeAssistant(client=client)
+        result = assistant.generate_and_verify(
+            "add function",
+            "assert add(1, 2) == 3",
+        )
+        assert result["success"]
+        assert "add" in result["code"]
+
     def test_architecture(self, assistant):
         result = assistant.architecture(SAMPLE_CODE, context="microservice")
         assert result == "Analysis complete."

@@ -3,12 +3,14 @@
 from devai.agents import Agent, CoderAgent
 from devai.ci import CIReporter
 from devai.assistant import CodeAssistant
-from devai.core import BatchRunner, DevAIConfig, LLMClient, MockLLMClient
+from devai.core import BatchRunner, DevAIConfig, EmbeddingClient, LLMClient, MockEmbeddingClient, MockLLMClient
 from devai.kit import DevKit
 from devai.pipeline import DevPipeline
+from devai.plugins import PluginRegistry
 from devai.presets import get_preset, list_presets
 from devai.program import DevProgram, ProgramResult, ProgramTask
 from devai.project import CodeProject
+from devai.sandbox import CodeSandbox, SandboxResult
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -18,7 +20,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __all__ = [
     "Agent",
     "BatchRunner",
@@ -27,17 +29,22 @@ __all__ = [
     "CodeIssue",
     "CodeProject",
     "CodeReviewResult",
+    "CodeSandbox",
     "CoderAgent",
     "DevAIConfig",
     "DevKit",
     "DevPipeline",
     "DevProgram",
+    "EmbeddingClient",
     "LLMClient",
+    "MockEmbeddingClient",
     "MockLLMClient",
     "PerfIssue",
     "PerfReviewResult",
+    "PluginRegistry",
     "ProgramResult",
     "ProgramTask",
+    "SandboxResult",
     "SecurityAuditResult",
     "SecurityFinding",
     "get_preset",

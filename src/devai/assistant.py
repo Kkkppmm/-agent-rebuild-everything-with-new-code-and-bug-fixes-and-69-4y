@@ -19,12 +19,14 @@ from devai.prompts import (
     COMMIT_MESSAGE,
     DEBUG,
     DEP_AUDIT,
+    DEP_UPGRADE,
     DIFF_REVIEW,
     DOCKERFILE_REVIEW,
     DOCSTRING_GEN,
     ERROR_HANDLER,
     EXPLAIN,
     FIX_LINT,
+    INCIDENT_TRIAGE,
     LOG_ANALYSIS,
     MIGRATION_PLAN,
     PERFORMANCE_REVIEW,
@@ -37,6 +39,7 @@ from devai.prompts import (
     STRUCTURED_PERFORMANCE,
     STRUCTURED_REVIEW,
     STRUCTURED_SECURITY,
+    SUMMARIZE_CHANGES,
     TEST_GEN,
     TYPE_HINTS,
 )
@@ -176,6 +179,52 @@ class CodeAssistant:
     def audit_deps(self, dependencies: str, context: str = "") -> str:
         """Audit project dependencies for security and licensing."""
         return self._run_chain(DEP_AUDIT, dependencies=dependencies, context=context)
+
+    def dependency_upgrade(self, dependencies: str, constraints: str = "") -> str:
+        """Recommend safe dependency version upgrades."""
+        return self._run_chain(
+            DEP_UPGRADE, dependencies=dependencies, constraints=constraints
+        )
+
+    def incident_triage(self, symptoms: str, logs: str = "") -> str:
+        """Triage a production incident from symptoms and logs."""
+        return self._run_chain(INCIDENT_TRIAGE, symptoms=symptoms, logs=logs)
+
+    def summarize_changes(self, diff: str, audience: str = "developers") -> str:
+        """Summarize a diff for PR or release notes."""
+        return self._run_chain(SUMMARIZE_CHANGES, diff=diff, audience=audience)
+
+    def generate_and_verify(
+        self,
+        spec: str,
+        test_code: str,
+        *,
+        language: str = "python",
+        max_attempts: int = 2,
+    ) -> dict[str, str]:
+        """Generate code from a spec and verify it passes sandbox tests."""
+        from devai.sandbox import CodeSandbox
+
+        sandbox = CodeSandbox()
+        code = self.generate(spec, language=language)
+        result = sandbox.run_tests(code, test_code)
+
+        attempts = 1
+        while not result.success and attempts < max_attempts:
+            fix_spec = (
+                f"Fix this code so tests pass.\n\nCode:\n{code}\n\n"
+                f"Test output:\n{result.output}\n\nOriginal spec: {spec}"
+            )
+            code = self.generate(fix_spec, language=language)
+            result = sandbox.run_tests(code, test_code)
+            attempts += 1
+
+        return {
+            "code": code,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+            "success": result.success,
+        }
 
     def architecture(self, code: str, context: str = "") -> str:
         """Describe codebase architecture with optional Mermaid diagram."""

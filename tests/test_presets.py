@@ -9,10 +9,11 @@ from devai.core import MockLLMClient
 class TestPresets:
     def test_list_presets(self):
         presets = list_presets()
-        assert len(presets) >= 5
+        assert len(presets) >= 8
         names = {p["name"] for p in presets}
         assert "pre-commit" in names
         assert "release" in names
+        assert "ci-gate" in names
 
     def test_get_preset(self):
         assistant = CodeAssistant(client=MockLLMClient(default_response="ok"))

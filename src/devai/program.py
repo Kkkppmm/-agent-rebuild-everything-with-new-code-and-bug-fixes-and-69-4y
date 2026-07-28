@@ -79,6 +79,9 @@ class DevProgram:
             "api_design",
             "optimize_sql",
             "analyze_logs",
+            "incident_triage",
+            "dependency_upgrade",
+            "summarize_changes",
         }
     )
 
@@ -150,6 +153,15 @@ class DevProgram:
         """Save the program to a JSON file."""
         Path(path).write_text(self.to_json(), encoding="utf-8")
 
+    def _resolve_kwargs(self, kwargs: dict[str, Any], context: dict[str, str]) -> dict[str, Any]:
+        resolved: dict[str, Any] = {}
+        for key, value in kwargs.items():
+            if isinstance(value, str) and value.startswith("$"):
+                resolved[key] = context.get(value[1:], "")
+            else:
+                resolved[key] = value
+        return resolved
+
     def _handler(self, action: str) -> Callable[..., str]:
         handlers: dict[str, Callable[..., str]] = {
             "review": self.assistant.review,
@@ -171,6 +183,9 @@ class DevProgram:
             "api_design": self.assistant.api_design,
             "optimize_sql": self.assistant.optimize_sql,
             "analyze_logs": self.assistant.analyze_logs,
+            "incident_triage": self.assistant.incident_triage,
+            "dependency_upgrade": self.assistant.dependency_upgrade,
+            "summarize_changes": self.assistant.summarize_changes,
         }
         handler = handlers.get(action)
         if handler is None:
@@ -189,7 +204,8 @@ class DevProgram:
         for task in self.tasks:
             handler = self._handler(task.action)
             primary = context.get(task.input_key, "")
-            output = handler(primary, **task.kwargs)
+            kwargs = self._resolve_kwargs(task.kwargs, context)
+            output = handler(primary, **kwargs)
             results.append(ProgramResult(name=task.name, action=task.action, output=output))
             context[task.name] = output
         return results
@@ -199,11 +215,12 @@ class DevProgram:
         results: list[ProgramResult] = []
         for task in self.tasks:
             primary = context.get(task.input_key, "")
+            kwargs = self._resolve_kwargs(task.kwargs, context)
             async_handler = self._async_handler(task.action)
             if async_handler is not None:
-                output = await async_handler(primary, **task.kwargs)
+                output = await async_handler(primary, **kwargs)
             else:
-                output = self._handler(task.action)(primary, **task.kwargs)
+                output = self._handler(task.action)(primary, **kwargs)
             results.append(ProgramResult(name=task.name, action=task.action, output=output))
             context[task.name] = output
         return results

@@ -63,6 +63,41 @@ PRESET_DEFINITIONS: dict[str, dict[str, Any]] = {
             {"name": "tests", "action": "tests"},
         ],
     },
+    "ci-gate": {
+        "name": "ci-gate",
+        "description": "CI gate: review, security, performance, and type hints",
+        "tasks": [
+            {"name": "review", "action": "review"},
+            {"name": "security", "action": "security"},
+            {"name": "performance", "action": "performance"},
+            {"name": "type_hints", "action": "type_hints"},
+        ],
+    },
+    "incident-response": {
+        "name": "incident-response",
+        "description": "Triage incidents and analyze related logs",
+        "tasks": [
+            {
+                "name": "triage",
+                "action": "incident_triage",
+                "input_key": "symptoms",
+                "kwargs": {"logs": "$logs"},
+            },
+            {"name": "logs", "action": "analyze_logs", "input_key": "logs"},
+        ],
+    },
+    "dependency-update": {
+        "name": "dependency-update",
+        "description": "Audit and recommend dependency upgrades",
+        "tasks": [
+            {"name": "audit", "action": "audit_deps", "input_key": "dependencies"},
+            {
+                "name": "upgrade",
+                "action": "dependency_upgrade",
+                "input_key": "dependencies",
+            },
+        ],
+    },
 }
 
 

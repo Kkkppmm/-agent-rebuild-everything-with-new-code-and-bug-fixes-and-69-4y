@@ -104,3 +104,15 @@ tasks:
         program = DevProgram("async", assistant).add("review", "review")
         results = await program.arun({"code": "def bar(): pass"})
         assert results[0].output == "async review"
+
+    def test_resolve_context_kwargs(self):
+        client = MockLLMClient(default_response="triaged")
+        assistant = CodeAssistant(client=client)
+        program = DevProgram("triage", assistant).add(
+            "triage",
+            "incident_triage",
+            input_key="symptoms",
+            logs="$logs",
+        )
+        results = program.run({"symptoms": "errors", "logs": "traceback"})
+        assert results[0].output == "triaged"

@@ -134,6 +134,23 @@ class DevKit:
             raise ValueError("Set project_path on DevKit to review a project")
         return self.assistant.review_project(str(self.project_path), query=query)
 
+    def ci_gate(self, code_or_path: str | None = None) -> str:
+        """Run the CI gate preset program."""
+        code = self._read_code(code_or_path)
+        return self.preset("ci-gate").run_and_summarize({"code": code})
+
+    def incident_response(self, symptoms: str, logs: str = "") -> str:
+        """Run incident triage and log analysis."""
+        return self.preset("incident-response").run_and_summarize(
+            {"symptoms": symptoms, "logs": logs}
+        )
+
+    def dependency_update(self, dependencies: str) -> str:
+        """Audit and recommend dependency upgrades."""
+        return self.preset("dependency-update").run_and_summarize(
+            {"dependencies": dependencies}
+        )
+
     def run_program(
         self,
         program: DevProgram | str,

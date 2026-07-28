@@ -175,6 +175,39 @@ def cmd_architecture(args: argparse.Namespace) -> None:
     print(assistant.architecture(code, context=args.context))
 
 
+def cmd_incident(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    logs = _read_input(args.logs) if args.logs else ""
+    print(assistant.incident_triage(args.symptoms, logs=logs))
+
+
+def cmd_summarize(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    diff = args.diff or git_diff()
+    print(assistant.summarize_changes(diff, audience=args.audience))
+
+
+def cmd_upgrade_deps(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    deps = _read_input(args.dependencies)
+    print(assistant.dependency_upgrade(deps, constraints=args.constraints))
+
+
+def cmd_verify(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    test_code = _read_input(args.tests)
+    result = assistant.generate_and_verify(
+        args.spec,
+        test_code,
+        language=args.language,
+        max_attempts=args.max_attempts,
+    )
+    print(result["code"])
+    if not result["success"]:
+        print("\n--- stderr ---\n", result["stderr"], file=sys.stderr)
+        sys.exit(1)
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     client = MockLLMClient() if args.mock else _get_assistant(args).client
     registry = ToolRegistry()
@@ -221,6 +254,7 @@ def cmd_kit(args: argparse.Namespace) -> None:
             diff=_read_input(args.diff) if args.diff else None,
             code=code,
         ),
+        "ci-gate": lambda: kit.ci_gate(code),
     }
     if args.workflow not in handlers:
         print(f"Unknown workflow: {args.workflow}", file=sys.stderr)
@@ -402,6 +436,28 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", default="", help="Additional context")
     p.set_defaults(func=cmd_architecture)
 
+    p = sub.add_parser("incident", help="Triage a production incident")
+    p.add_argument("symptoms", help="Incident symptoms")
+    p.add_argument("--logs", help="Log output or file path")
+    p.set_defaults(func=cmd_incident)
+
+    p = sub.add_parser("summarize", help="Summarize a diff for PR or release notes")
+    p.add_argument("--diff", help="Diff text or file path (defaults to git diff)")
+    p.add_argument("--audience", default="developers", help="Target audience")
+    p.set_defaults(func=cmd_summarize)
+
+    p = sub.add_parser("upgrade-deps", help="Recommend dependency upgrades")
+    p.add_argument("dependencies", help="Dependencies text or file path")
+    p.add_argument("--constraints", default="", help="Upgrade constraints")
+    p.set_defaults(func=cmd_upgrade_deps)
+
+    p = sub.add_parser("verify", help="Generate code and verify with tests in sandbox")
+    p.add_argument("spec", help="Natural-language specification")
+    p.add_argument("tests", help="Test code or file path")
+    p.add_argument("--language", default="python")
+    p.add_argument("--max-attempts", type=int, default=2)
+    p.set_defaults(func=cmd_verify)
+
     p = sub.add_parser("agent", help="Run coding agent")
     p.add_argument("task", help="Task description")
     p.set_defaults(func=cmd_agent)
@@ -424,7 +480,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("kit", help="Run a DevKit workflow")
     p.add_argument(
         "workflow",
-        choices=["audit", "pre-commit", "release", "onboard", "pr-review"],
+        choices=["audit", "pre-commit", "release", "onboard", "pr-review", "ci-gate"],
         help="Workflow to run",
     )
     p.add_argument("code", nargs="?", help="Code or file path")

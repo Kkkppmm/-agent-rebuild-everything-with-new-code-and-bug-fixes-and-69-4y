@@ -11,7 +11,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Observability** — Callback hooks for logging and tracing LLM calls
 - **Agents** — Tool-calling agents with a built-in coder agent
 - **Chains** — Simple, sequential, and structured (Pydantic) output chains
-- **RAG** — Text chunking, vector store, and retrieval-augmented generation
+- **RAG** — Text chunking, TF-IDF vector store, embedding-based semantic search, and retrieval-augmented generation
+- **Code Sandbox** — Run generated Python code in an isolated subprocess with timeout and test verification
+- **Plugins** — Register custom actions for DevProgram workflows
 - **Tools** — Code utilities: lint, search, git diff, complexity analysis
 - **CLI** — Command-line interface for common developer workflows
 - **Pipeline** — Composable review/debug/test workflows
@@ -19,7 +21,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
 - **CI Integration** — GitHub Actions annotations, PR comments, and CI gate helpers
 - **Cost Estimation** — Token counting and per-model cost estimates
-- **Program Presets** — Ready-made workflows for common developer tasks
+- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update)
 - **OpenAI Adapter** — Optional official OpenAI SDK integration
 
 ## Installation
@@ -111,6 +113,31 @@ store = VectorStore()
 store.add_documents(chunks)
 chain = RAGChain(client=MockLLMClient(), store=store)
 answer = chain.query("How does Python handle blocks?")
+```
+
+## Semantic RAG (Embeddings)
+
+```python
+from devai import MockEmbeddingClient, MockLLMClient
+from devai.rag import SemanticVectorStore, SemanticRAGChain
+
+store = SemanticVectorStore(MockEmbeddingClient())
+store.add_texts(["DevAI helps developers with code review and agents."])
+chain = SemanticRAGChain(MockLLMClient(), store)
+answer = chain.query("What does DevAI do?")
+```
+
+## Code Sandbox
+
+```python
+from devai import CodeAssistant, MockLLMClient
+from devai.sandbox import CodeSandbox
+
+sandbox = CodeSandbox()
+result = sandbox.run_python("print('hello')")
+
+assistant = CodeAssistant(client=MockLLMClient(default_response="def add(a,b): return a+b"))
+verified = assistant.generate_and_verify("add two numbers", "assert add(1,2)==3")
 ```
 
 ## CodeProject

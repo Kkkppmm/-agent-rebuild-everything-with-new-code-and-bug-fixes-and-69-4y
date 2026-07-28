@@ -255,3 +255,35 @@ STRUCTURED_PERFORMANCE = PromptTemplate(
     template="Analyze performance and return structured JSON:\n\n```\n$code\n```\n\nContext: $context",
     input_variables=["code", "context"],
 )
+
+INCIDENT_TRIAGE = PromptTemplate(
+    system=(
+        "You triage production incidents for developers. Be concise and actionable."
+    ),
+    template=(
+        "Triage this incident:\n\nSymptoms:\n$symptoms\n\n"
+        "Logs:\n```\n$logs\n```\n\n"
+        "Provide: likely cause, immediate steps, and follow-up investigation."
+    ),
+    input_variables=["symptoms", "logs"],
+)
+
+DEP_UPGRADE = PromptTemplate(
+    system="You recommend safe dependency upgrades for Python projects.",
+    template=(
+        "Suggest dependency upgrades for:\n\n```\n$dependencies\n```\n\n"
+        "Constraints: $constraints\n\n"
+        "Include version targets, breaking-change risks, and migration notes."
+    ),
+    input_variables=["dependencies", "constraints"],
+)
+
+SUMMARIZE_CHANGES = PromptTemplate(
+    system="You summarize code changes clearly for developers and reviewers.",
+    template=(
+        "Summarize these changes for a pull request or release notes:\n\n"
+        "```\n$diff\n```\n\n"
+        "Audience: $audience"
+    ),
+    input_variables=["diff", "audience"],
+)

@@ -4,6 +4,7 @@ from devai.core.batch import BatchRunner
 from devai.core.callbacks import LoggingCallback, ObservedLLMClient
 from devai.core.client import CachedLLMClient, LLMClient, MockLLMClient
 from devai.core.config import DevAIConfig
+from devai.core.embeddings import EmbeddingClient, MockEmbeddingClient
 from devai.core.exceptions import (
     AgentError,
     ConfigError,
@@ -23,9 +24,11 @@ __all__ = [
     "ConfigError",
     "DevAIConfig",
     "DevAIError",
+    "EmbeddingClient",
     "LLMClient",
     "LLMError",
     "Message",
+    "MockEmbeddingClient",
     "MockLLMClient",
     "ParseError",
     "Role",

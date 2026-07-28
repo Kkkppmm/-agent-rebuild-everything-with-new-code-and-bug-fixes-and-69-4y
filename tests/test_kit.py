@@ -88,3 +88,18 @@ class TestDevKit:
         program = kit.program("custom").add("review", "review")
         assert program.name == "custom"
         assert len(program.tasks) == 1
+
+    def test_ci_gate(self):
+        kit = DevKit.from_client(MockLLMClient(default_response="gated"))
+        result = kit.ci_gate("def foo(): pass")
+        assert "gated" in result
+
+    def test_incident_response(self):
+        kit = DevKit.from_client(MockLLMClient(default_response="handled"))
+        result = kit.incident_response("latency spike", logs="slow query")
+        assert "handled" in result
+
+    def test_dependency_update(self):
+        kit = DevKit.from_client(MockLLMClient(default_response="upgraded"))
+        result = kit.dependency_update("requests==2.28.0")
+        assert "upgraded" in result
