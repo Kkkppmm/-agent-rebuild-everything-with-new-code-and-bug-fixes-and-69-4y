@@ -112,6 +112,15 @@ PRESET_DEFINITIONS: dict[str, dict[str, Any]] = {
             },
         ],
     },
+    "test-gen": {
+        "name": "test-gen",
+        "description": "Generate and review tests for a module",
+        "tasks": [
+            {"name": "explain", "action": "explain"},
+            {"name": "tests", "action": "tests"},
+            {"name": "review", "action": "review"},
+        ],
+    },
 }
 
 

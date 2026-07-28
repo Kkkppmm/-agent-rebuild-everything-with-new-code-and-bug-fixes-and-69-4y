@@ -180,6 +180,32 @@ class DevProgram:
         """Return True if the program passes validation."""
         return not self.validate()
 
+    def validate_schema(self) -> list[str]:
+        """Validate program structure against the JSON Schema."""
+        from devai.program_schema import validate_program_dict
+
+        return validate_program_dict(self.to_dict())
+
+    def dry_run(self, context: dict[str, str] | None = None) -> list[dict[str, Any]]:
+        """Simulate program execution without calling the LLM."""
+        ctx = dict(context or {})
+        plan: list[dict[str, Any]] = []
+        for task in self.tasks:
+            primary = ctx.get(task.input_key, "")
+            kwargs = self._resolve_kwargs(task.kwargs, ctx)
+            preview = primary[:80] + ("..." if len(primary) > 80 else "")
+            plan.append(
+                {
+                    "name": task.name,
+                    "action": task.action,
+                    "input_key": task.input_key,
+                    "input_preview": preview,
+                    "kwargs": kwargs,
+                }
+            )
+            ctx[task.name] = f"<output of {task.name}>"
+        return plan
+
     def save(self, path: str | Path) -> None:
         """Save the program to a JSON file."""
         Path(path).write_text(self.to_json(), encoding="utf-8")

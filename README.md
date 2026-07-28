@@ -21,10 +21,12 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
 - **CI Integration** — GitHub Actions annotations, PR comments, and CI gate helpers
 - **Cost Estimation** — Token counting and per-model cost estimates
-- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update, docs-gen)
+- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update, docs-gen, test-gen)
 - **DevRuntime** — One-line bootstrap for programs, presets, and quick dev workflows
+- **DevApp** — Application framework for shipping custom AI-powered CLI tools
 - **Local LLM Support** — Ollama and any OpenAI-compatible endpoint via config presets
-- **Program Validation** — Validate JSON/YAML program files before execution
+- **Program Validation** — Validate JSON/YAML program files against a JSON Schema before execution
+- **Dry Run** — Simulate program execution without calling the LLM
 
 ## Installation
 

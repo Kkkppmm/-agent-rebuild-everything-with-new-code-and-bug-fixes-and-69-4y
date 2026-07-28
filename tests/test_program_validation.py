@@ -41,3 +41,24 @@ class TestProgramValidation:
         program = get_preset("docs-gen", assistant)
         assert program.is_valid()
         assert len(program.tasks) == 3
+
+    def test_test_gen_preset(self):
+        from devai.presets import get_preset
+
+        assistant = CodeAssistant(client=MockLLMClient())
+        program = get_preset("test-gen", assistant)
+        assert program.is_valid()
+        assert len(program.tasks) == 3
+
+    def test_dry_run(self):
+        assistant = CodeAssistant(client=MockLLMClient())
+        program = DevProgram("dry", assistant).add("review", "review")
+        plan = program.dry_run({"code": "x = 1"})
+        assert len(plan) == 1
+        assert plan[0]["action"] == "review"
+        assert plan[0]["input_preview"] == "x = 1"
+
+    def test_validate_schema(self):
+        assistant = CodeAssistant(client=MockLLMClient())
+        program = DevProgram("ok", assistant).add("review", "review")
+        assert program.validate_schema() == []
