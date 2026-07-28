@@ -63,6 +63,15 @@ PRESET_DEFINITIONS: dict[str, dict[str, Any]] = {
             {"name": "tests", "action": "tests"},
         ],
     },
+    "ci-gate": {
+        "name": "ci-gate",
+        "description": "CI pipeline gate: diff review, security, and performance checks",
+        "tasks": [
+            {"name": "diff_review", "action": "review_diff", "input_key": "diff"},
+            {"name": "security", "action": "security", "input_key": "code"},
+            {"name": "performance", "action": "performance", "input_key": "code"},
+        ],
+    },
 }
 
 

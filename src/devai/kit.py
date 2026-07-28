@@ -128,6 +128,25 @@ class DevKit:
             raise ValueError("Provide code or set project_path for PR review")
         return self.preset("pr-review").run_and_summarize(context)
 
+    def ci_gate(
+        self,
+        *,
+        diff: str | None = None,
+        code: str | None = None,
+    ) -> str:
+        """Run the ci-gate preset for CI pipeline checks."""
+        context: dict[str, str] = {}
+        context["diff"] = diff if diff is not None else git_diff()
+        if code is not None:
+            context["code"] = self._read_code(code)
+        elif self.project_path is not None:
+            project = self.project
+            if project is not None:
+                context["code"] = project.build_context()
+        if "code" not in context:
+            raise ValueError("Provide code or set project_path for CI gate")
+        return self.preset("ci-gate").run_and_summarize(context)
+
     def review_project(self, query: str | None = None) -> str:
         """Review the configured project directory."""
         if self.project_path is None:

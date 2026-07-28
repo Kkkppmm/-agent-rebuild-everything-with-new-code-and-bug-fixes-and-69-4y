@@ -8,6 +8,15 @@ from devai.pipeline import DevPipeline
 from devai.presets import get_preset, list_presets
 from devai.program import DevProgram, ProgramResult, ProgramTask
 from devai.project import CodeProject
+from devai.ci import (
+    CIAnnotation,
+    ci_gate_passed,
+    extract_annotations,
+    format_actions_annotations,
+    format_actions_summary,
+    format_pr_comment,
+    write_step_summary,
+)
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -17,10 +26,11 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __all__ = [
     "Agent",
     "BatchRunner",
+    "CIAnnotation",
     "CodeAssistant",
     "CodeIssue",
     "CodeProject",
@@ -38,7 +48,13 @@ __all__ = [
     "ProgramTask",
     "SecurityAuditResult",
     "SecurityFinding",
+    "ci_gate_passed",
+    "extract_annotations",
+    "format_actions_annotations",
+    "format_actions_summary",
+    "format_pr_comment",
     "get_preset",
     "list_presets",
+    "write_step_summary",
     "__version__",
 ]

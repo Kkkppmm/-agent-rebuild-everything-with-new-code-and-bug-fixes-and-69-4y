@@ -88,3 +88,8 @@ class TestDevKit:
         program = kit.program("custom").add("review", "review")
         assert program.name == "custom"
         assert len(program.tasks) == 1
+
+    def test_ci_gate(self):
+        kit = DevKit.from_client(MockLLMClient(default_response="gate ok"))
+        result = kit.ci_gate(diff="diff --git a/x.py", code="x = 1")
+        assert "gate ok" in result

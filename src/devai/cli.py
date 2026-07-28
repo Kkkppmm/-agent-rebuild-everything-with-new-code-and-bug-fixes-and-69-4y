@@ -8,9 +8,17 @@ from pathlib import Path
 
 from devai import CodeAssistant, DevAIConfig
 from devai.agents import CoderAgent
+from devai.ci import (
+    ci_gate_passed,
+    extract_annotations,
+    format_actions_annotations,
+    format_actions_summary,
+    format_pr_comment,
+    write_step_summary,
+)
 from devai.core import MockLLMClient
 from devai.kit import DevKit
-from devai.presets import list_presets
+from devai.presets import get_preset, list_presets
 from devai.program import DevProgram
 from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
 
@@ -221,11 +229,48 @@ def cmd_kit(args: argparse.Namespace) -> None:
             diff=_read_input(args.diff) if args.diff else None,
             code=code,
         ),
+        "ci-gate": lambda: kit.ci_gate(
+            diff=_read_input(args.diff) if args.diff else None,
+            code=code,
+        ),
     }
     if args.workflow not in handlers:
         print(f"Unknown workflow: {args.workflow}", file=sys.stderr)
         sys.exit(1)
     print(handlers[args.workflow]())
+
+
+def cmd_ci(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    if args.preset:
+        program = get_preset(args.preset, assistant)
+    else:
+        program = DevProgram.from_file(args.program, assistant)
+    context: dict[str, str] = {}
+    if args.code:
+        context["code"] = _read_input(args.code)
+    if args.diff:
+        context["diff"] = _read_input(args.diff)
+    if args.context:
+        for pair in args.context:
+            key, _, value = pair.partition("=")
+            context[key] = value
+    results = program.run(context)
+    if args.format == "pr-comment":
+        output = format_pr_comment(results, program_name=program.name)
+    elif args.format == "actions-summary":
+        output = format_actions_summary(results)
+    elif args.format == "actions-annotations":
+        annotations = extract_annotations(results)
+        output = format_actions_annotations(annotations)
+    else:
+        parts = [f"## {r.name} ({r.action})\n\n{r.output}" for r in results]
+        output = "\n\n---\n\n".join(parts)
+    if args.summary:
+        write_step_summary(output)
+    print(output)
+    if args.gate and not ci_gate_passed(results):
+        sys.exit(1)
 
 
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
@@ -389,13 +434,34 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("kit", help="Run a DevKit workflow")
     p.add_argument(
         "workflow",
-        choices=["audit", "pre-commit", "release", "onboard", "pr-review"],
+        choices=["audit", "pre-commit", "release", "onboard", "pr-review", "ci-gate"],
         help="Workflow to run",
     )
     p.add_argument("code", nargs="?", help="Code or file path")
     p.add_argument("--project", help="Project directory for context")
     p.add_argument("--diff", help="Diff for pr-review workflow")
     p.set_defaults(func=cmd_kit)
+
+    p = sub.add_parser("ci", help="Run a CI workflow and format output for GitHub")
+    p.add_argument("--program", help="Program JSON/YAML file")
+    p.add_argument("--preset", help="Built-in preset name (e.g. ci-gate)")
+    p.add_argument("--code", help="Code input or file path")
+    p.add_argument("--diff", help="Diff input or file path")
+    p.add_argument(
+        "--format",
+        choices=["markdown", "pr-comment", "actions-summary", "actions-annotations"],
+        default="markdown",
+        help="Output format",
+    )
+    p.add_argument("--summary", action="store_true", help="Write to GITHUB_STEP_SUMMARY")
+    p.add_argument("--gate", action="store_true", help="Exit 1 if gate checks fail")
+    p.add_argument(
+        "--context",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Additional context values",
+    )
+    p.set_defaults(func=cmd_ci)
 
     return parser
 

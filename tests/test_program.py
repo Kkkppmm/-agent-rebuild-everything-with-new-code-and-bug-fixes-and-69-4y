@@ -90,3 +90,17 @@ class TestDevProgram:
         program = DevProgram("async", assistant).add("review", "review")
         results = await program.arun({"code": "def bar(): pass"})
         assert results[0].output == "async review"
+
+    def test_from_yaml(self, tmp_path):
+        yaml = pytest.importorskip("yaml")
+        data = {
+            "name": "yaml-program",
+            "tasks": [{"name": "review", "action": "review"}],
+        }
+        path = tmp_path / "program.yaml"
+        path.write_text(yaml.dump(data), encoding="utf-8")
+        assistant = CodeAssistant(client=MockLLMClient(default_response="yaml ok"))
+        program = DevProgram.from_file(path, assistant)
+        assert program.name == "yaml-program"
+        results = program.run({"code": "pass"})
+        assert results[0].output == "yaml ok"

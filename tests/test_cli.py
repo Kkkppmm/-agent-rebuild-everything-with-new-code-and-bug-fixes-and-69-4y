@@ -97,3 +97,19 @@ class TestCLI:
         args = parser.parse_args(["--mock", "kit", "audit", "def foo(): pass"])
         assert args.command == "kit"
         assert args.workflow == "audit"
+
+    def test_ci_args(self):
+        parser = build_parser()
+        args = parser.parse_args([
+            "--mock",
+            "ci",
+            "--preset",
+            "ci-gate",
+            "--code",
+            "x=1",
+            "--format",
+            "pr-comment",
+        ])
+        assert args.command == "ci"
+        assert args.preset == "ci-gate"
+        assert args.format == "pr-comment"

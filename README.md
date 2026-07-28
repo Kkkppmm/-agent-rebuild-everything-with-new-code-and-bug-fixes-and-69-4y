@@ -18,6 +18,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevProgram** — Declarative JSON programs for scripted multi-step AI workflows
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
 - **Program Presets** — Ready-made workflows for common developer tasks
+- **CI Helpers** — GitHub PR comments, Actions annotations, and CI gate presets
 - **OpenAI Adapter** — Optional official OpenAI SDK integration
 
 ## Installation
@@ -28,8 +29,11 @@ pip install devai
 # With OpenAI SDK support
 pip install "devai[openai]"
 
+# With YAML program support
+pip install "devai[yaml]"
+
 # Development
-pip install -e ".[dev]"
+pip install -e ".[dev,yaml]"
 ```
 
 ## Quick Start
@@ -184,6 +188,28 @@ Example `audit.json`:
     {"name": "security", "action": "security"}
   ]
 }
+```
+
+## CI Integration
+
+```python
+from devai import DevKit, MockLLMClient, format_pr_comment, ci_gate_passed
+
+kit = DevKit.from_client(MockLLMClient(default_response="Looks good."))
+results = kit.run_program("ci-gate", {"code": open("app.py").read(), "diff": "..."})
+
+# Format for GitHub PR comment
+comment = format_pr_comment(results, program_name="ci-gate")
+
+# Gate check — exit non-zero in CI if blocking issues found
+if not ci_gate_passed(results):
+    raise SystemExit(1)
+```
+
+```bash
+devai ci --preset ci-gate --code app.py --diff "$(git diff)" --format pr-comment
+devai ci --preset ci-gate --code app.py --gate --summary
+devai kit ci-gate --project ./my-app --diff "$(git diff)"
 ```
 
 ## OpenAI SDK Adapter
