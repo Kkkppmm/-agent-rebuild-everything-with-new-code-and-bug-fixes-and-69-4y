@@ -21,7 +21,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
 - **CI Integration** — GitHub Actions annotations, PR comments, and CI gate helpers
 - **Cost Estimation** — Token counting and per-model cost estimates
-- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update, docs-gen, test-gen, hotfix)
+- **DevWorkflow** — Orchestrate multiple programs with sequential and parallel execution
+- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update, docs-gen, test-gen, hotfix, api-review, sql-review)
 - **DevRuntime** — One-line bootstrap for programs, presets, and quick dev workflows
 - **Local LLM Support** — Ollama and any OpenAI-compatible endpoint via config presets
 - **Program Validation** — Validate JSON/YAML program files before execution
@@ -223,6 +224,40 @@ print(kit.summarize(results))
 # Project-aware workflows
 kit = DevKit.from_client(MockLLMClient(), project_path="./my-app")
 print(kit.review_project(query="authentication"))
+```
+
+## DevWorkflow (Multi-Program Orchestration)
+
+```python
+from devai import DevRuntime, DevWorkflow
+
+runtime = DevRuntime.create(use_mock=True)
+
+# Chain multiple presets sequentially
+workflow = (
+    runtime.workflow("ship-it")
+    .add("quality", "pre-commit")
+    .add("docs", "docs-gen")
+)
+result = workflow.run({
+    "code": "def add(a, b): return a + b",
+    "project": "mylib",
+    "description": "A tiny math library",
+})
+print(result.summarize())
+
+# Run independent checks in parallel
+parallel = (
+    DevWorkflow("gate", runtime.assistant)
+    .add_parallel("checks", ("review", "pre-commit"), ("hotfix", "hotfix"))
+)
+parallel.run({"code": "def foo(): pass"})
+```
+
+```bash
+# CLI: run a workflow from presets
+devai workflow quality:pre-commit docs:docs-gen --code app.py --mock
+devai workflow review:pre-commit security:security-deep-dive --parallel --mock
 ```
 
 ## DevProgram (Scripted Workflows)

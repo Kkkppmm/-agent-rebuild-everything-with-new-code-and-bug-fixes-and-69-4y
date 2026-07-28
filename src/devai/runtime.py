@@ -11,6 +11,7 @@ from devai.core.client import LLMClient, LLMClientProtocol, MockLLMClient
 from devai.core.config import DevAIConfig
 from devai.kit import DevKit
 from devai.program import DevProgram, ProgramResult
+from devai.workflow import DevWorkflow, WorkflowResult
 
 
 @dataclass
@@ -162,3 +163,23 @@ class DevRuntime:
     def generate(self, spec: str) -> str:
         """Generate code from a specification."""
         return self.assistant.generate(spec)
+
+    def workflow(self, name: str = "workflow") -> DevWorkflow:
+        """Create a new DevWorkflow bound to this runtime's assistant."""
+        return DevWorkflow(name=name, assistant=self.assistant)
+
+    def run_workflow(
+        self,
+        workflow: DevWorkflow,
+        context: dict[str, str] | None = None,
+    ) -> WorkflowResult:
+        """Run a DevWorkflow and return structured results."""
+        return workflow.run(context or {})
+
+    async def arun_workflow(
+        self,
+        workflow: DevWorkflow,
+        context: dict[str, str] | None = None,
+    ) -> WorkflowResult:
+        """Run a DevWorkflow asynchronously."""
+        return await workflow.arun(context or {})

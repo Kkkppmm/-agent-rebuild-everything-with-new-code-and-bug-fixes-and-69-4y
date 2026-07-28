@@ -13,6 +13,7 @@ from devai.program import DevProgram, ProgramResult, ProgramStepPlan, ProgramTas
 from devai.program_schema import program_schema
 from devai.project import CodeProject
 from devai.runtime import DevRuntime
+from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
 from devai.sandbox import CodeSandbox, SandboxResult
 from devai.schemas import (
     CodeIssue,
@@ -23,7 +24,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "1.6.0"
+__version__ = "1.7.0"
 __all__ = [
     "Agent",
     "BatchRunner",
@@ -40,6 +41,7 @@ __all__ = [
     "DevPipeline",
     "DevProgram",
     "DevRuntime",
+    "DevWorkflow",
     "EmbeddingClient",
     "LLMClient",
     "MockEmbeddingClient",
@@ -55,6 +57,8 @@ __all__ = [
     "SecurityFinding",
     "get_preset",
     "list_presets",
+    "WorkflowResult",
+    "WorkflowStepResult",
     "program_schema",
     "__version__",
 ]

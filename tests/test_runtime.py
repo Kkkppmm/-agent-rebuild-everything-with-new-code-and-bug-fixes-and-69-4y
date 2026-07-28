@@ -102,3 +102,17 @@ class TestDevRuntime:
         results = await runtime.arun("hotfix", {"code": "def foo(): pass"})
         assert len(results) == 3
         assert results[1].action == "security"
+
+    def test_workflow(self):
+        runtime = DevRuntime.create(use_mock=True)
+        workflow = runtime.workflow("test").add("step", "hotfix")
+        result = runtime.run_workflow(workflow, {"code": "x = 1"})
+        assert len(result.steps) == 1
+        assert result.steps[0].name == "step"
+
+    @pytest.mark.asyncio
+    async def test_arun_workflow(self):
+        runtime = DevRuntime.create(use_mock=True)
+        workflow = runtime.workflow("async").add("step", "hotfix")
+        result = await runtime.arun_workflow(workflow, {"code": "x = 1"})
+        assert len(result.steps) == 1

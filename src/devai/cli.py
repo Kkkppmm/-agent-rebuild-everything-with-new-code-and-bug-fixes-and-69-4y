@@ -12,6 +12,7 @@ from devai.core import MockLLMClient
 from devai.kit import DevKit
 from devai.presets import list_presets
 from devai.program import DevProgram
+from devai.workflow import DevWorkflow
 from devai.program_schema import program_schema
 from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
 
@@ -279,6 +280,42 @@ def cmd_presets(args: argparse.Namespace) -> None:
         print(f"{preset['name']}: {preset['description']}")
 
 
+def cmd_workflow(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    workflow = DevWorkflow(name=args.name, assistant=assistant)
+    for step in args.step:
+        if ":" in step:
+            step_name, preset = step.split(":", 1)
+            workflow.add(step_name, preset)
+        else:
+            workflow.add(step, step)
+    if args.parallel:
+        parallel_workflow = DevWorkflow(name=args.name, assistant=assistant)
+        group = "parallel"
+        for step in args.step:
+            if ":" in step:
+                step_name, preset = step.split(":", 1)
+                parallel_workflow.add(step_name, preset, parallel_group=group)
+            else:
+                parallel_workflow.add(step, step, parallel_group=group)
+        workflow = parallel_workflow
+
+    context: dict[str, str] = {}
+    if args.code:
+        context["code"] = _read_input(args.code)
+    if args.diff:
+        context["diff"] = _read_input(args.diff)
+    if args.query:
+        context["query"] = _read_input(args.query)
+    if args.context:
+        for pair in args.context:
+            key, _, value = pair.partition("=")
+            context[key] = value
+
+    result = workflow.run(context)
+    print(result.summarize())
+
+
 def cmd_kit(args: argparse.Namespace) -> None:
     kit = DevKit.from_client(
         _get_assistant(args).client,
@@ -535,6 +572,25 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("presets", help="List built-in program presets")
     p.set_defaults(func=cmd_presets)
+
+    p = sub.add_parser("workflow", help="Run a multi-step workflow from presets")
+    p.add_argument(
+        "step",
+        nargs="+",
+        help="Workflow steps as name:preset or preset (e.g. review:pre-commit security:security)",
+    )
+    p.add_argument("--name", default="workflow", help="Workflow name")
+    p.add_argument("--code", help="Code input or file path")
+    p.add_argument("--diff", help="Diff input or file path")
+    p.add_argument("--query", help="SQL query input or file path")
+    p.add_argument("--parallel", action="store_true", help="Run all steps in parallel")
+    p.add_argument(
+        "--context",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Additional context values",
+    )
+    p.set_defaults(func=cmd_workflow)
 
     p = sub.add_parser("kit", help="Run a DevKit workflow")
     p.add_argument(

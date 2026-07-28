@@ -130,6 +130,24 @@ PRESET_DEFINITIONS: dict[str, dict[str, Any]] = {
             {"name": "tests", "action": "tests"},
         ],
     },
+    "api-review": {
+        "name": "api-review",
+        "description": "Review API design, security, and documentation",
+        "tasks": [
+            {"name": "api", "action": "api_design"},
+            {"name": "security", "action": "security"},
+            {"name": "docstring", "action": "docstring"},
+        ],
+    },
+    "sql-review": {
+        "name": "sql-review",
+        "description": "Optimize SQL queries and review related code",
+        "tasks": [
+            {"name": "sql", "action": "optimize_sql", "input_key": "query"},
+            {"name": "review", "action": "review", "input_key": "code"},
+            {"name": "performance", "action": "performance", "input_key": "code"},
+        ],
+    },
 }
 
 
