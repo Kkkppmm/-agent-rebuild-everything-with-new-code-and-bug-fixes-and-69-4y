@@ -70,6 +70,20 @@ class TestDevProgram:
         assert loaded.name == "saved"
         assert len(loaded.tasks) == 1
 
+    def test_from_yaml(self, tmp_path):
+        yaml_content = """
+name: yaml-program
+tasks:
+  - name: review
+    action: review
+"""
+        path = tmp_path / "program.yaml"
+        path.write_text(yaml_content, encoding="utf-8")
+        assistant = CodeAssistant(client=MockLLMClient())
+        program = DevProgram.from_file(path, assistant)
+        assert program.name == "yaml-program"
+        assert program.tasks[0].action == "review"
+
     def test_run_and_summarize(self):
         assistant = CodeAssistant(client=MockLLMClient(default_response="done"))
         program = DevProgram("summary", assistant).add("review", "review")

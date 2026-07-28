@@ -6,7 +6,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from devai import CodeAssistant, DevAIConfig
+from devai import CodeAssistant, DevAIConfig, CIReporter
 from devai.agents import CoderAgent
 from devai.core import MockLLMClient
 from devai.kit import DevKit
@@ -228,6 +228,41 @@ def cmd_kit(args: argparse.Namespace) -> None:
     print(handlers[args.workflow]())
 
 
+def cmd_ci(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    reporter = CIReporter(assistant)
+    context: dict[str, str] = {}
+    if args.code:
+        context["code"] = _read_input(args.code)
+    if args.diff:
+        context["diff"] = _read_input(args.diff)
+    if args.context:
+        for pair in args.context:
+            key, _, value = pair.partition("=")
+            context[key] = value
+
+    if args.program:
+        program = DevProgram.from_file(args.program, assistant)
+        payload = reporter.run_program_for_ci(program, context, gate=not args.no_gate)
+    else:
+        preset = args.preset or "pre-commit"
+        payload = reporter.run_program_for_ci(preset, context, gate=not args.no_gate)
+
+    if args.format == "comment":
+        print(payload["pr_comment"])
+    elif args.format == "annotations":
+        print("\n".join(payload["annotations"]))
+    elif args.format == "gate":
+        print(payload.get("gate_report", ""))
+    else:
+        print(payload["pr_comment"])
+        if "gate_report" in payload:
+            print("\n" + payload["gate_report"])
+
+    if not args.no_gate and payload.get("passed") is False:
+        sys.exit(1)
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -371,7 +406,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("task", help="Task description")
     p.set_defaults(func=cmd_agent)
 
-    p = sub.add_parser("run", help="Run a DevAI program from JSON")
+    p = sub.add_parser("run", help="Run a DevAI program from JSON or YAML")
     p.add_argument("program", help="Program JSON file")
     p.add_argument("--code", help="Code input or file path")
     p.add_argument("--diff", help="Diff input or file path")
@@ -396,6 +431,26 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--project", help="Project directory for context")
     p.add_argument("--diff", help="Diff for pr-review workflow")
     p.set_defaults(func=cmd_kit)
+
+    p = sub.add_parser("ci", help="Run CI workflow and output GitHub-ready reports")
+    p.add_argument("--program", help="Program JSON/YAML file")
+    p.add_argument("--preset", help="Built-in preset name (default: pre-commit)")
+    p.add_argument("--code", help="Code input or file path")
+    p.add_argument("--diff", help="Diff input or file path")
+    p.add_argument(
+        "--context",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Additional context values",
+    )
+    p.add_argument(
+        "--format",
+        choices=["comment", "annotations", "gate", "all"],
+        default="all",
+        help="Output format",
+    )
+    p.add_argument("--no-gate", action="store_true", help="Skip CI gate evaluation")
+    p.set_defaults(func=cmd_ci)
 
     return parser
 

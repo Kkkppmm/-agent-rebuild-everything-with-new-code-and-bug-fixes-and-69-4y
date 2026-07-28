@@ -15,8 +15,10 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Tools** — Code utilities: lint, search, git diff, complexity analysis
 - **CLI** — Command-line interface for common developer workflows
 - **Pipeline** — Composable review/debug/test workflows
-- **DevProgram** — Declarative JSON programs for scripted multi-step AI workflows
+- **DevProgram** — Declarative JSON/YAML programs for scripted multi-step AI workflows
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
+- **CI Integration** — GitHub Actions annotations, PR comments, and CI gate helpers
+- **Cost Estimation** — Token counting and per-model cost estimates
 - **Program Presets** — Ready-made workflows for common developer tasks
 - **OpenAI Adapter** — Optional official OpenAI SDK integration
 
@@ -28,8 +30,8 @@ pip install devai
 # With OpenAI SDK support
 pip install "devai[openai]"
 
-# Development
-pip install -e ".[dev]"
+# With YAML program support
+pip install "devai[yaml]"
 ```
 
 ## Quick Start
@@ -172,6 +174,9 @@ results = program.run({"code": open("app.py").read()})
 # Or load from JSON
 program = DevProgram.from_file("audit.json", assistant)
 print(program.run_and_summarize({"code": "..."}))
+
+# Or load from YAML (requires pip install 'devai[yaml]')
+program = DevProgram.from_file("audit.yaml", assistant)
 ```
 
 Example `audit.json`:
@@ -184,6 +189,38 @@ Example `audit.json`:
     {"name": "security", "action": "security"}
   ]
 }
+```
+
+## CI Integration
+
+```python
+from devai import CIReporter, CodeAssistant, MockLLMClient
+
+reporter = CIReporter(CodeAssistant(client=MockLLMClient()))
+payload = reporter.run_program_for_ci("pre-commit", {"code": open("app.py").read()})
+
+print(payload["pr_comment"])       # GitHub PR comment markdown
+print(payload["annotations"])      # GitHub Actions ::warning:: lines
+print(payload["passed"])           # CI gate result
+```
+
+```bash
+devai ci --preset pre-commit --code app.py
+devai ci --program audit.yaml --code app.py --format comment
+```
+
+## Cost Estimation
+
+```python
+from devai.core.models import Message
+from devai.utils import estimate_message_cost, format_cost
+
+cost = estimate_message_cost(
+    [Message.user("Review this code")],
+    response="Looks good.",
+    model="gpt-4o-mini",
+)
+print(format_cost(cost))
 ```
 
 ## OpenAI SDK Adapter
@@ -234,6 +271,7 @@ devai presets
 devai kit audit path/to/app.py
 devai kit pre-commit path/to/app.py
 devai kit pr-review --project ./my-app --diff "$(git diff)"
+devai ci --preset pre-commit --code app.py
 ```
 
 ## Configuration

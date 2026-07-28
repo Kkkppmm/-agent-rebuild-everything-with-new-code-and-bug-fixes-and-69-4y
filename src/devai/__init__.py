@@ -1,6 +1,7 @@
 """DevAI — A Python AI library for developers and programmers."""
 
 from devai.agents import Agent, CoderAgent
+from devai.ci import CIReporter
 from devai.assistant import CodeAssistant
 from devai.core import BatchRunner, DevAIConfig, LLMClient, MockLLMClient
 from devai.kit import DevKit
@@ -17,10 +18,11 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __all__ = [
     "Agent",
     "BatchRunner",
+    "CIReporter",
     "CodeAssistant",
     "CodeIssue",
     "CodeProject",
