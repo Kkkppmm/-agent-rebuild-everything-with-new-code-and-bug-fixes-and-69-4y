@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from devai import DevApp, DevRuntime
 
 
@@ -73,3 +75,14 @@ class TestDevApp:
             assert False, "expected ValueError"
         except ValueError:
             pass
+
+    def test_dry_run(self):
+        app = DevApp.create(use_mock=True).use_preset("hotfix")
+        plan = app.dry_run(context={"code": "def foo(): pass"})
+        assert len(plan) == 3
+
+    @pytest.mark.asyncio
+    async def test_arun(self):
+        app = DevApp.create(use_mock=True).use_preset("hotfix")
+        results = await app.arun(context={"code": "def foo(): pass"})
+        assert len(results) == 3

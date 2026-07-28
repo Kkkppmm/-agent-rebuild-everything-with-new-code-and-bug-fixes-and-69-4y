@@ -47,3 +47,10 @@ class TestPresets:
         assert len(program.tasks) == 3
         results = program.run({"code": "def add(a, b): return a + b"})
         assert results[-1].action == "tests"
+
+    def test_hotfix_preset(self):
+        assistant = CodeAssistant(client=MockLLMClient(default_response="ok"))
+        program = get_preset("hotfix", assistant)
+        assert program.name == "hotfix"
+        assert len(program.tasks) == 3
+        assert program.is_valid()

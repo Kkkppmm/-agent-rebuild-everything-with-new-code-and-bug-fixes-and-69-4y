@@ -121,6 +121,15 @@ PRESET_DEFINITIONS: dict[str, dict[str, Any]] = {
             {"name": "tests", "action": "tests"},
         ],
     },
+    "hotfix": {
+        "name": "hotfix",
+        "description": "Fast hotfix gate: review, security scan, and regression tests",
+        "tasks": [
+            {"name": "review", "action": "review"},
+            {"name": "security", "action": "security"},
+            {"name": "tests", "action": "tests"},
+        ],
+    },
 }
 
 

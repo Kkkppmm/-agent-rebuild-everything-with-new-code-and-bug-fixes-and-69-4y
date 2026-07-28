@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import pytest
+
 from devai import DevAIConfig, DevRuntime, MockLLMClient
 from devai.core.exceptions import ConfigError
 
@@ -87,3 +89,16 @@ class TestDevRuntime:
         runtime = DevRuntime.create(use_mock=True)
         assert isinstance(runtime.explain("x = 1"), str)
         assert isinstance(runtime.generate("a fibonacci function"), str)
+
+    def test_dry_run(self):
+        runtime = DevRuntime.create(use_mock=True)
+        plan = runtime.dry_run("pre-commit", {"code": "def foo(): pass"})
+        assert len(plan) == 3
+        assert plan[0].action == "review"
+
+    @pytest.mark.asyncio
+    async def test_arun(self):
+        runtime = DevRuntime.create(use_mock=True)
+        results = await runtime.arun("hotfix", {"code": "def foo(): pass"})
+        assert len(results) == 3
+        assert results[1].action == "security"

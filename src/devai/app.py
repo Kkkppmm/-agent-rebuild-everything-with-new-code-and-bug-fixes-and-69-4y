@@ -107,6 +107,30 @@ class DevApp:
         print(self.summarize(results))
         return results
 
+    async def arun(
+        self,
+        program: DevProgram | str | None = None,
+        context: dict[str, str] | None = None,
+    ) -> list[ProgramResult]:
+        """Run a program asynchronously with merged default and per-call context."""
+        merged = {**self.default_context, **(context or {})}
+        target = program or self.default_program
+        if target is None:
+            raise ValueError("No program specified. Call use_preset(), load(), or pass a program.")
+        return await self.runtime.arun(target, merged)
+
+    def dry_run(
+        self,
+        program: DevProgram | str | None = None,
+        context: dict[str, str] | None = None,
+    ) -> list:
+        """Preview program steps without calling the LLM."""
+        merged = {**self.default_context, **(context or {})}
+        target = program or self.default_program
+        if target is None:
+            raise ValueError("No program specified. Call use_preset(), load(), or pass a program.")
+        return self.runtime.dry_run(target, merged)
+
     def build_cli_parser(self) -> argparse.ArgumentParser:
         """Build an argparse parser for this application."""
         parser = argparse.ArgumentParser(

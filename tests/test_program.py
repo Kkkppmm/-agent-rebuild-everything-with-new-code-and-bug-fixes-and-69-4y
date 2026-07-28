@@ -116,3 +116,34 @@ tasks:
         )
         results = program.run({"symptoms": "errors", "logs": "traceback"})
         assert results[0].output == "triaged"
+
+    def test_to_yaml_and_save(self, tmp_path):
+        assistant = CodeAssistant(client=MockLLMClient())
+        program = DevProgram("yaml-out", assistant).add("review", "review")
+        yaml_text = program.to_yaml()
+        assert "yaml-out" in yaml_text
+        assert "review" in yaml_text
+
+        path = tmp_path / "program.yaml"
+        program.save(path)
+        loaded = DevProgram.from_file(path, assistant)
+        assert loaded.name == "yaml-out"
+        assert len(loaded.tasks) == 1
+
+    def test_compose(self):
+        assistant = CodeAssistant(client=MockLLMClient(default_response="ok"))
+        review = DevProgram("review-only", assistant).add("review", "review")
+        security = DevProgram("security-only", assistant).add("security", "security")
+        merged = DevProgram.compose(review, security, name="full-audit")
+        assert merged.name == "full-audit"
+        assert len(merged.tasks) == 2
+        assert merged.tasks[0].action == "review"
+        assert merged.tasks[1].action == "security"
+
+    def test_compose_requires_shared_assistant(self):
+        a1 = CodeAssistant(client=MockLLMClient())
+        a2 = CodeAssistant(client=MockLLMClient())
+        p1 = DevProgram("one", a1).add("review", "review")
+        p2 = DevProgram("two", a2).add("security", "security")
+        with pytest.raises(ValueError, match="same CodeAssistant"):
+            DevProgram.compose(p1, p2)

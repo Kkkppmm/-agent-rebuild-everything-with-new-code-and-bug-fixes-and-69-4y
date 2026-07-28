@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
@@ -162,6 +163,35 @@ class DevProgram:
         """Serialize the program to JSON."""
         return json.dumps(self.to_dict(), indent=indent)
 
+    def to_yaml(self) -> str:
+        """Serialize the program to YAML."""
+        try:
+            import yaml
+        except ImportError as exc:
+            raise ImportError(
+                "PyYAML is required for YAML programs. Install with: pip install 'devai[yaml]'"
+            ) from exc
+        return yaml.safe_dump(self.to_dict(), sort_keys=False, default_flow_style=False)
+
+    @classmethod
+    def compose(
+        cls,
+        *programs: DevProgram,
+        name: str | None = None,
+    ) -> DevProgram:
+        """Merge multiple programs into a single sequential workflow."""
+        if not programs:
+            raise ValueError("compose() requires at least one program")
+        assistant = programs[0].assistant
+        for program in programs[1:]:
+            if program.assistant is not assistant:
+                raise ValueError("All programs must share the same CodeAssistant instance")
+        merged_name = name or "-".join(program.name for program in programs)
+        tasks: list[ProgramTask] = []
+        for program in programs:
+            tasks.extend(program.tasks)
+        return cls(name=merged_name, assistant=assistant, tasks=tasks)
+
     def validate(self) -> list[str]:
         """Validate program structure and return a list of error messages."""
         errors: list[str] = []
@@ -193,8 +223,12 @@ class DevProgram:
         return not self.validate()
 
     def save(self, path: str | Path) -> None:
-        """Save the program to a JSON file."""
-        Path(path).write_text(self.to_json(), encoding="utf-8")
+        """Save the program to a JSON or YAML file (based on extension)."""
+        path = Path(path)
+        if path.suffix in {".yaml", ".yml"}:
+            path.write_text(self.to_yaml(), encoding="utf-8")
+        else:
+            path.write_text(self.to_json(), encoding="utf-8")
 
     def _resolve_kwargs(self, kwargs: dict[str, Any], context: dict[str, str]) -> dict[str, Any]:
         resolved: dict[str, Any] = {}
@@ -284,7 +318,8 @@ class DevProgram:
             if async_handler is not None:
                 output = await async_handler(primary, **kwargs)
             else:
-                output = self._handler(task.action)(primary, **kwargs)
+                handler = self._handler(task.action)
+                output = await asyncio.to_thread(handler, primary, **kwargs)
             results.append(ProgramResult(name=task.name, action=task.action, output=output))
             context[task.name] = output
         return results

@@ -117,6 +117,36 @@ class DevRuntime:
             return self._programs[program].run(context or {})
         return self.preset(program).run(context or {})
 
+    async def arun(
+        self,
+        program: DevProgram | str,
+        context: dict[str, str] | None = None,
+    ) -> list[ProgramResult]:
+        """Run a program asynchronously."""
+        if isinstance(program, DevProgram):
+            return await program.arun(context or {})
+        path = Path(program)
+        if path.exists() and path.is_file():
+            return await self.load_program(path).arun(context or {})
+        if program in self._programs:
+            return await self._programs[program].arun(context or {})
+        return await self.preset(program).arun(context or {})
+
+    def dry_run(
+        self,
+        program: DevProgram | str,
+        context: dict[str, str] | None = None,
+    ) -> list:
+        """Preview program steps without calling the LLM."""
+        if isinstance(program, DevProgram):
+            return program.dry_run(context or {})
+        path = Path(program)
+        if path.exists() and path.is_file():
+            return self.load_program(path).dry_run(context or {})
+        if program in self._programs:
+            return self._programs[program].dry_run(context or {})
+        return self.preset(program).dry_run(context or {})
+
     def summarize(self, results: list[ProgramResult]) -> str:
         """Format program results as markdown."""
         return self.kit.summarize(results)
