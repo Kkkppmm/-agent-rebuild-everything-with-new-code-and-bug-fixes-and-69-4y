@@ -90,3 +90,34 @@ class TestDevProgram:
         program = DevProgram("async", assistant).add("review", "review")
         results = await program.arun({"code": "def bar(): pass"})
         assert results[0].output == "async review"
+
+    def test_from_yaml(self, tmp_path):
+        pytest.importorskip("yaml")
+        assistant = CodeAssistant(client=MockLLMClient(default_response="yaml ok"))
+        yaml_text = """
+name: yaml-program
+tasks:
+  - name: review
+    action: review
+"""
+        program = DevProgram.from_yaml(yaml_text, assistant)
+        assert program.name == "yaml-program"
+        results = program.run({"code": "x = 1"})
+        assert results[0].output == "yaml ok"
+
+        path = tmp_path / "program.yaml"
+        path.write_text(yaml_text)
+        loaded = DevProgram.from_file(path, assistant)
+        assert loaded.name == "yaml-program"
+
+    def test_openapi_action(self):
+        assistant = CodeAssistant(client=MockLLMClient(default_response="openapi spec"))
+        program = DevProgram("api", assistant).add("spec", "openapi")
+        results = program.run({"code": "class UserAPI: pass"})
+        assert results[0].output == "openapi spec"
+
+    def test_code_smell_action(self):
+        assistant = CodeAssistant(client=MockLLMClient(default_response="smells found"))
+        program = DevProgram("smells", assistant).add("smells", "code_smell")
+        results = program.run({"code": "def huge(): pass"})
+        assert results[0].output == "smells found"

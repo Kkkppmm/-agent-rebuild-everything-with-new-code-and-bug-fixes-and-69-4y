@@ -16,8 +16,11 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **CLI** — Command-line interface for common developer workflows
 - **Pipeline** — Composable review/debug/test workflows
 - **DevProgram** — Declarative JSON programs for scripted multi-step AI workflows
-- **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
+- **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review, CI gate)
 - **Program Presets** — Ready-made workflows for common developer tasks
+- **CI Reporting** — Format structured reviews as GitHub PR comments and Actions annotations
+- **Token & Cost Estimation** — Budget LLM usage before sending prompts
+- **YAML Programs** — Load DevProgram workflows from YAML files
 - **OpenAI Adapter** — Optional official OpenAI SDK integration
 
 ## Installation
@@ -27,6 +30,9 @@ pip install devai
 
 # With OpenAI SDK support
 pip install "devai[openai]"
+
+# With YAML program support
+pip install "devai[yaml]"
 
 # Development
 pip install -e ".[dev]"
@@ -153,6 +159,44 @@ kit = DevKit.from_client(MockLLMClient(), project_path="./my-app")
 print(kit.review_project(query="authentication"))
 ```
 
+## CI Integration
+
+```python
+from devai import CodeAssistant, report_from_review, MockLLMClient
+
+assistant = CodeAssistant(client=MockLLMClient(...))
+review = assistant.structured_review(open("app.py").read())
+report = report_from_review(review, fail_below=6)
+
+# Post to GitHub PR
+print(report.to_github_comment())
+
+# Use in GitHub Actions
+for annotation in report.to_github_annotations():
+    print(annotation)
+```
+
+```bash
+# CLI: generate a CI report
+devai ci-report app.py --mode review --fail-below 6
+devai ci-report app.py --mode security --format json
+devai kit ci-gate path/to/app.py
+```
+
+## Token & Cost Estimation
+
+```python
+from devai.utils import estimate_tokens, estimate_cost
+
+text = open("large_prompt.txt").read()
+print(estimate_tokens(text))  # ~token count
+print(estimate_cost(text, model="gpt-4o-mini"))
+```
+
+```bash
+devai tokens path/to/prompt.txt --model gpt-4o-mini
+```
+
 ## DevProgram (Scripted Workflows)
 
 ```python
@@ -169,9 +213,22 @@ program = (
 )
 results = program.run({"code": open("app.py").read()})
 
-# Or load from JSON
-program = DevProgram.from_file("audit.json", assistant)
+# Or load from JSON or YAML
+program = DevProgram.from_file("audit.yaml", assistant)
 print(program.run_and_summarize({"code": "..."}))
+```
+
+Example `audit.yaml`:
+
+```yaml
+name: pre-commit-audit
+tasks:
+  - name: review
+    action: review
+  - name: security
+    action: security
+  - name: smells
+    action: code_smell
 ```
 
 Example `audit.json`:
@@ -228,12 +285,17 @@ devai generate "REST endpoint for user profiles" --language python
 devai fix-lint path/to/module.py "E501 line too long"
 devai deps requirements.txt --context "production web app"
 devai architecture path/to/main.py --context "microservice"
+devai openapi path/to/routes.py --context "REST API v2"
+devai smells path/to/module.py --focus "complexity, duplication"
+devai tokens path/to/prompt.txt --model gpt-4o-mini
+devai ci-report path/to/app.py --mode review --fail-below 6
 devai agent "Refactor the auth module"
 devai run audit.json --code path/to/app.py
 devai presets
 devai kit audit path/to/app.py
 devai kit pre-commit path/to/app.py
 devai kit pr-review --project ./my-app --diff "$(git diff)"
+devai kit ci-gate path/to/app.py
 ```
 
 ## Configuration

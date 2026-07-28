@@ -15,6 +15,7 @@ from devai.prompts import (
     CHANGELOG,
     CODE_GEN,
     CODE_REVIEW,
+    CODE_SMELL,
     CODE_TRANSLATE,
     COMMIT_MESSAGE,
     DEBUG,
@@ -27,6 +28,7 @@ from devai.prompts import (
     FIX_LINT,
     LOG_ANALYSIS,
     MIGRATION_PLAN,
+    OPENAPI_GEN,
     PERFORMANCE_REVIEW,
     PR_DESCRIPTION,
     README_GEN,
@@ -180,6 +182,18 @@ class CodeAssistant:
     def architecture(self, code: str, context: str = "") -> str:
         """Describe codebase architecture with optional Mermaid diagram."""
         return self._run_chain(ARCHITECTURE, code=code, context=context)
+
+    def openapi(self, code: str, context: str = "") -> str:
+        """Generate an OpenAPI 3.0 specification from API code or description."""
+        return self._run_chain(OPENAPI_GEN, code=code, context=context)
+
+    def code_smell(
+        self,
+        code: str,
+        focus: str = "readability, coupling, complexity, duplication",
+    ) -> str:
+        """Identify code smells and anti-patterns with refactoring suggestions."""
+        return self._run_chain(CODE_SMELL, code=code, focus=focus)
 
     def structured_review(self, code: str) -> CodeReviewResult:
         """Return a structured code review as a Pydantic model."""

@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import re
 
+from devai.utils.cost import estimate_cost
 from devai.utils.diff import get_git_diff, parse_changed_files, read_diff, summarize_diff
+from devai.utils.tokens import estimate_tokens, truncate_to_tokens
 
 __all__ = [
+    "estimate_cost",
     "estimate_tokens",
     "extract_code_blocks",
     "get_git_diff",
@@ -17,11 +20,6 @@ __all__ = [
 ]
 
 
-def estimate_tokens(text: str) -> int:
-    """Rough token estimate (1 token ≈ 4 characters for English)."""
-    return max(1, len(text) // 4)
-
-
 def extract_code_blocks(text: str, language: str | None = None) -> list[str]:
     """Extract fenced code blocks from markdown text."""
     if language:
@@ -29,11 +27,3 @@ def extract_code_blocks(text: str, language: str | None = None) -> list[str]:
     else:
         pattern = r"```(?:\w+)?\n(.*?)```"
     return re.findall(pattern, text, re.DOTALL)
-
-
-def truncate_to_tokens(text: str, max_tokens: int) -> str:
-    """Truncate text to approximately max_tokens."""
-    max_chars = max_tokens * 4
-    if len(text) <= max_chars:
-        return text
-    return text[:max_chars] + "\n... [truncated]"

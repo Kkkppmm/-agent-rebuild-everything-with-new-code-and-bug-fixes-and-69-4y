@@ -160,6 +160,14 @@ class TestCodeAssistant:
         result = assistant.architecture(SAMPLE_CODE, context="microservice")
         assert result == "Analysis complete."
 
+    def test_openapi(self, assistant):
+        result = assistant.openapi(SAMPLE_CODE, context="REST API v1")
+        assert result == "Analysis complete."
+
+    def test_code_smell(self, assistant):
+        result = assistant.code_smell(SAMPLE_CODE, focus="complexity")
+        assert result == "Analysis complete."
+
     def test_structured_review(self):
         json_response = (
             '{"summary": "Good code", "score": 9, '

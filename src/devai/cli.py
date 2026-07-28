@@ -175,6 +175,56 @@ def cmd_architecture(args: argparse.Namespace) -> None:
     print(assistant.architecture(code, context=args.context))
 
 
+def cmd_openapi(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.openapi(code, context=args.context))
+
+
+def cmd_smells(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+    print(assistant.code_smell(code, focus=args.focus))
+
+
+def cmd_tokens(args: argparse.Namespace) -> None:
+    from devai.utils import estimate_cost, estimate_tokens
+
+    text = _read_input(args.text)
+    tokens = estimate_tokens(text)
+    print(f"Estimated tokens: {tokens}")
+    if args.model:
+        cost = estimate_cost(text, model=args.model)
+        print(f"Estimated cost ({args.model}): ${cost['estimated_cost_usd']:.6f}")
+
+
+def cmd_ci_report(args: argparse.Namespace) -> None:
+    from devai.ci import report_from_program, report_from_review, report_from_security
+
+    assistant = _get_assistant(args)
+    code = _read_input(args.code)
+
+    if args.mode == "review":
+        report = report_from_review(
+            assistant.structured_review(code),
+            fail_below=args.fail_below,
+        )
+    elif args.mode == "security":
+        report = report_from_security(assistant.structured_security(code))
+    elif args.mode == "program":
+        program = DevProgram.from_file(args.program, assistant)
+        results = program.run({"code": code})
+        report = report_from_program(results)
+    else:
+        print(f"Unknown mode: {args.mode}", file=sys.stderr)
+        sys.exit(1)
+
+    if args.format == "json":
+        print(report.to_json())
+    else:
+        print(report.to_github_comment())
+
+
 def cmd_agent(args: argparse.Namespace) -> None:
     client = MockLLMClient() if args.mock else _get_assistant(args).client
     registry = ToolRegistry()
@@ -220,6 +270,9 @@ def cmd_kit(args: argparse.Namespace) -> None:
         "pr-review": lambda: kit.review_pr(
             diff=_read_input(args.diff) if args.diff else None,
             code=code,
+        ),
+        "ci-gate": lambda: kit.preset("ci-gate").run_and_summarize(
+            {"code": kit._read_code(code)}
         ),
     }
     if args.workflow not in handlers:
@@ -367,11 +420,48 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", default="", help="Additional context")
     p.set_defaults(func=cmd_architecture)
 
+    p = sub.add_parser("openapi", help="Generate OpenAPI 3.0 specification")
+    p.add_argument("code", help="API code or description")
+    p.add_argument("--context", default="", help="Additional context")
+    p.set_defaults(func=cmd_openapi)
+
+    p = sub.add_parser("smells", help="Detect code smells and anti-patterns")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument(
+        "--focus",
+        default="readability, coupling, complexity, duplication",
+        help="Focus areas for smell detection",
+    )
+    p.set_defaults(func=cmd_smells)
+
+    p = sub.add_parser("tokens", help="Estimate token count and cost")
+    p.add_argument("text", help="Text or file path")
+    p.add_argument("--model", help="Model for cost estimation")
+    p.set_defaults(func=cmd_tokens)
+
+    p = sub.add_parser("ci-report", help="Generate CI report for GitHub Actions")
+    p.add_argument("code", help="Code or file path")
+    p.add_argument(
+        "--mode",
+        choices=["review", "security", "program"],
+        default="review",
+        help="Report mode",
+    )
+    p.add_argument("--program", help="Program file for program mode")
+    p.add_argument("--fail-below", type=int, default=5, help="Fail review below score")
+    p.add_argument(
+        "--format",
+        choices=["comment", "json"],
+        default="comment",
+        help="Output format",
+    )
+    p.set_defaults(func=cmd_ci_report)
+
     p = sub.add_parser("agent", help="Run coding agent")
     p.add_argument("task", help="Task description")
     p.set_defaults(func=cmd_agent)
 
-    p = sub.add_parser("run", help="Run a DevAI program from JSON")
+    p = sub.add_parser("run", help="Run a DevAI program from JSON or YAML")
     p.add_argument("program", help="Program JSON file")
     p.add_argument("--code", help="Code input or file path")
     p.add_argument("--diff", help="Diff input or file path")
@@ -389,7 +479,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("kit", help="Run a DevKit workflow")
     p.add_argument(
         "workflow",
-        choices=["audit", "pre-commit", "release", "onboard", "pr-review"],
+        choices=["audit", "pre-commit", "release", "onboard", "pr-review", "ci-gate"],
         help="Workflow to run",
     )
     p.add_argument("code", nargs="?", help="Code or file path")

@@ -255,3 +255,24 @@ STRUCTURED_PERFORMANCE = PromptTemplate(
     template="Analyze performance and return structured JSON:\n\n```\n$code\n```\n\nContext: $context",
     input_variables=["code", "context"],
 )
+
+OPENAPI_GEN = PromptTemplate(
+    system="You are an API design expert. Generate valid OpenAPI 3.0 YAML specifications.",
+    template=(
+        "Generate an OpenAPI 3.0 specification for this API code or description:\n\n"
+        "```\n$code\n```\n\nAdditional context: $context"
+    ),
+    input_variables=["code", "context"],
+)
+
+CODE_SMELL = PromptTemplate(
+    system=(
+        "You are a code quality expert. Identify code smells, anti-patterns, "
+        "and maintainability issues with concrete refactoring suggestions."
+    ),
+    template=(
+        "Analyze this code for code smells and anti-patterns:\n\n```\n$code\n```\n\n"
+        "Focus areas: $focus"
+    ),
+    input_variables=["code", "focus"],
+)

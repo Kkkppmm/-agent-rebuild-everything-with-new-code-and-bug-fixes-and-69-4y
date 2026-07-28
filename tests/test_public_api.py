@@ -5,12 +5,13 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "1.1.0"
+        assert devai.__version__ == "1.2.0"
 
     def test_exports(self):
         expected = {
             "Agent",
             "BatchRunner",
+            "CIReport",
             "CodeAssistant",
             "CodeIssue",
             "CodeProject",
@@ -30,6 +31,10 @@ class TestPublicAPI:
             "SecurityFinding",
             "get_preset",
             "list_presets",
+            "report_from_performance",
+            "report_from_program",
+            "report_from_review",
+            "report_from_security",
             "__version__",
         }
         assert set(devai.__all__) == expected

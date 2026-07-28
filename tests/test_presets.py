@@ -38,3 +38,11 @@ class TestPresets:
         results = program.run({"code": "def foo(): pass"})
         assert len(results) == 3
         assert results[0].action == "explain"
+
+    def test_ci_gate_preset(self):
+        assistant = CodeAssistant(client=MockLLMClient(default_response="gate ok"))
+        program = get_preset("ci-gate", assistant)
+        assert program.name == "ci-gate"
+        results = program.run({"code": "def foo(): pass"})
+        assert len(results) == 3
+        assert results[2].action == "code_smell"
