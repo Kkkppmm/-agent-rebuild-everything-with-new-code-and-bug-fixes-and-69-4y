@@ -10,6 +10,7 @@ from devai.plugins import PluginRegistry
 from devai.presets import get_preset, list_presets
 from devai.program import DevProgram, ProgramResult, ProgramTask
 from devai.project import CodeProject
+from devai.runtime import DevRuntime
 from devai.sandbox import CodeSandbox, SandboxResult
 from devai.schemas import (
     CodeIssue,
@@ -20,7 +21,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 __all__ = [
     "Agent",
     "BatchRunner",
@@ -35,6 +36,7 @@ __all__ = [
     "DevKit",
     "DevPipeline",
     "DevProgram",
+    "DevRuntime",
     "EmbeddingClient",
     "LLMClient",
     "MockEmbeddingClient",

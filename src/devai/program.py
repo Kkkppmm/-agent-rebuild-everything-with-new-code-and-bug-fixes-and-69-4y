@@ -82,6 +82,7 @@ class DevProgram:
             "incident_triage",
             "dependency_upgrade",
             "summarize_changes",
+            "readme",
         }
     )
 
@@ -149,6 +150,36 @@ class DevProgram:
         """Serialize the program to JSON."""
         return json.dumps(self.to_dict(), indent=indent)
 
+    def validate(self) -> list[str]:
+        """Validate program structure and return a list of error messages."""
+        errors: list[str] = []
+        if not self.name.strip():
+            errors.append("Program name is required")
+        if not self.tasks:
+            errors.append("Program must have at least one task")
+        seen_names: set[str] = set()
+        for index, task in enumerate(self.tasks):
+            prefix = f"Task {index + 1}"
+            if not task.name.strip():
+                errors.append(f"{prefix}: name is required")
+            elif task.name in seen_names:
+                errors.append(f"{prefix}: duplicate task name '{task.name}'")
+            else:
+                seen_names.add(task.name)
+            if not task.action.strip():
+                errors.append(f"{prefix}: action is required")
+            elif task.action not in self.SUPPORTED_ACTIONS:
+                errors.append(
+                    f"{prefix}: unsupported action '{task.action}'"
+                )
+            if not task.input_key.strip():
+                errors.append(f"{prefix}: input_key is required")
+        return errors
+
+    def is_valid(self) -> bool:
+        """Return True if the program passes validation."""
+        return not self.validate()
+
     def save(self, path: str | Path) -> None:
         """Save the program to a JSON file."""
         Path(path).write_text(self.to_json(), encoding="utf-8")
@@ -186,6 +217,7 @@ class DevProgram:
             "incident_triage": self.assistant.incident_triage,
             "dependency_upgrade": self.assistant.dependency_upgrade,
             "summarize_changes": self.assistant.summarize_changes,
+            "readme": self.assistant.readme,
         }
         handler = handlers.get(action)
         if handler is None:

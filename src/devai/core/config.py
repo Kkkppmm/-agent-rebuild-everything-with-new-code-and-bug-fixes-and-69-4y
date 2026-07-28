@@ -44,6 +44,57 @@ class DevAIConfig:
                 "API key is required. Set DEVAI_API_KEY or pass api_key to DevAIConfig."
             )
 
+    @classmethod
+    def for_openai(
+        cls,
+        api_key: str | None = None,
+        model: str = "gpt-4o-mini",
+        **kwargs: Any,
+    ) -> DevAIConfig:
+        """Create config for the OpenAI API."""
+        return cls(
+            api_key=api_key,
+            base_url="https://api.openai.com/v1",
+            model=model,
+            **kwargs,
+        )
+
+    @classmethod
+    def for_ollama(
+        cls,
+        model: str = "llama3.2",
+        base_url: str = "http://localhost:11434/v1",
+        **kwargs: Any,
+    ) -> DevAIConfig:
+        """Create config for a local Ollama server (OpenAI-compatible endpoint)."""
+        return cls(
+            api_key="ollama",
+            base_url=base_url,
+            model=model,
+            **kwargs,
+        )
+
+    @classmethod
+    def from_provider(
+        cls,
+        provider: str,
+        *,
+        model: str | None = None,
+        api_key: str | None = None,
+        **kwargs: Any,
+    ) -> DevAIConfig:
+        """Create config from a named provider: openai, ollama, or mock."""
+        normalized = provider.lower().strip()
+        if normalized == "openai":
+            return cls.for_openai(api_key=api_key, model=model or "gpt-4o-mini", **kwargs)
+        if normalized == "ollama":
+            return cls.for_ollama(model=model or "llama3.2", **kwargs)
+        if normalized == "mock":
+            return cls(api_key="mock", model=model or "mock-model", **kwargs)
+        raise ConfigError(
+            f"Unknown provider '{provider}'. Supported: openai, ollama, mock"
+        )
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "base_url": self.base_url,

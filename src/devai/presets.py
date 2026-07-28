@@ -98,6 +98,20 @@ PRESET_DEFINITIONS: dict[str, dict[str, Any]] = {
             },
         ],
     },
+    "docs-gen": {
+        "name": "docs-gen",
+        "description": "Generate documentation: explain, docstrings, and README outline",
+        "tasks": [
+            {"name": "explain", "action": "explain"},
+            {"name": "docstring", "action": "docstring"},
+            {
+                "name": "readme",
+                "action": "readme",
+                "input_key": "project",
+                "kwargs": {"description": "$description"},
+            },
+        ],
+    },
 }
 
 

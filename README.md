@@ -21,8 +21,10 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
 - **CI Integration** — GitHub Actions annotations, PR comments, and CI gate helpers
 - **Cost Estimation** — Token counting and per-model cost estimates
-- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update)
-- **OpenAI Adapter** — Optional official OpenAI SDK integration
+- **Program Presets** — Ready-made workflows (pre-commit, release, CI gate, incident response, dependency update, docs-gen)
+- **DevRuntime** — One-line bootstrap for programs, presets, and quick dev workflows
+- **Local LLM Support** — Ollama and any OpenAI-compatible endpoint via config presets
+- **Program Validation** — Validate JSON/YAML program files before execution
 
 ## Installation
 
@@ -85,6 +87,25 @@ from devai import CodeAssistant, MockLLMClient
 client = MockLLMClient(default_response="This code looks good.")
 assistant = CodeAssistant(client=client)
 print(assistant.review("def foo(): pass"))
+```
+
+## DevRuntime (Fastest Start)
+
+```python
+from devai import DevRuntime
+
+# Bootstrap everything in one line (mock mode — no API key)
+runtime = DevRuntime.create(use_mock=True)
+
+print(runtime.review("def add(a, b): return a + b"))
+print(runtime.generate("a context manager for temp files"))
+
+# Run a built-in preset program
+results = runtime.run("pre-commit", {"code": "def foo(): pass"})
+print(runtime.summarize(results))
+
+# Local Ollama (requires running Ollama server)
+# runtime = DevRuntime.create(provider="ollama", model="llama3.2")
 ```
 
 ## Agents
