@@ -13,6 +13,7 @@ class TestPresets:
         names = {p["name"] for p in presets}
         assert "pre-commit" in names
         assert "release" in names
+        assert "ci-gate" in names
 
     def test_get_preset(self):
         assistant = CodeAssistant(client=MockLLMClient(default_response="ok"))

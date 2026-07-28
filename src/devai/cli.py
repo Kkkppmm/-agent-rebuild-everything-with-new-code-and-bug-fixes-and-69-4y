@@ -217,6 +217,7 @@ def cmd_kit(args: argparse.Namespace) -> None:
         "pre-commit": lambda: kit.pre_commit(code),
         "release": lambda: kit.release_check(code),
         "onboard": lambda: kit.onboard(code),
+        "ci-gate": lambda: kit.ci_gate(code).to_github_comment(),
         "pr-review": lambda: kit.review_pr(
             diff=_read_input(args.diff) if args.diff else None,
             code=code,
@@ -226,6 +227,24 @@ def cmd_kit(args: argparse.Namespace) -> None:
         print(f"Unknown workflow: {args.workflow}", file=sys.stderr)
         sys.exit(1)
     print(handlers[args.workflow]())
+
+
+def cmd_ci(args: argparse.Namespace) -> None:
+    kit = DevKit.from_client(_get_assistant(args).client)
+    code = _read_input(args.code) if args.code else None
+    if args.preset:
+        report = kit.ci_report(args.preset, {"code": code or ""})
+    else:
+        report = kit.ci_gate(code)
+    if args.format == "comment":
+        print(report.to_github_comment())
+    elif args.format == "annotations":
+        for line in report.to_github_actions_annotations():
+            print(line)
+    else:
+        print(report.to_github_comment())
+    if args.fail and not report.passed:
+        sys.exit(1)
 
 
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
@@ -389,13 +408,29 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("kit", help="Run a DevKit workflow")
     p.add_argument(
         "workflow",
-        choices=["audit", "pre-commit", "release", "onboard", "pr-review"],
+        choices=["audit", "pre-commit", "release", "onboard", "pr-review", "ci-gate"],
         help="Workflow to run",
     )
     p.add_argument("code", nargs="?", help="Code or file path")
     p.add_argument("--project", help="Project directory for context")
     p.add_argument("--diff", help="Diff for pr-review workflow")
     p.set_defaults(func=cmd_kit)
+
+    p = sub.add_parser("ci", help="Generate CI report for GitHub PR or Actions")
+    p.add_argument("code", nargs="?", help="Code or file path")
+    p.add_argument("--preset", help="Run a preset program instead of ci-gate")
+    p.add_argument(
+        "--format",
+        choices=["comment", "annotations"],
+        default="comment",
+        help="Output format",
+    )
+    p.add_argument(
+        "--fail",
+        action="store_true",
+        help="Exit with code 1 if the CI gate fails",
+    )
+    p.set_defaults(func=cmd_ci)
 
     return parser
 

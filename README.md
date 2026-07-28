@@ -18,6 +18,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevProgram** — Declarative JSON programs for scripted multi-step AI workflows
 - **DevKit** — Unified developer workspace with built-in presets (pre-commit, release, onboarding, PR review)
 - **Program Presets** — Ready-made workflows for common developer tasks
+- **CI Integration** — GitHub PR comments and Actions annotation helpers
 - **OpenAI Adapter** — Optional official OpenAI SDK integration
 
 ## Installation
@@ -28,8 +29,11 @@ pip install devai
 # With OpenAI SDK support
 pip install "devai[openai]"
 
+# With YAML program support
+pip install "devai[yaml]"
+
 # Development
-pip install -e ".[dev]"
+pip install -e ".[dev,yaml]"
 ```
 
 ## Quick Start
@@ -174,6 +178,32 @@ program = DevProgram.from_file("audit.json", assistant)
 print(program.run_and_summarize({"code": "..."}))
 ```
 
+## CI Integration
+
+```python
+from devai import DevKit, MockLLMClient, report_from_structured_review
+
+kit = DevKit.from_client(MockLLMClient(default_response="Looks good."))
+
+# Run CI gate and get a report
+report = kit.ci_gate("def divide(a, b): return a / b")
+print(report.to_github_comment())       # Markdown for PR comments
+report.write_github_actions_annotations()  # Print ::error/::warning lines
+
+# Structured review with score gating
+from devai import CodeReviewResult
+review = CodeReviewResult(summary="OK", score=8)
+report = report_from_structured_review(review, min_score=7)
+assert report.passed
+```
+
+```bash
+# CLI: generate CI report and fail on gate
+devai ci path/to/app.py --fail
+devai ci path/to/app.py --format annotations
+devai kit ci-gate path/to/app.py
+```
+
 Example `audit.json`:
 
 ```json
@@ -233,7 +263,9 @@ devai run audit.json --code path/to/app.py
 devai presets
 devai kit audit path/to/app.py
 devai kit pre-commit path/to/app.py
+devai kit ci-gate path/to/app.py
 devai kit pr-review --project ./my-app --diff "$(git diff)"
+devai ci path/to/app.py --fail
 ```
 
 ## Configuration

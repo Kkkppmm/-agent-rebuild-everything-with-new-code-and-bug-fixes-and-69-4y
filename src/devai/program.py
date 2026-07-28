@@ -113,9 +113,25 @@ class DevProgram:
         return cls.from_dict(json.loads(text), assistant)
 
     @classmethod
+    def from_yaml(cls, text: str, assistant: CodeAssistant) -> DevProgram:
+        """Load a program from YAML text."""
+        try:
+            import yaml
+        except ImportError:
+            raise ImportError(
+                "PyYAML is required for YAML programs. Install with: pip install pyyaml"
+            ) from None
+        return cls.from_dict(yaml.safe_load(text), assistant)
+
+    @classmethod
     def from_file(cls, path: str | Path, assistant: CodeAssistant) -> DevProgram:
-        """Load a program from a JSON file."""
-        return cls.from_json(Path(path).read_text(encoding="utf-8"), assistant)
+        """Load a program from a JSON or YAML file."""
+        file_path = Path(path)
+        text = file_path.read_text(encoding="utf-8")
+        suffix = file_path.suffix.lower()
+        if suffix in (".yaml", ".yml"):
+            return cls.from_yaml(text, assistant)
+        return cls.from_json(text, assistant)
 
     def to_dict(self) -> dict[str, Any]:
         """Serialize the program to a dictionary."""

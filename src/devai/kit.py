@@ -11,6 +11,7 @@ from devai.core.client import LLMClientProtocol
 from devai.core.config import DevAIConfig
 from devai.pipeline import DevPipeline
 from devai.presets import get_preset, list_presets
+from devai.ci import CIReport, report_from_program_results
 from devai.program import DevProgram, ProgramResult
 from devai.project import CodeProject
 from devai.tools.code_utils import git_diff
@@ -148,3 +149,20 @@ class DevKit:
         """Format program results as markdown."""
         parts = [f"## {r.name} ({r.action})\n\n{r.output}" for r in results]
         return "\n\n---\n\n".join(parts)
+
+    def ci_gate(self, code_or_path: str | None = None) -> CIReport:
+        """Run the ci-gate preset and return a CIReport."""
+        code = self._read_code(code_or_path)
+        results = self.preset("ci-gate").run({"code": code})
+        return report_from_program_results(results, title="DevAI CI Gate")
+
+    def ci_report(
+        self,
+        program: DevProgram | str,
+        context: dict[str, str] | None = None,
+        *,
+        title: str = "DevAI CI Report",
+    ) -> CIReport:
+        """Run a program and return a CIReport for CI integration."""
+        results = self.run_program(program, context)
+        return report_from_program_results(results, title=title)

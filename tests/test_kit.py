@@ -83,8 +83,13 @@ class TestDevKit:
         pipeline = kit.pipeline()
         assert pipeline.assistant is kit.assistant
 
-    def test_program_builder(self):
-        kit = DevKit.from_client(MockLLMClient())
-        program = kit.program("custom").add("review", "review")
-        assert program.name == "custom"
-        assert len(program.tasks) == 1
+    def test_ci_gate(self):
+        kit = DevKit.from_client(MockLLMClient(default_response="gated"))
+        report = kit.ci_gate("def foo(): pass")
+        assert report.passed
+        assert "DevAI CI Gate" in report.title
+
+    def test_ci_report(self):
+        kit = DevKit.from_client(MockLLMClient(default_response="reported"))
+        report = kit.ci_report("onboarding", {"code": "pass"})
+        assert len(report.sections) == 3

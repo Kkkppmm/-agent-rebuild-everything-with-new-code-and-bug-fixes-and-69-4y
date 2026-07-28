@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "devai"
-version = "1.1.0"
+version = "1.2.0"
 description = "A Python AI library for developers and programmers"
 readme = "README.md"
 license = "MIT"
@@ -34,6 +34,7 @@ dev = [
     "ruff>=0.4.0",
 ]
 openai = ["openai>=1.0.0"]
+yaml = ["pyyaml>=6.0.0"]
 
 [project.scripts]
 devai = "devai.cli:main"
