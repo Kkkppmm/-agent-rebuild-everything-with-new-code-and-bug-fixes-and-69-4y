@@ -31,5 +31,9 @@ class RateLimitError(DevAIError):
     """Raised when a rate limit is exceeded."""
 
 
+class BudgetExceededError(DevAIError):
+    """Raised when a token or cost budget is exceeded."""
+
+
 class CircuitBreakerError(DevAIError):
     """Raised when a circuit breaker is open."""

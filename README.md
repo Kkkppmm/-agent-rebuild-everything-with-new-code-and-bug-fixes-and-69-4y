@@ -43,6 +43,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Benchmarking** — Measure LLM latency, p95, and throughput with `BenchmarkRunner`
 - **DevDoctor** — Environment diagnostics for Python version, dependencies, API keys, and provider health
 - **ProgramReport** — Export program and workflow results to JSON or Markdown
+- **Disk Cache** — `DiskCachedLLMClient` persists LLM responses to disk for faster dev iteration
+- **Token Budget** — `TokenBudget` and `BudgetedLLMClient` track and enforce token/cost limits
+- **DevWatcher** — Poll directories and auto-run presets when code files change
 
 ## Installation
 

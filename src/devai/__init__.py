@@ -5,6 +5,7 @@ from devai.app import DevApp
 from devai.ci import CIReporter
 from devai.assistant import CodeAssistant
 from devai.core import BatchRunner, DevAIConfig, EmbeddingClient, LLMClient, MockEmbeddingClient, MockLLMClient
+from devai.core import DiskCachedLLMClient, BudgetExceededError
 from devai.kit import DevKit
 from devai.pipeline import DevPipeline
 from devai.plugins import PluginRegistry
@@ -23,8 +24,10 @@ from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
 from devai.trace import DevTrace, TraceEvent
 from devai.schedule import DevSchedule, ScheduleResult, ScheduledJob, cron_matches, validate_cron
-from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
+from devai.watch import DevWatcher, WatchEvent, WatchResult
+from devai.utils import TokenBudget, BudgetSnapshot, BudgetedLLMClient
 from devai.sandbox import CodeSandbox, SandboxResult
+from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -34,9 +37,12 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.2.0"
+__version__ = "2.3.0"
 __all__ = [
     "Agent",
+    "BudgetExceededError",
+    "BudgetedLLMClient",
+    "BudgetSnapshot",
     "BenchmarkResult",
     "BenchmarkRunner",
     "BenchmarkSample",
@@ -62,7 +68,9 @@ __all__ = [
     "ProgramReport",
     "DevSchedule",
     "DevTrace",
+    "DevWatcher",
     "DevWorkflow",
+    "DiskCachedLLMClient",
     "GitContext",
     "EmbeddingClient",
     "LLMClient",
@@ -79,7 +87,10 @@ __all__ = [
     "ScheduledJob",
     "SecurityAuditResult",
     "SecurityFinding",
+    "TokenBudget",
     "TraceEvent",
+    "WatchEvent",
+    "WatchResult",
     "WorkflowResult",
     "WorkflowStepResult",
     "assistant",
