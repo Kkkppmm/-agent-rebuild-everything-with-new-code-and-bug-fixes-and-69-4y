@@ -438,6 +438,31 @@ cost = estimate_message_cost(
 print(format_cost(cost))
 ```
 
+## Doctor & Reports
+
+```python
+from devai import DevDoctor, ProgramReport, quickstart
+
+# Diagnose your environment
+doctor = DevDoctor()
+print(doctor.summary())
+
+# Run a program and export results
+runtime = quickstart(use_mock=True)
+results = runtime.run("pre-commit", {"code": "def foo(): pass"})
+print(runtime.report(results, format="markdown"))
+print(runtime.report(results, format="json"))
+
+report = ProgramReport.from_program_results(results, program_name="pre-commit")
+print(report.to_markdown())
+```
+
+```bash
+devai doctor
+devai doctor --json
+devai report pre-commit app.py --format json
+```
+
 ## OpenAI SDK Adapter
 
 ```python
