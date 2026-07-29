@@ -29,6 +29,7 @@ from devai.prompts import (
     INCIDENT_TRIAGE,
     LOG_ANALYSIS,
     MIGRATION_PLAN,
+    OPENAPI_REVIEW,
     PERFORMANCE_REVIEW,
     PR_DESCRIPTION,
     README_GEN,
@@ -193,6 +194,10 @@ class CodeAssistant:
     def summarize_changes(self, diff: str, audience: str = "developers") -> str:
         """Summarize a diff for PR or release notes."""
         return self._run_chain(SUMMARIZE_CHANGES, diff=diff, audience=audience)
+
+    def review_openapi(self, spec: str, context: str = "") -> str:
+        """Review an OpenAPI/Swagger specification."""
+        return self._run_chain(OPENAPI_REVIEW, spec=spec, context=context)
 
     def generate_and_verify(
         self,

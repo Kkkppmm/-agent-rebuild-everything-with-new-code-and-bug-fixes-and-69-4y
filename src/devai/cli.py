@@ -143,6 +143,33 @@ def cmd_api(args: argparse.Namespace) -> None:
     print(assistant.api_design(code, context=args.context))
 
 
+def cmd_openapi(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    spec = _read_input(args.spec)
+    print(assistant.review_openapi(spec, context=args.context))
+
+
+def cmd_symbols(args: argparse.Namespace) -> None:
+    from devai.index import CodeSymbolIndex
+
+    index = CodeSymbolIndex(args.directory)
+    if args.search:
+        symbols = index.search(args.search, kind=args.kind)
+        if not symbols:
+            print(f"No symbols matching '{args.search}'")
+            return
+        for symbol in symbols:
+            print(f"[{symbol.kind}] {symbol.qualified_name()} @ {symbol.path}:{symbol.lineno}")
+        return
+    if args.context:
+        print(index.to_context(args.context))
+        return
+    print(index.summary())
+    if args.verbose:
+        for symbol in index.symbols:
+            print(f"[{symbol.kind}] {symbol.qualified_name()} @ {symbol.path}:{symbol.lineno}")
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -781,6 +808,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("code", help="Code or file path")
     p.add_argument("--context", default="", help="Additional context")
     p.set_defaults(func=cmd_api)
+
+    p = sub.add_parser("openapi", help="Review an OpenAPI/Swagger specification")
+    p.add_argument("spec", help="OpenAPI spec or file path")
+    p.add_argument("--context", default="", help="Additional context")
+    p.set_defaults(func=cmd_openapi)
+
+    p = sub.add_parser("symbols", help="Index and search Python symbols in a project")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--search", help="Search symbols by name")
+    p.add_argument("--kind", choices=["function", "class", "method"], help="Filter by symbol kind")
+    p.add_argument("--context", help="Build LLM context for matching symbols")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all indexed symbols")
+    p.set_defaults(func=cmd_symbols)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")

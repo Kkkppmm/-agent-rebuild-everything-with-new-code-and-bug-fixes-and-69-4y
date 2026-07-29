@@ -287,3 +287,16 @@ SUMMARIZE_CHANGES = PromptTemplate(
     ),
     input_variables=["diff", "audience"],
 )
+
+OPENAPI_REVIEW = PromptTemplate(
+    system=(
+        "You are an API design and OpenAPI expert. Review specs for consistency, "
+        "security, versioning, and developer experience."
+    ),
+    template=(
+        "Review this OpenAPI specification for design issues, missing error responses, "
+        "security gaps, and improvements:\n\n```yaml\n$spec\n```\n\n"
+        "Context: $context"
+    ),
+    input_variables=["spec", "context"],
+)

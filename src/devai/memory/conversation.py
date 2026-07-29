@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from devai.core.models import Message, Role
 from devai.utils import estimate_tokens
 
@@ -50,3 +53,34 @@ class ConversationMemory:
 
     def __len__(self) -> int:
         return len(self.messages)
+
+    def to_dict(self) -> dict:
+        """Serialize memory to a JSON-compatible dict."""
+        return {
+            "max_tokens": self.max_tokens,
+            "messages": [
+                {"role": m.role.value, "content": m.content}
+                for m in self.messages
+            ],
+        }
+
+    def save(self, path: str | Path) -> None:
+        """Persist conversation memory to a JSON file."""
+        target = Path(path)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(json.dumps(self.to_dict(), indent=2), encoding="utf-8")
+
+    @classmethod
+    def from_dict(cls, data: dict) -> ConversationMemory:
+        """Restore memory from a serialized dict."""
+        mem = cls(max_tokens=data.get("max_tokens", 8000))
+        for item in data.get("messages", []):
+            role = Role(item["role"])
+            mem.messages.append(Message(role=role, content=item["content"]))
+        return mem
+
+    @classmethod
+    def load(cls, path: str | Path) -> ConversationMemory:
+        """Load conversation memory from a JSON file."""
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        return cls.from_dict(data)

@@ -54,6 +54,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Code Block Extraction** — Pull fenced code blocks from LLM responses with `extract_code_blocks()`
 - **Fallback Client** — `FallbackLLMClient` tries multiple providers/models in order on failure
 - **Patch Application** — Apply unified diffs from LLM output with `apply_unified_diff()`
+- **CodeSymbolIndex** — AST-based symbol indexer for Python projects with search and LLM context export
+- **Conversation Persistence** — Save and load `ConversationMemory` to JSON files
+- **OpenAPI Review** — Review OpenAPI/Swagger specs for design, security, and consistency issues
 
 ## Installation
 

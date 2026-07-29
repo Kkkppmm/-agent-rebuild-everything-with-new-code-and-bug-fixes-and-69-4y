@@ -23,6 +23,7 @@ from devai.health import HealthChecker, HealthResult, check_health
 from devai.report import ProgramReport
 from devai.export import export_program, export_program_to_file
 from devai.facade import DevAI
+from devai.index import CodeSymbolIndex, SymbolInfo
 from devai.interpolate import interpolate, interpolate_context
 from devai.library import ProgramEntry, ProgramLibrary
 from devai.quickstart import assistant, quickstart
@@ -43,7 +44,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.8.0"
+__version__ = "2.9.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -66,6 +67,7 @@ __all__ = [
     "ContextSection",
     "CodeReviewResult",
     "CodeSandbox",
+    "CodeSymbolIndex",
     "CoderAgent",
     "DevAI",
     "DevAIConfig",
@@ -111,6 +113,7 @@ __all__ = [
     "ScheduledJob",
     "SecurityAuditResult",
     "SecurityFinding",
+    "SymbolInfo",
     "TokenBudget",
     "TraceEvent",
     "WatchEvent",

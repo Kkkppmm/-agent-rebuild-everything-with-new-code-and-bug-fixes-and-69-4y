@@ -168,6 +168,10 @@ class TestCodeAssistant:
         result = assistant.summarize_changes("diff content", audience="reviewers")
         assert result == "Analysis complete."
 
+    def test_review_openapi(self, assistant):
+        result = assistant.review_openapi("openapi: 3.0.0\npaths: {}")
+        assert result == "Analysis complete."
+
     def test_generate_and_verify_success(self):
         code_response = "def add(a, b):\n    return a + b"
         client = MockLLMClient(default_response=code_response)
