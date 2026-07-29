@@ -50,6 +50,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PromptBuilder** — Structured prompt assembly with system/user messages, context, and few-shot examples
 - **ProgramLibrary** — Discover, search, and run JSON/YAML programs from a directory
 - **Program Export** — Export DevProgram files to standalone runnable Python scripts
+- **BatchReviewer** — Review multiple files or entire directories in parallel
+- **Code Block Extraction** — Pull fenced code blocks from LLM responses with `extract_code_blocks()`
 
 ## Installation
 

@@ -1,6 +1,7 @@
 """DevAI — A Python AI library for developers and programmers."""
 
 from devai.agents import Agent, CoderAgent
+from devai.batch_review import BatchReviewReport, BatchReviewer, FileReviewResult
 from devai.app import DevApp
 from devai.ci import CIReporter
 from devai.assistant import CodeAssistant
@@ -31,6 +32,7 @@ from devai.watch import DevWatcher, WatchEvent, WatchResult
 from devai.utils import TokenBudget, BudgetSnapshot, BudgetedLLMClient
 from devai.sandbox import CodeSandbox, SandboxResult
 from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
+from devai.output import CodeBlock, extract_code_blocks, extract_code_by_language, extract_first_code_block
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -40,7 +42,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.5.0"
+__version__ = "2.6.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -52,7 +54,10 @@ __all__ = [
     "CONFIG_FILENAMES",
     "HealthChecker",
     "HealthResult",
+    "BatchReviewReport",
+    "BatchReviewer",
     "BatchRunner",
+    "CodeBlock",
     "CIReporter",
     "CodeAssistant",
     "CodeIssue",
@@ -78,7 +83,11 @@ __all__ = [
     "DiskCachedLLMClient",
     "GitContext",
     "EmbeddingClient",
+    "extract_code_blocks",
+    "extract_code_by_language",
+    "extract_first_code_block",
     "export_program",
+    "FileReviewResult",
     "export_program_to_file",
     "LLMClient",
     "MockEmbeddingClient",

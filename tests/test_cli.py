@@ -97,3 +97,22 @@ class TestCLI:
         args = parser.parse_args(["--mock", "kit", "audit", "def foo(): pass"])
         assert args.command == "kit"
         assert args.workflow == "audit"
+
+    def test_batch_review_args(self):
+        parser = build_parser()
+        args = parser.parse_args(
+            ["--mock", "batch-review", "-d", "src", "--pattern", "*.py", "--markdown"]
+        )
+        assert args.command == "batch-review"
+        assert args.directory == "src"
+        assert args.pattern == "*.py"
+        assert args.markdown is True
+
+    def test_extract_blocks_args(self):
+        parser = build_parser()
+        args = parser.parse_args(
+            ["extract-blocks", "response.md", "--first", "--language", "python"]
+        )
+        assert args.command == "extract-blocks"
+        assert args.first is True
+        assert args.language == "python"

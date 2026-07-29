@@ -8,6 +8,7 @@ from pathlib import Path
 
 from devai import CodeAssistant, DevAIConfig, CIReporter
 from devai.agents import CoderAgent
+from devai.batch_review import BatchReviewer
 from devai.core import MockLLMClient
 from devai.kit import DevKit
 from devai.presets import list_presets
@@ -19,6 +20,7 @@ from devai.schedule import cron_matches, validate_cron
 from devai.library import ProgramLibrary
 from devai.export import export_program_to_file
 from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
+from devai.output import extract_code_blocks, extract_first_code_block
 
 
 def _read_input(path_or_code: str) -> str:
@@ -32,6 +34,54 @@ def cmd_review(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     code = _read_input(args.code)
     print(assistant.review(code))
+
+
+def cmd_batch_review(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    reviewer = BatchReviewer(assistant, max_workers=args.workers)
+    if args.directory:
+        report = reviewer.review_directory(
+            args.directory,
+            pattern=args.pattern,
+            recursive=not args.no_recursive,
+        )
+    else:
+        report = reviewer.review_files(args.files)
+    if args.markdown:
+        print(report.to_markdown())
+    else:
+        for result in report.results:
+            print(f"## {result.path}")
+            if result.error:
+                print(f"ERROR: {result.error}")
+            else:
+                print(result.review)
+            print()
+
+
+def cmd_extract_blocks(args: argparse.Namespace) -> None:
+    text = _read_input(args.text)
+    if args.first:
+        block = extract_first_code_block(text, language=args.language)
+        if block is None:
+            print("No code block found.", file=sys.stderr)
+            sys.exit(1)
+        print(block)
+        return
+    blocks = extract_code_blocks(text)
+    if not blocks:
+        print("No code blocks found.", file=sys.stderr)
+        sys.exit(1)
+    for i, block in enumerate(blocks, 1):
+        lang = block.language or "text"
+        if args.language and lang != args.language:
+            continue
+        if args.index and i != args.index:
+            continue
+        print(f"--- block {i} ({lang}) ---")
+        print(block.code)
+        if i < len(blocks):
+            print()
 
 
 def cmd_explain(args: argparse.Namespace) -> None:
@@ -634,6 +684,22 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("review", help="Review code")
     p.add_argument("code", help="Code or file path")
     p.set_defaults(func=cmd_review)
+
+    p = sub.add_parser("batch-review", help="Review multiple files or a directory")
+    p.add_argument("files", nargs="*", help="File paths to review")
+    p.add_argument("--directory", "-d", help="Review all files in a directory")
+    p.add_argument("--pattern", default="*.py", help="Glob pattern (with --directory)")
+    p.add_argument("--no-recursive", action="store_true", help="Do not scan subdirectories")
+    p.add_argument("--workers", type=int, default=4, help="Parallel review workers")
+    p.add_argument("--markdown", action="store_true", help="Output as Markdown report")
+    p.set_defaults(func=cmd_batch_review)
+
+    p = sub.add_parser("extract-blocks", help="Extract fenced code blocks from text")
+    p.add_argument("text", help="Text or file path containing code fences")
+    p.add_argument("--language", help="Filter by language tag")
+    p.add_argument("--first", action="store_true", help="Print only the first matching block")
+    p.add_argument("--index", type=int, help="Print only the block at this 1-based index")
+    p.set_defaults(func=cmd_extract_blocks)
 
     p = sub.add_parser("explain", help="Explain code")
     p.add_argument("code", help="Code or file path")

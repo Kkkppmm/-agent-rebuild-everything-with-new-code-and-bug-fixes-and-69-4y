@@ -5,15 +5,18 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "2.5.0"
+        assert devai.__version__ == "2.6.0"
 
     def test_exports(self):
         expected = {
             "Agent",
+            "BatchReviewReport",
+            "BatchReviewer",
             "BatchRunner",
             "BenchmarkResult",
             "BenchmarkRunner",
             "BenchmarkSample",
+            "CodeBlock",
             "CONFIG_FILENAMES",
             "CIReporter",
             "CodeAssistant",
@@ -47,6 +50,10 @@ class TestPublicAPI:
             "EmbeddingClient",
             "export_program",
             "export_program_to_file",
+            "extract_code_blocks",
+            "extract_code_by_language",
+            "extract_first_code_block",
+            "FileReviewResult",
             "GitContext",
             "HealthChecker",
             "HealthResult",
