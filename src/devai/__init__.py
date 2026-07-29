@@ -15,6 +15,7 @@ from devai.program_schema import program_schema
 from devai.project import CodeProject
 from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
+from devai.context import ContextSection, DevContext, PromptBuilder
 from devai.git_context import GitContext
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
 from devai.health import HealthChecker, HealthResult, check_health
@@ -37,7 +38,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.3.0"
+__version__ = "2.4.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -54,11 +55,13 @@ __all__ = [
     "CodeAssistant",
     "CodeIssue",
     "CodeProject",
+    "ContextSection",
     "CodeReviewResult",
     "CodeSandbox",
     "CoderAgent",
     "DevAIConfig",
     "DevApp",
+    "DevContext",
     "DevKit",
     "DevDoctor",
     "DevPipeline",
@@ -79,6 +82,7 @@ __all__ = [
     "PerfIssue",
     "PerfReviewResult",
     "PluginRegistry",
+    "PromptBuilder",
     "ProgramResult",
     "ProgramStepPlan",
     "ProgramTask",

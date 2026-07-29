@@ -46,6 +46,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Disk Cache** — `DiskCachedLLMClient` persists LLM responses to disk for faster dev iteration
 - **Token Budget** — `TokenBudget` and `BudgetedLLMClient` track and enforce token/cost limits
 - **DevWatcher** — Poll directories and auto-run presets when code files change
+- **DevContext** — Fluent builder for assembling LLM context from files, snippets, git diffs, and variables
+- **PromptBuilder** — Structured prompt assembly with system/user messages, context, and few-shot examples
 
 ## Installation
 

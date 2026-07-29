@@ -517,6 +517,32 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
             sys.exit(1)
 
 
+def cmd_context(args: argparse.Namespace) -> None:
+    from devai.context import DevContext
+
+    ctx = DevContext()
+    if args.base:
+        ctx.with_base(args.base)
+    if args.max_tokens:
+        ctx.with_max_tokens(args.max_tokens)
+    for path in args.file or []:
+        ctx.file(path)
+    for snippet in args.snippet or []:
+        lang, _, code = snippet.partition(":")
+        ctx.snippet(code, language=lang or "text")
+    if args.git:
+        ctx.git_diff(staged=args.staged, base=args.base_ref)
+    if args.text:
+        ctx.text(args.text)
+    for var in args.context or []:
+        key, _, value = var.partition("=")
+        ctx.vars(**{key: value})
+    output = ctx.build()
+    if args.tokens:
+        print(f"tokens: {ctx.token_count()}")
+    print(output)
+
+
 def cmd_doctor(args: argparse.Namespace) -> None:
     from devai.doctor import DevDoctor
 
@@ -864,6 +890,29 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--json", action="store_true", help="Output full benchmark JSON")
     p.set_defaults(func=cmd_benchmark)
+
+    p = sub.add_parser("context", help="Build and preview DevContext from files/snippets")
+    p.add_argument("--file", action="append", help="Source file to include")
+    p.add_argument(
+        "--snippet",
+        action="append",
+        metavar="LANG:CODE",
+        help="Code snippet as lang:code (e.g. python:def f(): pass)",
+    )
+    p.add_argument("--text", help="Free-text section to include")
+    p.add_argument("--git", action="store_true", help="Include git diff")
+    p.add_argument("--staged", action="store_true", help="Use staged git diff")
+    p.add_argument("--base-ref", help="Git base ref for diff")
+    p.add_argument("--base", help="Base directory for relative file paths")
+    p.add_argument("--max-tokens", type=int, help="Truncate context to token limit")
+    p.add_argument("--tokens", action="store_true", help="Print token count before output")
+    p.add_argument(
+        "--context",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Template variables",
+    )
+    p.set_defaults(func=cmd_context)
 
     p = sub.add_parser("doctor", help="Run environment diagnostics")
     p.add_argument("--path", help="Project directory to diagnose")
