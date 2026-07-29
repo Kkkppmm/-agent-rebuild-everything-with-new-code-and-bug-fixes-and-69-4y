@@ -12,6 +12,8 @@ from devai.presets import get_preset, list_presets
 from devai.program import DevProgram, ProgramResult, ProgramStepPlan, ProgramTask
 from devai.program_schema import program_schema
 from devai.project import CodeProject
+from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
+from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.git_context import GitContext
 from devai.health import HealthChecker, HealthResult, check_health
 from devai.interpolate import interpolate, interpolate_context
@@ -30,9 +32,13 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 __all__ = [
     "Agent",
+    "BenchmarkResult",
+    "BenchmarkRunner",
+    "BenchmarkSample",
+    "CONFIG_FILENAMES",
     "HealthChecker",
     "HealthResult",
     "BatchRunner",
@@ -73,11 +79,14 @@ __all__ = [
     "WorkflowStepResult",
     "assistant",
     "check_health",
+    "config_file_template",
     "cron_matches",
     "get_preset",
     "interpolate",
     "interpolate_context",
+    "find_config_file",
     "list_presets",
+    "load_config_file",
     "program_schema",
     "quickstart",
     "validate_cron",

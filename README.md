@@ -39,6 +39,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **GitContext** — One-line git-aware reviews, commit messages, and PR descriptions
 - **DevTrace** — Lightweight tracing spans for program steps and workflows
 - **Program Templates** — `${var:}`, `${env:}`, and `${file:}` interpolation in program context
+- **Project Config Files** — Load `.devai.yaml` / `devai.json` for per-project LLM settings
+- **Benchmarking** — Measure LLM latency, p95, and throughput with `BenchmarkRunner`
 
 ## Installation
 
@@ -141,6 +143,46 @@ print(runtime.summarize(results))
 
 # Local Ollama (requires running Ollama server)
 # runtime = DevRuntime.create(provider="ollama", model="llama3.2")
+```
+
+## Project Config Files
+
+```bash
+devai config-init              # creates .devai.yaml
+devai config-show              # show resolved settings
+```
+
+```python
+from devai import DevRuntime, load_config_file
+
+# Load from .devai.yaml / devai.json in the project root
+runtime = DevRuntime.from_project("./my-app")
+config = load_config_file()    # raises if no config file is found
+```
+
+Example `.devai.yaml`:
+
+```yaml
+provider: openai
+model: gpt-4o-mini
+temperature: 0.2
+max_tokens: 4096
+# api_key: sk-...  # or set DEVAI_API_KEY
+```
+
+## Benchmarking
+
+```python
+from devai import BenchmarkRunner, DevRuntime
+
+runtime = DevRuntime.create(use_mock=True)
+result = BenchmarkRunner(runtime.client).run(iterations=10)
+print(result.summary())   # mean/p95 latency and throughput
+```
+
+```bash
+devai benchmark --mock --iterations 10
+devai benchmark --provider openai --iterations 5 --json
 ```
 
 ## Health Checks
@@ -446,11 +488,15 @@ devai kit audit path/to/app.py
 devai kit pre-commit path/to/app.py
 devai kit pr-review --project ./my-app --diff "$(git diff)"
 devai ci --preset pre-commit --code app.py
+devai config-init
+devai config-show
+devai benchmark --mock --iterations 5
+devai health --mock
 ```
 
 ## Configuration
 
-Set environment variables or pass a `DevAIConfig`:
+Set environment variables, create a project config file (`.devai.yaml`), or pass a `DevAIConfig`:
 
 | Variable | Description |
 |----------|-------------|

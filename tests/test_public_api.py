@@ -5,12 +5,16 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "2.0.0"
+        assert devai.__version__ == "2.1.0"
 
     def test_exports(self):
         expected = {
             "Agent",
             "BatchRunner",
+            "BenchmarkResult",
+            "BenchmarkRunner",
+            "BenchmarkSample",
+            "CONFIG_FILENAMES",
             "CIReporter",
             "CodeAssistant",
             "CodeIssue",
@@ -50,11 +54,14 @@ class TestPublicAPI:
             "WorkflowStepResult",
             "assistant",
             "check_health",
+            "config_file_template",
             "cron_matches",
+            "find_config_file",
             "get_preset",
             "interpolate",
             "interpolate_context",
             "list_presets",
+            "load_config_file",
             "program_schema",
             "quickstart",
             "validate_cron",

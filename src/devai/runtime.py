@@ -88,6 +88,29 @@ class DevRuntime:
             project_path=project_path,
         )
 
+    @classmethod
+    def from_project(
+        cls,
+        path: str | Path | None = None,
+        *,
+        config_path: str | Path | None = None,
+        use_mock: bool = False,
+        **overrides: Any,
+    ) -> DevRuntime:
+        """Bootstrap a runtime from a project directory and optional config file."""
+        project_path = Path(path or Path.cwd()).resolve()
+        if use_mock:
+            return cls.create(use_mock=True, project_path=project_path, **overrides)
+
+        from devai.config_file import find_config_file, load_config_file
+
+        resolved_config_path = Path(config_path) if config_path else find_config_file(project_path)
+        if resolved_config_path is None:
+            return cls.create(project_path=project_path, **overrides)
+
+        config = load_config_file(resolved_config_path, overrides=overrides or None)
+        return cls.from_config(config, project_path=project_path)
+
     def program(self, name: str = "program") -> DevProgram:
         """Create or retrieve a named DevProgram."""
         if name not in self._programs:

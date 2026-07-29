@@ -471,6 +471,52 @@ def cmd_trace_demo(args: argparse.Namespace) -> None:
         print(f"total_duration_ms: {summary['total_duration_ms']}")
 
 
+def cmd_config_init(args: argparse.Namespace) -> None:
+    from devai.config_file import config_file_template
+
+    target = Path(args.path)
+    if target.exists() and not args.force:
+        print(f"Config file already exists: {target}", file=sys.stderr)
+        sys.exit(1)
+    target.write_text(
+        config_file_template(provider=args.provider, model=args.model),
+        encoding="utf-8",
+    )
+    print(f"Created {target}")
+
+
+def cmd_config_show(args: argparse.Namespace) -> None:
+    from devai.config_file import find_config_file, load_config_file
+
+    path = Path(args.path) if args.path else find_config_file()
+    if path is None:
+        print("No DevAI config file found.", file=sys.stderr)
+        sys.exit(1)
+    config = load_config_file(path)
+    print(f"path: {path}")
+    print(f"model: {config.model}")
+    print(f"base_url: {config.base_url}")
+    print(f"temperature: {config.temperature}")
+    print(f"max_tokens: {config.max_tokens}")
+    print(f"api_key_set: {bool(config.api_key)}")
+
+
+def cmd_benchmark(args: argparse.Namespace) -> None:
+    from devai.benchmark import BenchmarkRunner
+
+    runtime = DevRuntime.create(use_mock=args.mock, provider=args.provider, model=args.model)
+    runner = BenchmarkRunner(runtime.client, prompt=args.prompt)
+    result = runner.run(iterations=args.iterations, name=args.name)
+    if args.json:
+        import json
+
+        print(json.dumps(result.to_dict(), indent=2))
+    else:
+        print(result.summary())
+        if result.failures:
+            sys.exit(1)
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -760,6 +806,33 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("trace-demo", help="Run a preset with tracing enabled (demo)")
     p.add_argument("--json", action="store_true", help="Output full trace JSON")
     p.set_defaults(func=cmd_trace_demo)
+
+    p = sub.add_parser("config-init", help="Create a starter .devai.yaml config file")
+    p.add_argument(
+        "--path",
+        default=".devai.yaml",
+        help="Config file path to create (default: .devai.yaml)",
+    )
+    p.add_argument("--provider", default="openai", help="Provider name for the template")
+    p.add_argument("--model", default="gpt-4o-mini", help="Model name for the template")
+    p.add_argument("--force", action="store_true", help="Overwrite an existing config file")
+    p.set_defaults(func=cmd_config_init)
+
+    p = sub.add_parser("config-show", help="Show resolved DevAI config from a project file")
+    p.add_argument("--path", help="Explicit config file path")
+    p.set_defaults(func=cmd_config_show)
+
+    p = sub.add_parser("benchmark", help="Benchmark LLM latency and throughput")
+    p.add_argument("--iterations", type=int, default=5, help="Number of requests to run")
+    p.add_argument("--name", default="llm-benchmark", help="Benchmark name")
+    p.add_argument("--prompt", default="Reply with exactly: benchmark-ok", help="Prompt text")
+    p.add_argument(
+        "--provider",
+        default="mock",
+        help="Provider name (openai, ollama, mock)",
+    )
+    p.add_argument("--json", action="store_true", help="Output full benchmark JSON")
+    p.set_defaults(func=cmd_benchmark)
 
     return parser
 
