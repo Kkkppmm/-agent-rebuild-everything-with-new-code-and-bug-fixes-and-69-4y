@@ -149,6 +149,35 @@ def cmd_openapi(args: argparse.Namespace) -> None:
     print(assistant.review_openapi(spec, context=args.context))
 
 
+def cmd_test_failures(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    output = _read_input(args.output)
+    code = _read_input(args.code) if args.code else ""
+    print(assistant.analyze_test_failures(output, code=code))
+
+
+def cmd_stacktrace(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    trace = _read_input(args.trace)
+    print(assistant.analyze_stacktrace(trace, context=args.context))
+
+
+def cmd_config_review(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    config = _read_input(args.config)
+    print(assistant.review_config(config, config_type=args.type, context=args.context))
+
+
+def cmd_notebook(args: argparse.Namespace) -> None:
+    assistant = _get_assistant(args)
+    if args.cells:
+        results = assistant.review_notebook_cells(args.notebook)
+        for index, review in sorted(results.items()):
+            print(f"## Cell {index}\n{review}\n")
+    else:
+        print(assistant.review_notebook(args.notebook))
+
+
 def cmd_symbols(args: argparse.Namespace) -> None:
     from devai.index import CodeSymbolIndex
 
@@ -813,6 +842,35 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("spec", help="OpenAPI spec or file path")
     p.add_argument("--context", default="", help="Additional context")
     p.set_defaults(func=cmd_openapi)
+
+    p = sub.add_parser("test-failures", help="Analyze pytest/unittest failure output")
+    p.add_argument("output", help="Test failure output file or inline text")
+    p.add_argument("--code", help="Source code context file or inline text")
+    p.set_defaults(func=cmd_test_failures)
+
+    p = sub.add_parser("stacktrace", help="Analyze a Python stack trace")
+    p.add_argument("trace", help="Stack trace file or inline text")
+    p.add_argument("--context", default="", help="Additional context")
+    p.set_defaults(func=cmd_stacktrace)
+
+    p = sub.add_parser("config-review", help="Review a project configuration file")
+    p.add_argument("config", help="Config file path or inline content")
+    p.add_argument(
+        "--type",
+        default="config",
+        help="Config type label (e.g. pyproject.toml, docker-compose.yaml)",
+    )
+    p.add_argument("--context", default="", help="Additional context")
+    p.set_defaults(func=cmd_config_review)
+
+    p = sub.add_parser("notebook", help="Review a Jupyter notebook")
+    p.add_argument("notebook", help="Path to .ipynb file")
+    p.add_argument(
+        "--cells",
+        action="store_true",
+        help="Review each code cell separately",
+    )
+    p.set_defaults(func=cmd_notebook)
 
     p = sub.add_parser("symbols", help="Index and search Python symbols in a project")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

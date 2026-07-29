@@ -300,3 +300,53 @@ OPENAPI_REVIEW = PromptTemplate(
     ),
     input_variables=["spec", "context"],
 )
+
+TEST_FAILURE = PromptTemplate(
+    system=(
+        "You are an expert Python test debugger. Analyze pytest/unittest failures "
+        "and provide root cause analysis with concrete fixes."
+    ),
+    template=(
+        "Analyze these test failures and explain root causes with fixes:\n\n"
+        "```\n$output\n```\n\n"
+        "Source code context (if available):\n```\n$code\n```"
+    ),
+    input_variables=["output", "code"],
+)
+
+STACK_TRACE = PromptTemplate(
+    system=(
+        "You are an expert debugger. Analyze stack traces and explain the failure "
+        "with actionable fixes."
+    ),
+    template=(
+        "Analyze this stack trace and explain the failure:\n\n```\n$trace\n```\n\n"
+        "Additional context:\n$context"
+    ),
+    input_variables=["trace", "context"],
+)
+
+CONFIG_REVIEW = PromptTemplate(
+    system=(
+        "You review project configuration files (pyproject.toml, YAML, JSON, TOML) "
+        "for correctness, security, and best practices."
+    ),
+    template=(
+        "Review this $config_type configuration file:\n\n```\n$config\n```\n\n"
+        "Context: $context"
+    ),
+    input_variables=["config", "config_type", "context"],
+)
+
+NOTEBOOK_REVIEW = PromptTemplate(
+    system=(
+        "You review Jupyter notebooks for code quality, reproducibility, "
+        "and data-science best practices."
+    ),
+    template=(
+        "Review this Jupyter notebook content:\n\n$notebook\n\n"
+        "Focus on: code quality, missing tests, hardcoded values, "
+        "reproducibility, and documentation."
+    ),
+    input_variables=["notebook"],
+)

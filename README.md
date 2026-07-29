@@ -57,6 +57,10 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **CodeSymbolIndex** — AST-based symbol indexer for Python projects with search and LLM context export
 - **Conversation Persistence** — Save and load `ConversationMemory` to JSON files
 - **OpenAPI Review** — Review OpenAPI/Swagger specs for design, security, and consistency issues
+- **Jupyter Notebooks** — Read, extract, and review `.ipynb` notebooks with `NotebookReader` and `review_notebook()`
+- **Test Failure Analysis** — Analyze pytest/unittest output with `analyze_test_failures()`
+- **Stack Trace Analysis** — Debug crashes with `analyze_stacktrace()`
+- **Config Review** — Review `pyproject.toml`, YAML, and JSON configs with `review_config()`
 
 ## Installation
 

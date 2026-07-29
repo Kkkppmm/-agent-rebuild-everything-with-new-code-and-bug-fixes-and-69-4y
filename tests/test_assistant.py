@@ -172,6 +172,18 @@ class TestCodeAssistant:
         result = assistant.review_openapi("openapi: 3.0.0\npaths: {}")
         assert result == "Analysis complete."
 
+    def test_analyze_test_failures(self, assistant):
+        result = assistant.analyze_test_failures("FAILED test_add")
+        assert result == "Analysis complete."
+
+    def test_analyze_stacktrace(self, assistant):
+        result = assistant.analyze_stacktrace("Traceback (most recent call last):")
+        assert result == "Analysis complete."
+
+    def test_review_config(self, assistant):
+        result = assistant.review_config("[project]\nname = 'demo'", config_type="pyproject.toml")
+        assert result == "Analysis complete."
+
     def test_generate_and_verify_success(self):
         code_response = "def add(a, b):\n    return a + b"
         client = MockLLMClient(default_response=code_response)

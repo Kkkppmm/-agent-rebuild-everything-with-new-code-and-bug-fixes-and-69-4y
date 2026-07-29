@@ -26,6 +26,7 @@ from devai.facade import DevAI
 from devai.index import CodeSymbolIndex, SymbolInfo
 from devai.interpolate import interpolate, interpolate_context
 from devai.library import ProgramEntry, ProgramLibrary
+from devai.notebook import NotebookCell, NotebookReader
 from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
 from devai.trace import DevTrace, TraceEvent
@@ -44,7 +45,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.9.0"
+__version__ = "3.0.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -98,6 +99,8 @@ __all__ = [
     "LLMClient",
     "MockEmbeddingClient",
     "MockLLMClient",
+    "NotebookCell",
+    "NotebookReader",
     "PatchResult",
     "PerfIssue",
     "PerfReviewResult",

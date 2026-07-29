@@ -29,6 +29,7 @@ from devai.prompts import (
     INCIDENT_TRIAGE,
     LOG_ANALYSIS,
     MIGRATION_PLAN,
+    NOTEBOOK_REVIEW,
     OPENAPI_REVIEW,
     PERFORMANCE_REVIEW,
     PR_DESCRIPTION,
@@ -40,9 +41,12 @@ from devai.prompts import (
     STRUCTURED_PERFORMANCE,
     STRUCTURED_REVIEW,
     STRUCTURED_SECURITY,
+    STACK_TRACE,
     SUMMARIZE_CHANGES,
+    TEST_FAILURE,
     TEST_GEN,
     TYPE_HINTS,
+    CONFIG_REVIEW,
 )
 from devai.schemas import CodeReviewResult, PerfReviewResult, SecurityAuditResult
 
@@ -198,6 +202,44 @@ class CodeAssistant:
     def review_openapi(self, spec: str, context: str = "") -> str:
         """Review an OpenAPI/Swagger specification."""
         return self._run_chain(OPENAPI_REVIEW, spec=spec, context=context)
+
+    def analyze_test_failures(self, output: str, code: str = "") -> str:
+        """Analyze pytest or unittest failure output and suggest fixes."""
+        return self._run_chain(TEST_FAILURE, output=output, code=code)
+
+    def analyze_stacktrace(self, trace: str, context: str = "") -> str:
+        """Analyze a Python stack trace and explain the failure."""
+        return self._run_chain(STACK_TRACE, trace=trace, context=context)
+
+    def review_config(
+        self,
+        config: str,
+        config_type: str = "config",
+        context: str = "",
+    ) -> str:
+        """Review a project configuration file (TOML, YAML, JSON)."""
+        return self._run_chain(
+            CONFIG_REVIEW, config=config, config_type=config_type, context=context
+        )
+
+    def review_notebook(self, path: str) -> str:
+        """Review a Jupyter notebook file."""
+        from devai.notebook import NotebookReader
+
+        reader = NotebookReader(path)
+        notebook_text = reader.extract_code(include_markdown=True)
+        return self._run_chain(NOTEBOOK_REVIEW, notebook=notebook_text)
+
+    def review_notebook_cells(self, path: str) -> dict[int, str]:
+        """Review each code cell in a notebook separately."""
+        from devai.notebook import NotebookReader
+
+        reader = NotebookReader(path)
+        results: dict[int, str] = {}
+        for cell in reader.code_cells():
+            if cell.source.strip():
+                results[cell.index] = self.review(cell.source)
+        return results
 
     def generate_and_verify(
         self,
