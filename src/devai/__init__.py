@@ -15,7 +15,9 @@ from devai.project import CodeProject
 from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.git_context import GitContext
+from devai.doctor import DevDoctor, DoctorCheck, DoctorResult, run_doctor
 from devai.health import HealthChecker, HealthResult, check_health
+from devai.report import ProgramReport
 from devai.interpolate import interpolate, interpolate_context
 from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
@@ -32,7 +34,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.1.0"
+__version__ = "2.2.0"
 __all__ = [
     "Agent",
     "BenchmarkResult",
@@ -53,11 +55,14 @@ __all__ = [
     "DevApp",
     "DevKit",
     "DevPipeline",
+    "DevDoctor",
     "DevProgram",
     "DevRuntime",
     "DevSchedule",
     "DevTrace",
     "DevWorkflow",
+    "DoctorCheck",
+    "DoctorResult",
     "GitContext",
     "EmbeddingClient",
     "LLMClient",
@@ -66,6 +71,7 @@ __all__ = [
     "PerfIssue",
     "PerfReviewResult",
     "PluginRegistry",
+    "ProgramReport",
     "ProgramResult",
     "ProgramStepPlan",
     "ProgramTask",
@@ -89,6 +95,7 @@ __all__ = [
     "load_config_file",
     "program_schema",
     "quickstart",
+    "run_doctor",
     "validate_cron",
     "__version__",
 ]

@@ -41,6 +41,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Program Templates** — `${var:}`, `${env:}`, and `${file:}` interpolation in program context
 - **Project Config Files** — Load `.devai.yaml` / `devai.json` for per-project LLM settings
 - **Benchmarking** — Measure LLM latency, p95, and throughput with `BenchmarkRunner`
+- **ProgramReport** — Export program and workflow results to JSON or Markdown for CI artifacts
+- **DevDoctor** — Environment diagnostics for Python version, config, API keys, and provider health
 
 ## Installation
 
