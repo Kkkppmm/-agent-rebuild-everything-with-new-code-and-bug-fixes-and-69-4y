@@ -11,6 +11,8 @@ from devai.core.client import LLMClient, LLMClientProtocol, MockLLMClient
 from devai.core.config import DevAIConfig
 from devai.kit import DevKit
 from devai.program import DevProgram, ProgramResult
+from devai.git_context import GitContext
+from devai.trace import DevTrace
 from devai.workflow import DevWorkflow, WorkflowResult
 
 
@@ -29,6 +31,7 @@ class DevRuntime:
     kit: DevKit
     project_path: str | Path | None = None
     _programs: dict[str, DevProgram] = field(default_factory=dict, init=False, repr=False)
+    _trace: DevTrace = field(default_factory=DevTrace, init=False, repr=False)
 
     @classmethod
     def create(
@@ -107,31 +110,37 @@ class DevRuntime:
         self,
         program: DevProgram | str,
         context: dict[str, str] | None = None,
+        *,
+        trace: bool = False,
     ) -> list[ProgramResult]:
         """Run a program by object, registered name, preset name, or file path."""
+        active_trace = self._trace if trace else None
         if isinstance(program, DevProgram):
-            return program.run(context or {})
+            return program.run(context or {}, trace=active_trace)
         path = Path(program)
         if path.exists() and path.is_file():
-            return self.load_program(path).run(context or {})
+            return self.load_program(path).run(context or {}, trace=active_trace)
         if program in self._programs:
-            return self._programs[program].run(context or {})
-        return self.preset(program).run(context or {})
+            return self._programs[program].run(context or {}, trace=active_trace)
+        return self.preset(program).run(context or {}, trace=active_trace)
 
     async def arun(
         self,
         program: DevProgram | str,
         context: dict[str, str] | None = None,
+        *,
+        trace: bool = False,
     ) -> list[ProgramResult]:
         """Run a program asynchronously."""
+        active_trace = self._trace if trace else None
         if isinstance(program, DevProgram):
-            return await program.arun(context or {})
+            return await program.arun(context or {}, trace=active_trace)
         path = Path(program)
         if path.exists() and path.is_file():
-            return await self.load_program(path).arun(context or {})
+            return await self.load_program(path).arun(context or {}, trace=active_trace)
         if program in self._programs:
-            return await self._programs[program].arun(context or {})
-        return await self.preset(program).arun(context or {})
+            return await self._programs[program].arun(context or {}, trace=active_trace)
+        return await self.preset(program).arun(context or {}, trace=active_trace)
 
     def dry_run(
         self,
@@ -189,6 +198,23 @@ class DevRuntime:
         from devai.schedule import DevSchedule
 
         return DevSchedule(runtime=self)
+
+    def git(self, *, staged: bool = False, base: str | None = None) -> GitContext:
+        """Create a GitContext for the runtime project path."""
+        return GitContext(
+            repo_path=Path(self.project_path or Path.cwd()),
+            staged=staged,
+            base=base,
+        )
+
+    @property
+    def trace(self) -> DevTrace:
+        """Access the runtime trace collector."""
+        return self._trace
+
+    def review_git(self, *, staged: bool = False, base: str | None = None) -> str:
+        """Review git changes using the runtime assistant."""
+        return self.git(staged=staged, base=base).review_changes(self.assistant)
 
     def resilient_client(
         self,

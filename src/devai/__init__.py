@@ -12,9 +12,12 @@ from devai.presets import get_preset, list_presets
 from devai.program import DevProgram, ProgramResult, ProgramStepPlan, ProgramTask
 from devai.program_schema import program_schema
 from devai.project import CodeProject
+from devai.git_context import GitContext
 from devai.health import HealthChecker, HealthResult, check_health
+from devai.interpolate import interpolate, interpolate_context
 from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
+from devai.trace import DevTrace, TraceEvent
 from devai.schedule import DevSchedule, ScheduleResult, ScheduledJob, cron_matches, validate_cron
 from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
 from devai.sandbox import CodeSandbox, SandboxResult
@@ -27,7 +30,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "1.9.0"
+__version__ = "2.0.0"
 __all__ = [
     "Agent",
     "HealthChecker",
@@ -47,7 +50,9 @@ __all__ = [
     "DevProgram",
     "DevRuntime",
     "DevSchedule",
+    "DevTrace",
     "DevWorkflow",
+    "GitContext",
     "EmbeddingClient",
     "LLMClient",
     "MockEmbeddingClient",
@@ -63,12 +68,15 @@ __all__ = [
     "ScheduledJob",
     "SecurityAuditResult",
     "SecurityFinding",
+    "TraceEvent",
     "WorkflowResult",
     "WorkflowStepResult",
     "assistant",
     "check_health",
     "cron_matches",
     "get_preset",
+    "interpolate",
+    "interpolate_context",
     "list_presets",
     "program_schema",
     "quickstart",

@@ -36,6 +36,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Resilient Client** — One-line wrapper combining rate limiting, circuit breaker, and metrics
 - **Health Checks** — Verify LLM provider connectivity before running jobs
 - **Quickstart** — `quickstart()` and `assistant()` helpers for minimal setup
+- **GitContext** — One-line git-aware reviews, commit messages, and PR descriptions
+- **DevTrace** — Lightweight tracing spans for program steps and workflows
+- **Program Templates** — `${var:}`, `${env:}`, and `${file:}` interpolation in program context
 
 ## Installation
 
@@ -57,6 +60,19 @@ from devai import quickstart
 # Fastest path — one line to a full runtime (mock mode, no API key)
 runtime = quickstart(use_mock=True)
 print(runtime.review("def add(a, b): return a + b"))
+```
+
+```python
+from devai import quickstart
+
+# Review local git changes
+runtime = quickstart(use_mock=True)
+print(runtime.review_git(staged=True))
+
+# Trace program execution
+runtime.trace.clear()
+runtime.run("pre-commit", {"code": "x = 1"}, trace=True)
+print(runtime.trace.summary())
 ```
 
 ```python

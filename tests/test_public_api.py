@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "1.9.0"
+        assert devai.__version__ == "2.0.0"
 
     def test_exports(self):
         expected = {
@@ -25,8 +25,10 @@ class TestPublicAPI:
             "DevProgram",
             "DevRuntime",
             "DevSchedule",
+            "DevTrace",
             "DevWorkflow",
             "EmbeddingClient",
+            "GitContext",
             "HealthChecker",
             "HealthResult",
             "LLMClient",
@@ -43,12 +45,15 @@ class TestPublicAPI:
             "ScheduledJob",
             "SecurityAuditResult",
             "SecurityFinding",
+            "TraceEvent",
             "WorkflowResult",
             "WorkflowStepResult",
             "assistant",
             "check_health",
             "cron_matches",
             "get_preset",
+            "interpolate",
+            "interpolate_context",
             "list_presets",
             "program_schema",
             "quickstart",

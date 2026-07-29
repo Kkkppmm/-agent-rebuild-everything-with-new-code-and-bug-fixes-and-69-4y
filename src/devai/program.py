@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from devai.assistant import CodeAssistant
+from devai.interpolate import interpolate, interpolate_context
 
 
 @dataclass
@@ -230,11 +231,17 @@ class DevProgram:
         else:
             path.write_text(self.to_json(), encoding="utf-8")
 
+    def _prepare_context(self, context: dict[str, str]) -> dict[str, str]:
+        """Interpolate template variables in context values (in place)."""
+        for key, value in list(context.items()):
+            context[key] = interpolate(value, context)
+        return context
+
     def _resolve_kwargs(self, kwargs: dict[str, Any], context: dict[str, str]) -> dict[str, Any]:
         resolved: dict[str, Any] = {}
         for key, value in kwargs.items():
-            if isinstance(value, str) and value.startswith("$"):
-                resolved[key] = context.get(value[1:], "")
+            if isinstance(value, str):
+                resolved[key] = interpolate(value, context)
             else:
                 resolved[key] = value
         return resolved
@@ -280,6 +287,7 @@ class DevProgram:
         """Preview program execution without calling the LLM."""
         plan: list[ProgramStepPlan] = []
         preview_context = dict(context)
+        self._prepare_context(preview_context)
         for index, task in enumerate(self.tasks, start=1):
             primary = preview_context.get(task.input_key, "")
             kwargs = self._resolve_kwargs(task.kwargs, preview_context)
@@ -296,30 +304,65 @@ class DevProgram:
             preview_context[task.name] = f"<{task.action} output>"
         return plan
 
-    def run(self, context: dict[str, str]) -> list[ProgramResult]:
+    def run(
+        self,
+        context: dict[str, str],
+        *,
+        trace: "DevTrace | None" = None,
+    ) -> list[ProgramResult]:
         """Execute all tasks and return ordered results."""
         results: list[ProgramResult] = []
+        self._prepare_context(context)
         for task in self.tasks:
             handler = self._handler(task.action)
             primary = context.get(task.input_key, "")
             kwargs = self._resolve_kwargs(task.kwargs, context)
-            output = handler(primary, **kwargs)
+            if trace is not None:
+                with trace.span(
+                    task.name,
+                    kind="program_step",
+                    action=task.action,
+                    input_key=task.input_key,
+                ):
+                    output = handler(primary, **kwargs)
+            else:
+                output = handler(primary, **kwargs)
             results.append(ProgramResult(name=task.name, action=task.action, output=output))
             context[task.name] = output
         return results
 
-    async def arun(self, context: dict[str, str]) -> list[ProgramResult]:
+    async def arun(
+        self,
+        context: dict[str, str],
+        *,
+        trace: "DevTrace | None" = None,
+    ) -> list[ProgramResult]:
         """Execute all tasks asynchronously where supported."""
         results: list[ProgramResult] = []
+        self._prepare_context(context)
         for task in self.tasks:
             primary = context.get(task.input_key, "")
             kwargs = self._resolve_kwargs(task.kwargs, context)
-            async_handler = self._async_handler(task.action)
-            if async_handler is not None:
-                output = await async_handler(primary, **kwargs)
+            if trace is not None:
+                with trace.span(
+                    task.name,
+                    kind="program_step",
+                    action=task.action,
+                    input_key=task.input_key,
+                ):
+                    async_handler = self._async_handler(task.action)
+                    if async_handler is not None:
+                        output = await async_handler(primary, **kwargs)
+                    else:
+                        handler = self._handler(task.action)
+                        output = await asyncio.to_thread(handler, primary, **kwargs)
             else:
-                handler = self._handler(task.action)
-                output = await asyncio.to_thread(handler, primary, **kwargs)
+                async_handler = self._async_handler(task.action)
+                if async_handler is not None:
+                    output = await async_handler(primary, **kwargs)
+                else:
+                    handler = self._handler(task.action)
+                    output = await asyncio.to_thread(handler, primary, **kwargs)
             results.append(ProgramResult(name=task.name, action=task.action, output=output))
             context[task.name] = output
         return results

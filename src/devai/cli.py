@@ -443,6 +443,34 @@ def cmd_health(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def cmd_git_review(args: argparse.Namespace) -> None:
+    from devai.git_context import GitContext
+
+    assistant = _get_assistant(args)
+    ctx = GitContext(staged=args.staged, base=args.base)
+    if args.commit:
+        print(ctx.commit_message(assistant))
+    elif args.pr:
+        print(ctx.pr_description(assistant, title=args.title or ""))
+    else:
+        print(ctx.review_changes(assistant))
+
+
+def cmd_trace_demo(args: argparse.Namespace) -> None:
+    from devai.trace import DevTrace
+
+    runtime = DevRuntime.create(use_mock=True)
+    runtime.trace.clear()
+    runtime.run("pre-commit", {"code": "def add(a, b): return a + b"}, trace=True)
+    if args.json:
+        print(runtime.trace.to_json())
+    else:
+        summary = runtime.trace.summary()
+        print(f"trace_id: {summary['trace_id']}")
+        print(f"span_count: {summary['span_count']}")
+        print(f"total_duration_ms: {summary['total_duration_ms']}")
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -720,6 +748,18 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--no-probe", action="store_true", help="Only check endpoint, skip completion")
     p.set_defaults(func=cmd_health)
+
+    p = sub.add_parser("git-review", help="Review git changes with AI")
+    p.add_argument("--staged", action="store_true", help="Review staged changes only")
+    p.add_argument("--base", help="Base ref for diff (e.g. main)")
+    p.add_argument("--commit", action="store_true", help="Generate commit message instead of review")
+    p.add_argument("--pr", action="store_true", help="Generate PR description instead of review")
+    p.add_argument("--title", help="PR title when using --pr")
+    p.set_defaults(func=cmd_git_review)
+
+    p = sub.add_parser("trace-demo", help="Run a preset with tracing enabled (demo)")
+    p.add_argument("--json", action="store_true", help="Output full trace JSON")
+    p.set_defaults(func=cmd_trace_demo)
 
     return parser
 
