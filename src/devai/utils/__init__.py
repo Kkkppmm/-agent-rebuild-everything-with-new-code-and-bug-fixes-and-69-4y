@@ -5,7 +5,15 @@ from __future__ import annotations
 import re
 
 from devai.utils.budget import BudgetedLLMClient, BudgetSnapshot, TokenBudget
-from devai.utils.diff import get_git_diff, parse_changed_files, read_diff, summarize_diff
+from devai.utils.diff import (
+    PatchResult,
+    apply_unified_diff,
+    extract_diff_from_text,
+    get_git_diff,
+    parse_changed_files,
+    read_diff,
+    summarize_diff,
+)
 from devai.utils.tokens import (
     count_message_tokens,
     estimate_cost,
@@ -19,10 +27,13 @@ __all__ = [
     "BudgetedLLMClient",
     "BudgetSnapshot",
     "TokenBudget",
+    "PatchResult",
+    "apply_unified_diff",
     "count_message_tokens",
     "estimate_cost",
     "estimate_message_cost",
     "estimate_tokens",
+    "extract_diff_from_text",
     "extract_code_blocks",
     "format_cost",
     "get_git_diff",

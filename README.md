@@ -52,6 +52,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Program Export** — Export DevProgram files to standalone runnable Python scripts
 - **BatchReviewer** — Review multiple files or entire directories in parallel
 - **Code Block Extraction** — Pull fenced code blocks from LLM responses with `extract_code_blocks()`
+- **Fallback Client** — `FallbackLLMClient` tries multiple providers/models in order on failure
+- **Patch Application** — Apply unified diffs from LLM output with `apply_unified_diff()`
 
 ## Installation
 

@@ -646,6 +646,41 @@ def cmd_library(args: argparse.Namespace) -> None:
             print(f"  actions: {', '.join(entry.actions)}")
 
 
+def cmd_apply_patch(args: argparse.Namespace) -> None:
+    from devai.utils.diff import apply_unified_diff, extract_diff_from_text, read_diff
+
+    if args.input == "-":
+        diff_text = sys.stdin.read()
+    elif Path(args.input).exists():
+        diff_text = read_diff(args.input)
+    else:
+        diff_text = args.input
+    diff_text = extract_diff_from_text(diff_text)
+    result = apply_unified_diff(diff_text, root=args.root, dry_run=args.dry_run)
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "applied": result.applied,
+                    "files_changed": result.files_changed,
+                    "errors": result.errors,
+                },
+                indent=2,
+            )
+        )
+    else:
+        if result.files_changed:
+            print("Changed files:")
+            for path in result.files_changed:
+                print(f"  {path}")
+        for error in result.errors:
+            print(f"Error: {error}", file=sys.stderr)
+        if args.dry_run:
+            print("(dry run — no files written)")
+    if result.errors:
+        sys.exit(1)
+
+
 def cmd_export(args: argparse.Namespace) -> None:
     assistant = CodeAssistant(client=MockLLMClient())
     program = DevProgram.from_file(args.program, assistant)
@@ -1041,6 +1076,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true", help="Output JSON")
     p.add_argument("--verbose", "-v", action="store_true", help="Show file paths and actions")
     p.set_defaults(func=cmd_library)
+
+    p = sub.add_parser("apply-patch", help="Apply a unified diff from file or stdin")
+    p.add_argument(
+        "input",
+        nargs="?",
+        default="-",
+        help="Diff file path, raw diff text, or '-' for stdin",
+    )
+    p.add_argument("--root", default=".", help="Project root for relative paths in the diff")
+    p.add_argument("--dry-run", action="store_true", help="Validate without writing files")
+    p.add_argument("--json", action="store_true", help="Output JSON result")
+    p.set_defaults(func=cmd_apply_patch)
 
     p = sub.add_parser("export", help="Export a program file to a standalone Python script")
     p.add_argument("program", help="Program JSON or YAML file")

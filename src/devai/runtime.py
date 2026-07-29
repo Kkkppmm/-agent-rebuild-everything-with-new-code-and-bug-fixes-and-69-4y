@@ -267,6 +267,25 @@ class DevRuntime:
             client = MetricsLLMClient(client)
         return client
 
+    def fallback_client(
+        self,
+        providers: list[str],
+        *,
+        labels: list[str] | None = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Wrap multiple provider clients with automatic failover."""
+        from devai.core.fallback import FallbackLLMClient
+
+        clients: list[Any] = []
+        for provider in providers:
+            if provider.lower() == "mock":
+                clients.append(MockLLMClient())
+            else:
+                config = DevAIConfig.from_provider(provider, **kwargs)
+                clients.append(LLMClient(config))
+        return FallbackLLMClient(clients, labels=labels or providers)
+
     def doctor(self, *, probe: bool = True) -> list:
         """Run environment diagnostics for this runtime's project."""
         from devai.doctor import DevDoctor

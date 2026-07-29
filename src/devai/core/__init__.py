@@ -18,6 +18,7 @@ from devai.core.exceptions import (
     RateLimitError,
     ToolError,
 )
+from devai.core.fallback import FallbackAttempt, FallbackLLMClient
 from devai.core.metrics import CallMetric, MetricsCollector, MetricsLLMClient
 from devai.core.models import Message, Role, Tool, ToolCall
 from devai.core.rate_limit import RateLimitedLLMClient, RateLimiter
@@ -41,6 +42,8 @@ __all__ = [
     "DiskCachedLLMClient",
     "DevAIError",
     "EmbeddingClient",
+    "FallbackAttempt",
+    "FallbackLLMClient",
     "LLMClient",
     "LLMError",
     "Message",

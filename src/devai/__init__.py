@@ -5,7 +5,7 @@ from devai.batch_review import BatchReviewReport, BatchReviewer, FileReviewResul
 from devai.app import DevApp
 from devai.ci import CIReporter
 from devai.assistant import CodeAssistant
-from devai.core import BatchRunner, DevAIConfig, EmbeddingClient, LLMClient, MockEmbeddingClient, MockLLMClient
+from devai.core import BatchRunner, DevAIConfig, EmbeddingClient, FallbackLLMClient, LLMClient, MockEmbeddingClient, MockLLMClient
 from devai.core import DiskCachedLLMClient, BudgetExceededError
 from devai.kit import DevKit
 from devai.pipeline import DevPipeline
@@ -30,7 +30,7 @@ from devai.runtime import DevRuntime
 from devai.trace import DevTrace, TraceEvent
 from devai.schedule import DevSchedule, ScheduleResult, ScheduledJob, cron_matches, validate_cron
 from devai.watch import DevWatcher, WatchEvent, WatchResult
-from devai.utils import TokenBudget, BudgetSnapshot, BudgetedLLMClient
+from devai.utils import TokenBudget, BudgetSnapshot, BudgetedLLMClient, PatchResult, apply_unified_diff, extract_diff_from_text
 from devai.sandbox import CodeSandbox, SandboxResult
 from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
 from devai.output import CodeBlock, extract_code_blocks, extract_code_by_language, extract_first_code_block
@@ -43,7 +43,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.7.0"
+__version__ = "2.8.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -85,15 +85,18 @@ __all__ = [
     "DiskCachedLLMClient",
     "GitContext",
     "EmbeddingClient",
+    "extract_diff_from_text",
     "extract_code_blocks",
     "extract_code_by_language",
     "extract_first_code_block",
     "export_program",
     "FileReviewResult",
     "export_program_to_file",
+    "FallbackLLMClient",
     "LLMClient",
     "MockEmbeddingClient",
     "MockLLMClient",
+    "PatchResult",
     "PerfIssue",
     "PerfReviewResult",
     "PluginRegistry",
@@ -114,6 +117,7 @@ __all__ = [
     "WatchResult",
     "WorkflowResult",
     "WorkflowStepResult",
+    "apply_unified_diff",
     "assistant",
     "check_health",
     "config_file_template",

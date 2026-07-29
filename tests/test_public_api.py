@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "2.7.0"
+        assert devai.__version__ == "2.8.0"
 
     def test_exports(self):
         expected = {
@@ -58,9 +58,11 @@ class TestPublicAPI:
             "GitContext",
             "HealthChecker",
             "HealthResult",
+            "FallbackLLMClient",
             "LLMClient",
             "MockEmbeddingClient",
             "MockLLMClient",
+            "PatchResult",
             "PerfIssue",
             "PerfReviewResult",
             "PluginRegistry",
@@ -78,10 +80,12 @@ class TestPublicAPI:
             "TraceEvent",
             "WorkflowResult",
             "WorkflowStepResult",
+            "apply_unified_diff",
             "assistant",
             "check_health",
             "config_file_template",
             "cron_matches",
+            "extract_diff_from_text",
             "find_config_file",
             "get_preset",
             "interpolate",
