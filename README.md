@@ -48,6 +48,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DevWatcher** — Poll directories and auto-run presets when code files change
 - **DevContext** — Fluent builder for assembling LLM context from files, snippets, git diffs, and variables
 - **PromptBuilder** — Structured prompt assembly with system/user messages, context, and few-shot examples
+- **ProgramLibrary** — Discover, search, and run JSON/YAML programs from a directory
+- **Program Export** — Export DevProgram files to standalone runnable Python scripts
 
 ## Installation
 

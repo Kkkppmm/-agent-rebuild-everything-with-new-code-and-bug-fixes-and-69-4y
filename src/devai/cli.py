@@ -16,6 +16,8 @@ from devai.workflow import DevWorkflow
 from devai.program_schema import program_schema
 from devai.runtime import DevRuntime
 from devai.schedule import cron_matches, validate_cron
+from devai.library import ProgramLibrary
+from devai.export import export_program_to_file
 from devai.tools import ToolRegistry, git_diff, list_files, read_file, search_code
 
 
@@ -574,6 +576,40 @@ def cmd_report(args: argparse.Namespace) -> None:
         print(report.to_markdown())
 
 
+def cmd_library(args: argparse.Namespace) -> None:
+    assistant = CodeAssistant(client=MockLLMClient())
+    library = ProgramLibrary(Path(args.directory), assistant)
+    if args.search:
+        entries = library.search(args.search)
+    else:
+        entries = library.discover(recursive=args.recursive)
+    if args.json:
+        import json
+
+        print(json.dumps([entry.to_dict() for entry in entries], indent=2))
+        return
+    for entry in entries:
+        desc = f" — {entry.description}" if entry.description else ""
+        print(f"{entry.name} ({entry.task_count} tasks){desc}")
+        if args.verbose:
+            print(f"  path: {entry.path}")
+            print(f"  actions: {', '.join(entry.actions)}")
+
+
+def cmd_export(args: argparse.Namespace) -> None:
+    assistant = CodeAssistant(client=MockLLMClient())
+    program = DevProgram.from_file(args.program, assistant)
+    output = Path(args.output)
+    export_program_to_file(
+        program,
+        output,
+        use_mock=args.mock,
+        provider=args.provider,
+        model=args.model,
+    )
+    print(f"Exported {program.name} to {output}")
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -926,6 +962,32 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--format", choices=["markdown", "json"], default="markdown")
     p.add_argument("--provider", default="mock", help="Provider name")
     p.set_defaults(func=cmd_report)
+
+    p = sub.add_parser("library", help="List or search programs in a directory")
+    p.add_argument(
+        "directory",
+        nargs="?",
+        default="examples/programs",
+        help="Directory containing program JSON/YAML files",
+    )
+    p.add_argument("--search", help="Search programs by name, description, or action")
+    p.add_argument("--recursive", action="store_true", help="Scan subdirectories")
+    p.add_argument("--json", action="store_true", help="Output JSON")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show file paths and actions")
+    p.set_defaults(func=cmd_library)
+
+    p = sub.add_parser("export", help="Export a program file to a standalone Python script")
+    p.add_argument("program", help="Program JSON or YAML file")
+    p.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        help="Output Python script path",
+    )
+    p.add_argument("--mock", action="store_true", help="Default to mock LLM in exported script")
+    p.add_argument("--provider", default="openai", help="Default provider in exported script")
+    p.add_argument("--model", help="Default model in exported script")
+    p.set_defaults(func=cmd_export)
 
     return parser
 

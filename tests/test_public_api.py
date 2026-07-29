@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "2.4.0"
+        assert devai.__version__ == "2.5.0"
 
     def test_exports(self):
         expected = {
@@ -45,6 +45,8 @@ class TestPublicAPI:
             "DoctorResult",
             "ProgramReport",
             "EmbeddingClient",
+            "export_program",
+            "export_program_to_file",
             "GitContext",
             "HealthChecker",
             "HealthResult",
@@ -54,6 +56,8 @@ class TestPublicAPI:
             "PerfIssue",
             "PerfReviewResult",
             "PluginRegistry",
+            "ProgramEntry",
+            "ProgramLibrary",
             "PromptBuilder",
             "ProgramResult",
             "ProgramStepPlan",

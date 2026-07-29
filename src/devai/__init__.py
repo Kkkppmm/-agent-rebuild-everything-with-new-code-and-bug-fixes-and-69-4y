@@ -20,7 +20,9 @@ from devai.git_context import GitContext
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
 from devai.health import HealthChecker, HealthResult, check_health
 from devai.report import ProgramReport
+from devai.export import export_program, export_program_to_file
 from devai.interpolate import interpolate, interpolate_context
+from devai.library import ProgramEntry, ProgramLibrary
 from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
 from devai.trace import DevTrace, TraceEvent
@@ -38,7 +40,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.4.0"
+__version__ = "2.5.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -76,12 +78,16 @@ __all__ = [
     "DiskCachedLLMClient",
     "GitContext",
     "EmbeddingClient",
+    "export_program",
+    "export_program_to_file",
     "LLMClient",
     "MockEmbeddingClient",
     "MockLLMClient",
     "PerfIssue",
     "PerfReviewResult",
     "PluginRegistry",
+    "ProgramEntry",
+    "ProgramLibrary",
     "PromptBuilder",
     "ProgramResult",
     "ProgramStepPlan",
