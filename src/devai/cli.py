@@ -517,6 +517,58 @@ def cmd_benchmark(args: argparse.Namespace) -> None:
             sys.exit(1)
 
 
+def cmd_doctor(args: argparse.Namespace) -> None:
+    from devai.doctor import run_doctor
+
+    result = run_doctor(
+        project_path=args.project,
+        use_mock=args.mock,
+        check_provider=not args.skip_provider,
+    )
+    if args.json:
+        import json
+
+        print(json.dumps(result.to_dict(), indent=2))
+    else:
+        print(result.summary())
+    if not result.healthy:
+        sys.exit(1)
+
+
+def cmd_report(args: argparse.Namespace) -> None:
+    from devai.report import ProgramReport
+
+    runtime = DevRuntime.create(use_mock=args.mock)
+    context = _parse_context(args.context)
+    if args.code:
+        context["code"] = _read_input(args.code)
+    if args.diff:
+        context["diff"] = _read_input(args.diff)
+
+    if args.workflow:
+        workflow = runtime.workflow(name=args.name)
+        for step in args.workflow:
+            if ":" in step:
+                step_name, preset = step.split(":", 1)
+                workflow.add(step_name, preset)
+            else:
+                workflow.add(step, step)
+        wf_result = runtime.run_workflow(workflow, context)
+        report = ProgramReport.from_workflow(wf_result)
+    else:
+        preset = args.preset or "pre-commit"
+        results = runtime.run(preset, context)
+        report = ProgramReport.from_program(preset, results, context=context)
+
+    if args.output:
+        report.save(args.output, format=args.format)
+        print(f"Report saved to {args.output}")
+    elif args.format == "json" or args.json:
+        print(report.to_json())
+    else:
+        print(report.to_markdown())
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -833,6 +885,39 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--json", action="store_true", help="Output full benchmark JSON")
     p.set_defaults(func=cmd_benchmark)
+
+    p = sub.add_parser("doctor", help="Diagnose DevAI environment and configuration")
+    p.add_argument("--project", help="Project directory to inspect")
+    p.add_argument("--mock", action="store_true", help="Treat as mock mode (skip API key check)")
+    p.add_argument("--skip-provider", action="store_true", help="Skip provider connectivity check")
+    p.add_argument("--json", action="store_true", help="Output full diagnostics JSON")
+    p.set_defaults(func=cmd_doctor)
+
+    p = sub.add_parser("report", help="Run a program/workflow and export a structured report")
+    p.add_argument("--preset", help="Built-in preset to run (default: pre-commit)")
+    p.add_argument(
+        "--workflow",
+        nargs="+",
+        help="Workflow steps as name:preset or preset",
+    )
+    p.add_argument("--name", default="report", help="Report/workflow name")
+    p.add_argument("--code", help="Code input or file path")
+    p.add_argument("--diff", help="Diff input or file path")
+    p.add_argument(
+        "--context",
+        action="append",
+        metavar="KEY=VALUE",
+        help="Additional context values",
+    )
+    p.add_argument("--output", "-o", help="Write report to file (.json or .md)")
+    p.add_argument(
+        "--format",
+        choices=["json", "markdown", "md"],
+        default="markdown",
+        help="Output format when writing to stdout",
+    )
+    p.add_argument("--json", action="store_true", help="Output JSON to stdout")
+    p.set_defaults(func=cmd_report)
 
     return parser
 

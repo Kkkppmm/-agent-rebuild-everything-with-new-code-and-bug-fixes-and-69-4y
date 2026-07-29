@@ -41,6 +41,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Program Templates** — `${var:}`, `${env:}`, and `${file:}` interpolation in program context
 - **Project Config Files** — Load `.devai.yaml` / `devai.json` for per-project LLM settings
 - **Benchmarking** — Measure LLM latency, p95, and throughput with `BenchmarkRunner`
+- **DevDoctor** — Environment diagnostics for Python, dependencies, API keys, config, and provider connectivity
+- **ProgramReport** — Export program and workflow results as JSON or Markdown
 
 ## Installation
 
@@ -195,6 +197,32 @@ print(result.healthy, result.latency_ms)
 
 # CLI: devai health --mock
 # devai health --provider ollama --no-probe
+```
+
+## Environment Diagnostics
+
+```python
+from devai import run_doctor
+
+result = run_doctor(use_mock=True)
+print(result.summary())
+
+# CLI: devai doctor --mock
+# devai doctor --json
+```
+
+## Structured Reports
+
+```python
+from devai import DevRuntime, ProgramReport
+
+runtime = DevRuntime.create(use_mock=True)
+results = runtime.run("pre-commit", {"code": "def foo(): pass"})
+report = runtime.report(results, name="pre-commit")
+print(report.to_markdown())
+report.save("report.json")
+
+# CLI: devai report --mock --preset pre-commit --code app.py -o report.md
 ```
 
 ## DevApp (Ship Your Own Tool)

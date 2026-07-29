@@ -239,6 +239,33 @@ class DevRuntime:
         """Review git changes using the runtime assistant."""
         return self.git(staged=staged, base=base).review_changes(self.assistant)
 
+    def doctor(self, *, use_mock: bool = False, check_provider: bool = True) -> Any:
+        """Run environment diagnostics for this runtime."""
+        from devai.doctor import DevDoctor
+
+        return DevDoctor(
+            project_path=self.project_path,
+            config=self.config,
+            check_provider=check_provider,
+            use_mock=use_mock or self.config.api_key == "mock",
+        ).run()
+
+    def report(
+        self,
+        results: list[ProgramResult] | WorkflowResult,
+        *,
+        name: str | None = None,
+    ) -> Any:
+        """Build a structured report from program or workflow results."""
+        from devai.report import ProgramReport
+
+        if isinstance(results, WorkflowResult):
+            return ProgramReport.from_workflow(results)
+        return ProgramReport.from_program(
+            name or "program",
+            results,
+        )
+
     def resilient_client(
         self,
         *,
