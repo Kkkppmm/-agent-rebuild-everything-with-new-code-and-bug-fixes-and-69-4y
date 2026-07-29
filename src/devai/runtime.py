@@ -184,6 +184,32 @@ class DevRuntime:
         """Format program results as markdown."""
         return self.kit.summarize(results)
 
+    def report(
+        self,
+        results: list[ProgramResult] | WorkflowResult,
+        *,
+        title: str | None = None,
+        **metadata: Any,
+    ) -> "ProgramReport":
+        """Build a structured report from program or workflow results."""
+        from devai.report import ProgramReport
+
+        if isinstance(results, WorkflowResult):
+            return ProgramReport.from_workflow(
+                results, title=title, **metadata
+            )
+        return ProgramReport.from_program(
+            results, title=title or "DevAI Program Report", **metadata
+        )
+
+    def doctor(self, *, check_provider: bool = False) -> "DoctorResult":
+        """Run environment diagnostics for this runtime's project."""
+        from devai.doctor import DevDoctor
+
+        return DevDoctor(project_path=self.project_path).run(
+            check_provider=check_provider
+        )
+
     def review(self, code: str) -> str:
         """Quick code review."""
         return self.assistant.review(code)

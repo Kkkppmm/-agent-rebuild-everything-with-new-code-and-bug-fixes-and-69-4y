@@ -197,6 +197,30 @@ print(result.healthy, result.latency_ms)
 # devai health --provider ollama --no-probe
 ```
 
+## Doctor & Reports
+
+```python
+from devai import DevRuntime, run_doctor
+from devai.report import ProgramReport
+
+# Diagnose your environment
+result = run_doctor(check_provider=True)
+print(result.summary())
+
+# Export program results
+runtime = DevRuntime.create(use_mock=True)
+results = runtime.run("pre-commit", {"code": open("app.py").read()})
+report = runtime.report(results, title="Pre-commit Report")
+report.save("report.md")
+```
+
+```bash
+devai doctor
+devai doctor --check-provider --json
+devai report --preset pre-commit --code app.py -o report.md
+devai report --workflow review:pre-commit security:security --code app.py --format json
+```
+
 ## DevApp (Ship Your Own Tool)
 
 ```python
@@ -492,6 +516,8 @@ devai config-init
 devai config-show
 devai benchmark --mock --iterations 5
 devai health --mock
+devai doctor
+devai report --preset pre-commit --code app.py -o report.md
 ```
 
 ## Configuration

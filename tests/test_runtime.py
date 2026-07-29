@@ -116,3 +116,16 @@ class TestDevRuntime:
         workflow = runtime.workflow("async").add("step", "hotfix")
         result = await runtime.arun_workflow(workflow, {"code": "x = 1"})
         assert len(result.steps) == 1
+
+    def test_doctor(self):
+        runtime = DevRuntime.create(use_mock=True)
+        result = runtime.doctor(check_provider=True)
+        assert result.healthy is True
+        assert any(c.name == "python" for c in result.checks)
+
+    def test_report(self):
+        runtime = DevRuntime.create(use_mock=True)
+        results = runtime.run("pre-commit", {"code": "def foo(): pass"})
+        report = runtime.report(results, title="Test")
+        assert report.title == "Test"
+        assert "review" in report.to_markdown()
