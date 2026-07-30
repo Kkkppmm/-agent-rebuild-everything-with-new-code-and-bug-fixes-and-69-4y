@@ -829,6 +829,36 @@ def cmd_export(args: argparse.Namespace) -> None:
     print(f"Exported {program.name} to {output}")
 
 
+def cmd_hooks(args: argparse.Namespace) -> None:
+    from devai.hooks import DevHooks, SUPPORTED_HOOKS
+
+    hooks = DevHooks(
+        args.path or ".",
+        preset=args.preset,
+        fail_on_issues=not args.warn_only,
+    )
+    if args.action == "install":
+        installed = hooks.install(args.hook or ["pre-commit"])
+        if not installed:
+            print("No hooks installed.")
+            return
+        for name in installed:
+            print(f"Installed DevAI hook: {name}")
+    elif args.action == "uninstall":
+        removed = hooks.uninstall(args.hook or list(SUPPORTED_HOOKS))
+        if not removed:
+            print("No DevAI hooks to remove.")
+            return
+        for name in removed:
+            print(f"Removed DevAI hook: {name}")
+    elif args.action == "status":
+        status = hooks.status()
+        for name, state in status.items():
+            print(f"{name}: {state}")
+    else:
+        raise SystemExit(f"Unknown hooks action: {args.action}")
+
+
 def _get_assistant(args: argparse.Namespace) -> CodeAssistant:
     if getattr(args, "mock", False):
         return CodeAssistant(client=MockLLMClient())
@@ -1309,6 +1339,27 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--provider", default="openai", help="Default provider in exported script")
     p.add_argument("--model", help="Default model in exported script")
     p.set_defaults(func=cmd_export)
+
+    p = sub.add_parser("hooks", help="Install or manage DevAI git hooks")
+    p.add_argument(
+        "action",
+        choices=["install", "uninstall", "status"],
+        help="Hook management action",
+    )
+    p.add_argument(
+        "--hook",
+        nargs="+",
+        choices=["pre-commit", "pre-push", "commit-msg", "post-commit"],
+        help="Hook name(s) to install or uninstall",
+    )
+    p.add_argument("--preset", default="pre-commit", help="Preset for hook actions")
+    p.add_argument("--path", help="Project directory (default: current)")
+    p.add_argument(
+        "--warn-only",
+        action="store_true",
+        help="Do not fail commits/pushes when checks fail",
+    )
+    p.set_defaults(func=cmd_hooks)
 
     return parser
 

@@ -67,6 +67,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **GitChangelog** — Generate Keep a Changelog-style release notes from git commit history
 - **TypingCoverage** — Analyze type hint coverage across Python projects and export LLM context
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
+- **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
+- **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets
+- **Async Batch Review** — `areview_files()` and `areview_directory()` for async parallel file reviews
 
 ## Installation
 
