@@ -299,6 +299,32 @@ def cmd_health(args: argparse.Namespace) -> None:
     print(report.summary())
 
 
+def cmd_smells(args: argparse.Namespace) -> None:
+    from devai.code_smells import CodeSmellDetector
+
+    detector = CodeSmellDetector(args.directory)
+    if args.context:
+        print(detector.to_context())
+        return
+    print(detector.summary())
+    if args.verbose:
+        for smell in detector.analyze():
+            print(smell.format())
+
+
+def cmd_tech_debt(args: argparse.Namespace) -> None:
+    from devai.tech_debt import TechDebtScanner
+
+    scanner = TechDebtScanner(args.directory)
+    if args.context:
+        print(scanner.to_context())
+        return
+    print(scanner.summary())
+    if args.verbose:
+        for item in scanner.scan():
+            print(item.format())
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -1139,6 +1165,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--markdown", action="store_true", help="Output Markdown report")
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.set_defaults(func=cmd_health)
+
+    p = sub.add_parser("smells", help="Detect code smells (long functions, nesting, etc.)")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all smells")
+    p.set_defaults(func=cmd_smells)
+
+    p = sub.add_parser("tech-debt", help="Scan for TODO, FIXME, HACK markers")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all markers")
+    p.set_defaults(func=cmd_tech_debt)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")

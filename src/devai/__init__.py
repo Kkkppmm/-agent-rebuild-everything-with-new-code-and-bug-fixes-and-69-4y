@@ -19,6 +19,7 @@ from devai.prompt_registry import PromptRegistry
 from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.code_compare import CodeComparer, CompareResult
 from devai.code_metrics import CodeMetrics, FileMetrics, FunctionMetrics, ProjectMetrics
+from devai.code_smells import CodeSmell, CodeSmellDetector, CodeSmellStats
 from devai.docstring_coverage import DocstringCoverage, DocstringGap, DocstringStats
 from devai.test_mapper import ModuleMapping, TestMapReport, TestMapper
 from devai.composer import ProgramComposer
@@ -50,8 +51,9 @@ from devai.output import CodeBlock, extract_code_blocks, extract_code_by_languag
 from devai.stream import StreamCollector, StreamResult
 from devai.index import CodeSymbolIndex, SymbolInfo
 from devai.secrets import SecretFinding, SecretsScanner
-from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
+from devai.tech_debt import TechDebtItem, TechDebtScanner, TechDebtStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
+from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -61,7 +63,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "3.8.0"
+__version__ = "3.9.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -83,6 +85,9 @@ __all__ = [
     "CodeBlock",
     "CodeComparer",
     "CodeMetrics",
+    "CodeSmell",
+    "CodeSmellDetector",
+    "CodeSmellStats",
     "DocstringCoverage",
     "DocstringGap",
     "DocstringStats",
@@ -164,6 +169,9 @@ __all__ = [
     "ImportEdge",
     "ImportGraph",
     "SymbolInfo",
+    "TechDebtItem",
+    "TechDebtScanner",
+    "TechDebtStats",
     "TestMapReport",
     "TestMapper",
     "TokenBudget",

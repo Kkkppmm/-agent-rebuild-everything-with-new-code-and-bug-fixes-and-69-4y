@@ -7,10 +7,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from devai.code_metrics import CodeMetrics
+from devai.code_smells import CodeSmellDetector
 from devai.deps_parser import DependencyParser
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
+from devai.tech_debt import TechDebtScanner
 from devai.test_mapper import TestMapper
 from devai.typing_coverage import TypingCoverage
 
@@ -102,12 +104,14 @@ class ProjectHealth:
     """
 
     WEIGHTS = {
-        "metrics": 0.15,
-        "typing": 0.20,
-        "docstrings": 0.15,
-        "tests": 0.25,
-        "dependencies": 0.10,
-        "secrets": 0.15,
+        "metrics": 0.12,
+        "typing": 0.17,
+        "docstrings": 0.12,
+        "tests": 0.20,
+        "dependencies": 0.08,
+        "secrets": 0.12,
+        "smells": 0.10,
+        "tech_debt": 0.09,
     }
 
     def __init__(
@@ -215,6 +219,32 @@ class ProjectHealth:
             "high_confidence": high,
         }
 
+    def _score_smells(self, detector: CodeSmellDetector) -> tuple[float, str, dict]:
+        smells = detector.analyze()
+        score = detector.health_score()
+        stats = detector.stats
+        high = sum(1 for s in smells if s.severity == "high")
+        summary = f"{len(smells)} smells ({high} high severity)"
+        return score, summary, {
+            "total_smells": len(smells),
+            "high_severity": high,
+            "by_kind": stats.by_kind,
+            "density": stats.smell_density,
+        }
+
+    def _score_tech_debt(self, scanner: TechDebtScanner) -> tuple[float, str, dict]:
+        items = scanner.scan()
+        score = scanner.health_score()
+        stats = scanner.stats
+        critical = sum(1 for i in items if i.marker in ("FIXME", "BUG", "HACK"))
+        summary = f"{len(items)} markers in {stats.files_with_debt} files ({critical} critical)"
+        return score, summary, {
+            "total_items": len(items),
+            "files_with_debt": stats.files_with_debt,
+            "critical": critical,
+            "by_marker": stats.by_marker,
+        }
+
     def _build_recommendations(self, categories: list[HealthCategory]) -> list[str]:
         recs: list[str] = []
         for cat in categories:
@@ -234,6 +264,10 @@ class ProjectHealth:
                 recs.append("Pin unpinned dependencies with exact versions for reproducibility")
             elif cat.name == "secrets" and cat.details.get("findings", 0) > 0:
                 recs.append("Review and remove hardcoded secrets; use environment variables")
+            elif cat.name == "smells" and cat.details.get("high_severity", 0) > 0:
+                recs.append("Refactor high-severity code smells (deep nesting, bare except, god classes)")
+            elif cat.name == "tech_debt" and cat.details.get("critical", 0) > 0:
+                recs.append("Address critical tech-debt markers (FIXME, BUG, HACK) before release")
         return recs
 
     def analyze(self) -> ProjectHealthReport:
@@ -277,6 +311,14 @@ class ProjectHealth:
             scanner = SecretsScanner(root_str, ignore_dirs=self.ignore_dirs)
             score, summary, details = self._score_secrets(scanner)
             categories.append(HealthCategory("secrets", score, summary, details))
+
+        smells = CodeSmellDetector(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_smells(smells)
+        categories.append(HealthCategory("smells", score, summary, details))
+
+        debt = TechDebtScanner(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_tech_debt(debt)
+        categories.append(HealthCategory("tech_debt", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

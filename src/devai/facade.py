@@ -8,7 +8,9 @@ from typing import Any
 from devai.assistant import CodeAssistant
 from devai.code_compare import CodeComparer, CompareResult
 from devai.code_metrics import CodeMetrics
+from devai.code_smells import CodeSmellDetector
 from devai.docstring_coverage import DocstringCoverage
+from devai.tech_debt import TechDebtScanner
 from devai.test_mapper import TestMapper
 from devai.project_health import ProjectHealth
 from devai.program import DevProgram, ProgramResult
@@ -225,6 +227,14 @@ class DevAI:
     def health(self, path: str | Path = ".", **kwargs: Any) -> ProjectHealth:
         """Run unified project health analysis (metrics, typing, tests, deps, secrets)."""
         return ProjectHealth(str(path), **kwargs)
+
+    def smells(self, path: str | Path = ".", **kwargs: Any) -> CodeSmellDetector:
+        """Detect code smells (long functions, deep nesting, bare except, god classes)."""
+        return CodeSmellDetector(str(path), **kwargs)
+
+    def tech_debt(self, path: str | Path = ".", **kwargs: Any) -> TechDebtScanner:
+        """Scan for TODO, FIXME, HACK, and other tech-debt comment markers."""
+        return TechDebtScanner(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

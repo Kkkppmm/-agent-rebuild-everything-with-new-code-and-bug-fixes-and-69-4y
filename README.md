@@ -77,7 +77,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DocstringCoverage** — Analyze docstring coverage for functions, methods, and classes
 - **TestMapper** — Map source modules to test files and find untested modules
 - **Async Facade** — `areview()` and `aexplain()` async methods on the `DevAI` entry point
-- **ProjectHealth** — Unified project health dashboard combining metrics, typing, docstrings, tests, dependencies, and secrets scanning with scored recommendations
+- **ProjectHealth** — Unified project health dashboard combining metrics, typing, docstrings, tests, dependencies, secrets, code smells, and tech-debt scanning with scored recommendations
+- **CodeSmellDetector** — AST-based detection of long functions, deep nesting, bare except, god classes, and excessive parameters
+- **TechDebtScanner** — Scan for TODO, FIXME, HACK, XXX, and other tech-debt comment markers across multiple languages
 
 ## Installation
 
