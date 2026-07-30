@@ -126,7 +126,7 @@ class DevHooks:
                 continue
             if "DevAI-managed hook" in content:
                 found.append(name)
-        return found
+        return sorted(found)
 
     def status(self) -> dict[str, str]:
         """Return status of each supported hook (installed, other, missing)."""

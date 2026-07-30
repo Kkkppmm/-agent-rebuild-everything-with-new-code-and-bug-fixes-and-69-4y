@@ -135,6 +135,22 @@ class DevAI:
         """Run a program asynchronously."""
         return await self._runtime.arun(program, context, trace=trace)
 
+    async def areview(self, code: str) -> str:
+        """Review code asynchronously."""
+        return await self._runtime.assistant.areview(code)
+
+    async def aexplain(self, code: str) -> str:
+        """Explain code asynchronously."""
+        return await self._runtime.assistant.aexplain(code)
+
+    async def agenerate(self, spec: str) -> str:
+        """Generate code asynchronously."""
+        return await self._runtime.assistant.agenerate(spec)
+
+    async def adebug(self, code: str, error: str) -> str:
+        """Debug code asynchronously."""
+        return await self._runtime.assistant.adebug(code, error)
+
     def dry_run(
         self,
         program: DevProgram | str,

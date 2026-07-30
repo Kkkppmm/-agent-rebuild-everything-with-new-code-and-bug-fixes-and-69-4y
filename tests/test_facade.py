@@ -44,3 +44,17 @@ class TestDevAI:
         ai = DevAI.mock()
         assert ai.kit is ai.runtime.kit
         assert ai.config is ai.runtime.config
+
+    async def test_async_review(self):
+        ai = DevAI.mock()
+        result = await ai.areview("def add(a, b): return a + b")
+        assert result
+
+    async def test_async_explain_and_generate(self):
+        ai = DevAI.mock()
+        assert await ai.aexplain("x = 1")
+        assert await ai.agenerate("add function")
+
+    async def test_async_debug(self):
+        ai = DevAI.mock()
+        assert await ai.adebug("x = 1", "NameError")

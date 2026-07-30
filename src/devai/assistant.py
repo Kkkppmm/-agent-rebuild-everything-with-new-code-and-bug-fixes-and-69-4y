@@ -334,3 +334,30 @@ class CodeAssistant:
             Message.user(CODE_REVIEW.format(code=code)),
         ]
         return await self.client.acomplete(messages)
+
+    async def _arun_chain(self, prompt_template: Any, **kwargs: Any) -> str:
+        messages = []
+        if prompt_template.system:
+            messages.append(Message.system(prompt_template.system))
+        messages.append(Message.user(prompt_template.format(**kwargs)))
+        return await self.client.acomplete(messages)
+
+    async def aexplain(self, code: str) -> str:
+        """Async code explanation."""
+        return await self._arun_chain(EXPLAIN, code=code)
+
+    async def adebug(self, code: str, error: str) -> str:
+        """Async debug assistance."""
+        return await self._arun_chain(DEBUG, code=code, error=error)
+
+    async def agenerate(self, spec: str, language: str = "python") -> str:
+        """Async code generation."""
+        return await self._arun_chain(CODE_GEN, spec=spec, language=language)
+
+    async def asecurity(self, code: str) -> str:
+        """Async security review."""
+        return await self._arun_chain(SECURITY_REVIEW, code=code)
+
+    async def arefactor(self, code: str, goals: str = "improve readability") -> str:
+        """Async code refactoring."""
+        return await self._arun_chain(REFACTOR, code=code, goals=goals)

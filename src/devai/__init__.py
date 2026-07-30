@@ -2,6 +2,8 @@
 
 from devai.agents import Agent, CoderAgent
 from devai.batch_review import BatchReviewReport, BatchReviewer, FileReviewResult
+from devai.composer import ProgramComposer
+from devai.indexer import CodeIndexer, CodeSymbol
 from devai.app import DevApp
 from devai.ci import CIReporter
 from devai.assistant import CodeAssistant
@@ -34,6 +36,7 @@ from devai.watch import DevWatcher, WatchEvent, WatchResult
 from devai.utils import TokenBudget, BudgetSnapshot, BudgetedLLMClient, PatchResult, apply_unified_diff, extract_diff_from_text
 from devai.sandbox import CodeSandbox, SandboxResult
 from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
+from devai.memory import ConversationMemory, ConversationStore
 from devai.output import CodeBlock, extract_code_blocks, extract_code_by_language, extract_first_code_block
 from devai.stream import StreamCollector, StreamResult
 from devai.schemas import (
@@ -45,7 +48,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.9.0"
+__version__ = "3.0.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -67,6 +70,11 @@ __all__ = [
     "CodeProject",
     "ContextSection",
     "CodeReviewResult",
+    "CodeIndexer",
+    "CodeSymbol",
+    "ConversationMemory",
+    "ConversationStore",
+    "ProgramComposer",
     "CodeSandbox",
     "CoderAgent",
     "DevAI",

@@ -57,6 +57,10 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets
 - **Async Batch Review** — `areview_files()` and `areview_directory()` for async parallel file reviews
+- **CodeIndexer** — AST-based symbol indexing for Python projects (functions, classes, methods)
+- **Conversation Persistence** — Save and load `ConversationMemory` to JSON; `ConversationStore` for named sessions
+- **ProgramComposer** — Merge presets and custom tasks into composite DevPrograms
+- **Async DevAI** — `areview()`, `aexplain()`, `agenerate()`, and `adebug()` on the DevAI facade
 
 ## Installation
 

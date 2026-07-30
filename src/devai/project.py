@@ -192,6 +192,29 @@ class CodeProject:
 
         return truncate_to_tokens("\n".join(parts), max_tokens)
 
+    def index_symbols(self, pattern: str = "*.py") -> list:
+        """Index Python symbols (functions, classes, methods) in the project."""
+        from devai.indexer import CodeIndexer
+
+        indexer = CodeIndexer(self.root)
+        return indexer.index_directory(pattern, ignore_dirs=self.ignore_dirs)
+
+    def symbol_context(self, query: str | None = None, *, max_symbols: int = 50) -> str:
+        """Build LLM context from indexed symbols, optionally filtered by query."""
+        from devai.indexer import CodeIndexer
+
+        indexer = CodeIndexer(self.root)
+        indexer.index_directory(ignore_dirs=self.ignore_dirs)
+        if query:
+            symbols = indexer.search(query, limit=max_symbols)
+            if not symbols:
+                return f"No symbols matching '{query}'."
+            lines = [f"Symbols matching '{query}':", ""]
+            for symbol in symbols:
+                lines.append(symbol.display())
+            return "\n".join(lines)
+        return indexer.to_context(max_symbols=max_symbols)
+
     def token_estimate(self) -> int:
         """Estimate total tokens across all project files."""
         total = 0

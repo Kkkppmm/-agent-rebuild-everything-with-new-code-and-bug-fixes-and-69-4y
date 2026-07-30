@@ -47,6 +47,19 @@ class Message:
     def assistant(cls, content: str, tool_calls: list[dict[str, Any]] | None = None) -> Message:
         return cls(role=Role.ASSISTANT, content=content, tool_calls=tool_calls)
 
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Message:
+        role = data.get("role", Role.USER)
+        if isinstance(role, str):
+            role = Role(role)
+        return cls(
+            role=role,
+            content=data.get("content", ""),
+            name=data.get("name"),
+            tool_call_id=data.get("tool_call_id"),
+            tool_calls=data.get("tool_calls"),
+        )
+
 
 @dataclass
 class Tool:

@@ -76,3 +76,15 @@ class TestCodeProject:
         project = CodeProject(str(tmp_path))
         assert project.scan() == []
         assert "No source files" in project.summary()
+
+    def test_index_symbols(self, tmp_path):
+        (tmp_path / "mod.py").write_text("def foo():\n    pass\nclass Bar:\n    def m(self):\n        pass\n")
+        project = CodeProject(str(tmp_path))
+        symbols = project.index_symbols()
+        assert len(symbols) == 3
+
+    def test_symbol_context(self, tmp_path):
+        (tmp_path / "mod.py").write_text("def authenticate(user):\n    pass\n")
+        project = CodeProject(str(tmp_path))
+        context = project.symbol_context("auth")
+        assert "authenticate" in context
