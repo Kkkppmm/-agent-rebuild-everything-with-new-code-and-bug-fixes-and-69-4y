@@ -60,7 +60,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Jupyter Notebooks** — Read, extract, and review `.ipynb` notebooks with `NotebookReader` and `review_notebook()`
 - **Test Failure Analysis** — Analyze pytest/unittest output with `analyze_test_failures()`
 - **Stack Trace Analysis** — Debug crashes with `analyze_stacktrace()`
-- **Config Review** — Review `pyproject.toml`, YAML, and JSON configs with `review_config()`
+- **ProgramComposer** — Fluent Python API for building DevProgram workflows without JSON/YAML
+- **Schedule Config** — Load cron job definitions from JSON/YAML files for DevSchedule and ProgramLibrary
 
 ## Installation
 

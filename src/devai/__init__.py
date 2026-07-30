@@ -15,6 +15,7 @@ from devai.program import DevProgram, ProgramResult, ProgramStepPlan, ProgramTas
 from devai.program_schema import program_schema
 from devai.project import CodeProject
 from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
+from devai.composer import ProgramComposer
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.context import ContextSection, DevContext, PromptBuilder
 from devai.git_context import GitContext
@@ -31,6 +32,7 @@ from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
 from devai.trace import DevTrace, TraceEvent
 from devai.schedule import DevSchedule, ScheduleResult, ScheduledJob, cron_matches, validate_cron
+from devai.schedule_config import apply_schedule_config, load_schedule_config, schedule_from_config
 from devai.watch import DevWatcher, WatchEvent, WatchResult
 from devai.utils import TokenBudget, BudgetSnapshot, BudgetedLLMClient, PatchResult, apply_unified_diff, extract_diff_from_text
 from devai.sandbox import CodeSandbox, SandboxResult
@@ -45,7 +47,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "3.0.0"
+__version__ = "3.1.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -105,8 +107,12 @@ __all__ = [
     "PerfIssue",
     "PerfReviewResult",
     "PluginRegistry",
+    "ProgramComposer",
     "ProgramEntry",
     "ProgramLibrary",
+    "apply_schedule_config",
+    "load_schedule_config",
+    "schedule_from_config",
     "PromptBuilder",
     "ProgramResult",
     "ProgramStepPlan",

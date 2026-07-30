@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from devai.assistant import CodeAssistant
 from devai.program import DevProgram, ProgramResult
+
+if TYPE_CHECKING:
+    from devai.runtime import DevRuntime
+    from devai.schedule import DevSchedule
 
 PROGRAM_EXTENSIONS = {".json", ".yaml", ".yml"}
 
@@ -141,6 +145,16 @@ class ProgramLibrary:
         if not self._programs:
             self.discover()
         return {name: program.validate() for name, program in self._programs.items()}
+
+    def create_schedule(
+        self,
+        runtime: "DevRuntime",
+        config_path: str | Path,
+    ) -> "DevSchedule":
+        """Build a DevSchedule from a config file referencing programs in this library."""
+        from devai.schedule_config import schedule_from_config
+
+        return schedule_from_config(runtime, config_path, library=self)
 
     @staticmethod
     def _read_description(path: Path, program: DevProgram) -> str | None:

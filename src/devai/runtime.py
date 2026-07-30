@@ -117,6 +117,12 @@ class DevRuntime:
             self._programs[name] = DevProgram(name, self.assistant)
         return self._programs[name]
 
+    def composer(self, name: str = "program") -> "ProgramComposer":
+        """Create a fluent ProgramComposer for building workflows in Python."""
+        from devai.composer import ProgramComposer
+
+        return ProgramComposer(self.assistant, name)
+
     def load_program(self, path: str | Path) -> DevProgram:
         """Load a program from a JSON or YAML file and register it."""
         program = DevProgram.from_file(path, self.assistant)
