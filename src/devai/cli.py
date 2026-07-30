@@ -261,6 +261,22 @@ def cmd_typing(args: argparse.Namespace) -> None:
             print(gap.format())
 
 
+def cmd_docstrings(args: argparse.Namespace) -> None:
+    from devai.docstring_coverage import DocstringCoverage
+
+    coverage = DocstringCoverage(
+        args.directory,
+        include_private=args.include_private,
+    )
+    if args.context:
+        print(coverage.to_context())
+        return
+    print(coverage.summary())
+    if args.verbose:
+        for gap in coverage.analyze():
+            print(gap.format())
+
+
 def cmd_parse_deps(args: argparse.Namespace) -> None:
     from devai.deps_parser import DependencyParser
 
@@ -982,6 +998,17 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all typing gaps")
     p.set_defaults(func=cmd_typing)
+
+    p = sub.add_parser("docstrings", help="Analyze docstring coverage")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all docstring gaps")
+    p.add_argument(
+        "--include-private",
+        action="store_true",
+        help="Include private functions and methods",
+    )
+    p.set_defaults(func=cmd_docstrings)
 
     p = sub.add_parser("parse-deps", help="Parse and analyze project dependencies")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

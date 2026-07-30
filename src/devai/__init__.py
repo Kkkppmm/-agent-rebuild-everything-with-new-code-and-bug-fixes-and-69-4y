@@ -42,6 +42,7 @@ from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
 from devai.output import CodeBlock, extract_code_blocks, extract_code_by_language, extract_first_code_block
 from devai.index import CodeSymbolIndex, SymbolInfo
 from devai.secrets import SecretFinding, SecretsScanner
+from devai.docstring_coverage import DocstringCoverage, DocstringGap, DocstringStats
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
     CodeIssue,
@@ -52,7 +53,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "3.3.0"
+__version__ = "3.4.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -80,6 +81,9 @@ __all__ = [
     "CoderAgent",
     "Dependency",
     "DependencyParser",
+    "DocstringCoverage",
+    "DocstringGap",
+    "DocstringStats",
     "DevAI",
     "DevAIConfig",
     "DevApp",

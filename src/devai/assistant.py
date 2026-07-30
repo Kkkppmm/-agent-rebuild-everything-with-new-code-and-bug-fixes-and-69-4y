@@ -151,6 +151,12 @@ class CodeAssistant:
 
         return TypingCoverage(directory).to_context()
 
+    def docstring_coverage_context(self, directory: str = ".") -> str:
+        """Build LLM context from docstring coverage analysis."""
+        from devai.docstring_coverage import DocstringCoverage
+
+        return DocstringCoverage(directory).to_context()
+
     def dependency_context(self, directory: str = ".") -> str:
         """Build LLM context from project dependency analysis."""
         from devai.deps_parser import DependencyParser
