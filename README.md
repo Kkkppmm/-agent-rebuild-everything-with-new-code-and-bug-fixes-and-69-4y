@@ -65,6 +65,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **ImportGraph** — Analyze Python import dependencies, find circular imports, and export LLM context
 - **SecretsScanner** — Heuristic scan for hardcoded API keys, tokens, and credentials
 - **GitChangelog** — Generate Keep a Changelog-style release notes from git commit history
+- **TypingCoverage** — Analyze type hint coverage across Python projects and export LLM context
+- **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 
 ## Installation
 

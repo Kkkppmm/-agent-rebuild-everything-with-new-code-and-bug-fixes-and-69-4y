@@ -18,6 +18,7 @@ from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.composer import ProgramComposer
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.context import ContextSection, DevContext, PromptBuilder
+from devai.deps_parser import Dependency, DependencyParser
 from devai.git_context import GitContext
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
 from devai.health import HealthChecker, HealthResult, check_health
@@ -41,6 +42,7 @@ from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
 from devai.output import CodeBlock, extract_code_blocks, extract_code_by_language, extract_first_code_block
 from devai.index import CodeSymbolIndex, SymbolInfo
 from devai.secrets import SecretFinding, SecretsScanner
+from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -50,7 +52,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "3.2.0"
+__version__ = "3.3.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -76,6 +78,8 @@ __all__ = [
     "CodeSandbox",
     "CodeSymbolIndex",
     "CoderAgent",
+    "Dependency",
+    "DependencyParser",
     "DevAI",
     "DevAIConfig",
     "DevApp",
@@ -133,6 +137,9 @@ __all__ = [
     "ImportGraph",
     "SymbolInfo",
     "TokenBudget",
+    "TypingCoverage",
+    "TypingGap",
+    "TypingStats",
     "TraceEvent",
     "WatchEvent",
     "WatchResult",

@@ -145,6 +145,18 @@ class CodeAssistant:
         graph = ImportGraph(directory)
         return graph.to_context(module)
 
+    def typing_coverage_context(self, directory: str = ".") -> str:
+        """Build LLM context from type hint coverage analysis."""
+        from devai.typing_coverage import TypingCoverage
+
+        return TypingCoverage(directory).to_context()
+
+    def dependency_context(self, directory: str = ".") -> str:
+        """Build LLM context from project dependency analysis."""
+        from devai.deps_parser import DependencyParser
+
+        return DependencyParser(directory).to_context()
+
     def translate_code(self, code: str, source_lang: str, target_lang: str) -> str:
         """Translate code between programming languages."""
         return self._run_chain(

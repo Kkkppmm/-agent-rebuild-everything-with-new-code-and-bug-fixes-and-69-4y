@@ -248,6 +248,35 @@ def cmd_git_changelog(args: argparse.Namespace) -> None:
     )
 
 
+def cmd_typing(args: argparse.Namespace) -> None:
+    from devai.typing_coverage import TypingCoverage
+
+    coverage = TypingCoverage(args.directory)
+    if args.context:
+        print(coverage.to_context())
+        return
+    print(coverage.summary())
+    if args.verbose:
+        for gap in coverage.analyze():
+            print(gap.format())
+
+
+def cmd_parse_deps(args: argparse.Namespace) -> None:
+    from devai.deps_parser import DependencyParser
+
+    parser = DependencyParser(args.directory)
+    if args.context:
+        print(parser.to_context())
+        return
+    print(parser.summary())
+    if args.unpinned:
+        for dep in parser.unpinned():
+            print(dep.format())
+    elif args.verbose:
+        for dep in parser.parse():
+            print(dep.format())
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -947,6 +976,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--from-ref", help="Start ref (e.g. v1.0.0) for commit range")
     p.add_argument("--raw", action="store_true", help="Skip LLM polishing")
     p.set_defaults(func=cmd_git_changelog)
+
+    p = sub.add_parser("typing", help="Analyze type hint coverage")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all typing gaps")
+    p.set_defaults(func=cmd_typing)
+
+    p = sub.add_parser("parse-deps", help="Parse and analyze project dependencies")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--unpinned", action="store_true", help="List unpinned dependencies")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all dependencies")
+    p.set_defaults(func=cmd_parse_deps)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")
