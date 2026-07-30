@@ -47,6 +47,8 @@ from devai.prompts import (
     TEST_GEN,
     TYPE_HINTS,
     CONFIG_REVIEW,
+    COVERAGE_REVIEW,
+    METRICS_REVIEW,
 )
 from devai.schemas import CodeReviewResult, PerfReviewResult, SecurityAuditResult
 
@@ -150,6 +152,26 @@ class CodeAssistant:
         from devai.typing_coverage import TypingCoverage
 
         return TypingCoverage(directory).to_context()
+
+    def metrics_context(self, directory: str = ".") -> str:
+        """Build LLM context from static code metrics analysis."""
+        from devai.code_metrics import CodeMetrics
+
+        return CodeMetrics(directory).to_context()
+
+    def coverage_context(self, coverage_xml: str | Path) -> str:
+        """Build LLM context from a coverage.py XML report."""
+        from devai.coverage_report import CoverageReport
+
+        return CoverageReport(coverage_xml).to_context()
+
+    def review_metrics(self, directory: str = ".") -> str:
+        """AI review of static code metrics for maintainability."""
+        return self._run_chain(METRICS_REVIEW, metrics=self.metrics_context(directory))
+
+    def review_coverage(self, coverage_xml: str | Path) -> str:
+        """AI review of test coverage gaps and recommendations."""
+        return self._run_chain(COVERAGE_REVIEW, coverage=self.coverage_context(coverage_xml))
 
     def dependency_context(self, directory: str = ".") -> str:
         """Build LLM context from project dependency analysis."""

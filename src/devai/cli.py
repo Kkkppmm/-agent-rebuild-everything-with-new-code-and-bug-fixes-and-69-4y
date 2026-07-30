@@ -261,6 +261,40 @@ def cmd_typing(args: argparse.Namespace) -> None:
             print(gap.format())
 
 
+def cmd_metrics(args: argparse.Namespace) -> None:
+    from devai.code_metrics import CodeMetrics
+
+    metrics = CodeMetrics(args.directory, complexity_threshold=args.threshold)
+    if args.review:
+        assistant = _get_assistant(args)
+        print(assistant.review_metrics(args.directory))
+        return
+    if args.context:
+        print(metrics.to_context())
+        return
+    print(metrics.summary())
+    if args.verbose:
+        for fm in metrics.high_complexity():
+            print(fm.format())
+
+
+def cmd_coverage(args: argparse.Namespace) -> None:
+    from devai.coverage_report import CoverageReport
+
+    report = CoverageReport(args.report)
+    if args.review:
+        assistant = _get_assistant(args)
+        print(assistant.review_coverage(args.report))
+        return
+    if args.context:
+        print(report.to_context())
+        return
+    print(report.summary())
+    if args.verbose:
+        for fc in report.worst_files():
+            print(fc.format())
+
+
 def cmd_parse_deps(args: argparse.Namespace) -> None:
     from devai.deps_parser import DependencyParser
 
@@ -1100,6 +1134,26 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all typing gaps")
     p.set_defaults(func=cmd_typing)
+
+    p = sub.add_parser("metrics", help="Analyze static code metrics")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--review", action="store_true", help="AI review metrics for maintainability")
+    p.add_argument("--verbose", "-v", action="store_true", help="List high-complexity functions")
+    p.add_argument(
+        "--threshold",
+        type=int,
+        default=10,
+        help="Complexity threshold for high-complexity listing",
+    )
+    p.set_defaults(func=cmd_metrics)
+
+    p = sub.add_parser("coverage", help="Parse coverage.py XML reports")
+    p.add_argument("report", help="Path to coverage XML report")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--review", action="store_true", help="AI review coverage gaps")
+    p.add_argument("--verbose", "-v", action="store_true", help="List files with lowest coverage")
+    p.set_defaults(func=cmd_coverage)
 
     p = sub.add_parser("parse-deps", help="Parse and analyze project dependencies")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

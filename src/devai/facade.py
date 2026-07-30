@@ -7,6 +7,8 @@ from typing import Any
 
 from devai.assistant import CodeAssistant
 from devai.code_compare import CodeComparer, CompareResult
+from devai.code_metrics import CodeMetrics, FunctionMetric, FileMetric, ProjectMetrics
+from devai.coverage_report import CoverageReport, CoverageSummary, FileCoverage
 from devai.program import DevProgram, ProgramResult
 from devai.project_detect import ProjectDetector, ProjectProfile
 from devai.prompt_registry import PromptRegistry
@@ -205,6 +207,22 @@ class DevAI:
     def detect_project(self, path: str | Path = ".") -> ProjectProfile:
         """Detect project language, framework, and tooling from a directory."""
         return ProjectDetector().detect(path)
+
+    def metrics(self, path: str | Path = ".") -> ProjectMetrics:
+        """Analyze static code metrics for a project directory."""
+        return CodeMetrics(str(path)).analyze()
+
+    def review_metrics(self, path: str | Path = ".") -> str:
+        """AI review of static code metrics for maintainability."""
+        return self._runtime.assistant.review_metrics(str(path))
+
+    def coverage(self, coverage_xml: str | Path) -> CoverageSummary:
+        """Parse a coverage.py XML report and return summary statistics."""
+        return CoverageReport(coverage_xml).parse()
+
+    def review_coverage(self, coverage_xml: str | Path) -> str:
+        """AI review of test coverage gaps and recommendations."""
+        return self._runtime.assistant.review_coverage(coverage_xml)
 
     @staticmethod
     def prompts() -> PromptRegistry:

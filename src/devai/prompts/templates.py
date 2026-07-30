@@ -350,3 +350,27 @@ NOTEBOOK_REVIEW = PromptTemplate(
     ),
     input_variables=["notebook"],
 )
+
+METRICS_REVIEW = PromptTemplate(
+    system=(
+        "You analyze static code metrics and recommend maintainability improvements. "
+        "Focus on complexity hotspots, oversized files, and structural issues."
+    ),
+    template=(
+        "Review these static code metrics and recommend improvements:\n\n$metrics\n\n"
+        "Prioritize high-complexity functions and oversized files."
+    ),
+    input_variables=["metrics"],
+)
+
+COVERAGE_REVIEW = PromptTemplate(
+    system=(
+        "You analyze test coverage reports and recommend where to add tests. "
+        "Focus on uncovered critical paths, edge cases, and high-risk gaps."
+    ),
+    template=(
+        "Review this test coverage report and recommend where to add tests:\n\n$coverage\n\n"
+        "Prioritize files with low coverage and critical business logic."
+    ),
+    input_variables=["coverage"],
+)

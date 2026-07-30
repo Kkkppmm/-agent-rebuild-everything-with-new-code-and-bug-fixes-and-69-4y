@@ -18,6 +18,8 @@ from devai.project_detect import ProjectDetector, ProjectProfile
 from devai.prompt_registry import PromptRegistry
 from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.code_compare import CodeComparer, CompareResult
+from devai.code_metrics import CodeMetrics, FunctionMetric, FileMetric, ProjectMetrics
+from devai.coverage_report import CoverageReport, CoverageSummary, FileCoverage
 from devai.composer import ProgramComposer
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.context import ContextSection, DevContext, PromptBuilder
@@ -57,7 +59,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "3.5.0"
+__version__ = "3.6.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -77,6 +79,13 @@ __all__ = [
     "CodeAssistant",
     "CodeBlock",
     "CodeComparer",
+    "CodeMetrics",
+    "CoverageReport",
+    "CoverageSummary",
+    "FileCoverage",
+    "FileMetric",
+    "FunctionMetric",
+    "ProjectMetrics",
     "CodeIssue",
     "CodeProject",
     "CompareResult",

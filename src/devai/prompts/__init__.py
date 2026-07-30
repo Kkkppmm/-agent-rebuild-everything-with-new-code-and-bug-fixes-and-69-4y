@@ -38,6 +38,8 @@ from devai.prompts.templates import (
     TEST_GEN,
     TYPE_HINTS,
     CONFIG_REVIEW,
+    COVERAGE_REVIEW,
+    METRICS_REVIEW,
     PromptTemplate,
 )
 
@@ -46,6 +48,8 @@ __all__ = [
     "ARCHITECTURE",
     "CHANGELOG",
     "CONFIG_REVIEW",
+    "COVERAGE_REVIEW",
+    "METRICS_REVIEW",
     "CODE_GEN",
     "CODE_REVIEW",
     "CODE_TRANSLATE",
