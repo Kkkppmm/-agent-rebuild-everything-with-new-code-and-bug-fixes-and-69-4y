@@ -317,3 +317,15 @@ class DevRuntime:
         if format == "json":
             return report.to_json()
         return report.to_markdown()
+
+    def devtools(self) -> "DevTools":
+        """Create a DevTools facade for static project analysis."""
+        from devai.devtools import DevTools
+
+        return DevTools(self.project_path or Path.cwd())
+
+    def composer(self, name: str = "program") -> "ProgramComposer":
+        """Create a ProgramComposer for building DevProgram workflows."""
+        from devai.composer import ProgramComposer
+
+        return ProgramComposer(name=name, assistant=self.assistant)

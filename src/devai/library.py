@@ -4,10 +4,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from devai.assistant import CodeAssistant
 from devai.program import DevProgram, ProgramResult
+
+if TYPE_CHECKING:
+    from devai.runtime import DevRuntime
+    from devai.schedule import DevSchedule
 
 PROGRAM_EXTENSIONS = {".json", ".yaml", ".yml"}
 
@@ -185,3 +189,16 @@ class ProgramLibrary:
         if isinstance(tags, list):
             return [str(tag) for tag in tags]
         return []
+
+    def create_schedule(
+        self,
+        config_path: str | Path,
+        runtime: "DevRuntime",
+    ) -> "DevSchedule":
+        """Load a schedule config file and return a configured DevSchedule."""
+        from devai.schedule import DevSchedule
+        from devai.schedule_config import schedule_from_config
+
+        schedule = runtime.schedule()
+        schedule_from_config(schedule, config_path)
+        return schedule

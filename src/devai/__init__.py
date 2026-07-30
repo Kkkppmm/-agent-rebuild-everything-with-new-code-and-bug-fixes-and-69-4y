@@ -17,6 +17,15 @@ from devai.project import CodeProject
 from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.context import ContextSection, DevContext, PromptBuilder
+from devai.composer import ProgramComposer
+from devai.devtools import DevTools, DevToolsReport
+from devai.deps_parser import Dependency, DependencyParser
+from devai.docstring_coverage import DocstringCoverage, DocstringReport
+from devai.git_changelog import ChangelogEntry, GitChangelog
+from devai.import_graph import CircularImport, ImportEdge, ImportGraph
+from devai.secrets import SecretFinding, SecretsScanner
+from devai.schedule_config import apply_schedule_config, load_schedule_config, schedule_from_config
+from devai.typing_coverage import TypingCoverage, TypingReport
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -45,7 +54,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.9.0"
+__version__ = "3.0.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -66,7 +75,26 @@ __all__ = [
     "CodeIssue",
     "CodeProject",
     "ContextSection",
+    "ChangelogEntry",
+    "CircularImport",
     "CodeReviewResult",
+    "Dependency",
+    "DependencyParser",
+    "DevTools",
+    "DevToolsReport",
+    "DocstringCoverage",
+    "DocstringReport",
+    "GitChangelog",
+    "ImportEdge",
+    "ImportGraph",
+    "ProgramComposer",
+    "SecretFinding",
+    "SecretsScanner",
+    "TypingCoverage",
+    "TypingReport",
+    "apply_schedule_config",
+    "load_schedule_config",
+    "schedule_from_config",
     "CodeSandbox",
     "CoderAgent",
     "DevAI",
