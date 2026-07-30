@@ -19,6 +19,8 @@ from devai.prompt_registry import PromptRegistry
 from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.code_compare import CodeComparer, CompareResult
 from devai.code_metrics import CodeMetrics, FileMetrics, FunctionMetrics, ProjectMetrics
+from devai.docstring_coverage import DocstringCoverage, DocstringGap, DocstringStats
+from devai.test_mapper import ModuleMapping, TestMapReport, TestMapper
 from devai.composer import ProgramComposer
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.context import ContextSection, DevContext, PromptBuilder
@@ -58,7 +60,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "3.6.0"
+__version__ = "3.7.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -79,6 +81,9 @@ __all__ = [
     "CodeBlock",
     "CodeComparer",
     "CodeMetrics",
+    "DocstringCoverage",
+    "DocstringGap",
+    "DocstringStats",
     "CodeIssue",
     "CodeProject",
     "CompareResult",
@@ -124,6 +129,7 @@ __all__ = [
     "LLMClient",
     "MockEmbeddingClient",
     "MockLLMClient",
+    "ModuleMapping",
     "NotebookCell",
     "NotebookReader",
     "PatchResult",
@@ -154,6 +160,8 @@ __all__ = [
     "ImportEdge",
     "ImportGraph",
     "SymbolInfo",
+    "TestMapReport",
+    "TestMapper",
     "TokenBudget",
     "TypingCoverage",
     "TypingGap",

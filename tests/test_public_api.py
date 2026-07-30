@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "3.6.0"
+        assert devai.__version__ == "3.7.0"
 
     def test_exports(self):
         expected = {
@@ -23,6 +23,9 @@ class TestPublicAPI:
             "CodeAssistant",
             "CodeComparer",
             "CodeMetrics",
+            "DocstringCoverage",
+            "DocstringGap",
+            "DocstringStats",
             "CodeIssue",
             "CodeProject",
             "CompareResult",
@@ -77,6 +80,7 @@ class TestPublicAPI:
             "LLMClient",
             "MockEmbeddingClient",
             "MockLLMClient",
+            "ModuleMapping",
             "NotebookCell",
             "NotebookReader",
             "PatchResult",
@@ -105,6 +109,8 @@ class TestPublicAPI:
             "SecurityAuditResult",
             "SecurityFinding",
             "SymbolInfo",
+            "TestMapReport",
+            "TestMapper",
             "TypingCoverage",
             "TypingGap",
             "TypingStats",

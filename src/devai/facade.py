@@ -8,6 +8,8 @@ from typing import Any
 from devai.assistant import CodeAssistant
 from devai.code_compare import CodeComparer, CompareResult
 from devai.code_metrics import CodeMetrics
+from devai.docstring_coverage import DocstringCoverage
+from devai.test_mapper import TestMapper
 from devai.program import DevProgram, ProgramResult
 from devai.project_detect import ProjectDetector, ProjectProfile
 from devai.prompt_registry import PromptRegistry
@@ -210,6 +212,14 @@ class DevAI:
     def metrics(self, path: str | Path = ".", **kwargs: Any) -> CodeMetrics:
         """Analyze static code metrics (complexity, LOC, function counts) for a project."""
         return CodeMetrics(str(path), **kwargs)
+
+    def docstrings(self, path: str | Path = ".", **kwargs: Any) -> DocstringCoverage:
+        """Analyze docstring coverage for functions, methods, and classes."""
+        return DocstringCoverage(str(path), **kwargs)
+
+    def test_map(self, path: str | Path = ".", **kwargs: Any) -> TestMapper:
+        """Map source modules to test files and find untested modules."""
+        return TestMapper(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

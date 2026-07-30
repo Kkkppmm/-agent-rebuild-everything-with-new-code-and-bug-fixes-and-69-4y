@@ -40,6 +40,25 @@ class TestDevAI:
         wf = ai.workflow("test")
         assert wf.name == "test"
 
+    def test_metrics(self):
+        ai = DevAI.mock()
+        metrics = ai.metrics(".")
+        assert metrics is not None
+
+    def test_docstrings_and_test_map(self, tmp_path):
+        from pathlib import Path
+
+        src = tmp_path / "src"
+        src.mkdir()
+        (src / "app.py").write_text("def foo(): pass\n", encoding="utf-8")
+
+        ai = DevAI.mock()
+        doc_cov = ai.docstrings(str(tmp_path))
+        assert doc_cov.coverage_pct() < 100.0
+
+        test_map = ai.test_map(str(tmp_path))
+        assert test_map.map().total_modules >= 1
+
     def test_getattr_delegates_to_runtime(self):
         ai = DevAI.mock()
         assert ai.kit is ai.runtime.kit

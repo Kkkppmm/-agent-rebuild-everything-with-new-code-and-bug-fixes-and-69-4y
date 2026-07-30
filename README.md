@@ -74,6 +74,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PromptRegistry** — Discover and register custom prompt templates alongside built-in DevAI prompts
 - **ProjectDetector** — Detect project language, framework, package manager, and tooling from a directory
 - **CodeMetrics** — Static analysis for LOC, cyclomatic complexity, and function counts without LLM calls
+- **DocstringCoverage** — Analyze docstring coverage for functions, methods, and classes
+- **TestMapper** — Map source modules to test files and find untested modules
 - **Async Facade** — `areview()` and `aexplain()` async methods on the `DevAI` entry point
 
 ## Installation
