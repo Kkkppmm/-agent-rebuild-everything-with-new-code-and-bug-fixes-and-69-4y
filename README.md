@@ -54,6 +54,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Code Block Extraction** — Pull fenced code blocks from LLM responses with `extract_code_blocks()`
 - **Fallback Client** — `FallbackLLMClient` tries multiple providers/models in order on failure
 - **Patch Application** — Apply unified diffs from LLM output with `apply_unified_diff()`
+- **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
+- **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets
+- **Async Batch Review** — `areview_files()` and `areview_directory()` for async parallel file reviews
 
 ## Installation
 
@@ -501,6 +504,38 @@ callback = LoggingCallback()
 client = ObservedLLMClient(MockLLMClient(), callbacks=[callback])
 client.complete([...])
 print(callback.events)  # [{"event": "start", ...}, {"event": "end", ...}]
+```
+
+## Streaming
+
+```python
+from devai import MockLLMClient, StreamCollector
+from devai.core.models import Message
+
+client = MockLLMClient(default_response="Streaming explanation of your code.")
+result = StreamCollector.from_messages(
+    client,
+    [Message.user("Explain async/await")],
+    on_chunk=lambda c: print(c, end=""),
+)
+print(result.text, result.chunk_count, result.elapsed_ms)
+```
+
+## Git Hooks
+
+```bash
+devai hooks install --hook pre-commit --preset pre-commit
+devai hooks install --hook pre-commit commit-msg
+devai hooks status
+devai hooks uninstall --hook pre-commit
+```
+
+```python
+from devai import DevHooks
+
+hooks = DevHooks("./my-app", preset="pre-commit")
+hooks.install(["pre-commit", "commit-msg"])
+print(hooks.status())
 ```
 
 ## CLI

@@ -1,5 +1,6 @@
 """Tests for batch code review."""
 
+import pytest
 from pathlib import Path
 
 from devai import CodeAssistant, MockLLMClient
@@ -72,3 +73,19 @@ class TestBatchReviewer:
         reviewer = BatchReviewer(_assistant())
         report = reviewer.review_directory(tmp_path, pattern="*.py")
         assert len(report.failed) == 1
+
+    @pytest.mark.asyncio
+    async def test_areview_files(self, tmp_path: Path):
+        (tmp_path / "a.py").write_text("x = 1\n", encoding="utf-8")
+        (tmp_path / "b.py").write_text("y = 2\n", encoding="utf-8")
+        reviewer = BatchReviewer(_assistant())
+        report = await reviewer.areview_files([tmp_path / "a.py", tmp_path / "b.py"])
+        assert len(report.results) == 2
+        assert all(r.ok for r in report.results)
+
+    @pytest.mark.asyncio
+    async def test_areview_directory(self, tmp_path: Path):
+        (tmp_path / "mod.py").write_text("z = 3\n", encoding="utf-8")
+        reviewer = BatchReviewer(_assistant())
+        report = await reviewer.areview_directory(tmp_path, pattern="*.py")
+        assert len(report.reviewed) == 1

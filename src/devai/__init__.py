@@ -18,6 +18,7 @@ from devai.benchmark import BenchmarkResult, BenchmarkRunner, BenchmarkSample
 from devai.config_file import CONFIG_FILENAMES, config_file_template, find_config_file, load_config_file
 from devai.context import ContextSection, DevContext, PromptBuilder
 from devai.git_context import GitContext
+from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
 from devai.health import HealthChecker, HealthResult, check_health
 from devai.report import ProgramReport
@@ -34,6 +35,7 @@ from devai.utils import TokenBudget, BudgetSnapshot, BudgetedLLMClient, PatchRes
 from devai.sandbox import CodeSandbox, SandboxResult
 from devai.workflow import DevWorkflow, WorkflowResult, WorkflowStepResult
 from devai.output import CodeBlock, extract_code_blocks, extract_code_by_language, extract_first_code_block
+from devai.stream import StreamCollector, StreamResult
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -43,7 +45,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "2.8.0"
+__version__ = "2.9.0"
 __all__ = [
     "Agent",
     "BudgetExceededError",
@@ -72,7 +74,11 @@ __all__ = [
     "DevApp",
     "DevContext",
     "DevKit",
+    "DevHooks",
     "DevDoctor",
+    "SUPPORTED_HOOKS",
+    "StreamCollector",
+    "StreamResult",
     "DevPipeline",
     "DevProgram",
     "DevRuntime",

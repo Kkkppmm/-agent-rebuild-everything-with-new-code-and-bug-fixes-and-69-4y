@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
@@ -163,3 +164,50 @@ class BatchReviewer:
                 ]
             )
         return self.review_files(paths)
+
+    async def areview_file(self, path: str | Path) -> FileReviewResult:
+        """Review a single file asynchronously."""
+        return await asyncio.to_thread(self.review_file, path)
+
+    async def areview_files(self, paths: list[str | Path]) -> BatchReviewReport:
+        """Review multiple files concurrently using asyncio."""
+        tasks = [self.areview_file(path) for path in paths]
+        results = await asyncio.gather(*tasks)
+        return BatchReviewReport(results=list(results))
+
+    async def areview_directory(
+        self,
+        directory: str | Path,
+        *,
+        pattern: str = "*.py",
+        recursive: bool = True,
+    ) -> BatchReviewReport:
+        """Review all files matching a glob pattern asynchronously."""
+        root = Path(directory)
+        if not root.exists():
+            return BatchReviewReport(
+                results=[
+                    FileReviewResult(
+                        path=str(root),
+                        review="",
+                        error=f"Directory not found: {root}",
+                    )
+                ]
+            )
+        globber = root.rglob if recursive else root.glob
+        paths = sorted(
+            p
+            for p in globber(pattern)
+            if p.is_file() and not any(part.startswith(".") for part in p.parts)
+        )
+        if not paths:
+            return BatchReviewReport(
+                results=[
+                    FileReviewResult(
+                        path=str(root),
+                        review="",
+                        error=f"No files matching '{pattern}' in {root}",
+                    )
+                ]
+            )
+        return await self.areview_files(paths)
