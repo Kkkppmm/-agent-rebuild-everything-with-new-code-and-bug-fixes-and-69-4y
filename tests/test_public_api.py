@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "4.7.0"
+        assert devai.__version__ == "4.8.0"
 
     def test_exports(self):
         expected = {
@@ -64,6 +64,9 @@ class TestPublicAPI:
             "DeadCodeAnalyzer",
             "DeadCodeStats",
             "DeadSymbol",
+            "DebugArtifact",
+            "DebugArtifactDetector",
+            "DebugArtifactStats",
             "Dependency",
             "DependencyParser",
             "DevKit",

@@ -17,6 +17,8 @@ from devai.module_coupling import ModuleCouplingAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.async_blocking import AsyncBlockingDetector
+from devai.debug_artifacts import DebugArtifactDetector
+from devai.secrets import SecretsScanner
 from devai.magic_numbers import MagicNumberDetector
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -295,6 +297,14 @@ class DevAI:
     def async_blocking(self, path: str | Path = ".", **kwargs: Any) -> AsyncBlockingDetector:
         """Detect blocking calls inside async functions (time.sleep, requests, open, etc.)."""
         return AsyncBlockingDetector(str(path), **kwargs)
+
+    def debug_artifacts(self, path: str | Path = ".", **kwargs: Any) -> DebugArtifactDetector:
+        """Detect debug statements left in code (print, breakpoint, pdb.set_trace, etc.)."""
+        return DebugArtifactDetector(str(path), **kwargs)
+
+    def secrets(self, path: str | Path = ".", **kwargs: Any) -> SecretsScanner:
+        """Scan for hardcoded API keys, tokens, and credentials."""
+        return SecretsScanner(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

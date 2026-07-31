@@ -94,3 +94,5 @@ class TestDevAI:
         assert ai.dangerous_calls(str(tmp_path)).health_score() >= 0
         assert ai.resource_leaks(str(tmp_path)).health_score() >= 0
         assert ai.async_blocking(str(tmp_path)).health_score() >= 0
+        assert ai.debug_artifacts(str(tmp_path)).health_score() >= 0
+        assert ai.secrets(str(tmp_path)).summary()
