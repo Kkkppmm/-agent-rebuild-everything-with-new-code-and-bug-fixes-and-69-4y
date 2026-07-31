@@ -90,6 +90,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **MagicNumberDetector** — Find unexplained numeric literals that should be named constants
 - **DangerousCallsAnalyzer** — Detect risky calls (`eval`, `exec`, `shell=True`) and mutable default arguments
 - **ResourceLeakAnalyzer** — Detect unclosed files, sockets, and database connections
+- **AsyncBlockingDetector** — Detect blocking calls inside async functions (`time.sleep`, `requests`, `open`, `subprocess`, etc.)
 
 ## Installation
 

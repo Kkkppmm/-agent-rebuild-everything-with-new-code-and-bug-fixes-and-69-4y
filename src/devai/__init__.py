@@ -70,6 +70,7 @@ from devai.exception_analyzer import (
 from devai.module_coupling import CouplingStats, ModuleCoupling, ModuleCouplingAnalyzer
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.resource_leaks import ResourceLeak, ResourceLeakAnalyzer, ResourceLeakStats
+from devai.async_blocking import AsyncBlockingCall, AsyncBlockingDetector, AsyncBlockingStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
@@ -83,7 +84,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "4.6.0"
+__version__ = "4.7.0"
 __all__ = [
     "Agent",
     "APISurfaceAnalyzer",
@@ -132,6 +133,9 @@ __all__ = [
     "ResourceLeak",
     "ResourceLeakAnalyzer",
     "ResourceLeakStats",
+    "AsyncBlockingCall",
+    "AsyncBlockingDetector",
+    "AsyncBlockingStats",
     "DeadCodeAnalyzer",
     "DeadCodeStats",
     "DeadSymbol",

@@ -16,6 +16,7 @@ from devai.import_graph import ImportGraph
 from devai.module_coupling import ModuleCouplingAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.resource_leaks import ResourceLeakAnalyzer
+from devai.async_blocking import AsyncBlockingDetector
 from devai.magic_numbers import MagicNumberDetector
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -290,6 +291,10 @@ class DevAI:
     def resource_leaks(self, path: str | Path = ".", **kwargs: Any) -> ResourceLeakAnalyzer:
         """Detect unclosed files, sockets, and database connections."""
         return ResourceLeakAnalyzer(str(path), **kwargs)
+
+    def async_blocking(self, path: str | Path = ".", **kwargs: Any) -> AsyncBlockingDetector:
+        """Detect blocking calls inside async functions (time.sleep, requests, open, etc.)."""
+        return AsyncBlockingDetector(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:
