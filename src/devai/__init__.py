@@ -71,6 +71,8 @@ from devai.module_coupling import CouplingStats, ModuleCoupling, ModuleCouplingA
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
+from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
+from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
@@ -86,7 +88,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.0.0"
+__version__ = "5.1.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -198,6 +200,9 @@ __all__ = [
     "NotebookCell",
     "NotebookReader",
     "PatchResult",
+    "PathTraversalAnalyzer",
+    "PathTraversalFinding",
+    "PathTraversalStats",
     "PerfIssue",
     "PerfReviewResult",
     "PluginRegistry",
@@ -233,6 +238,9 @@ __all__ = [
     "SecurityFinding",
     "ImportEdge",
     "ImportGraph",
+    "InsecureRandomAnalyzer",
+    "InsecureRandomFinding",
+    "InsecureRandomStats",
     "SymbolInfo",
     "TechDebtItem",
     "TechDebtScanner",

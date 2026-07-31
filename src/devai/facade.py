@@ -18,6 +18,8 @@ from devai.async_blocking import AsyncBlockingDetector
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.debug_artifacts import DebugArtifactDetector
 from devai.magic_numbers import MagicNumberDetector
+from devai.insecure_random import InsecureRandomAnalyzer
+from devai.path_traversal import PathTraversalAnalyzer
 from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
@@ -310,6 +312,14 @@ class DevAI:
     def resource_leaks(self, path: str | Path = ".", **kwargs: Any) -> ResourceLeakAnalyzer:
         """Detect files, sockets, and connections opened without context managers."""
         return ResourceLeakAnalyzer(str(path), **kwargs)
+
+    def insecure_random(self, path: str | Path = ".", **kwargs: Any) -> InsecureRandomAnalyzer:
+        """Detect use of random module for security-sensitive values."""
+        return InsecureRandomAnalyzer(str(path), **kwargs)
+
+    def path_traversal(self, path: str | Path = ".", **kwargs: Any) -> PathTraversalAnalyzer:
+        """Detect unsafe file path construction from user-controlled input."""
+        return PathTraversalAnalyzer(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

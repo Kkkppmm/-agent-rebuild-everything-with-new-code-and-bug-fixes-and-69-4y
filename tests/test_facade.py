@@ -103,3 +103,5 @@ class TestDevAI:
         assert ai.debug_artifacts(str(tmp_path)).health_score() >= 0
         assert ai.async_blocking(str(tmp_path)).health_score() >= 0
         assert ai.resource_leaks(str(tmp_path)).health_score() >= 0
+        assert ai.insecure_random(str(tmp_path)).health_score() >= 0
+        assert ai.path_traversal(str(tmp_path)).health_score() >= 0
