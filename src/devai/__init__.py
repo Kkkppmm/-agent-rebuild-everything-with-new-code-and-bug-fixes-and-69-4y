@@ -68,6 +68,7 @@ from devai.exception_analyzer import (
     ExceptionStats,
 )
 from devai.module_coupling import CouplingStats, ModuleCoupling, ModuleCouplingAnalyzer
+from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
@@ -79,7 +80,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "4.2.0"
+__version__ = "4.3.0"
 __all__ = [
     "Agent",
     "APISurfaceAnalyzer",
@@ -172,6 +173,9 @@ __all__ = [
     "ModuleCoupling",
     "ModuleCouplingAnalyzer",
     "ModuleMapping",
+    "NamingConventionAnalyzer",
+    "NamingStats",
+    "NamingViolation",
     "ModuleSurface",
     "NotebookCell",
     "NotebookReader",

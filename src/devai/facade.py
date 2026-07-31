@@ -14,6 +14,7 @@ from devai.complexity_hotspots import ComplexityHotspotAnalyzer
 from devai.exception_analyzer import ExceptionHierarchyAnalyzer
 from devai.import_graph import ImportGraph
 from devai.module_coupling import ModuleCouplingAnalyzer
+from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.duplicate_code import DuplicateCodeDetector
@@ -270,6 +271,10 @@ class DevAI:
     def coupling(self, path: str | Path = ".", **kwargs: Any) -> ModuleCouplingAnalyzer:
         """Measure module afferent/efferent coupling and instability."""
         return ModuleCouplingAnalyzer(str(path), **kwargs)
+
+    def naming(self, path: str | Path = ".", **kwargs: Any) -> NamingConventionAnalyzer:
+        """Check PEP 8 naming conventions for functions, classes, and variables."""
+        return NamingConventionAnalyzer(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

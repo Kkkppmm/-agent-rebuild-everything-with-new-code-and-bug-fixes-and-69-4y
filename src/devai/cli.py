@@ -407,6 +407,19 @@ def cmd_coupling(args: argparse.Namespace) -> None:
     print(analyzer.summary())
 
 
+def cmd_naming(args: argparse.Namespace) -> None:
+    from devai.naming_conventions import NamingConventionAnalyzer
+
+    analyzer = NamingConventionAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for violation in analyzer.analyze():
+            print(violation.format())
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -1299,6 +1312,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--limit", type=int, default=20, help="Max modules to show")
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.set_defaults(func=cmd_coupling)
+
+    p = sub.add_parser("naming", help="Check PEP 8 naming conventions")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all violations")
+    p.set_defaults(func=cmd_naming)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")
