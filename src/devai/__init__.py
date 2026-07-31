@@ -68,7 +68,11 @@ from devai.exception_analyzer import (
     ExceptionStats,
 )
 from devai.module_coupling import CouplingStats, ModuleCoupling, ModuleCouplingAnalyzer
+from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
+from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
+from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
+from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
@@ -82,9 +86,12 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "4.5.0"
+__version__ = "5.0.0"
 __all__ = [
     "Agent",
+    "AsyncBlockingDetector",
+    "AsyncBlockingFinding",
+    "AsyncBlockingStats",
     "APISurfaceAnalyzer",
     "APISurfaceStats",
     "BudgetExceededError",
@@ -125,6 +132,9 @@ __all__ = [
     "CodeSandbox",
     "CodeSymbolIndex",
     "CoderAgent",
+    "DebugArtifact",
+    "DebugArtifactDetector",
+    "DebugArtifactStats",
     "DangerousCall",
     "DangerousCallsAnalyzer",
     "DangerousCallStats",
@@ -201,6 +211,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ResourceLeakAnalyzer",
+    "ResourceLeakFinding",
+    "ResourceLeakStats",
     "apply_schedule_config",
     "load_schedule_config",
     "schedule_from_config",
@@ -213,6 +226,9 @@ __all__ = [
     "ScheduledJob",
     "SecretFinding",
     "SecretsScanner",
+    "SQLInjectionAnalyzer",
+    "SQLInjectionFinding",
+    "SQLInjectionStats",
     "SecurityAuditResult",
     "SecurityFinding",
     "ImportEdge",

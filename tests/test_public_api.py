@@ -5,11 +5,14 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "4.5.0"
+        assert devai.__version__ == "5.0.0"
 
     def test_exports(self):
         expected = {
             "Agent",
+            "AsyncBlockingDetector",
+            "AsyncBlockingFinding",
+            "AsyncBlockingStats",
             "APISurfaceAnalyzer",
             "APISurfaceStats",
             "BroadExceptHandler",
@@ -43,6 +46,9 @@ class TestPublicAPI:
             "ContextSection",
             "CodeSandbox",
             "CoderAgent",
+            "DebugArtifact",
+            "DebugArtifactDetector",
+            "DebugArtifactStats",
             "DangerousCall",
             "DangerousCallsAnalyzer",
             "DangerousCallStats",
@@ -130,6 +136,9 @@ class TestPublicAPI:
             "ProjectDetector",
             "ProjectProfile",
             "PromptRegistry",
+            "ResourceLeakAnalyzer",
+            "ResourceLeakFinding",
+            "ResourceLeakStats",
             "apply_schedule_config",
             "load_schedule_config",
             "schedule_from_config",
@@ -142,6 +151,9 @@ class TestPublicAPI:
             "ScheduledJob",
             "SecretFinding",
             "SecretsScanner",
+            "SQLInjectionAnalyzer",
+            "SQLInjectionFinding",
+            "SQLInjectionStats",
             "SecurityAuditResult",
             "SecurityFinding",
             "SymbolInfo",

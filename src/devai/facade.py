@@ -14,8 +14,13 @@ from devai.complexity_hotspots import ComplexityHotspotAnalyzer
 from devai.exception_analyzer import ExceptionHierarchyAnalyzer
 from devai.import_graph import ImportGraph
 from devai.module_coupling import ModuleCouplingAnalyzer
+from devai.async_blocking import AsyncBlockingDetector
 from devai.dangerous_calls import DangerousCallsAnalyzer
+from devai.debug_artifacts import DebugArtifactDetector
 from devai.magic_numbers import MagicNumberDetector
+from devai.resource_leaks import ResourceLeakAnalyzer
+from devai.secrets import SecretsScanner
+from devai.sql_injection import SQLInjectionAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -285,6 +290,26 @@ class DevAI:
     def dangerous_calls(self, path: str | Path = ".", **kwargs: Any) -> DangerousCallsAnalyzer:
         """Detect risky calls (eval, exec, shell=True) and mutable default arguments."""
         return DangerousCallsAnalyzer(str(path), **kwargs)
+
+    def secrets(self, path: str | Path = ".", **kwargs: Any) -> SecretsScanner:
+        """Scan for hardcoded API keys, tokens, and credentials."""
+        return SecretsScanner(str(path), **kwargs)
+
+    def sql_injection(self, path: str | Path = ".", **kwargs: Any) -> SQLInjectionAnalyzer:
+        """Detect dynamic SQL construction in database execute calls."""
+        return SQLInjectionAnalyzer(str(path), **kwargs)
+
+    def debug_artifacts(self, path: str | Path = ".", **kwargs: Any) -> DebugArtifactDetector:
+        """Find print, breakpoint, and pdb debug code left in sources."""
+        return DebugArtifactDetector(str(path), **kwargs)
+
+    def async_blocking(self, path: str | Path = ".", **kwargs: Any) -> AsyncBlockingDetector:
+        """Detect blocking calls inside async functions."""
+        return AsyncBlockingDetector(str(path), **kwargs)
+
+    def resource_leaks(self, path: str | Path = ".", **kwargs: Any) -> ResourceLeakAnalyzer:
+        """Detect files, sockets, and connections opened without context managers."""
+        return ResourceLeakAnalyzer(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

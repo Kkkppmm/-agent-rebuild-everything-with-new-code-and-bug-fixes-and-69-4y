@@ -92,3 +92,14 @@ class TestDevAI:
         assert ai.naming(str(tmp_path)).health_score() >= 0
         assert ai.magic_numbers(str(tmp_path)).health_score() >= 0
         assert ai.dangerous_calls(str(tmp_path)).health_score() >= 0
+
+    def test_security_analyzers(self, tmp_path):
+        src = tmp_path / "src"
+        src.mkdir()
+        (src / "app.py").write_text("def foo(): return 1\n", encoding="utf-8")
+        ai = DevAI.mock()
+        assert ai.secrets(str(tmp_path)).scan() is not None
+        assert ai.sql_injection(str(tmp_path)).health_score() >= 0
+        assert ai.debug_artifacts(str(tmp_path)).health_score() >= 0
+        assert ai.async_blocking(str(tmp_path)).health_score() >= 0
+        assert ai.resource_leaks(str(tmp_path)).health_score() >= 0
