@@ -15,8 +15,10 @@ from devai.exception_analyzer import ExceptionHierarchyAnalyzer
 from devai.import_graph import ImportGraph
 from devai.module_coupling import ModuleCouplingAnalyzer
 from devai.async_blocking import AsyncBlockingDetector
+from devai.command_injection import CommandInjectionAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.debug_artifacts import DebugArtifactDetector
+from devai.log_injection import LogInjectionAnalyzer
 from devai.magic_numbers import MagicNumberDetector
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
@@ -24,6 +26,8 @@ from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.secrets import SecretsScanner
 from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
+from devai.ssrf import SSRFAnalyzer
+from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -322,8 +326,24 @@ class DevAI:
         """Detect unsafe file path construction from user-controlled input."""
         return PathTraversalAnalyzer(str(path), **kwargs)
 
+    def command_injection(self, path: str | Path = ".", **kwargs: Any) -> CommandInjectionAnalyzer:
+        """Detect dynamic shell command construction in os/subprocess calls."""
+        return CommandInjectionAnalyzer(str(path), **kwargs)
+
+    def weak_crypto(self, path: str | Path = ".", **kwargs: Any) -> WeakCryptoAnalyzer:
+        """Detect use of weak hashing and cipher algorithms."""
+        return WeakCryptoAnalyzer(str(path), **kwargs)
+
+    def log_injection(self, path: str | Path = ".", **kwargs: Any) -> LogInjectionAnalyzer:
+        """Detect dynamic log message construction from user input."""
+        return LogInjectionAnalyzer(str(path), **kwargs)
+
+    def ssrf(self, path: str | Path = ".", **kwargs: Any) -> SSRFAnalyzer:
+        """Detect user-controlled outbound HTTP requests."""
+        return SSRFAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (secrets, injections, dangerous calls)."""
+        """Run unified static security analysis (9 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod

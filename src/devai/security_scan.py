@@ -7,12 +7,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from devai.command_injection import CommandInjectionAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.log_injection import LogInjectionAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
+from devai.ssrf import SSRFAnalyzer
+from devai.weak_crypto import WeakCryptoAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -20,6 +24,10 @@ CHECK_NAMES = (
     "sql_injection",
     "insecure_random",
     "path_traversal",
+    "command_injection",
+    "weak_crypto",
+    "log_injection",
+    "ssrf",
 )
 
 
@@ -112,7 +120,8 @@ class SecurityScanner:
     """Run multiple static security analyzers and aggregate results.
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
-    insecure random usage, and path-traversal risks into one report.
+    insecure random usage, path-traversal risks, command injection, weak crypto,
+    log injection, and SSRF into one report.
   """
 
     def __init__(
@@ -135,6 +144,10 @@ class SecurityScanner:
         self._sql: SQLInjectionAnalyzer | None = None
         self._random: InsecureRandomAnalyzer | None = None
         self._paths: PathTraversalAnalyzer | None = None
+        self._command: CommandInjectionAnalyzer | None = None
+        self._crypto: WeakCryptoAnalyzer | None = None
+        self._logs: LogInjectionAnalyzer | None = None
+        self._ssrf: SSRFAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -161,6 +174,26 @@ class SecurityScanner:
             self._paths = PathTraversalAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._paths
 
+    def _command_analyzer(self) -> CommandInjectionAnalyzer:
+        if self._command is None:
+            self._command = CommandInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._command
+
+    def _crypto_analyzer(self) -> WeakCryptoAnalyzer:
+        if self._crypto is None:
+            self._crypto = WeakCryptoAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._crypto
+
+    def _log_analyzer(self) -> LogInjectionAnalyzer:
+        if self._logs is None:
+            self._logs = LogInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._logs
+
+    def _ssrf_analyzer(self) -> SSRFAnalyzer:
+        if self._ssrf is None:
+            self._ssrf = SSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._ssrf
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -179,6 +212,14 @@ class SecurityScanner:
             recs.append("Use secrets module for tokens, passwords, and session identifiers.")
         if by_name.get("path_traversal", SecurityScanCategory("path_traversal", 100, 0, "")).findings:
             recs.append("Validate and normalize user-supplied paths before file operations.")
+        if by_name.get("command_injection", SecurityScanCategory("command_injection", 100, 0, "")).findings:
+            recs.append("Avoid shell=True and never pass user input directly to os.system or subprocess.")
+        if by_name.get("weak_crypto", SecurityScanCategory("weak_crypto", 100, 0, "")).findings:
+            recs.append("Replace MD5/SHA1 with SHA-256+ or bcrypt/argon2 for password hashing.")
+        if by_name.get("log_injection", SecurityScanCategory("log_injection", 100, 0, "")).findings:
+            recs.append("Use structured logging with extra fields instead of f-strings in log messages.")
+        if by_name.get("ssrf", SecurityScanCategory("ssrf", 100, 0, "")).findings:
+            recs.append("Validate outbound URLs against an allowlist and block internal network ranges.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -249,6 +290,54 @@ class SecurityScanner:
                 )
             )
 
+        if "command_injection" in self.checks:
+            analyzer = self._command_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="command_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "weak_crypto" in self.checks:
+            analyzer = self._crypto_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="weak_crypto",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "log_injection" in self.checks:
+            analyzer = self._log_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="log_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "ssrf" in self.checks:
+            analyzer = self._ssrf_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="ssrf",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -290,6 +379,14 @@ class SecurityScanner:
             lines.extend(["## Insecure random", self._random_analyzer().to_context(limit=limit), ""])
         if "path_traversal" in self.checks:
             lines.extend(["## Path traversal", self._path_analyzer().to_context(limit=limit), ""])
+        if "command_injection" in self.checks:
+            lines.extend(["## Command injection", self._command_analyzer().to_context(limit=limit), ""])
+        if "weak_crypto" in self.checks:
+            lines.extend(["## Weak crypto", self._crypto_analyzer().to_context(limit=limit), ""])
+        if "log_injection" in self.checks:
+            lines.extend(["## Log injection", self._log_analyzer().to_context(limit=limit), ""])
+        if "ssrf" in self.checks:
+            lines.extend(["## SSRF", self._ssrf_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -316,3 +413,23 @@ class SecurityScanner:
     def path_traversal(self) -> PathTraversalAnalyzer:
         """Underlying path-traversal analyzer."""
         return self._path_analyzer()
+
+    @property
+    def command_injection(self) -> CommandInjectionAnalyzer:
+        """Underlying command-injection analyzer."""
+        return self._command_analyzer()
+
+    @property
+    def weak_crypto(self) -> WeakCryptoAnalyzer:
+        """Underlying weak-crypto analyzer."""
+        return self._crypto_analyzer()
+
+    @property
+    def log_injection(self) -> LogInjectionAnalyzer:
+        """Underlying log-injection analyzer."""
+        return self._log_analyzer()
+
+    @property
+    def ssrf(self) -> SSRFAnalyzer:
+        """Underlying SSRF analyzer."""
+        return self._ssrf_analyzer()

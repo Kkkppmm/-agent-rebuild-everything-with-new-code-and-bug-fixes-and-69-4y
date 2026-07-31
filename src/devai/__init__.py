@@ -70,10 +70,14 @@ from devai.exception_analyzer import (
 )
 from devai.module_coupling import CouplingStats, ModuleCoupling, ModuleCouplingAnalyzer
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
+from devai.command_injection import CommandInjectionAnalyzer, CommandInjectionFinding, CommandInjectionStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
+from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
+from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
+from devai.weak_crypto import WeakCryptoAnalyzer, WeakCryptoFinding, WeakCryptoStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
@@ -89,7 +93,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.2.0"
+__version__ = "5.3.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -118,6 +122,9 @@ __all__ = [
     "CodeAssistant",
     "CodeBlock",
     "CodeComparer",
+    "CommandInjectionAnalyzer",
+    "CommandInjectionFinding",
+    "CommandInjectionStats",
     "CodeMetrics",
     "ComplexityHotspot",
     "ComplexityHotspotAnalyzer",
@@ -186,6 +193,9 @@ __all__ = [
     "export_program_to_file",
     "FallbackLLMClient",
     "LLMClient",
+    "LogInjectionAnalyzer",
+    "LogInjectionFinding",
+    "LogInjectionStats",
     "MockEmbeddingClient",
     "MockLLMClient",
     "ModuleCoupling",
@@ -228,6 +238,9 @@ __all__ = [
     "ProgramStepPlan",
     "ProgramTask",
     "SandboxResult",
+    "SSRFAnalyzer",
+    "SSRFFinding",
+    "SSRFStats",
     "ScheduleResult",
     "ScheduledJob",
     "SecretFinding",
@@ -256,6 +269,9 @@ __all__ = [
     "TypingGap",
     "TypingStats",
     "TraceEvent",
+    "WeakCryptoAnalyzer",
+    "WeakCryptoFinding",
+    "WeakCryptoStats",
     "WatchEvent",
     "WatchResult",
     "WorkflowResult",

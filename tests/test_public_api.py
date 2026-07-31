@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "5.2.0"
+        assert devai.__version__ == "5.3.0"
 
     def test_exports(self):
         expected = {
@@ -29,6 +29,9 @@ class TestPublicAPI:
             "CIReporter",
             "CodeAssistant",
             "CodeComparer",
+            "CommandInjectionAnalyzer",
+            "CommandInjectionFinding",
+            "CommandInjectionStats",
             "CodeMetrics",
             "ComplexityHotspot",
             "ComplexityHotspotAnalyzer",
@@ -79,6 +82,9 @@ class TestPublicAPI:
             "DiskCachedLLMClient",
             "TokenBudget",
             "WatchEvent",
+            "WeakCryptoAnalyzer",
+            "WeakCryptoFinding",
+            "WeakCryptoStats",
             "WatchResult",
             "DevWorkflow",
             "DoctorResult",
@@ -111,6 +117,9 @@ class TestPublicAPI:
             "InsecureRandomStats",
             "FallbackLLMClient",
             "LLMClient",
+            "LogInjectionAnalyzer",
+            "LogInjectionFinding",
+            "LogInjectionStats",
             "MockEmbeddingClient",
             "MockLLMClient",
             "MagicNumber",
@@ -153,6 +162,9 @@ class TestPublicAPI:
             "ProgramStepPlan",
             "ProgramTask",
             "SandboxResult",
+            "SSRFAnalyzer",
+            "SSRFFinding",
+            "SSRFStats",
             "ScheduleResult",
             "ScheduledJob",
             "SecretFinding",
