@@ -68,6 +68,7 @@ from devai.exception_analyzer import (
     ExceptionStats,
 )
 from devai.module_coupling import CouplingStats, ModuleCoupling, ModuleCouplingAnalyzer
+from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
@@ -81,7 +82,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "4.4.0"
+__version__ = "4.5.0"
 __all__ = [
     "Agent",
     "APISurfaceAnalyzer",
@@ -124,6 +125,9 @@ __all__ = [
     "CodeSandbox",
     "CodeSymbolIndex",
     "CoderAgent",
+    "DangerousCall",
+    "DangerousCallsAnalyzer",
+    "DangerousCallStats",
     "DeadCodeAnalyzer",
     "DeadCodeStats",
     "DeadSymbol",

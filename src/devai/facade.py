@@ -14,6 +14,7 @@ from devai.complexity_hotspots import ComplexityHotspotAnalyzer
 from devai.exception_analyzer import ExceptionHierarchyAnalyzer
 from devai.import_graph import ImportGraph
 from devai.module_coupling import ModuleCouplingAnalyzer
+from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.magic_numbers import MagicNumberDetector
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -280,6 +281,10 @@ class DevAI:
     def magic_numbers(self, path: str | Path = ".", **kwargs: Any) -> MagicNumberDetector:
         """Find unexplained numeric literals that should be named constants."""
         return MagicNumberDetector(str(path), **kwargs)
+
+    def dangerous_calls(self, path: str | Path = ".", **kwargs: Any) -> DangerousCallsAnalyzer:
+        """Detect risky calls (eval, exec, shell=True) and mutable default arguments."""
+        return DangerousCallsAnalyzer(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

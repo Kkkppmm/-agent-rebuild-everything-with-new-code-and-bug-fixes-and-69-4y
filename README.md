@@ -88,6 +88,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **ModuleCouplingAnalyzer** — Measure afferent/efferent coupling and instability from import graphs
 - **NamingConventionAnalyzer** — Check PEP 8 naming for functions, methods, classes, variables, and constants
 - **MagicNumberDetector** — Find unexplained numeric literals that should be named constants
+- **DangerousCallsAnalyzer** — Detect risky calls (`eval`, `exec`, `shell=True`) and mutable default arguments
 
 ## Installation
 
