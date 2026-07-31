@@ -82,6 +82,7 @@ from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogIn
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
+from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
@@ -96,7 +97,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.4.0"
+__version__ = "5.5.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -248,6 +249,9 @@ __all__ = [
     "SQLInjectionAnalyzer",
     "SQLInjectionFinding",
     "SQLInjectionStats",
+    "SSRFFinding",
+    "SSRFAnalyzer",
+    "SSRFStats",
     "SecurityAuditResult",
     "SecurityFinding",
     "ImportEdge",

@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "5.4.0"
+        assert devai.__version__ == "5.5.0"
 
     def test_exports(self):
         expected = {
@@ -169,6 +169,9 @@ class TestPublicAPI:
             "SQLInjectionAnalyzer",
             "SQLInjectionFinding",
             "SQLInjectionStats",
+            "SSRFFinding",
+            "SSRFAnalyzer",
+            "SSRFStats",
             "SecurityAuditResult",
             "SecurityFinding",
             "SymbolInfo",

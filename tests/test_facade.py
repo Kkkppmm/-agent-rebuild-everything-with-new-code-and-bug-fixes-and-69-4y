@@ -108,4 +108,5 @@ class TestDevAI:
         assert ai.path_traversal(str(tmp_path)).health_score() >= 0
         assert ai.weak_crypto(str(tmp_path)).health_score() >= 0
         assert ai.log_injection(str(tmp_path)).health_score() >= 0
+        assert ai.ssrf(str(tmp_path)).health_score() >= 0
         assert ai.security_scan(str(tmp_path)).health_score() == 100.0

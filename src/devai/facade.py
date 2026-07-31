@@ -26,6 +26,7 @@ from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.secrets import SecretsScanner
 from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
+from devai.ssrf import SSRFAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -336,6 +337,10 @@ class DevAI:
     def log_injection(self, path: str | Path = ".", **kwargs: Any) -> LogInjectionAnalyzer:
         """Detect log injection risks from dynamic log message construction."""
         return LogInjectionAnalyzer(str(path), **kwargs)
+
+    def ssrf(self, path: str | Path = ".", **kwargs: Any) -> SSRFAnalyzer:
+        """Detect server-side request forgery risks in outbound HTTP calls."""
+        return SSRFAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""
