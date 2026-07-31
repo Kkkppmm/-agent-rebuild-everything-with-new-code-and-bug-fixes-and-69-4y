@@ -71,6 +71,7 @@ from devai.module_coupling import CouplingStats, ModuleCoupling, ModuleCouplingA
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
+from devai.resource_leaks import ResourceLeak, ResourceLeakAnalyzer, ResourceLeakStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
@@ -82,7 +83,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "4.5.0"
+__version__ = "4.6.0"
 __all__ = [
     "Agent",
     "APISurfaceAnalyzer",
@@ -201,6 +202,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ResourceLeak",
+    "ResourceLeakAnalyzer",
+    "ResourceLeakStats",
     "apply_schedule_config",
     "load_schedule_config",
     "schedule_from_config",

@@ -89,6 +89,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **NamingConventionAnalyzer** — Check PEP 8 naming for functions, methods, classes, variables, and constants
 - **MagicNumberDetector** — Find unexplained numeric literals that should be named constants
 - **DangerousCallsAnalyzer** — Detect risky calls (`eval`, `exec`, `shell=True`) and mutable default arguments
+- **ResourceLeakAnalyzer** — Detect unclosed files, sockets, and database connections
 
 ## Installation
 

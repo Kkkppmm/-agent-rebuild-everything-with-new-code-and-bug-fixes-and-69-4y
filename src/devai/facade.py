@@ -17,6 +17,7 @@ from devai.module_coupling import ModuleCouplingAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.magic_numbers import MagicNumberDetector
 from devai.naming_conventions import NamingConventionAnalyzer
+from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.duplicate_code import DuplicateCodeDetector
@@ -285,6 +286,10 @@ class DevAI:
     def dangerous_calls(self, path: str | Path = ".", **kwargs: Any) -> DangerousCallsAnalyzer:
         """Detect risky calls (eval, exec, shell=True) and mutable default arguments."""
         return DangerousCallsAnalyzer(str(path), **kwargs)
+
+    def resource_leaks(self, path: str | Path = ".", **kwargs: Any) -> ResourceLeakAnalyzer:
+        """Detect unclosed files, sockets, and database connections."""
+        return ResourceLeakAnalyzer(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

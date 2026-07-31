@@ -446,6 +446,19 @@ def cmd_dangerous_calls(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_resource_leaks(args: argparse.Namespace) -> None:
+    from devai.resource_leaks import ResourceLeakAnalyzer
+
+    analyzer = ResourceLeakAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -1356,6 +1369,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_dangerous_calls)
+
+    p = sub.add_parser("resource-leaks", help="Detect unclosed files, sockets, and connections")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_resource_leaks)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")
