@@ -82,6 +82,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **TechDebtScanner** — Scan for TODO, FIXME, HACK, XXX, and other tech-debt comment markers across multiple languages
 - **DuplicateCodeDetector** — Find duplicate and near-duplicate code blocks using normalized line hashing
 - **DeadCodeAnalyzer** — Detect potentially unused top-level Python functions and classes
+- **APISurfaceAnalyzer** — Map public API symbols, check `__all__` declarations, and flag undocumented exports
+- **ComplexityHotspotAnalyzer** — Rank files by complexity debt to prioritize refactoring
 
 ## Installation
 
