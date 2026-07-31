@@ -351,6 +351,33 @@ def cmd_dead_code(args: argparse.Namespace) -> None:
             print(symbol.format())
 
 
+def cmd_api_surface(args: argparse.Namespace) -> None:
+    from devai.api_surface import APISurfaceAnalyzer
+
+    analyzer = APISurfaceAnalyzer(args.directory, source_dir=args.source_dir)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for sym in analyzer.undocumented():
+            print(sym.format())
+
+
+def cmd_hotspots(args: argparse.Namespace) -> None:
+    from devai.complexity_hotspots import ComplexityHotspotAnalyzer
+
+    analyzer = ComplexityHotspotAnalyzer(
+        args.directory,
+        complexity_threshold=args.threshold,
+        limit=args.limit,
+    )
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -1216,6 +1243,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all symbols")
     p.set_defaults(func=cmd_dead_code)
+
+    p = sub.add_parser("api-surface", help="Map and analyze public API surface")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--source-dir", default="src", help="Source directory name")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List undocumented symbols")
+    p.set_defaults(func=cmd_api_surface)
+
+    p = sub.add_parser("hotspots", help="Rank files by complexity debt")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--threshold", type=int, default=10, help="Complexity threshold")
+    p.add_argument("--limit", type=int, default=20, help="Max hotspots to show")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.set_defaults(func=cmd_hotspots)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")

@@ -71,3 +71,11 @@ class TestDevAI:
         ai = DevAI.mock()
         assert ai.kit is ai.runtime.kit
         assert ai.config is ai.runtime.config
+
+    def test_api_surface_and_hotspots(self, tmp_path):
+        src = tmp_path / "src"
+        src.mkdir()
+        (src / "app.py").write_text('def foo():\n    """doc"""\n    return 1\n', encoding="utf-8")
+        ai = DevAI.mock()
+        assert ai.api_surface(str(tmp_path), source_dir="src").stats.public_symbols >= 1
+        assert ai.hotspots(str(tmp_path)).stats.files_analyzed >= 1

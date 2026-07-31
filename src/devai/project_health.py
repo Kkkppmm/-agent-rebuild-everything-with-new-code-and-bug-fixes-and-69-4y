@@ -6,8 +6,10 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from devai.api_surface import APISurfaceAnalyzer
 from devai.code_metrics import CodeMetrics
 from devai.code_smells import CodeSmellDetector
+from devai.complexity_hotspots import ComplexityHotspotAnalyzer
 from devai.deps_parser import DependencyParser
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
@@ -104,14 +106,16 @@ class ProjectHealth:
     """
 
     WEIGHTS = {
-        "metrics": 0.12,
-        "typing": 0.17,
-        "docstrings": 0.12,
-        "tests": 0.20,
-        "dependencies": 0.08,
-        "secrets": 0.12,
-        "smells": 0.10,
-        "tech_debt": 0.09,
+        "metrics": 0.10,
+        "typing": 0.15,
+        "docstrings": 0.10,
+        "tests": 0.18,
+        "dependencies": 0.07,
+        "secrets": 0.10,
+        "smells": 0.09,
+        "tech_debt": 0.08,
+        "api_surface": 0.08,
+        "hotspots": 0.05,
     }
 
     def __init__(
@@ -268,6 +272,10 @@ class ProjectHealth:
                 recs.append("Refactor high-severity code smells (deep nesting, bare except, god classes)")
             elif cat.name == "tech_debt" and cat.details.get("critical", 0) > 0:
                 recs.append("Address critical tech-debt markers (FIXME, BUG, HACK) before release")
+            elif cat.name == "api_surface" and cat.score < 70:
+                recs.append("Document public API symbols and declare __all__ in package modules")
+            elif cat.name == "hotspots" and cat.details.get("hotspots", 0) > 0:
+                recs.append("Refactor complexity hotspots — start with the highest-scoring files")
         return recs
 
     def analyze(self) -> ProjectHealthReport:
@@ -319,6 +327,53 @@ class ProjectHealth:
         debt = TechDebtScanner(root_str, ignore_dirs=self.ignore_dirs)
         score, summary, details = self._score_tech_debt(debt)
         categories.append(HealthCategory("tech_debt", score, summary, details))
+
+        api = APISurfaceAnalyzer(root_str, source_dir=self.source_dir, ignore_dirs=self.ignore_dirs)
+        api.analyze()
+        api_score = api.health_score()
+        api_stats = api.stats
+        api_summary = (
+            f"{api_stats.public_symbols} public symbols, "
+            f"{api_stats.coverage_pct}% documented"
+        )
+        categories.append(
+            HealthCategory(
+                "api_surface",
+                api_score,
+                api_summary,
+                {
+                    "public_symbols": api_stats.public_symbols,
+                    "documented": api_stats.documented,
+                    "undocumented": api_stats.undocumented,
+                    "coverage_pct": api_stats.coverage_pct,
+                },
+            )
+        )
+
+        hotspots = ComplexityHotspotAnalyzer(
+            root_str,
+            complexity_threshold=self.complexity_threshold,
+            ignore_dirs=self.ignore_dirs,
+        )
+        hotspots.analyze()
+        hs_score = hotspots.health_score()
+        hs_stats = hotspots.stats
+        hs_summary = (
+            f"{hs_stats.hotspots} hotspot files, "
+            f"{hs_stats.total_high_complexity} high-complexity functions"
+        )
+        categories.append(
+            HealthCategory(
+                "hotspots",
+                hs_score,
+                hs_summary,
+                {
+                    "hotspots": hs_stats.hotspots,
+                    "total_high_complexity": hs_stats.total_high_complexity,
+                    "worst_score": hs_stats.worst_score,
+                },
+            )
+        )
 
         overall = 0.0
         weight_sum = 0.0

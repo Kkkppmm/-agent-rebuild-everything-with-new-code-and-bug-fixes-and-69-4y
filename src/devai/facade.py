@@ -5,10 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from devai.api_surface import APISurfaceAnalyzer
 from devai.assistant import CodeAssistant
 from devai.code_compare import CodeComparer, CompareResult
 from devai.code_metrics import CodeMetrics
 from devai.code_smells import CodeSmellDetector
+from devai.complexity_hotspots import ComplexityHotspotAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.duplicate_code import DuplicateCodeDetector
@@ -245,6 +247,14 @@ class DevAI:
     def dead_code(self, path: str | Path = ".", **kwargs: Any) -> DeadCodeAnalyzer:
         """Find potentially unused top-level Python functions and classes."""
         return DeadCodeAnalyzer(str(path), **kwargs)
+
+    def api_surface(self, path: str | Path = ".", **kwargs: Any) -> APISurfaceAnalyzer:
+        """Map and analyze the public API surface of a Python package."""
+        return APISurfaceAnalyzer(str(path), **kwargs)
+
+    def hotspots(self, path: str | Path = ".", **kwargs: Any) -> ComplexityHotspotAnalyzer:
+        """Rank files by complexity debt to prioritize refactoring."""
+        return ComplexityHotspotAnalyzer(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

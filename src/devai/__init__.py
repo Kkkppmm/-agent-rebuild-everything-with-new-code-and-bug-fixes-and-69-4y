@@ -59,6 +59,8 @@ from devai.stream import StreamCollector, StreamResult
 from devai.index import CodeSymbolIndex, SymbolInfo
 from devai.secrets import SecretFinding, SecretsScanner
 from devai.tech_debt import TechDebtItem, TechDebtScanner, TechDebtStats
+from devai.api_surface import APISurfaceAnalyzer, APISurfaceStats, ModuleSurface, PublicSymbol
+from devai.complexity_hotspots import ComplexityHotspot, ComplexityHotspotAnalyzer, HotspotStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
@@ -70,9 +72,11 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "4.0.0"
+__version__ = "4.1.0"
 __all__ = [
     "Agent",
+    "APISurfaceAnalyzer",
+    "APISurfaceStats",
     "BudgetExceededError",
     "BudgetedLLMClient",
     "BudgetSnapshot",
@@ -81,6 +85,7 @@ __all__ = [
     "BenchmarkSample",
     "CONFIG_FILENAMES",
     "HealthCategory",
+    "HotspotStats",
     "HealthChecker",
     "HealthResult",
     "BatchReviewReport",
@@ -92,6 +97,8 @@ __all__ = [
     "CodeBlock",
     "CodeComparer",
     "CodeMetrics",
+    "ComplexityHotspot",
+    "ComplexityHotspotAnalyzer",
     "CodeSmell",
     "CodeSmellDetector",
     "CodeSmellStats",
@@ -151,6 +158,7 @@ __all__ = [
     "MockEmbeddingClient",
     "MockLLMClient",
     "ModuleMapping",
+    "ModuleSurface",
     "NotebookCell",
     "NotebookReader",
     "PatchResult",
@@ -158,6 +166,7 @@ __all__ = [
     "PerfReviewResult",
     "PluginRegistry",
     "ProgramComposer",
+    "PublicSymbol",
     "ProgramEntry",
     "ProgramLibrary",
     "ProjectHealth",

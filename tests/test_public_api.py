@@ -5,11 +5,13 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "4.0.0"
+        assert devai.__version__ == "4.1.0"
 
     def test_exports(self):
         expected = {
             "Agent",
+            "APISurfaceAnalyzer",
+            "APISurfaceStats",
             "BatchReviewReport",
             "BatchReviewer",
             "BatchRunner",
@@ -23,6 +25,8 @@ class TestPublicAPI:
             "CodeAssistant",
             "CodeComparer",
             "CodeMetrics",
+            "ComplexityHotspot",
+            "ComplexityHotspotAnalyzer",
             "CodeSmell",
             "CodeSmellDetector",
             "CodeSmellStats",
@@ -83,6 +87,7 @@ class TestPublicAPI:
             "GitChangelog",
             "GitContext",
             "HealthCategory",
+            "HotspotStats",
             "HealthChecker",
             "HealthResult",
             "ImportEdge",
@@ -92,6 +97,7 @@ class TestPublicAPI:
             "MockEmbeddingClient",
             "MockLLMClient",
             "ModuleMapping",
+            "ModuleSurface",
             "NotebookCell",
             "NotebookReader",
             "PatchResult",
@@ -99,6 +105,7 @@ class TestPublicAPI:
             "PerfReviewResult",
             "PluginRegistry",
             "ProgramComposer",
+            "PublicSymbol",
             "ProgramEntry",
             "ProgramLibrary",
             "ProjectHealth",
