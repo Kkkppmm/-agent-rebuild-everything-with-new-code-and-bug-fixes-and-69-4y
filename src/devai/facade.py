@@ -22,6 +22,7 @@ from devai.insecure_random import InsecureRandomAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.secrets import SecretsScanner
+from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -320,6 +321,10 @@ class DevAI:
     def path_traversal(self, path: str | Path = ".", **kwargs: Any) -> PathTraversalAnalyzer:
         """Detect unsafe file path construction from user-controlled input."""
         return PathTraversalAnalyzer(str(path), **kwargs)
+
+    def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
+        """Run unified static security analysis (secrets, injections, dangerous calls)."""
+        return SecurityScanner(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:

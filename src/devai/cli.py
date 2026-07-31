@@ -524,6 +524,26 @@ def cmd_path_traversal(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_security_scan(args: argparse.Namespace) -> None:
+    from devai.security_scan import SecurityScanner
+
+    scanner = SecurityScanner(args.directory)
+    if args.json:
+        print(scanner.scan().to_json())
+        return
+    if args.markdown:
+        print(scanner.scan().to_markdown())
+        return
+    if args.context:
+        print(scanner.to_context())
+        return
+    print(scanner.summary())
+    if args.verbose:
+        report = scanner.scan()
+        for cat in report.categories:
+            print(f"\n[{cat.name}] {cat.summary}")
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -1470,6 +1490,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_path_traversal)
+
+    p = sub.add_parser("security-scan", help="Run unified static security analysis")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--json", action="store_true", help="Output JSON report")
+    p.add_argument("--markdown", action="store_true", help="Output Markdown report")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show per-check summaries")
+    p.set_defaults(func=cmd_security_scan)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")

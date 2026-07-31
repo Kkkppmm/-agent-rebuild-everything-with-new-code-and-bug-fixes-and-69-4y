@@ -1,11 +1,12 @@
-"""Example: scan for insecure random and path traversal risks."""
+"""Example: unified static security scan across a project."""
 
 from devai import DevAI
 
 ai = DevAI.mock()
 
-print("=== Insecure random ===")
-print(ai.insecure_random(".").summary())
+report = ai.security_scan(".").scan()
+print(report.summary())
 
-print("\n=== Path traversal ===")
-print(ai.path_traversal(".").summary())
+if report.total_findings:
+    print("\nDetailed context for LLM review:")
+    print(ai.security_scan(".").to_context())
