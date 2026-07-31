@@ -475,6 +475,22 @@ def cmd_debug_artifacts(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_sql_injection(args: argparse.Namespace) -> None:
+    from devai.sql_injection import SQLInjectionAnalyzer
+
+    analyzer = SQLInjectionAnalyzer(
+        args.directory,
+        include_tests=args.include_tests,
+    )
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -1402,6 +1418,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Include test files in the scan",
     )
     p.set_defaults(func=cmd_debug_artifacts)
+
+    p = sub.add_parser("sql-injection", help="Detect SQL injection risks in query execution")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--include-tests",
+        action="store_true",
+        help="Include test files in the scan",
+    )
+    p.set_defaults(func=cmd_sql_injection)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")

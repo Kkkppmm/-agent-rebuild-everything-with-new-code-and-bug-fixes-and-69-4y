@@ -96,3 +96,4 @@ class TestDevAI:
         assert ai.async_blocking(str(tmp_path)).health_score() >= 0
         assert ai.debug_artifacts(str(tmp_path)).health_score() >= 0
         assert ai.secrets(str(tmp_path)).summary()
+        assert ai.sql_injection(str(tmp_path)).health_score() >= 0

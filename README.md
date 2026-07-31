@@ -92,6 +92,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **ResourceLeakAnalyzer** — Detect unclosed files, sockets, and database connections
 - **AsyncBlockingDetector** — Detect blocking calls inside async functions (`time.sleep`, `requests`, `open`, `subprocess`, etc.)
 - **DebugArtifactDetector** — Detect debug statements left in code (`print`, `breakpoint`, `pdb.set_trace`, etc.)
+- **SQLInjectionAnalyzer** — Detect SQL injection risks from f-strings, concatenation, and formatting in query execution
 
 ## Installation
 

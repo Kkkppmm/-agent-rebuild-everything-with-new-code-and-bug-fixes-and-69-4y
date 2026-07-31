@@ -58,6 +58,7 @@ from devai.output import CodeBlock, extract_code_blocks, extract_code_by_languag
 from devai.stream import StreamCollector, StreamResult
 from devai.index import CodeSymbolIndex, SymbolInfo
 from devai.secrets import SecretFinding, SecretsScanner
+from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionRisk, SQLInjectionStats
 from devai.tech_debt import TechDebtItem, TechDebtScanner, TechDebtStats
 from devai.api_surface import APISurfaceAnalyzer, APISurfaceStats, ModuleSurface, PublicSymbol
 from devai.complexity_hotspots import ComplexityHotspot, ComplexityHotspotAnalyzer, HotspotStats
@@ -85,7 +86,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "4.8.0"
+__version__ = "4.9.0"
 __all__ = [
     "Agent",
     "APISurfaceAnalyzer",
@@ -225,6 +226,9 @@ __all__ = [
     "ScheduledJob",
     "SecretFinding",
     "SecretsScanner",
+    "SQLInjectionAnalyzer",
+    "SQLInjectionRisk",
+    "SQLInjectionStats",
     "SecurityAuditResult",
     "SecurityFinding",
     "ImportEdge",

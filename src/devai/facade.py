@@ -19,6 +19,7 @@ from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.async_blocking import AsyncBlockingDetector
 from devai.debug_artifacts import DebugArtifactDetector
 from devai.secrets import SecretsScanner
+from devai.sql_injection import SQLInjectionAnalyzer
 from devai.magic_numbers import MagicNumberDetector
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -305,6 +306,10 @@ class DevAI:
     def secrets(self, path: str | Path = ".", **kwargs: Any) -> SecretsScanner:
         """Scan for hardcoded API keys, tokens, and credentials."""
         return SecretsScanner(str(path), **kwargs)
+
+    def sql_injection(self, path: str | Path = ".", **kwargs: Any) -> SQLInjectionAnalyzer:
+        """Detect SQL injection risks from string interpolation in query execution."""
+        return SQLInjectionAnalyzer(str(path), **kwargs)
 
     @staticmethod
     def prompts() -> PromptRegistry:
