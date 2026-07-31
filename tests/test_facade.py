@@ -92,3 +92,5 @@ class TestDevAI:
         assert ai.naming(str(tmp_path)).health_score() >= 0
         assert ai.magic_numbers(str(tmp_path)).health_score() >= 0
         assert ai.dangerous_calls(str(tmp_path)).health_score() >= 0
+        assert ai.async_blocking(str(tmp_path)).health_score() >= 0
+        assert ai.resource_leaks(str(tmp_path)).health_score() >= 0
