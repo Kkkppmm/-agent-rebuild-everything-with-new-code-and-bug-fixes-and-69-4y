@@ -104,11 +104,14 @@ def _resource_info(node: ast.Call) -> tuple[str, str] | None:
 
     if name == "connect":
         if isinstance(node.func, ast.Attribute):
-            base = _module_name(node.func.value)
-            if base and (base in _CONNECT_MODULES or base.split(".")[0] in _CONNECT_MODULES):
-                return "connection", f"{base}.connect"
-            if base:
-                return "connection", f"{base}.connect"
+            if isinstance(node.func.value, ast.Name):
+                base = node.func.value.id
+                if base in _CONNECT_MODULES:
+                    return "connection", f"{base}.connect"
+            else:
+                base = _module_name(node.func.value)
+                if base and (base in _CONNECT_MODULES or base.split(".")[0] in _CONNECT_MODULES):
+                    return "connection", f"{base}.connect"
 
     if name == "TemporaryFile":
         if isinstance(node.func, ast.Attribute):
