@@ -524,6 +524,32 @@ def cmd_path_traversal(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_weak_crypto(args: argparse.Namespace) -> None:
+    from devai.weak_crypto import WeakCryptoAnalyzer
+
+    analyzer = WeakCryptoAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_log_injection(args: argparse.Namespace) -> None:
+    from devai.log_injection import LogInjectionAnalyzer
+
+    analyzer = LogInjectionAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_command_injection(args: argparse.Namespace) -> None:
     from devai.command_injection import CommandInjectionAnalyzer
 
@@ -1503,6 +1529,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_path_traversal)
+
+    p = sub.add_parser("weak-crypto", help="Detect weak cryptographic algorithms")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_weak_crypto)
+
+    p = sub.add_parser("log-injection", help="Detect log injection risks")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_log_injection)
 
     p = sub.add_parser("command-injection", help="Detect dynamic shell command construction")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

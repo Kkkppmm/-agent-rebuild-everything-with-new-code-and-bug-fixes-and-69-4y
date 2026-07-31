@@ -20,6 +20,7 @@ from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.debug_artifacts import DebugArtifactDetector
 from devai.magic_numbers import MagicNumberDetector
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.log_injection import LogInjectionAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.secrets import SecretsScanner
@@ -31,6 +32,7 @@ from devai.docstring_coverage import DocstringCoverage
 from devai.duplicate_code import DuplicateCodeDetector
 from devai.tech_debt import TechDebtScanner
 from devai.test_mapper import TestMapper
+from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.project_health import ProjectHealth
 from devai.program import DevProgram, ProgramResult
 from devai.project_detect import ProjectDetector, ProjectProfile
@@ -326,6 +328,14 @@ class DevAI:
     def path_traversal(self, path: str | Path = ".", **kwargs: Any) -> PathTraversalAnalyzer:
         """Detect unsafe file path construction from user-controlled input."""
         return PathTraversalAnalyzer(str(path), **kwargs)
+
+    def weak_crypto(self, path: str | Path = ".", **kwargs: Any) -> WeakCryptoAnalyzer:
+        """Detect use of weak cryptographic algorithms (MD5, SHA1) for security."""
+        return WeakCryptoAnalyzer(str(path), **kwargs)
+
+    def log_injection(self, path: str | Path = ".", **kwargs: Any) -> LogInjectionAnalyzer:
+        """Detect log injection risks from dynamic log message construction."""
+        return LogInjectionAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""
