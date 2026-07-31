@@ -420,6 +420,19 @@ def cmd_naming(args: argparse.Namespace) -> None:
             print(violation.format())
 
 
+def cmd_magic_numbers(args: argparse.Namespace) -> None:
+    from devai.magic_numbers import MagicNumberDetector
+
+    detector = MagicNumberDetector(args.directory)
+    if args.context:
+        print(detector.to_context())
+        return
+    print(detector.summary())
+    if args.verbose:
+        for finding in detector.analyze():
+            print(finding.format())
+
+
 def cmd_sql(args: argparse.Namespace) -> None:
     assistant = _get_assistant(args)
     query = _read_input(args.query)
@@ -1318,6 +1331,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all violations")
     p.set_defaults(func=cmd_naming)
+
+    p = sub.add_parser("magic-numbers", help="Find unexplained numeric literals")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_magic_numbers)
 
     p = sub.add_parser("sql", help="Optimize SQL query")
     p.add_argument("query", help="SQL query or file path")

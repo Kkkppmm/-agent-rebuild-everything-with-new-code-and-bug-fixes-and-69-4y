@@ -90,3 +90,4 @@ class TestDevAI:
         assert ai.exceptions(str(tmp_path)).health_score() >= 0
         assert ai.coupling(str(tmp_path)).health_score() >= 0
         assert ai.naming(str(tmp_path)).health_score() >= 0
+        assert ai.magic_numbers(str(tmp_path)).health_score() >= 0

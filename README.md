@@ -87,6 +87,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **ExceptionHierarchyAnalyzer** — Map custom exception classes, inheritance chains, and risky bare/broad except handlers
 - **ModuleCouplingAnalyzer** — Measure afferent/efferent coupling and instability from import graphs
 - **NamingConventionAnalyzer** — Check PEP 8 naming for functions, methods, classes, variables, and constants
+- **MagicNumberDetector** — Find unexplained numeric literals that should be named constants
 
 ## Installation
 
