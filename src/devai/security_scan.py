@@ -10,12 +10,16 @@ from typing import Any
 from devai.command_injection import CommandInjectionAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.insecure_tls import InsecureTLSAnalyzer
+from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
+from devai.redos import ReDoSAnalyzer
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 
 CHECK_NAMES = (
@@ -28,6 +32,10 @@ CHECK_NAMES = (
     "weak_crypto",
     "log_injection",
     "ssrf",
+    "redos",
+    "jwt_security",
+    "unsafe_deserialization",
+    "insecure_tls",
 )
 
 
@@ -121,7 +129,9 @@ class SecurityScanner:
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
-    weak crypto usage, log injection risks, and SSRF risks into one report.
+    weak crypto usage, log injection risks, SSRF risks, ReDoS patterns,
+    insecure JWT handling, unsafe deserialization, and disabled TLS
+    verification into one report.
   """
 
     def __init__(
@@ -148,6 +158,10 @@ class SecurityScanner:
         self._weak_crypto: WeakCryptoAnalyzer | None = None
         self._log_injection: LogInjectionAnalyzer | None = None
         self._ssrf: SSRFAnalyzer | None = None
+        self._redos: ReDoSAnalyzer | None = None
+        self._jwt: JWTSecurityAnalyzer | None = None
+        self._deserialization: UnsafeDeserializationAnalyzer | None = None
+        self._tls: InsecureTLSAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -194,6 +208,28 @@ class SecurityScanner:
             self._ssrf = SSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._ssrf
 
+    def _redos_analyzer(self) -> ReDoSAnalyzer:
+        if self._redos is None:
+            self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redos
+
+    def _jwt_analyzer(self) -> JWTSecurityAnalyzer:
+        if self._jwt is None:
+            self._jwt = JWTSecurityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._jwt
+
+    def _deserialization_analyzer(self) -> UnsafeDeserializationAnalyzer:
+        if self._deserialization is None:
+            self._deserialization = UnsafeDeserializationAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._deserialization
+
+    def _tls_analyzer(self) -> InsecureTLSAnalyzer:
+        if self._tls is None:
+            self._tls = InsecureTLSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._tls
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -220,6 +256,14 @@ class SecurityScanner:
             recs.append("Use structured logging with extra={} instead of interpolating user data into messages.")
         if by_name.get("ssrf", SecurityScanCategory("ssrf", 100, 0, "")).findings:
             recs.append("Validate outbound URLs, block internal/private IP ranges, and use an allowlist of hosts.")
+        if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
+            recs.append("Simplify regex patterns to avoid nested quantifiers and catastrophic backtracking.")
+        if by_name.get("jwt_security", SecurityScanCategory("jwt_security", 100, 0, "")).findings:
+            recs.append("Always verify JWT signatures and reject the 'none' algorithm.")
+        if by_name.get("unsafe_deserialization", SecurityScanCategory("unsafe_deserialization", 100, 0, "")).findings:
+            recs.append("Use yaml.safe_load, JSON, or signed serialization instead of pickle/marshal.")
+        if by_name.get("insecure_tls", SecurityScanCategory("insecure_tls", 100, 0, "")).findings:
+            recs.append("Enable TLS certificate verification; never use verify=False in production.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -338,6 +382,54 @@ class SecurityScanner:
                 )
             )
 
+        if "redos" in self.checks:
+            analyzer = self._redos_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="redos",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "jwt_security" in self.checks:
+            analyzer = self._jwt_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="jwt_security",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "unsafe_deserialization" in self.checks:
+            analyzer = self._deserialization_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="unsafe_deserialization",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_tls" in self.checks:
+            analyzer = self._tls_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_tls",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -387,6 +479,16 @@ class SecurityScanner:
             lines.extend(["## Log injection", self._log_injection_analyzer().to_context(limit=limit), ""])
         if "ssrf" in self.checks:
             lines.extend(["## SSRF", self._ssrf_analyzer().to_context(limit=limit), ""])
+        if "redos" in self.checks:
+            lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
+        if "jwt_security" in self.checks:
+            lines.extend(["## JWT security", self._jwt_analyzer().to_context(limit=limit), ""])
+        if "unsafe_deserialization" in self.checks:
+            lines.extend(
+                ["## Unsafe deserialization", self._deserialization_analyzer().to_context(limit=limit), ""]
+            )
+        if "insecure_tls" in self.checks:
+            lines.extend(["## Insecure TLS", self._tls_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -433,3 +535,23 @@ class SecurityScanner:
     def ssrf(self) -> SSRFAnalyzer:
         """Underlying SSRF analyzer."""
         return self._ssrf_analyzer()
+
+    @property
+    def redos(self) -> ReDoSAnalyzer:
+        """Underlying ReDoS analyzer."""
+        return self._redos_analyzer()
+
+    @property
+    def jwt_security(self) -> JWTSecurityAnalyzer:
+        """Underlying JWT security analyzer."""
+        return self._jwt_analyzer()
+
+    @property
+    def unsafe_deserialization(self) -> UnsafeDeserializationAnalyzer:
+        """Underlying unsafe-deserialization analyzer."""
+        return self._deserialization_analyzer()
+
+    @property
+    def insecure_tls(self) -> InsecureTLSAnalyzer:
+        """Underlying insecure-TLS analyzer."""
+        return self._tls_analyzer()

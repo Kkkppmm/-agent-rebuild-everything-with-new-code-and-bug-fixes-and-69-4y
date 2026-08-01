@@ -78,11 +78,19 @@ from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, As
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
+from devai.insecure_tls import InsecureTLSAnalyzer, TLSFinding, TLSStats
+from devai.jwt_security import JWTSecurityAnalyzer, JWTFinding, JWTStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
+from devai.unsafe_deserialization import (
+    DeserializationFinding,
+    DeserializationStats,
+    UnsafeDeserializationAnalyzer,
+)
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
@@ -97,7 +105,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.5.0"
+__version__ = "5.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -155,6 +163,8 @@ __all__ = [
     "DeadCodeAnalyzer",
     "DeadCodeStats",
     "DeadSymbol",
+    "DeserializationFinding",
+    "DeserializationStats",
     "Dependency",
     "DependencyParser",
     "DevAI",
@@ -228,6 +238,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "ResourceLeakAnalyzer",
     "ResourceLeakFinding",
     "ResourceLeakStats",
@@ -259,6 +272,10 @@ __all__ = [
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
+    "InsecureTLSAnalyzer",
+    "JWTSecurityAnalyzer",
+    "JWTFinding",
+    "JWTStats",
     "LogInjectionAnalyzer",
     "LogInjectionFinding",
     "LogInjectionStats",
@@ -271,10 +288,13 @@ __all__ = [
     "TechDebtStats",
     "TestMapReport",
     "TestMapper",
+    "TLSFinding",
+    "TLSStats",
     "TokenBudget",
     "TypingCoverage",
     "TypingGap",
     "TypingStats",
+    "UnsafeDeserializationAnalyzer",
     "TraceEvent",
     "WatchEvent",
     "WatchResult",

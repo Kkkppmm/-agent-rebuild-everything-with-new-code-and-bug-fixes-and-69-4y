@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "5.5.0"
+        assert devai.__version__ == "5.6.0"
 
     def test_exports(self):
         expected = {
@@ -67,6 +67,8 @@ class TestPublicAPI:
             "DeadCodeAnalyzer",
             "DeadCodeStats",
             "DeadSymbol",
+            "DeserializationFinding",
+            "DeserializationStats",
             "Dependency",
             "DependencyParser",
             "DevKit",
@@ -112,6 +114,10 @@ class TestPublicAPI:
             "InsecureRandomAnalyzer",
             "InsecureRandomFinding",
             "InsecureRandomStats",
+            "InsecureTLSAnalyzer",
+            "JWTSecurityAnalyzer",
+            "JWTFinding",
+            "JWTStats",
             "LogInjectionAnalyzer",
             "LogInjectionFinding",
             "LogInjectionStats",
@@ -148,6 +154,9 @@ class TestPublicAPI:
             "ProjectDetector",
             "ProjectProfile",
             "PromptRegistry",
+            "ReDoSAnalyzer",
+            "ReDoSFinding",
+            "ReDoSStats",
             "ResourceLeakAnalyzer",
             "ResourceLeakFinding",
             "ResourceLeakStats",
@@ -180,9 +189,12 @@ class TestPublicAPI:
             "TechDebtStats",
             "TestMapReport",
             "TestMapper",
+            "TLSFinding",
+            "TLSStats",
             "TypingCoverage",
             "TypingGap",
             "TypingStats",
+            "UnsafeDeserializationAnalyzer",
             "TraceEvent",
             "WeakCryptoAnalyzer",
             "WeakCryptoFinding",
