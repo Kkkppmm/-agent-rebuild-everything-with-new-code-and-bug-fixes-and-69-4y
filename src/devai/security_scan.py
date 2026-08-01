@@ -15,19 +15,23 @@ from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
+from devai.open_redirect import OpenRedirectAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 
 CHECK_NAMES = (
     "secrets",
     "dangerous_calls",
     "sql_injection",
-    "command_injection",
     "insecure_random",
     "path_traversal",
+    "command_injection",
     "weak_crypto",
     "log_injection",
     "ssrf",
+    "unsafe_deserialization",
+    "open_redirect",
 )
 
 
@@ -120,8 +124,8 @@ class SecurityScanner:
     """Run multiple static security analyzers and aggregate results.
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
-    command injection checks, insecure random usage, path-traversal risks,
-    weak crypto usage, log injection risks, and SSRF risks into one report.
+    insecure random usage, path-traversal risks, command injection, weak crypto,
+    log injection, SSRF, unsafe deserialization, and open redirects into one report.
   """
 
     def __init__(
@@ -142,12 +146,14 @@ class SecurityScanner:
         self._secrets: SecretsScanner | None = None
         self._dangerous: DangerousCallsAnalyzer | None = None
         self._sql: SQLInjectionAnalyzer | None = None
-        self._command: CommandInjectionAnalyzer | None = None
         self._random: InsecureRandomAnalyzer | None = None
         self._paths: PathTraversalAnalyzer | None = None
-        self._weak_crypto: WeakCryptoAnalyzer | None = None
-        self._log_injection: LogInjectionAnalyzer | None = None
+        self._command: CommandInjectionAnalyzer | None = None
+        self._crypto: WeakCryptoAnalyzer | None = None
+        self._logs: LogInjectionAnalyzer | None = None
         self._ssrf: SSRFAnalyzer | None = None
+        self._deserialization: UnsafeDeserializationAnalyzer | None = None
+        self._redirect: OpenRedirectAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -164,11 +170,6 @@ class SecurityScanner:
             self._sql = SQLInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._sql
 
-    def _command_analyzer(self) -> CommandInjectionAnalyzer:
-        if self._command is None:
-            self._command = CommandInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
-        return self._command
-
     def _random_analyzer(self) -> InsecureRandomAnalyzer:
         if self._random is None:
             self._random = InsecureRandomAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
@@ -179,20 +180,37 @@ class SecurityScanner:
             self._paths = PathTraversalAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._paths
 
-    def _weak_crypto_analyzer(self) -> WeakCryptoAnalyzer:
-        if self._weak_crypto is None:
-            self._weak_crypto = WeakCryptoAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
-        return self._weak_crypto
+    def _command_analyzer(self) -> CommandInjectionAnalyzer:
+        if self._command is None:
+            self._command = CommandInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._command
 
-    def _log_injection_analyzer(self) -> LogInjectionAnalyzer:
-        if self._log_injection is None:
-            self._log_injection = LogInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
-        return self._log_injection
+    def _crypto_analyzer(self) -> WeakCryptoAnalyzer:
+        if self._crypto is None:
+            self._crypto = WeakCryptoAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._crypto
+
+    def _log_analyzer(self) -> LogInjectionAnalyzer:
+        if self._logs is None:
+            self._logs = LogInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._logs
 
     def _ssrf_analyzer(self) -> SSRFAnalyzer:
         if self._ssrf is None:
             self._ssrf = SSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._ssrf
+
+    def _deserialization_analyzer(self) -> UnsafeDeserializationAnalyzer:
+        if self._deserialization is None:
+            self._deserialization = UnsafeDeserializationAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._deserialization
+
+    def _redirect_analyzer(self) -> OpenRedirectAnalyzer:
+        if self._redirect is None:
+            self._redirect = OpenRedirectAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redirect
 
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
@@ -208,18 +226,22 @@ class SecurityScanner:
             recs.append("Replace eval/exec and shell=True subprocess calls with safer alternatives.")
         if by_name.get("sql_injection", SecurityScanCategory("sql_injection", 100, 0, "")).findings:
             recs.append("Use parameterized queries instead of string-built SQL.")
-        if by_name.get("command_injection", SecurityScanCategory("command_injection", 100, 0, "")).findings:
-            recs.append("Pass subprocess argv as a list instead of building shell commands from user input.")
         if by_name.get("insecure_random", SecurityScanCategory("insecure_random", 100, 0, "")).findings:
             recs.append("Use secrets module for tokens, passwords, and session identifiers.")
         if by_name.get("path_traversal", SecurityScanCategory("path_traversal", 100, 0, "")).findings:
             recs.append("Validate and normalize user-supplied paths before file operations.")
+        if by_name.get("command_injection", SecurityScanCategory("command_injection", 100, 0, "")).findings:
+            recs.append("Avoid shell=True and never pass user input directly to os.system or subprocess.")
         if by_name.get("weak_crypto", SecurityScanCategory("weak_crypto", 100, 0, "")).findings:
-            recs.append("Replace MD5/SHA1 with bcrypt, scrypt, argon2, or SHA-256+ for security use.")
+            recs.append("Replace MD5/SHA1 with SHA-256+ or bcrypt/argon2 for password hashing.")
         if by_name.get("log_injection", SecurityScanCategory("log_injection", 100, 0, "")).findings:
-            recs.append("Use structured logging with extra={} instead of interpolating user data into messages.")
+            recs.append("Use structured logging with extra fields instead of f-strings in log messages.")
         if by_name.get("ssrf", SecurityScanCategory("ssrf", 100, 0, "")).findings:
-            recs.append("Validate outbound URLs, block internal/private IP ranges, and use an allowlist of hosts.")
+            recs.append("Validate outbound URLs against an allowlist and block internal network ranges.")
+        if by_name.get("unsafe_deserialization", SecurityScanCategory("unsafe_deserialization", 100, 0, "")).findings:
+            recs.append("Never deserialize untrusted data with pickle or yaml.load — use safe formats and loaders.")
+        if by_name.get("open_redirect", SecurityScanCategory("open_redirect", 100, 0, "")).findings:
+            recs.append("Validate redirect destinations against a same-origin or explicit allowlist.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -266,18 +288,6 @@ class SecurityScanner:
                 )
             )
 
-        if "command_injection" in self.checks:
-            analyzer = self._command_analyzer()
-            findings = analyzer.analyze()
-            categories.append(
-                SecurityScanCategory(
-                    name="command_injection",
-                    score=analyzer.health_score(),
-                    findings=len(findings),
-                    summary=analyzer.summary().splitlines()[0],
-                )
-            )
-
         if "insecure_random" in self.checks:
             analyzer = self._random_analyzer()
             findings = analyzer.analyze()
@@ -302,8 +312,20 @@ class SecurityScanner:
                 )
             )
 
+        if "command_injection" in self.checks:
+            analyzer = self._command_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="command_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         if "weak_crypto" in self.checks:
-            analyzer = self._weak_crypto_analyzer()
+            analyzer = self._crypto_analyzer()
             findings = analyzer.analyze()
             categories.append(
                 SecurityScanCategory(
@@ -315,7 +337,7 @@ class SecurityScanner:
             )
 
         if "log_injection" in self.checks:
-            analyzer = self._log_injection_analyzer()
+            analyzer = self._log_analyzer()
             findings = analyzer.analyze()
             categories.append(
                 SecurityScanCategory(
@@ -332,6 +354,30 @@ class SecurityScanner:
             categories.append(
                 SecurityScanCategory(
                     name="ssrf",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "unsafe_deserialization" in self.checks:
+            analyzer = self._deserialization_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="unsafe_deserialization",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "open_redirect" in self.checks:
+            analyzer = self._redirect_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="open_redirect",
                     score=analyzer.health_score(),
                     findings=len(findings),
                     summary=analyzer.summary().splitlines()[0],
@@ -375,18 +421,24 @@ class SecurityScanner:
             lines.extend(["## Dangerous calls", self._dangerous_analyzer().to_context(limit=limit), ""])
         if "sql_injection" in self.checks:
             lines.extend(["## SQL injection", self._sql_analyzer().to_context(limit=limit), ""])
-        if "command_injection" in self.checks:
-            lines.extend(["## Command injection", self._command_analyzer().to_context(limit=limit), ""])
         if "insecure_random" in self.checks:
             lines.extend(["## Insecure random", self._random_analyzer().to_context(limit=limit), ""])
         if "path_traversal" in self.checks:
             lines.extend(["## Path traversal", self._path_analyzer().to_context(limit=limit), ""])
+        if "command_injection" in self.checks:
+            lines.extend(["## Command injection", self._command_analyzer().to_context(limit=limit), ""])
         if "weak_crypto" in self.checks:
-            lines.extend(["## Weak crypto", self._weak_crypto_analyzer().to_context(limit=limit), ""])
+            lines.extend(["## Weak crypto", self._crypto_analyzer().to_context(limit=limit), ""])
         if "log_injection" in self.checks:
-            lines.extend(["## Log injection", self._log_injection_analyzer().to_context(limit=limit), ""])
+            lines.extend(["## Log injection", self._log_analyzer().to_context(limit=limit), ""])
         if "ssrf" in self.checks:
             lines.extend(["## SSRF", self._ssrf_analyzer().to_context(limit=limit), ""])
+        if "unsafe_deserialization" in self.checks:
+            lines.extend(
+                ["## Unsafe deserialization", self._deserialization_analyzer().to_context(limit=limit), ""]
+            )
+        if "open_redirect" in self.checks:
+            lines.extend(["## Open redirect", self._redirect_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -405,11 +457,6 @@ class SecurityScanner:
         return self._sql_analyzer()
 
     @property
-    def command_injection(self) -> CommandInjectionAnalyzer:
-        """Underlying command injection analyzer."""
-        return self._command_analyzer()
-
-    @property
     def insecure_random(self) -> InsecureRandomAnalyzer:
         """Underlying insecure-random analyzer."""
         return self._random_analyzer()
@@ -420,16 +467,31 @@ class SecurityScanner:
         return self._path_analyzer()
 
     @property
+    def command_injection(self) -> CommandInjectionAnalyzer:
+        """Underlying command-injection analyzer."""
+        return self._command_analyzer()
+
+    @property
     def weak_crypto(self) -> WeakCryptoAnalyzer:
         """Underlying weak-crypto analyzer."""
-        return self._weak_crypto_analyzer()
+        return self._crypto_analyzer()
 
     @property
     def log_injection(self) -> LogInjectionAnalyzer:
         """Underlying log-injection analyzer."""
-        return self._log_injection_analyzer()
+        return self._log_analyzer()
 
     @property
     def ssrf(self) -> SSRFAnalyzer:
         """Underlying SSRF analyzer."""
         return self._ssrf_analyzer()
+
+    @property
+    def unsafe_deserialization(self) -> UnsafeDeserializationAnalyzer:
+        """Underlying unsafe-deserialization analyzer."""
+        return self._deserialization_analyzer()
+
+    @property
+    def open_redirect(self) -> OpenRedirectAnalyzer:
+        """Underlying open-redirect analyzer."""
+        return self._redirect_analyzer()
