@@ -96,6 +96,7 @@ from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, Nami
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.weak_crypto import WeakCryptoAnalyzer, WeakCryptoFinding, WeakCryptoStats
+from devai.xxe import XXEAnalyzer, XXEFinding, XXEStats
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -105,7 +106,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.6.0"
+__version__ = "5.7.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -282,6 +283,9 @@ __all__ = [
     "WeakCryptoAnalyzer",
     "WeakCryptoFinding",
     "WeakCryptoStats",
+    "XXEAnalyzer",
+    "XXEFinding",
+    "XXEStats",
     "SymbolInfo",
     "TechDebtItem",
     "TechDebtScanner",

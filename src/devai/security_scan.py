@@ -21,6 +21,7 @@ from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xxe import XXEAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -36,6 +37,7 @@ CHECK_NAMES = (
     "jwt_security",
     "unsafe_deserialization",
     "insecure_tls",
+    "xxe",
 )
 
 
@@ -130,8 +132,8 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
     weak crypto usage, log injection risks, SSRF risks, ReDoS patterns,
-    JWT misconfigurations, unsafe deserialization, and disabled TLS verification
-    into one report.
+    JWT misconfigurations, unsafe deserialization, disabled TLS verification,
+    and XXE-vulnerable XML parsing into one report.
   """
 
     def __init__(
@@ -162,6 +164,7 @@ class SecurityScanner:
         self._jwt: JWTSecurityAnalyzer | None = None
         self._deserialization: UnsafeDeserializationAnalyzer | None = None
         self._tls: InsecureTLSAnalyzer | None = None
+        self._xxe: XXEAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -230,6 +233,11 @@ class SecurityScanner:
             self._tls = InsecureTLSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._tls
 
+    def _xxe_analyzer(self) -> XXEAnalyzer:
+        if self._xxe is None:
+            self._xxe = XXEAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xxe
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -264,6 +272,8 @@ class SecurityScanner:
             recs.append("Use JSON instead of pickle/yaml.load for untrusted data; always specify SafeLoader.")
         if by_name.get("insecure_tls", SecurityScanCategory("insecure_tls", 100, 0, "")).findings:
             recs.append("Enable TLS certificate verification and avoid ssl._create_unverified_context.")
+        if by_name.get("xxe", SecurityScanCategory("xxe", 100, 0, "")).findings:
+            recs.append("Use defusedxml for parsing untrusted XML and disable external entity resolution.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -430,6 +440,18 @@ class SecurityScanner:
                 )
             )
 
+        if "xxe" in self.checks:
+            analyzer = self._xxe_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xxe",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -491,6 +513,8 @@ class SecurityScanner:
             ])
         if "insecure_tls" in self.checks:
             lines.extend(["## Insecure TLS", self._tls_analyzer().to_context(limit=limit), ""])
+        if "xxe" in self.checks:
+            lines.extend(["## XXE", self._xxe_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -557,3 +581,8 @@ class SecurityScanner:
     def insecure_tls(self) -> InsecureTLSAnalyzer:
         """Underlying insecure TLS analyzer."""
         return self._tls_analyzer()
+
+    @property
+    def xxe(self) -> XXEAnalyzer:
+        """Underlying XXE analyzer."""
+        return self._xxe_analyzer()

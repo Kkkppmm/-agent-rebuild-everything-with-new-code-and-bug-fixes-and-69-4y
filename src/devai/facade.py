@@ -38,6 +38,7 @@ from devai.duplicate_code import DuplicateCodeDetector
 from devai.tech_debt import TechDebtScanner
 from devai.test_mapper import TestMapper
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xxe import XXEAnalyzer
 from devai.project_health import ProjectHealth
 from devai.program import DevProgram, ProgramResult
 from devai.project_detect import ProjectDetector, ProjectProfile
@@ -361,6 +362,10 @@ class DevAI:
     def insecure_tls(self, path: str | Path = ".", **kwargs: Any) -> InsecureTLSAnalyzer:
         """Detect disabled TLS certificate verification."""
         return InsecureTLSAnalyzer(str(path), **kwargs)
+
+    def xxe(self, path: str | Path = ".", **kwargs: Any) -> XXEAnalyzer:
+        """Detect XML External Entity (XXE) vulnerabilities in XML parsing."""
+        return XXEAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""
