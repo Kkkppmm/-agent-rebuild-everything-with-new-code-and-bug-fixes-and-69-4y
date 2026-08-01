@@ -22,6 +22,7 @@ from devai.debug_artifacts import DebugArtifactDetector
 from devai.magic_numbers import MagicNumberDetector
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.insecure_tls import InsecureTLSAnalyzer
+from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
@@ -371,6 +372,10 @@ class DevAI:
     def cors_misconfig(self, path: str | Path = ".", **kwargs: Any) -> CORSMisconfigAnalyzer:
         """Detect permissive CORS configuration in web applications."""
         return CORSMisconfigAnalyzer(str(path), **kwargs)
+
+    def jwt_security(self, path: str | Path = ".", **kwargs: Any) -> JWTSecurityAnalyzer:
+        """Detect insecure JWT handling (disabled verification, algorithm none, hardcoded secrets)."""
+        return JWTSecurityAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""

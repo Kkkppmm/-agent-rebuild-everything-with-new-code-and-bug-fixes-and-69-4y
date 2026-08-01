@@ -111,4 +111,5 @@ class TestDevAI:
         assert ai.ssrf(str(tmp_path)).health_score() >= 0
         assert ai.insecure_tls(str(tmp_path)).health_score() >= 0
         assert ai.cors_misconfig(str(tmp_path)).health_score() >= 0
+        assert ai.jwt_security(str(tmp_path)).health_score() >= 0
         assert ai.security_scan(str(tmp_path)).health_score() == 100.0

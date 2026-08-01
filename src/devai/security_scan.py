@@ -11,6 +11,7 @@ from devai.command_injection import CommandInjectionAnalyzer
 from devai.cors_misconfig import CORSMisconfigAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.insecure_tls import InsecureTLSAnalyzer
+from devai.jwt_security import JWTSecurityAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
@@ -40,6 +41,7 @@ CHECK_NAMES = (
     "xxe",
     "insecure_tls",
     "cors_misconfig",
+    "jwt_security",
 )
 
 
@@ -134,8 +136,8 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
     weak crypto usage, log injection risks, SSRF risks, unsafe deserialization,
-    open redirect, XSS, XXE, insecure TLS, and CORS misconfiguration
-    checks into one report.
+    open redirect, XSS, XXE, insecure TLS, CORS misconfiguration, and JWT
+    security checks into one report.
   """
 
     def __init__(
@@ -168,6 +170,7 @@ class SecurityScanner:
         self._xxe: XXEAnalyzer | None = None
         self._insecure_tls: InsecureTLSAnalyzer | None = None
         self._cors_misconfig: CORSMisconfigAnalyzer | None = None
+        self._jwt_security: JWTSecurityAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -246,6 +249,11 @@ class SecurityScanner:
             self._cors_misconfig = CORSMisconfigAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._cors_misconfig
 
+    def _jwt_security_analyzer(self) -> JWTSecurityAnalyzer:
+        if self._jwt_security is None:
+            self._jwt_security = JWTSecurityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._jwt_security
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -284,6 +292,8 @@ class SecurityScanner:
             recs.append("Enable TLS certificate verification (verify=True) for all outbound HTTP requests.")
         if by_name.get("cors_misconfig", SecurityScanCategory("cors_misconfig", 100, 0, "")).findings:
             recs.append("Restrict CORS origins to trusted domains instead of using wildcard *.")
+        if by_name.get("jwt_security", SecurityScanCategory("jwt_security", 100, 0, "")).findings:
+            recs.append("Always verify JWT signatures, reject algorithm 'none', and store signing keys in secrets managers.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -474,6 +484,18 @@ class SecurityScanner:
                 )
             )
 
+        if "jwt_security" in self.checks:
+            analyzer = self._jwt_security_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="jwt_security",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -537,6 +559,8 @@ class SecurityScanner:
             lines.extend(["## Insecure TLS", self._insecure_tls_analyzer().to_context(limit=limit), ""])
         if "cors_misconfig" in self.checks:
             lines.extend(["## CORS misconfiguration", self._cors_misconfig_analyzer().to_context(limit=limit), ""])
+        if "jwt_security" in self.checks:
+            lines.extend(["## JWT security", self._jwt_security_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -613,3 +637,8 @@ class SecurityScanner:
     def cors_misconfig(self) -> CORSMisconfigAnalyzer:
         """Underlying CORS misconfiguration analyzer."""
         return self._cors_misconfig_analyzer()
+
+    @property
+    def jwt_security(self) -> JWTSecurityAnalyzer:
+        """Underlying JWT security analyzer."""
+        return self._jwt_security_analyzer()

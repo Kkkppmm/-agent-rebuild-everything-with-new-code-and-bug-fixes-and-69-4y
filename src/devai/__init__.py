@@ -80,6 +80,7 @@ from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, Dangero
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
 from devai.insecure_tls import InsecureTLSAnalyzer, InsecureTLSFinding, InsecureTLSStats
+from devai.jwt_security import JWTSecurityAnalyzer, JWTSecurityFinding, JWTSecurityStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
@@ -107,7 +108,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.7.0"
+__version__ = "5.8.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -278,6 +279,9 @@ __all__ = [
     "InsecureTLSAnalyzer",
     "InsecureTLSFinding",
     "InsecureTLSStats",
+    "JWTSecurityAnalyzer",
+    "JWTSecurityFinding",
+    "JWTSecurityStats",
     "LogInjectionAnalyzer",
     "LogInjectionFinding",
     "LogInjectionStats",
