@@ -29,6 +29,7 @@ from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
+from devai.xxe import XXEAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -354,8 +355,12 @@ class DevAI:
         """Detect open redirect vulnerabilities in web handlers."""
         return OpenRedirectAnalyzer(str(path), **kwargs)
 
+    def xxe(self, path: str | Path = ".", **kwargs: Any) -> XXEAnalyzer:
+        """Detect XML External Entity (XXE) vulnerabilities in XML parsers."""
+        return XXEAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (11 checks)."""
+        """Run unified static security analysis (12 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod
