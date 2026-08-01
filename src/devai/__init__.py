@@ -82,7 +82,13 @@ from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, Reso
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
+from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
+from devai.unsafe_deserialization import (
+    UnsafeDeserializationAnalyzer,
+    UnsafeDeserializationFinding,
+    UnsafeDeserializationStats,
+)
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
     CodeIssue,
@@ -93,7 +99,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.3.0"
+__version__ = "5.4.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -210,6 +216,9 @@ __all__ = [
     "ModuleSurface",
     "NotebookCell",
     "NotebookReader",
+    "OpenRedirectAnalyzer",
+    "OpenRedirectFinding",
+    "OpenRedirectStats",
     "PatchResult",
     "PathTraversalAnalyzer",
     "PathTraversalFinding",
@@ -268,6 +277,9 @@ __all__ = [
     "TypingCoverage",
     "TypingGap",
     "TypingStats",
+    "UnsafeDeserializationAnalyzer",
+    "UnsafeDeserializationFinding",
+    "UnsafeDeserializationStats",
     "TraceEvent",
     "WeakCryptoAnalyzer",
     "WeakCryptoFinding",
