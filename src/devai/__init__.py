@@ -89,6 +89,7 @@ from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthRep
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.insecure_tls import InsecureTLSAnalyzer, InsecureTLSFinding, InsecureTLSStats
 from devai.jwt_security import JWTSecurityAnalyzer, JWTSecurityFinding, JWTSecurityStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -104,7 +105,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.6.0"
+__version__ = "5.7.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -241,6 +242,9 @@ __all__ = [
     "apply_schedule_config",
     "load_schedule_config",
     "schedule_from_config",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "PromptBuilder",
     "ProgramResult",
     "ProgramStepPlan",

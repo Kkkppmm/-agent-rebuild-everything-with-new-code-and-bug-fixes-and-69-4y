@@ -27,6 +27,7 @@ from devai.secrets import SecretsScanner
 from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.redos import ReDoSAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -341,6 +342,10 @@ class DevAI:
     def ssrf(self, path: str | Path = ".", **kwargs: Any) -> SSRFAnalyzer:
         """Detect server-side request forgery risks in outbound HTTP calls."""
         return SSRFAnalyzer(str(path), **kwargs)
+
+    def redos(self, path: str | Path = ".", **kwargs: Any) -> ReDoSAnalyzer:
+        """Detect regex patterns vulnerable to catastrophic backtracking (ReDoS)."""
+        return ReDoSAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""

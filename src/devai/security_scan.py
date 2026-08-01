@@ -19,6 +19,7 @@ from devai.insecure_tls import InsecureTLSAnalyzer
 from devai.jwt_security import JWTSecurityAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+from devai.redos import ReDoSAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 
 CHECK_NAMES = (
@@ -34,6 +35,7 @@ CHECK_NAMES = (
     "unsafe_deserialization",
     "jwt_security",
     "insecure_tls",
+    "redos",
 )
 
 
@@ -128,7 +130,8 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
     weak crypto usage, log injection risks, SSRF risks, unsafe deserialization,
-    insecure JWT handling, and disabled TLS verification into one report.
+    insecure JWT handling, disabled TLS verification, and ReDoS-vulnerable
+    regex patterns into one report.
     """
 
     def __init__(
@@ -158,6 +161,7 @@ class SecurityScanner:
         self._unsafe_deser: UnsafeDeserializationAnalyzer | None = None
         self._jwt: JWTSecurityAnalyzer | None = None
         self._insecure_tls: InsecureTLSAnalyzer | None = None
+        self._redos: ReDoSAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -219,6 +223,11 @@ class SecurityScanner:
             self._insecure_tls = InsecureTLSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._insecure_tls
 
+    def _redos_analyzer(self) -> ReDoSAnalyzer:
+        if self._redos is None:
+            self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redos
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -251,6 +260,8 @@ class SecurityScanner:
             recs.append("Always verify JWT signatures, restrict algorithms, and never accept alg=none tokens.")
         if by_name.get("insecure_tls", SecurityScanCategory("insecure_tls", 100, 0, "")).findings:
             recs.append("Enable TLS certificate verification and avoid ssl.CERT_NONE or verify=False.")
+        if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
+            recs.append("Simplify regex patterns — avoid nested quantifiers and quantified dot-star groups.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -405,6 +416,18 @@ class SecurityScanner:
                 )
             )
 
+        if "redos" in self.checks:
+            analyzer = self._redos_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="redos",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -460,6 +483,8 @@ class SecurityScanner:
             lines.extend(["## JWT security", self._jwt_analyzer().to_context(limit=limit), ""])
         if "insecure_tls" in self.checks:
             lines.extend(["## Insecure TLS", self._insecure_tls_analyzer().to_context(limit=limit), ""])
+        if "redos" in self.checks:
+            lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -521,3 +546,8 @@ class SecurityScanner:
     def insecure_tls(self) -> InsecureTLSAnalyzer:
         """Underlying insecure-TLS analyzer."""
         return self._insecure_tls_analyzer()
+
+    @property
+    def redos(self) -> ReDoSAnalyzer:
+        """Underlying ReDoS analyzer."""
+        return self._redos_analyzer()
