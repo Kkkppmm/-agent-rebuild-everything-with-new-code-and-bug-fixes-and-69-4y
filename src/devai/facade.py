@@ -20,6 +20,8 @@ from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.debug_artifacts import DebugArtifactDetector
 from devai.magic_numbers import MagicNumberDetector
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.insecure_tls import InsecureTLSAnalyzer
+from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.resource_leaks import ResourceLeakAnalyzer
@@ -27,6 +29,7 @@ from devai.secrets import SecretsScanner
 from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -341,6 +344,18 @@ class DevAI:
     def ssrf(self, path: str | Path = ".", **kwargs: Any) -> SSRFAnalyzer:
         """Detect server-side request forgery risks in outbound HTTP calls."""
         return SSRFAnalyzer(str(path), **kwargs)
+
+    def jwt_security(self, path: str | Path = ".", **kwargs: Any) -> JWTSecurityAnalyzer:
+        """Detect insecure JWT handling (disabled verification, algorithm none, hardcoded secrets)."""
+        return JWTSecurityAnalyzer(str(path), **kwargs)
+
+    def unsafe_deserialization(self, path: str | Path = ".", **kwargs: Any) -> UnsafeDeserializationAnalyzer:
+        """Detect unsafe deserialization (pickle, yaml.load, marshal) that can lead to RCE."""
+        return UnsafeDeserializationAnalyzer(str(path), **kwargs)
+
+    def insecure_tls(self, path: str | Path = ".", **kwargs: Any) -> InsecureTLSAnalyzer:
+        """Detect disabled TLS certificate verification in HTTP/SSL clients."""
+        return InsecureTLSAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""
