@@ -291,6 +291,7 @@ __all__ = [
     "TokenBudget",
     "TypingCoverage",
     "TypingGap",
+    "TypingStats",
     "UnsafeDeserializationAnalyzer",
     "UnsafeDeserializationFinding",
     "UnsafeDeserializationStats",
