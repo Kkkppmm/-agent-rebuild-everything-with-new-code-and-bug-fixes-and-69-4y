@@ -26,14 +26,17 @@ from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.secrets import SecretsScanner
 from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
+from devai.open_redirect import OpenRedirectAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xxe import XXEAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.duplicate_code import DuplicateCodeDetector
 from devai.tech_debt import TechDebtScanner
 from devai.test_mapper import TestMapper
-from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.project_health import ProjectHealth
 from devai.program import DevProgram, ProgramResult
 from devai.project_detect import ProjectDetector, ProjectProfile
@@ -341,6 +344,20 @@ class DevAI:
     def ssrf(self, path: str | Path = ".", **kwargs: Any) -> SSRFAnalyzer:
         """Detect server-side request forgery risks in outbound HTTP calls."""
         return SSRFAnalyzer(str(path), **kwargs)
+
+    def xxe(self, path: str | Path = ".", **kwargs: Any) -> XXEAnalyzer:
+        """Detect XML External Entity (XXE) risks in XML parsers."""
+        return XXEAnalyzer(str(path), **kwargs)
+
+    def unsafe_deserialization(
+        self, path: str | Path = ".", **kwargs: Any
+    ) -> UnsafeDeserializationAnalyzer:
+        """Detect unsafe pickle, yaml, marshal, and dill deserialization."""
+        return UnsafeDeserializationAnalyzer(str(path), **kwargs)
+
+    def open_redirect(self, path: str | Path = ".", **kwargs: Any) -> OpenRedirectAnalyzer:
+        """Detect open redirect vulnerabilities in web handlers."""
+        return OpenRedirectAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""

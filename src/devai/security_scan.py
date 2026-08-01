@@ -15,8 +15,11 @@ from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
+from devai.open_redirect import OpenRedirectAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xxe import XXEAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -28,6 +31,9 @@ CHECK_NAMES = (
     "weak_crypto",
     "log_injection",
     "ssrf",
+    "xxe",
+    "unsafe_deserialization",
+    "open_redirect",
 )
 
 
@@ -121,7 +127,8 @@ class SecurityScanner:
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
-    weak crypto usage, log injection risks, and SSRF risks into one report.
+    weak crypto usage, log injection risks, SSRF risks, XXE, unsafe
+    deserialization, and open redirect risks into one report.
   """
 
     def __init__(
@@ -148,6 +155,9 @@ class SecurityScanner:
         self._weak_crypto: WeakCryptoAnalyzer | None = None
         self._log_injection: LogInjectionAnalyzer | None = None
         self._ssrf: SSRFAnalyzer | None = None
+        self._xxe: XXEAnalyzer | None = None
+        self._unsafe_deserialization: UnsafeDeserializationAnalyzer | None = None
+        self._open_redirect: OpenRedirectAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -194,6 +204,23 @@ class SecurityScanner:
             self._ssrf = SSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._ssrf
 
+    def _xxe_analyzer(self) -> XXEAnalyzer:
+        if self._xxe is None:
+            self._xxe = XXEAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xxe
+
+    def _unsafe_deserialization_analyzer(self) -> UnsafeDeserializationAnalyzer:
+        if self._unsafe_deserialization is None:
+            self._unsafe_deserialization = UnsafeDeserializationAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._unsafe_deserialization
+
+    def _open_redirect_analyzer(self) -> OpenRedirectAnalyzer:
+        if self._open_redirect is None:
+            self._open_redirect = OpenRedirectAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._open_redirect
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -220,6 +247,12 @@ class SecurityScanner:
             recs.append("Use structured logging with extra={} instead of interpolating user data into messages.")
         if by_name.get("ssrf", SecurityScanCategory("ssrf", 100, 0, "")).findings:
             recs.append("Validate outbound URLs, block internal/private IP ranges, and use an allowlist of hosts.")
+        if by_name.get("xxe", SecurityScanCategory("xxe", 100, 0, "")).findings:
+            recs.append("Use defusedxml or disable external entity resolution in XML parsers.")
+        if by_name.get("unsafe_deserialization", SecurityScanCategory("unsafe_deserialization", 100, 0, "")).findings:
+            recs.append("Avoid pickle/yaml.load on untrusted data; use JSON or yaml.safe_load instead.")
+        if by_name.get("open_redirect", SecurityScanCategory("open_redirect", 100, 0, "")).findings:
+            recs.append("Validate redirect targets against an allowlist of relative paths or trusted domains.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -338,6 +371,42 @@ class SecurityScanner:
                 )
             )
 
+        if "xxe" in self.checks:
+            analyzer = self._xxe_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xxe",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "unsafe_deserialization" in self.checks:
+            analyzer = self._unsafe_deserialization_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="unsafe_deserialization",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "open_redirect" in self.checks:
+            analyzer = self._open_redirect_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="open_redirect",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -387,6 +456,18 @@ class SecurityScanner:
             lines.extend(["## Log injection", self._log_injection_analyzer().to_context(limit=limit), ""])
         if "ssrf" in self.checks:
             lines.extend(["## SSRF", self._ssrf_analyzer().to_context(limit=limit), ""])
+        if "xxe" in self.checks:
+            lines.extend(["## XXE", self._xxe_analyzer().to_context(limit=limit), ""])
+        if "unsafe_deserialization" in self.checks:
+            lines.extend(
+                [
+                    "## Unsafe deserialization",
+                    self._unsafe_deserialization_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "open_redirect" in self.checks:
+            lines.extend(["## Open redirect", self._open_redirect_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -433,3 +514,18 @@ class SecurityScanner:
     def ssrf(self) -> SSRFAnalyzer:
         """Underlying SSRF analyzer."""
         return self._ssrf_analyzer()
+
+    @property
+    def xxe(self) -> XXEAnalyzer:
+        """Underlying XXE analyzer."""
+        return self._xxe_analyzer()
+
+    @property
+    def unsafe_deserialization(self) -> UnsafeDeserializationAnalyzer:
+        """Underlying unsafe-deserialization analyzer."""
+        return self._unsafe_deserialization_analyzer()
+
+    @property
+    def open_redirect(self) -> OpenRedirectAnalyzer:
+        """Underlying open-redirect analyzer."""
+        return self._open_redirect_analyzer()

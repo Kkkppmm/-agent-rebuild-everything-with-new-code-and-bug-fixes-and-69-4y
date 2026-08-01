@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "5.5.0"
+        assert devai.__version__ == "5.6.0"
 
     def test_exports(self):
         expected = {
@@ -129,6 +129,9 @@ class TestPublicAPI:
             "NamingStats",
             "NamingViolation",
             "ModuleSurface",
+            "OpenRedirectAnalyzer",
+            "OpenRedirectFinding",
+            "OpenRedirectStats",
             "NotebookCell",
             "NotebookReader",
             "PatchResult",
@@ -180,6 +183,9 @@ class TestPublicAPI:
             "TechDebtStats",
             "TestMapReport",
             "TestMapper",
+            "UnsafeDeserializationAnalyzer",
+            "UnsafeDeserializationFinding",
+            "UnsafeDeserializationStats",
             "TypingCoverage",
             "TypingGap",
             "TypingStats",
@@ -187,6 +193,9 @@ class TestPublicAPI:
             "WeakCryptoAnalyzer",
             "WeakCryptoFinding",
             "WeakCryptoStats",
+            "XXEAnalyzer",
+            "XXEFinding",
+            "XXEStats",
             "WorkflowResult",
             "WorkflowStepResult",
             "apply_unified_diff",
