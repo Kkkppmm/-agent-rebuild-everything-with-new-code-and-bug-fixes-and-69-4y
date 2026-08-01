@@ -99,7 +99,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PathTraversalAnalyzer** — Detect unsafe file path construction from user-controlled input
 - **CommandInjectionAnalyzer** — Detect dynamic shell command construction in os/subprocess calls
 - **SSRFAnalyzer** — Detect server-side request forgery risks in outbound HTTP client calls
-- **SecurityScanner** — Unified static security scan combining secrets, injections, dangerous calls, insecure random, weak crypto, log injection, SSRF, and path traversal checks
+- **UnsafeDeserializationAnalyzer** — Detect unsafe pickle, yaml, and marshal deserialization of untrusted data
+- **OpenRedirectAnalyzer** — Detect open redirect vulnerabilities in Flask, Django, and FastAPI handlers
+- **SecurityScanner** — Unified static security scan combining 13 checks (secrets, injections, crypto, SSRF, deserialization, redirects, and more)
 
 ## Installation
 

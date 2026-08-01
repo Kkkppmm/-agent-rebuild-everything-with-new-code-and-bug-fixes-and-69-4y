@@ -537,6 +537,19 @@ def cmd_weak_crypto(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_unsafe_deserialization(args: argparse.Namespace) -> None:
+    from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+
+    analyzer = UnsafeDeserializationAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_log_injection(args: argparse.Namespace) -> None:
     from devai.log_injection import LogInjectionAnalyzer
 
@@ -567,6 +580,19 @@ def cmd_ssrf(args: argparse.Namespace) -> None:
     from devai.ssrf import SSRFAnalyzer
 
     analyzer = SSRFAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_open_redirect(args: argparse.Namespace) -> None:
+    from devai.open_redirect import OpenRedirectAnalyzer
+
+    analyzer = OpenRedirectAnalyzer(args.directory)
     if args.context:
         print(analyzer.to_context())
         return
@@ -1549,6 +1575,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_weak_crypto)
 
+    p = sub.add_parser("unsafe-deserialization", help="Detect unsafe pickle/yaml deserialization")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_unsafe_deserialization)
+
     p = sub.add_parser("log-injection", help="Detect log injection risks")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
@@ -1566,6 +1598,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_ssrf)
+
+    p = sub.add_parser("open-redirect", help="Detect open redirect vulnerabilities")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_open_redirect)
 
     p = sub.add_parser("security-scan", help="Run unified static security analysis")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")
