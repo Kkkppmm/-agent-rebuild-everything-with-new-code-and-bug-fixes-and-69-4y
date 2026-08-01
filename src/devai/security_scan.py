@@ -10,15 +10,19 @@ from typing import Any
 from devai.command_injection import CommandInjectionAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.insecure_tls import InsecureTLSAnalyzer
+from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
+from devai.redos import ReDoSAnalyzer
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xxe import XXEAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -32,6 +36,10 @@ CHECK_NAMES = (
     "ssrf",
     "unsafe_deserialization",
     "open_redirect",
+    "xxe",
+    "redos",
+    "jwt_security",
+    "insecure_tls",
 )
 
 
@@ -125,7 +133,8 @@ class SecurityScanner:
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     insecure random usage, path-traversal risks, command injection, weak crypto,
-    log injection, SSRF, unsafe deserialization, and open redirects into one report.
+    log injection, SSRF, unsafe deserialization, open redirects, XXE, ReDoS,
+    JWT security, and insecure TLS into one report.
   """
 
     def __init__(
@@ -154,6 +163,10 @@ class SecurityScanner:
         self._ssrf: SSRFAnalyzer | None = None
         self._deserialization: UnsafeDeserializationAnalyzer | None = None
         self._redirect: OpenRedirectAnalyzer | None = None
+        self._xxe: XXEAnalyzer | None = None
+        self._redos: ReDoSAnalyzer | None = None
+        self._jwt: JWTSecurityAnalyzer | None = None
+        self._tls: InsecureTLSAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -212,6 +225,26 @@ class SecurityScanner:
             self._redirect = OpenRedirectAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._redirect
 
+    def _xxe_analyzer(self) -> XXEAnalyzer:
+        if self._xxe is None:
+            self._xxe = XXEAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xxe
+
+    def _redos_analyzer(self) -> ReDoSAnalyzer:
+        if self._redos is None:
+            self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redos
+
+    def _jwt_analyzer(self) -> JWTSecurityAnalyzer:
+        if self._jwt is None:
+            self._jwt = JWTSecurityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._jwt
+
+    def _tls_analyzer(self) -> InsecureTLSAnalyzer:
+        if self._tls is None:
+            self._tls = InsecureTLSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._tls
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -242,6 +275,14 @@ class SecurityScanner:
             recs.append("Never deserialize untrusted data with pickle or yaml.load — use safe formats and loaders.")
         if by_name.get("open_redirect", SecurityScanCategory("open_redirect", 100, 0, "")).findings:
             recs.append("Validate redirect destinations against a same-origin or explicit allowlist.")
+        if by_name.get("xxe", SecurityScanCategory("xxe", 100, 0, "")).findings:
+            recs.append("Use defusedxml or disable external entity resolution in XML parsers.")
+        if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
+            recs.append("Simplify regex patterns to avoid nested quantifiers and catastrophic backtracking.")
+        if by_name.get("jwt_security", SecurityScanCategory("jwt_security", 100, 0, "")).findings:
+            recs.append("Always verify JWT signatures and reject the 'none' algorithm.")
+        if by_name.get("insecure_tls", SecurityScanCategory("insecure_tls", 100, 0, "")).findings:
+            recs.append("Enable TLS certificate verification and use TLS 1.2+ in all HTTP clients.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -384,6 +425,54 @@ class SecurityScanner:
                 )
             )
 
+        if "xxe" in self.checks:
+            analyzer = self._xxe_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xxe",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "redos" in self.checks:
+            analyzer = self._redos_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="redos",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "jwt_security" in self.checks:
+            analyzer = self._jwt_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="jwt_security",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_tls" in self.checks:
+            analyzer = self._tls_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_tls",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -439,6 +528,14 @@ class SecurityScanner:
             )
         if "open_redirect" in self.checks:
             lines.extend(["## Open redirect", self._redirect_analyzer().to_context(limit=limit), ""])
+        if "xxe" in self.checks:
+            lines.extend(["## XXE", self._xxe_analyzer().to_context(limit=limit), ""])
+        if "redos" in self.checks:
+            lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
+        if "jwt_security" in self.checks:
+            lines.extend(["## JWT security", self._jwt_analyzer().to_context(limit=limit), ""])
+        if "insecure_tls" in self.checks:
+            lines.extend(["## Insecure TLS", self._tls_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -495,3 +592,23 @@ class SecurityScanner:
     def open_redirect(self) -> OpenRedirectAnalyzer:
         """Underlying open-redirect analyzer."""
         return self._redirect_analyzer()
+
+    @property
+    def xxe(self) -> XXEAnalyzer:
+        """Underlying XXE analyzer."""
+        return self._xxe_analyzer()
+
+    @property
+    def redos(self) -> ReDoSAnalyzer:
+        """Underlying ReDoS analyzer."""
+        return self._redos_analyzer()
+
+    @property
+    def jwt_security(self) -> JWTSecurityAnalyzer:
+        """Underlying JWT security analyzer."""
+        return self._jwt_analyzer()
+
+    @property
+    def insecure_tls(self) -> InsecureTLSAnalyzer:
+        """Underlying insecure-TLS analyzer."""
+        return self._tls_analyzer()

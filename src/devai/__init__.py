@@ -75,11 +75,13 @@ from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, Dangero
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
+from devai.insecure_tls import InsecureTLSAnalyzer, InsecureTLSFinding, InsecureTLSStats
+from devai.jwt_security import JWTSecurityAnalyzer, JWTSecurityFinding, JWTSecurityStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
 from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
 from devai.weak_crypto import WeakCryptoAnalyzer, WeakCryptoFinding, WeakCryptoStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
-from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
@@ -89,6 +91,8 @@ from devai.unsafe_deserialization import (
     UnsafeDeserializationFinding,
     UnsafeDeserializationStats,
 )
+from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
+from devai.xxe import XXEAnalyzer, XXEFinding, XXEStats
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.schemas import (
     CodeIssue,
@@ -99,7 +103,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.4.0"
+__version__ = "5.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -236,6 +240,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "ResourceLeakAnalyzer",
     "ResourceLeakFinding",
     "ResourceLeakStats",
@@ -262,11 +269,17 @@ __all__ = [
     "SQLInjectionStats",
     "SecurityAuditResult",
     "SecurityFinding",
+    "JWTSecurityAnalyzer",
+    "JWTSecurityFinding",
+    "JWTSecurityStats",
     "ImportEdge",
     "ImportGraph",
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
+    "InsecureTLSAnalyzer",
+    "InsecureTLSFinding",
+    "InsecureTLSStats",
     "SymbolInfo",
     "TechDebtItem",
     "TechDebtScanner",
@@ -284,6 +297,9 @@ __all__ = [
     "WeakCryptoAnalyzer",
     "WeakCryptoFinding",
     "WeakCryptoStats",
+    "XXEAnalyzer",
+    "XXEFinding",
+    "XXEStats",
     "WatchEvent",
     "WatchResult",
     "WorkflowResult",

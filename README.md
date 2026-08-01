@@ -96,8 +96,12 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **InsecureRandomAnalyzer** — Detect use of `random` for tokens, passwords, and other security-sensitive values
 - **PathTraversalAnalyzer** — Detect unsafe file path construction from user-controlled input
 - **UnsafeDeserializationAnalyzer** — Detect unsafe pickle, yaml, and marshal deserialization of untrusted data
+- **XXEAnalyzer** — Detect XML External Entity vulnerability patterns in XML parsers
+- **ReDoSAnalyzer** — Detect regex patterns vulnerable to catastrophic backtracking
+- **JWTSecurityAnalyzer** — Detect insecure JWT handling (disabled verification, none algorithm)
+- **InsecureTLSAnalyzer** — Detect disabled TLS certificate verification in HTTP clients
 - **OpenRedirectAnalyzer** — Detect open redirect vulnerabilities in Flask, Django, and FastAPI handlers
-- **SecurityScanner** — Unified static security scan combining 11 checks (secrets, injections, crypto, SSRF, deserialization, redirects, and more)
+- **SecurityScanner** — Unified static security scan combining 15 checks (secrets, injections, crypto, SSRF, deserialization, redirects, XXE, ReDoS, JWT, TLS, and more)
 
 ## Installation
 
