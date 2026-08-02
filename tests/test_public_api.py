@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "5.5.0"
+        assert devai.__version__ == "5.6.0"
 
     def test_exports(self):
         expected = {
@@ -103,6 +103,9 @@ class TestPublicAPI:
             "FunctionMetrics",
             "GitChangelog",
             "GitContext",
+            "HardcodedConfigAnalyzer",
+            "HardcodedConfigFinding",
+            "HardcodedConfigStats",
             "HealthCategory",
             "HotspotStats",
             "HealthChecker",
@@ -131,6 +134,9 @@ class TestPublicAPI:
             "ModuleSurface",
             "NotebookCell",
             "NotebookReader",
+            "OpenRedirectAnalyzer",
+            "OpenRedirectFinding",
+            "OpenRedirectStats",
             "PatchResult",
             "PathTraversalAnalyzer",
             "PathTraversalFinding",
@@ -148,6 +154,9 @@ class TestPublicAPI:
             "ProjectDetector",
             "ProjectProfile",
             "PromptRegistry",
+            "ReDoSAnalyzer",
+            "ReDoSFinding",
+            "ReDoSStats",
             "ResourceLeakAnalyzer",
             "ResourceLeakFinding",
             "ResourceLeakStats",
@@ -183,6 +192,9 @@ class TestPublicAPI:
             "TypingCoverage",
             "TypingGap",
             "TypingStats",
+            "UnsafeDeserializationAnalyzer",
+            "UnsafeDeserializationFinding",
+            "UnsafeDeserializationStats",
             "TraceEvent",
             "WeakCryptoAnalyzer",
             "WeakCryptoFinding",

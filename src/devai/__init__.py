@@ -77,12 +77,20 @@ from devai.command_injection import (
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
+from devai.hardcoded_config import HardcodedConfigAnalyzer, HardcodedConfigFinding, HardcodedConfigStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
+from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
+from devai.unsafe_deserialization import (
+    UnsafeDeserializationAnalyzer,
+    UnsafeDeserializationFinding,
+    UnsafeDeserializationStats,
+)
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
@@ -97,7 +105,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.5.0"
+__version__ = "5.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -112,6 +120,9 @@ __all__ = [
     "BenchmarkRunner",
     "BenchmarkSample",
     "CONFIG_FILENAMES",
+    "HardcodedConfigAnalyzer",
+    "HardcodedConfigFinding",
+    "HardcodedConfigStats",
     "HealthCategory",
     "HotspotStats",
     "HealthChecker",
@@ -209,6 +220,9 @@ __all__ = [
     "NamingStats",
     "NamingViolation",
     "ModuleSurface",
+    "OpenRedirectAnalyzer",
+    "OpenRedirectFinding",
+    "OpenRedirectStats",
     "NotebookCell",
     "NotebookReader",
     "PatchResult",
@@ -228,6 +242,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "ResourceLeakAnalyzer",
     "ResourceLeakFinding",
     "ResourceLeakStats",
@@ -272,6 +289,9 @@ __all__ = [
     "TestMapReport",
     "TestMapper",
     "TokenBudget",
+    "UnsafeDeserializationAnalyzer",
+    "UnsafeDeserializationFinding",
+    "UnsafeDeserializationStats",
     "TypingCoverage",
     "TypingGap",
     "TypingStats",

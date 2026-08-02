@@ -9,13 +9,17 @@ from typing import Any
 
 from devai.command_injection import CommandInjectionAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
+from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
+from devai.open_redirect import OpenRedirectAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
+from devai.redos import ReDoSAnalyzer
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 
 CHECK_NAMES = (
@@ -28,6 +32,10 @@ CHECK_NAMES = (
     "weak_crypto",
     "log_injection",
     "ssrf",
+    "unsafe_deserialization",
+    "open_redirect",
+    "hardcoded_config",
+    "redos",
 )
 
 
@@ -121,7 +129,8 @@ class SecurityScanner:
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
-    weak crypto usage, log injection risks, and SSRF risks into one report.
+    weak crypto usage, log injection risks, SSRF risks, unsafe deserialization,
+    open redirects, hardcoded configuration, and ReDoS patterns into one report.
   """
 
     def __init__(
@@ -148,6 +157,10 @@ class SecurityScanner:
         self._weak_crypto: WeakCryptoAnalyzer | None = None
         self._log_injection: LogInjectionAnalyzer | None = None
         self._ssrf: SSRFAnalyzer | None = None
+        self._unsafe_deserialization: UnsafeDeserializationAnalyzer | None = None
+        self._open_redirect: OpenRedirectAnalyzer | None = None
+        self._hardcoded_config: HardcodedConfigAnalyzer | None = None
+        self._redos: ReDoSAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -194,6 +207,28 @@ class SecurityScanner:
             self._ssrf = SSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._ssrf
 
+    def _unsafe_deserialization_analyzer(self) -> UnsafeDeserializationAnalyzer:
+        if self._unsafe_deserialization is None:
+            self._unsafe_deserialization = UnsafeDeserializationAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._unsafe_deserialization
+
+    def _open_redirect_analyzer(self) -> OpenRedirectAnalyzer:
+        if self._open_redirect is None:
+            self._open_redirect = OpenRedirectAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._open_redirect
+
+    def _hardcoded_config_analyzer(self) -> HardcodedConfigAnalyzer:
+        if self._hardcoded_config is None:
+            self._hardcoded_config = HardcodedConfigAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._hardcoded_config
+
+    def _redos_analyzer(self) -> ReDoSAnalyzer:
+        if self._redos is None:
+            self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redos
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -220,6 +255,14 @@ class SecurityScanner:
             recs.append("Use structured logging with extra={} instead of interpolating user data into messages.")
         if by_name.get("ssrf", SecurityScanCategory("ssrf", 100, 0, "")).findings:
             recs.append("Validate outbound URLs, block internal/private IP ranges, and use an allowlist of hosts.")
+        if by_name.get("unsafe_deserialization", SecurityScanCategory("unsafe_deserialization", 100, 0, "")).findings:
+            recs.append("Never deserialize untrusted data with pickle, yaml.load, or marshal — use safe alternatives.")
+        if by_name.get("open_redirect", SecurityScanCategory("open_redirect", 100, 0, "")).findings:
+            recs.append("Validate redirect targets against an allowlist of trusted paths or domains.")
+        if by_name.get("hardcoded_config", SecurityScanCategory("hardcoded_config", 100, 0, "")).findings:
+            recs.append("Move URLs, IPs, and database connection strings to environment variables or a config service.")
+        if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
+            recs.append("Avoid nested quantifiers in regex and never compile user-supplied patterns without validation.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -338,6 +381,54 @@ class SecurityScanner:
                 )
             )
 
+        if "unsafe_deserialization" in self.checks:
+            analyzer = self._unsafe_deserialization_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="unsafe_deserialization",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "open_redirect" in self.checks:
+            analyzer = self._open_redirect_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="open_redirect",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "hardcoded_config" in self.checks:
+            analyzer = self._hardcoded_config_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="hardcoded_config",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "redos" in self.checks:
+            analyzer = self._redos_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="redos",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -387,6 +478,16 @@ class SecurityScanner:
             lines.extend(["## Log injection", self._log_injection_analyzer().to_context(limit=limit), ""])
         if "ssrf" in self.checks:
             lines.extend(["## SSRF", self._ssrf_analyzer().to_context(limit=limit), ""])
+        if "unsafe_deserialization" in self.checks:
+            lines.extend(
+                ["## Unsafe deserialization", self._unsafe_deserialization_analyzer().to_context(limit=limit), ""]
+            )
+        if "open_redirect" in self.checks:
+            lines.extend(["## Open redirect", self._open_redirect_analyzer().to_context(limit=limit), ""])
+        if "hardcoded_config" in self.checks:
+            lines.extend(["## Hardcoded config", self._hardcoded_config_analyzer().to_context(limit=limit), ""])
+        if "redos" in self.checks:
+            lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -433,3 +534,23 @@ class SecurityScanner:
     def ssrf(self) -> SSRFAnalyzer:
         """Underlying SSRF analyzer."""
         return self._ssrf_analyzer()
+
+    @property
+    def unsafe_deserialization(self) -> UnsafeDeserializationAnalyzer:
+        """Underlying unsafe-deserialization analyzer."""
+        return self._unsafe_deserialization_analyzer()
+
+    @property
+    def open_redirect(self) -> OpenRedirectAnalyzer:
+        """Underlying open-redirect analyzer."""
+        return self._open_redirect_analyzer()
+
+    @property
+    def hardcoded_config(self) -> HardcodedConfigAnalyzer:
+        """Underlying hardcoded-config analyzer."""
+        return self._hardcoded_config_analyzer()
+
+    @property
+    def redos(self) -> ReDoSAnalyzer:
+        """Underlying ReDoS analyzer."""
+        return self._redos_analyzer()
