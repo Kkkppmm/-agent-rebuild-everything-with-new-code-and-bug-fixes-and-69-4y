@@ -84,6 +84,7 @@ from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogIn
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
 from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
+from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -105,7 +106,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.6.0"
+__version__ = "5.7.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -219,6 +220,9 @@ __all__ = [
     "ModuleSurface",
     "NotebookCell",
     "NotebookReader",
+    "OpenRedirectAnalyzer",
+    "OpenRedirectFinding",
+    "OpenRedirectStats",
     "PatchResult",
     "PathTraversalAnalyzer",
     "PathTraversalFinding",

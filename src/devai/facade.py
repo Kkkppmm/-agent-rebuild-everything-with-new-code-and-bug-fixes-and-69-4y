@@ -31,6 +31,7 @@ from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.resource_leaks import ResourceLeakAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+from devai.open_redirect import OpenRedirectAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -361,6 +362,10 @@ class DevAI:
     def insecure_tls(self, path: str | Path = ".", **kwargs: Any) -> InsecureTLSAnalyzer:
         """Detect disabled TLS certificate verification."""
         return InsecureTLSAnalyzer(str(path), **kwargs)
+
+    def open_redirect(self, path: str | Path = ".", **kwargs: Any) -> OpenRedirectAnalyzer:
+        """Detect open redirect vulnerabilities in web framework handlers."""
+        return OpenRedirectAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""
