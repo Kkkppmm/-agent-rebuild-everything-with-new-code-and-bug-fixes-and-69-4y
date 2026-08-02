@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "5.8.0"
+        assert devai.__version__ == "5.9.0"
 
     def test_exports(self):
         expected = {

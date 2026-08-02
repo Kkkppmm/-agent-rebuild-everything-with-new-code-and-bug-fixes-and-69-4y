@@ -86,14 +86,27 @@ def _contains_dynamic_value(node: ast.AST) -> tuple[str, str, str] | None:
                     "high",
                     "NoSQL query built with str.format() — use structured query dicts",
                 )
+    if isinstance(node, ast.Dict):
+        for value in node.values:
+            if value is not None:
+                result = _contains_dynamic_value(value)
+                if result:
+                    return result
+    if isinstance(node, ast.List):
+        for elt in node.elts:
+            result = _contains_dynamic_value(elt)
+            if result:
+                return result
     return None
 
 
 def _dict_has_where_operator(node: ast.AST) -> bool:
     if not isinstance(node, ast.Dict):
         return False
-    for key in node.keys:
+    for key, value in zip(node.keys, node.values):
         if isinstance(key, ast.Constant) and str(key.value) in _WHERE_OPERATORS:
+            return True
+        if value is not None and _dict_has_where_operator(value):
             return True
     return False
 
