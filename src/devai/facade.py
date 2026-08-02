@@ -30,6 +30,8 @@ from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.insecure_cookies import InsecureCookieAnalyzer
 from devai.mass_assignment import MassAssignmentAnalyzer
+from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer
+from devai.cors_misconfig import CorsMisconfigAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
@@ -364,8 +366,16 @@ class DevAI:
         """Detect ORM mass-assignment from user-controlled dictionaries."""
         return MassAssignmentAnalyzer(str(path), **kwargs)
 
+    def xss(self, path: str | Path = ".", **kwargs: Any) -> XssVulnerabilityAnalyzer:
+        """Detect cross-site scripting risks in web code."""
+        return XssVulnerabilityAnalyzer(str(path), **kwargs)
+
+    def cors(self, path: str | Path = ".", **kwargs: Any) -> CorsMisconfigAnalyzer:
+        """Detect overly permissive CORS configuration."""
+        return CorsMisconfigAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (13 checks)."""
+        """Run unified static security analysis (15 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod

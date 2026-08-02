@@ -17,6 +17,8 @@ from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.insecure_cookies import InsecureCookieAnalyzer
 from devai.mass_assignment import MassAssignmentAnalyzer
+from devai.cors_misconfig import CorsMisconfigAnalyzer
+from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
@@ -36,6 +38,8 @@ CHECK_NAMES = (
     "open_redirect",
     "insecure_cookies",
     "mass_assignment",
+    "xss",
+    "cors",
 )
 
 
@@ -130,7 +134,7 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     insecure random usage, path-traversal risks, command injection, weak crypto,
     log injection, SSRF, unsafe deserialization, open redirects, insecure cookies,
-    and mass assignment into one report.
+    mass assignment, XSS vulnerabilities, and CORS misconfigurations into one report.
   """
 
     def __init__(
@@ -161,6 +165,8 @@ class SecurityScanner:
         self._redirect: OpenRedirectAnalyzer | None = None
         self._cookies: InsecureCookieAnalyzer | None = None
         self._mass_assignment: MassAssignmentAnalyzer | None = None
+        self._xss: XssVulnerabilityAnalyzer | None = None
+        self._cors: CorsMisconfigAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -229,6 +235,16 @@ class SecurityScanner:
             self._mass_assignment = MassAssignmentAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._mass_assignment
 
+    def _xss_analyzer(self) -> XssVulnerabilityAnalyzer:
+        if self._xss is None:
+            self._xss = XssVulnerabilityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xss
+
+    def _cors_analyzer(self) -> CorsMisconfigAnalyzer:
+        if self._cors is None:
+            self._cors = CorsMisconfigAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._cors
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -263,6 +279,10 @@ class SecurityScanner:
             recs.append("Set secure=True, httponly=True, and samesite on all session cookies.")
         if by_name.get("mass_assignment", SecurityScanCategory("mass_assignment", 100, 0, "")).findings:
             recs.append("Whitelist allowed fields before passing user input to ORM create/update.")
+        if by_name.get("xss", SecurityScanCategory("xss", 100, 0, "")).findings:
+            recs.append("Avoid mark_safe and |safe filters — rely on framework auto-escaping for HTML.")
+        if by_name.get("cors", SecurityScanCategory("cors", 100, 0, "")).findings:
+            recs.append("Restrict CORS origins to trusted domains instead of wildcard (*).")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -429,6 +449,30 @@ class SecurityScanner:
                 )
             )
 
+        if "xss" in self.checks:
+            analyzer = self._xss_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xss",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "cors" in self.checks:
+            analyzer = self._cors_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="cors",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -488,6 +532,10 @@ class SecurityScanner:
             lines.extend(["## Insecure cookies", self._cookie_analyzer().to_context(limit=limit), ""])
         if "mass_assignment" in self.checks:
             lines.extend(["## Mass assignment", self._mass_assignment_analyzer().to_context(limit=limit), ""])
+        if "xss" in self.checks:
+            lines.extend(["## XSS", self._xss_analyzer().to_context(limit=limit), ""])
+        if "cors" in self.checks:
+            lines.extend(["## CORS", self._cors_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -554,3 +602,13 @@ class SecurityScanner:
     def mass_assignment(self) -> MassAssignmentAnalyzer:
         """Underlying mass-assignment analyzer."""
         return self._mass_assignment_analyzer()
+
+    @property
+    def xss(self) -> XssVulnerabilityAnalyzer:
+        """Underlying XSS vulnerability analyzer."""
+        return self._xss_analyzer()
+
+    @property
+    def cors(self) -> CorsMisconfigAnalyzer:
+        """Underlying CORS misconfiguration analyzer."""
+        return self._cors_analyzer()

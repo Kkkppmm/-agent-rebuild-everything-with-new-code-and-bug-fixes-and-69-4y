@@ -84,6 +84,8 @@ from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberSta
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.insecure_cookies import InsecureCookieAnalyzer, InsecureCookieFinding, InsecureCookieStats
 from devai.mass_assignment import MassAssignmentAnalyzer, MassAssignmentFinding, MassAssignmentStats
+from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer, XssVulnerabilityFinding, XssVulnerabilityStats
+from devai.cors_misconfig import CorsMisconfigAnalyzer, CorsMisconfigFinding, CorsMisconfigStats
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.unsafe_deserialization import (
@@ -101,7 +103,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.5.0"
+__version__ = "5.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -146,6 +148,9 @@ __all__ = [
     "CodeProject",
     "CompareResult",
     "ContextSection",
+    "CorsMisconfigAnalyzer",
+    "CorsMisconfigFinding",
+    "CorsMisconfigStats",
     "CodeReviewResult",
     "CodeSandbox",
     "CodeSymbolIndex",
@@ -296,6 +301,9 @@ __all__ = [
     "WatchResult",
     "WorkflowResult",
     "WorkflowStepResult",
+    "XssVulnerabilityAnalyzer",
+    "XssVulnerabilityFinding",
+    "XssVulnerabilityStats",
     "apply_unified_diff",
     "assistant",
     "check_health",
