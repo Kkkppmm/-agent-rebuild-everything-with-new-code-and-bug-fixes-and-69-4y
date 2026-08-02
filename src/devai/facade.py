@@ -28,8 +28,12 @@ from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+from devai.cors_misconfig import CorsMisconfigAnalyzer
+from devai.insecure_cookies import InsecureCookieAnalyzer
+from devai.mass_assignment import MassAssignmentAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -354,8 +358,24 @@ class DevAI:
         """Detect open redirect vulnerabilities in web handlers."""
         return OpenRedirectAnalyzer(str(path), **kwargs)
 
+    def xss_vulnerabilities(self, path: str | Path = ".", **kwargs: Any) -> XssVulnerabilityAnalyzer:
+        """Detect XSS risks from mark_safe, |safe filters, and disabled autoescaping."""
+        return XssVulnerabilityAnalyzer(str(path), **kwargs)
+
+    def cors_misconfig(self, path: str | Path = ".", **kwargs: Any) -> CorsMisconfigAnalyzer:
+        """Detect wildcard and overly permissive CORS configuration."""
+        return CorsMisconfigAnalyzer(str(path), **kwargs)
+
+    def insecure_cookies(self, path: str | Path = ".", **kwargs: Any) -> InsecureCookieAnalyzer:
+        """Detect cookies missing secure, httponly, or samesite attributes."""
+        return InsecureCookieAnalyzer(str(path), **kwargs)
+
+    def mass_assignment(self, path: str | Path = ".", **kwargs: Any) -> MassAssignmentAnalyzer:
+        """Detect ORM mass-assignment from request data."""
+        return MassAssignmentAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (11 checks)."""
+        """Run unified static security analysis (15 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod
