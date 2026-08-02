@@ -83,6 +83,7 @@ from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLIn
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
@@ -99,7 +100,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.4.0"
+__version__ = "5.5.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -219,6 +220,9 @@ __all__ = [
     "OpenRedirectAnalyzer",
     "OpenRedirectFinding",
     "OpenRedirectStats",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "PatchResult",
     "PathTraversalAnalyzer",
     "PathTraversalFinding",

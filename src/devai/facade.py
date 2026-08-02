@@ -29,6 +29,7 @@ from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
+from devai.redos import ReDoSAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -354,8 +355,12 @@ class DevAI:
         """Detect open redirect vulnerabilities in web handlers."""
         return OpenRedirectAnalyzer(str(path), **kwargs)
 
+    def redos(self, path: str | Path = ".", **kwargs: Any) -> ReDoSAnalyzer:
+        """Detect regex patterns vulnerable to ReDoS."""
+        return ReDoSAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (11 checks)."""
+        """Run unified static security analysis (12 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod
