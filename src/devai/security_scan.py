@@ -15,6 +15,7 @@ from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
+from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
@@ -32,6 +33,7 @@ CHECK_NAMES = (
     "ssrf",
     "unsafe_deserialization",
     "open_redirect",
+    "hardcoded_config",
 )
 
 
@@ -125,7 +127,8 @@ class SecurityScanner:
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     insecure random usage, path-traversal risks, command injection, weak crypto,
-    log injection, SSRF, unsafe deserialization, and open redirects into one report.
+    log injection, SSRF, unsafe deserialization, open redirects, and hardcoded
+    configuration into one report.
   """
 
     def __init__(
@@ -154,6 +157,7 @@ class SecurityScanner:
         self._ssrf: SSRFAnalyzer | None = None
         self._deserialization: UnsafeDeserializationAnalyzer | None = None
         self._redirect: OpenRedirectAnalyzer | None = None
+        self._hardcoded: HardcodedConfigAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -212,6 +216,11 @@ class SecurityScanner:
             self._redirect = OpenRedirectAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._redirect
 
+    def _hardcoded_analyzer(self) -> HardcodedConfigAnalyzer:
+        if self._hardcoded is None:
+            self._hardcoded = HardcodedConfigAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._hardcoded
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -242,6 +251,8 @@ class SecurityScanner:
             recs.append("Never deserialize untrusted data with pickle or yaml.load — use safe formats and loaders.")
         if by_name.get("open_redirect", SecurityScanCategory("open_redirect", 100, 0, "")).findings:
             recs.append("Validate redirect destinations against a same-origin or explicit allowlist.")
+        if by_name.get("hardcoded_config", SecurityScanCategory("hardcoded_config", 100, 0, "")).findings:
+            recs.append("Move URLs, database strings, and host values to environment variables or config files.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -384,6 +395,18 @@ class SecurityScanner:
                 )
             )
 
+        if "hardcoded_config" in self.checks:
+            analyzer = self._hardcoded_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="hardcoded_config",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -439,6 +462,10 @@ class SecurityScanner:
             )
         if "open_redirect" in self.checks:
             lines.extend(["## Open redirect", self._redirect_analyzer().to_context(limit=limit), ""])
+        if "hardcoded_config" in self.checks:
+            lines.extend(
+                ["## Hardcoded config", self._hardcoded_analyzer().to_context(limit=limit), ""]
+            )
         return "\n".join(lines).rstrip()
 
     @property
@@ -495,3 +522,8 @@ class SecurityScanner:
     def open_redirect(self) -> OpenRedirectAnalyzer:
         """Underlying open-redirect analyzer."""
         return self._redirect_analyzer()
+
+    @property
+    def hardcoded_config(self) -> HardcodedConfigAnalyzer:
+        """Underlying hardcoded-configuration analyzer."""
+        return self._hardcoded_analyzer()

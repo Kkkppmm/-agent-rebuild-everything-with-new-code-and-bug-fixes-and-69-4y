@@ -28,6 +28,7 @@ from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
@@ -354,8 +355,12 @@ class DevAI:
         """Detect open redirect vulnerabilities in web handlers."""
         return OpenRedirectAnalyzer(str(path), **kwargs)
 
+    def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
+        """Detect hardcoded URLs, IPs, database URLs, and env defaults."""
+        return HardcodedConfigAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (11 checks)."""
+        """Run unified static security analysis (12 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod
