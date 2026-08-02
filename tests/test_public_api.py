@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "5.5.0"
+        assert devai.__version__ == "5.6.0"
 
     def test_exports(self):
         expected = {
@@ -24,6 +24,9 @@ class TestPublicAPI:
             "BenchmarkSample",
             "CommitInfo",
             "CouplingStats",
+            "CorsMisconfigAnalyzer",
+            "CorsMisconfigFinding",
+            "CorsMisconfigStats",
             "CodeBlock",
             "CONFIG_FILENAMES",
             "CIReporter",
@@ -109,9 +112,15 @@ class TestPublicAPI:
             "HealthResult",
             "ImportEdge",
             "ImportGraph",
+            "InsecureCookieAnalyzer",
+            "InsecureCookieFinding",
+            "InsecureCookieStats",
             "InsecureRandomAnalyzer",
             "InsecureRandomFinding",
             "InsecureRandomStats",
+            "InsecureTLSAnalyzer",
+            "InsecureTLSFinding",
+            "InsecureTLSStats",
             "LogInjectionAnalyzer",
             "LogInjectionFinding",
             "LogInjectionStats",
@@ -122,6 +131,9 @@ class TestPublicAPI:
             "MagicNumber",
             "MagicNumberDetector",
             "MagicNumberStats",
+            "MassAssignmentAnalyzer",
+            "MassAssignmentFinding",
+            "MassAssignmentStats",
             "ModuleCoupling",
             "ModuleCouplingAnalyzer",
             "ModuleMapping",
@@ -184,6 +196,9 @@ class TestPublicAPI:
             "TypingGap",
             "TypingStats",
             "TraceEvent",
+            "XssVulnerabilityAnalyzer",
+            "XssVulnerabilityFinding",
+            "XssVulnerabilityStats",
             "WeakCryptoAnalyzer",
             "WeakCryptoFinding",
             "WeakCryptoStats",

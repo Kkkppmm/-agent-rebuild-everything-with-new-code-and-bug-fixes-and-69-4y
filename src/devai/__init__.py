@@ -83,6 +83,11 @@ from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, Pa
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
+from devai.cors_misconfig import CorsMisconfigAnalyzer, CorsMisconfigFinding, CorsMisconfigStats
+from devai.insecure_cookies import InsecureCookieAnalyzer, InsecureCookieFinding, InsecureCookieStats
+from devai.insecure_tls import InsecureTLSAnalyzer, InsecureTLSFinding, InsecureTLSStats
+from devai.mass_assignment import MassAssignmentAnalyzer, MassAssignmentFinding, MassAssignmentStats
+from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer, XssVulnerabilityFinding, XssVulnerabilityStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
@@ -97,7 +102,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.5.0"
+__version__ = "5.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -122,6 +127,9 @@ __all__ = [
     "BatchRunner",
     "CommitInfo",
     "CouplingStats",
+    "CorsMisconfigAnalyzer",
+    "CorsMisconfigFinding",
+    "CorsMisconfigStats",
     "CIReporter",
     "CodeAssistant",
     "CodeBlock",
@@ -199,6 +207,9 @@ __all__ = [
     "LLMClient",
     "MockEmbeddingClient",
     "MockLLMClient",
+    "MassAssignmentAnalyzer",
+    "MassAssignmentFinding",
+    "MassAssignmentStats",
     "ModuleCoupling",
     "MagicNumber",
     "MagicNumberDetector",
@@ -256,12 +267,21 @@ __all__ = [
     "SecurityFinding",
     "ImportEdge",
     "ImportGraph",
+    "InsecureCookieAnalyzer",
+    "InsecureCookieFinding",
+    "InsecureCookieStats",
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
+    "InsecureTLSAnalyzer",
+    "InsecureTLSFinding",
+    "InsecureTLSStats",
     "LogInjectionAnalyzer",
     "LogInjectionFinding",
     "LogInjectionStats",
+    "XssVulnerabilityAnalyzer",
+    "XssVulnerabilityFinding",
+    "XssVulnerabilityStats",
     "WeakCryptoAnalyzer",
     "WeakCryptoFinding",
     "WeakCryptoStats",

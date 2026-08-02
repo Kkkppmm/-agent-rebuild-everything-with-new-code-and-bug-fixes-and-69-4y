@@ -576,6 +576,47 @@ def cmd_ssrf(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def _analyzer_cmd(analyzer_cls: type, args: argparse.Namespace) -> None:
+    analyzer = analyzer_cls(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_insecure_tls(args: argparse.Namespace) -> None:
+    from devai.insecure_tls import InsecureTLSAnalyzer
+
+    _analyzer_cmd(InsecureTLSAnalyzer, args)
+
+
+def cmd_xss(args: argparse.Namespace) -> None:
+    from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer
+
+    _analyzer_cmd(XssVulnerabilityAnalyzer, args)
+
+
+def cmd_cors(args: argparse.Namespace) -> None:
+    from devai.cors_misconfig import CorsMisconfigAnalyzer
+
+    _analyzer_cmd(CorsMisconfigAnalyzer, args)
+
+
+def cmd_insecure_cookies(args: argparse.Namespace) -> None:
+    from devai.insecure_cookies import InsecureCookieAnalyzer
+
+    _analyzer_cmd(InsecureCookieAnalyzer, args)
+
+
+def cmd_mass_assignment(args: argparse.Namespace) -> None:
+    from devai.mass_assignment import MassAssignmentAnalyzer
+
+    _analyzer_cmd(MassAssignmentAnalyzer, args)
+
+
 def cmd_security_scan(args: argparse.Namespace) -> None:
     from devai.security_scan import SecurityScanner
 
@@ -1566,6 +1607,36 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_ssrf)
+
+    p = sub.add_parser("insecure-tls", help="Detect disabled TLS verification")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_insecure_tls)
+
+    p = sub.add_parser("xss", help="Detect cross-site scripting risks")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_xss)
+
+    p = sub.add_parser("cors", help="Detect overly permissive CORS configuration")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_cors)
+
+    p = sub.add_parser("insecure-cookies", help="Detect cookies missing security flags")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_insecure_cookies)
+
+    p = sub.add_parser("mass-assignment", help="Detect ORM mass-assignment from request data")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_mass_assignment)
 
     p = sub.add_parser("security-scan", help="Run unified static security analysis")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

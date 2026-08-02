@@ -27,6 +27,11 @@ from devai.secrets import SecretsScanner
 from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.cors_misconfig import CorsMisconfigAnalyzer
+from devai.insecure_cookies import InsecureCookieAnalyzer
+from devai.insecure_tls import InsecureTLSAnalyzer
+from devai.mass_assignment import MassAssignmentAnalyzer
+from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -341,6 +346,26 @@ class DevAI:
     def ssrf(self, path: str | Path = ".", **kwargs: Any) -> SSRFAnalyzer:
         """Detect server-side request forgery risks in outbound HTTP calls."""
         return SSRFAnalyzer(str(path), **kwargs)
+
+    def insecure_tls(self, path: str | Path = ".", **kwargs: Any) -> InsecureTLSAnalyzer:
+        """Detect disabled TLS verification and weak SSL configuration."""
+        return InsecureTLSAnalyzer(str(path), **kwargs)
+
+    def xss_vulnerabilities(self, path: str | Path = ".", **kwargs: Any) -> XssVulnerabilityAnalyzer:
+        """Detect cross-site scripting risks in web frameworks."""
+        return XssVulnerabilityAnalyzer(str(path), **kwargs)
+
+    def cors_misconfig(self, path: str | Path = ".", **kwargs: Any) -> CorsMisconfigAnalyzer:
+        """Detect overly permissive CORS configuration."""
+        return CorsMisconfigAnalyzer(str(path), **kwargs)
+
+    def insecure_cookies(self, path: str | Path = ".", **kwargs: Any) -> InsecureCookieAnalyzer:
+        """Detect cookies missing secure, httponly, or samesite flags."""
+        return InsecureCookieAnalyzer(str(path), **kwargs)
+
+    def mass_assignment(self, path: str | Path = ".", **kwargs: Any) -> MassAssignmentAnalyzer:
+        """Detect ORM mass-assignment from request data."""
+        return MassAssignmentAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""
