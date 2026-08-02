@@ -30,6 +30,7 @@ from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.redos import ReDoSAnalyzer
+from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
@@ -358,6 +359,12 @@ class DevAI:
     def redos(self, path: str | Path = ".", **kwargs: Any) -> ReDoSAnalyzer:
         """Detect regex patterns vulnerable to ReDoS."""
         return ReDoSAnalyzer(str(path), **kwargs)
+
+    def hardcoded_config(
+        self, path: str | Path = ".", **kwargs: Any
+    ) -> HardcodedConfigAnalyzer:
+        """Detect hardcoded URLs, IPs, database URLs, and brittle env access."""
+        return HardcodedConfigAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (12 checks)."""

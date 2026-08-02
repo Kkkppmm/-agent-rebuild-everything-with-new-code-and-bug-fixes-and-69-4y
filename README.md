@@ -98,6 +98,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **UnsafeDeserializationAnalyzer** — Detect unsafe pickle, yaml, and marshal deserialization of untrusted data
 - **OpenRedirectAnalyzer** — Detect open redirect vulnerabilities in Flask, Django, and FastAPI handlers
 - **ReDoSAnalyzer** — Detect catastrophic backtracking regex patterns and user-controlled `re.compile` calls
+- **HardcodedConfigAnalyzer** — Detect hardcoded URLs, IPs, database connection strings, and brittle `os.environ["KEY"]` access
 - **SecurityScanner** — Unified static security scan combining 12 checks (secrets, injections, crypto, SSRF, deserialization, redirects, ReDoS, and more)
 
 ## Installation

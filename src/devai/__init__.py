@@ -33,6 +33,11 @@ from devai.duplicate_code import (
     DuplicateCodeDetector,
     DuplicateStats,
 )
+from devai.hardcoded_config import (
+    HardcodedConfigAnalyzer,
+    HardcodedConfigFinding,
+    HardcodedConfigStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -100,7 +105,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.5.0"
+__version__ = "5.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -182,6 +187,9 @@ __all__ = [
     "DiskCachedLLMClient",
     "GitChangelog",
     "GitContext",
+    "HardcodedConfigAnalyzer",
+    "HardcodedConfigFinding",
+    "HardcodedConfigStats",
     "DuplicateBlock",
     "DuplicateCluster",
     "DuplicateCodeDetector",
