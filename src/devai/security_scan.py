@@ -10,8 +10,11 @@ from typing import Any
 from devai.command_injection import CommandInjectionAnalyzer
 from devai.cors_misconfig import CORSMisconfigAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
+from devai.debug_mode import DebugModeAnalyzer
+from devai.insecure_session import InsecureSessionAnalyzer
 from devai.insecure_tls import InsecureTLSAnalyzer
 from devai.jwt_security import JWTSecurityAnalyzer
+from devai.nosql_injection import NoSQLInjectionAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
@@ -42,6 +45,9 @@ CHECK_NAMES = (
     "insecure_tls",
     "cors_misconfig",
     "jwt_security",
+    "nosql_injection",
+    "debug_mode",
+    "insecure_session",
 )
 
 
@@ -136,8 +142,9 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
     weak crypto usage, log injection risks, SSRF risks, unsafe deserialization,
-    open redirect, XSS, XXE, insecure TLS, CORS misconfiguration, and JWT
-    security checks into one report.
+    open redirect, XSS, XXE, insecure TLS, CORS misconfiguration, JWT
+    security, NoSQL injection, debug mode, and insecure session checks
+    into one report.
   """
 
     def __init__(
@@ -171,6 +178,9 @@ class SecurityScanner:
         self._insecure_tls: InsecureTLSAnalyzer | None = None
         self._cors_misconfig: CORSMisconfigAnalyzer | None = None
         self._jwt_security: JWTSecurityAnalyzer | None = None
+        self._nosql_injection: NoSQLInjectionAnalyzer | None = None
+        self._debug_mode: DebugModeAnalyzer | None = None
+        self._insecure_session: InsecureSessionAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -254,6 +264,21 @@ class SecurityScanner:
             self._jwt_security = JWTSecurityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._jwt_security
 
+    def _nosql_injection_analyzer(self) -> NoSQLInjectionAnalyzer:
+        if self._nosql_injection is None:
+            self._nosql_injection = NoSQLInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._nosql_injection
+
+    def _debug_mode_analyzer(self) -> DebugModeAnalyzer:
+        if self._debug_mode is None:
+            self._debug_mode = DebugModeAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._debug_mode
+
+    def _insecure_session_analyzer(self) -> InsecureSessionAnalyzer:
+        if self._insecure_session is None:
+            self._insecure_session = InsecureSessionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._insecure_session
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -294,6 +319,12 @@ class SecurityScanner:
             recs.append("Restrict CORS origins to trusted domains instead of using wildcard *.")
         if by_name.get("jwt_security", SecurityScanCategory("jwt_security", 100, 0, "")).findings:
             recs.append("Always verify JWT signatures, reject algorithm 'none', and store signing keys in secrets managers.")
+        if by_name.get("nosql_injection", SecurityScanCategory("nosql_injection", 100, 0, "")).findings:
+            recs.append("Use structured query dicts instead of string-built NoSQL filters; avoid $where with user input.")
+        if by_name.get("debug_mode", SecurityScanCategory("debug_mode", 100, 0, "")).findings:
+            recs.append("Disable DEBUG mode and development settings in production deployments.")
+        if by_name.get("insecure_session", SecurityScanCategory("insecure_session", 100, 0, "")).findings:
+            recs.append("Set secure and httponly on session cookies and load SECRET_KEY from environment variables.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -496,6 +527,42 @@ class SecurityScanner:
                 )
             )
 
+        if "nosql_injection" in self.checks:
+            analyzer = self._nosql_injection_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="nosql_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "debug_mode" in self.checks:
+            analyzer = self._debug_mode_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="debug_mode",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_session" in self.checks:
+            analyzer = self._insecure_session_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_session",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -561,6 +628,12 @@ class SecurityScanner:
             lines.extend(["## CORS misconfiguration", self._cors_misconfig_analyzer().to_context(limit=limit), ""])
         if "jwt_security" in self.checks:
             lines.extend(["## JWT security", self._jwt_security_analyzer().to_context(limit=limit), ""])
+        if "nosql_injection" in self.checks:
+            lines.extend(["## NoSQL injection", self._nosql_injection_analyzer().to_context(limit=limit), ""])
+        if "debug_mode" in self.checks:
+            lines.extend(["## Debug mode", self._debug_mode_analyzer().to_context(limit=limit), ""])
+        if "insecure_session" in self.checks:
+            lines.extend(["## Insecure session", self._insecure_session_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -642,3 +715,18 @@ class SecurityScanner:
     def jwt_security(self) -> JWTSecurityAnalyzer:
         """Underlying JWT security analyzer."""
         return self._jwt_security_analyzer()
+
+    @property
+    def nosql_injection(self) -> NoSQLInjectionAnalyzer:
+        """Underlying NoSQL injection analyzer."""
+        return self._nosql_injection_analyzer()
+
+    @property
+    def debug_mode(self) -> DebugModeAnalyzer:
+        """Underlying debug-mode analyzer."""
+        return self._debug_mode_analyzer()
+
+    @property
+    def insecure_session(self) -> InsecureSessionAnalyzer:
+        """Underlying insecure-session analyzer."""
+        return self._insecure_session_analyzer()

@@ -78,8 +78,11 @@ from devai.cors_misconfig import CORSMisconfigAnalyzer, CORSMisconfigFinding, CO
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
+from devai.debug_mode import DebugModeAnalyzer, DebugModeFinding, DebugModeStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
+from devai.insecure_session import InsecureSessionAnalyzer, InsecureSessionFinding, InsecureSessionStats
 from devai.insecure_tls import InsecureTLSAnalyzer, InsecureTLSFinding, InsecureTLSStats
+from devai.nosql_injection import NoSQLInjectionAnalyzer, NoSQLInjectionFinding, NoSQLInjectionStats
 from devai.jwt_security import JWTSecurityAnalyzer, JWTSecurityFinding, JWTSecurityStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
@@ -108,7 +111,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.8.0"
+__version__ = "5.9.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -163,6 +166,9 @@ __all__ = [
     "DebugArtifact",
     "DebugArtifactDetector",
     "DebugArtifactStats",
+    "DebugModeAnalyzer",
+    "DebugModeFinding",
+    "DebugModeStats",
     "DangerousCall",
     "DangerousCallsAnalyzer",
     "DangerousCallStats",
@@ -223,6 +229,9 @@ __all__ = [
     "NamingStats",
     "NamingViolation",
     "ModuleSurface",
+    "NoSQLInjectionAnalyzer",
+    "NoSQLInjectionFinding",
+    "NoSQLInjectionStats",
     "OpenRedirectAnalyzer",
     "OpenRedirectFinding",
     "OpenRedirectStats",
@@ -276,6 +285,9 @@ __all__ = [
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
+    "InsecureSessionAnalyzer",
+    "InsecureSessionFinding",
+    "InsecureSessionStats",
     "InsecureTLSAnalyzer",
     "InsecureTLSFinding",
     "InsecureTLSStats",

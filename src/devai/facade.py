@@ -19,8 +19,10 @@ from devai.command_injection import CommandInjectionAnalyzer
 from devai.cors_misconfig import CORSMisconfigAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.debug_artifacts import DebugArtifactDetector
+from devai.debug_mode import DebugModeAnalyzer
 from devai.magic_numbers import MagicNumberDetector
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.insecure_session import InsecureSessionAnalyzer
 from devai.insecure_tls import InsecureTLSAnalyzer
 from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -33,6 +35,7 @@ from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
+from devai.nosql_injection import NoSQLInjectionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.duplicate_code import DuplicateCodeDetector
@@ -376,6 +379,18 @@ class DevAI:
     def jwt_security(self, path: str | Path = ".", **kwargs: Any) -> JWTSecurityAnalyzer:
         """Detect insecure JWT handling (disabled verification, algorithm none, hardcoded secrets)."""
         return JWTSecurityAnalyzer(str(path), **kwargs)
+
+    def nosql_injection(self, path: str | Path = ".", **kwargs: Any) -> NoSQLInjectionAnalyzer:
+        """Detect dynamic NoSQL query construction in MongoDB-style calls."""
+        return NoSQLInjectionAnalyzer(str(path), **kwargs)
+
+    def debug_mode(self, path: str | Path = ".", **kwargs: Any) -> DebugModeAnalyzer:
+        """Detect debug mode and development settings in production code."""
+        return DebugModeAnalyzer(str(path), **kwargs)
+
+    def insecure_session(self, path: str | Path = ".", **kwargs: Any) -> InsecureSessionAnalyzer:
+        """Detect insecure session and cookie configuration."""
+        return InsecureSessionAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""

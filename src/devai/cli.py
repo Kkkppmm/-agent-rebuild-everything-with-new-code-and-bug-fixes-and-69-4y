@@ -615,6 +615,45 @@ def cmd_jwt_security(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_nosql_injection(args: argparse.Namespace) -> None:
+    from devai.nosql_injection import NoSQLInjectionAnalyzer
+
+    analyzer = NoSQLInjectionAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_debug_mode(args: argparse.Namespace) -> None:
+    from devai.debug_mode import DebugModeAnalyzer
+
+    analyzer = DebugModeAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_insecure_session(args: argparse.Namespace) -> None:
+    from devai.insecure_session import InsecureSessionAnalyzer
+
+    analyzer = InsecureSessionAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_security_scan(args: argparse.Namespace) -> None:
     from devai.security_scan import SecurityScanner
 
@@ -1623,6 +1662,24 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_jwt_security)
+
+    p = sub.add_parser("nosql-injection", help="Detect dynamic NoSQL query construction")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_nosql_injection)
+
+    p = sub.add_parser("debug-mode", help="Detect debug mode in production code")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_debug_mode)
+
+    p = sub.add_parser("insecure-session", help="Detect insecure session/cookie configuration")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_insecure_session)
 
     p = sub.add_parser("security-scan", help="Run unified static security analysis")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")
