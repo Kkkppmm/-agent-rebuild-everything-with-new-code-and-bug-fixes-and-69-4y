@@ -89,6 +89,7 @@ from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberSta
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
+from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
@@ -105,7 +106,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.6.0"
+__version__ = "5.7.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -283,6 +284,9 @@ __all__ = [
     "TechDebtItem",
     "TechDebtScanner",
     "TechDebtStats",
+    "TimingAttackAnalyzer",
+    "TimingAttackFinding",
+    "TimingAttackStats",
     "TestMapReport",
     "TestMapper",
     "TokenBudget",

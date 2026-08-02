@@ -19,6 +19,7 @@ from devai.open_redirect import OpenRedirectAnalyzer
 from devai.redos import ReDoSAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+from devai.timing_attack import TimingAttackAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 
 CHECK_NAMES = (
@@ -34,6 +35,7 @@ CHECK_NAMES = (
     "unsafe_deserialization",
     "open_redirect",
     "redos",
+    "timing_attack",
 )
 
 
@@ -127,7 +129,8 @@ class SecurityScanner:
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     insecure random usage, path-traversal risks, command injection, weak crypto,
-    log injection, SSRF, unsafe deserialization, open redirects, and ReDoS into one report.
+    log injection, SSRF, unsafe deserialization, open redirects, ReDoS, and
+    timing-attack risks into one report.
   """
 
     def __init__(
@@ -157,6 +160,7 @@ class SecurityScanner:
         self._deserialization: UnsafeDeserializationAnalyzer | None = None
         self._redirect: OpenRedirectAnalyzer | None = None
         self._redos: ReDoSAnalyzer | None = None
+        self._timing: TimingAttackAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -220,6 +224,11 @@ class SecurityScanner:
             self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._redos
 
+    def _timing_analyzer(self) -> TimingAttackAnalyzer:
+        if self._timing is None:
+            self._timing = TimingAttackAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._timing
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -252,6 +261,10 @@ class SecurityScanner:
             recs.append("Validate redirect destinations against a same-origin or explicit allowlist.")
         if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
             recs.append("Avoid nested quantifiers in regex and never compile user-supplied patterns.")
+        if by_name.get("timing_attack", SecurityScanCategory("timing_attack", 100, 0, "")).findings:
+            recs.append(
+                "Compare secrets with hmac.compare_digest() or secrets.compare_digest(), not == or !=."
+            )
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -406,6 +419,18 @@ class SecurityScanner:
                 )
             )
 
+        if "timing_attack" in self.checks:
+            analyzer = self._timing_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="timing_attack",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -463,6 +488,10 @@ class SecurityScanner:
             lines.extend(["## Open redirect", self._redirect_analyzer().to_context(limit=limit), ""])
         if "redos" in self.checks:
             lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
+        if "timing_attack" in self.checks:
+            lines.extend(
+                ["## Timing attacks", self._timing_analyzer().to_context(limit=limit), ""]
+            )
         return "\n".join(lines).rstrip()
 
     @property
@@ -524,3 +553,8 @@ class SecurityScanner:
     def redos(self) -> ReDoSAnalyzer:
         """Underlying ReDoS analyzer."""
         return self._redos_analyzer()
+
+    @property
+    def timing_attack(self) -> TimingAttackAnalyzer:
+        """Underlying timing-attack analyzer."""
+        return self._timing_analyzer()

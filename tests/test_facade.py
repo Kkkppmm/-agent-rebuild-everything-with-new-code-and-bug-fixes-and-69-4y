@@ -109,4 +109,5 @@ class TestDevAI:
         assert ai.open_redirect(str(tmp_path)).health_score() >= 0
         assert ai.redos(str(tmp_path)).health_score() >= 0
         assert ai.hardcoded_config(str(tmp_path)).health_score() >= 0
+        assert ai.timing_attack(str(tmp_path)).health_score() >= 0
         assert ai.security_scan(str(tmp_path)).health_score() == 100.0
