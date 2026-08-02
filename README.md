@@ -100,8 +100,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **XssVulnerabilityAnalyzer** — Detect XSS risks from `mark_safe`, Jinja `|safe` filters, and disabled autoescaping
 - **CorsMisconfigAnalyzer** — Detect wildcard CORS origins in Flask, FastAPI, and Django settings
 - **InsecureCookieAnalyzer** — Detect cookies missing `secure`, `httponly`, or `samesite` attributes
+- **InsecureTLSAnalyzer** — Detect disabled TLS certificate verification (`verify=False`, unverified SSL contexts)
 - **MassAssignmentAnalyzer** — Detect ORM mass-assignment from request data (`**request.json`, etc.)
-- **SecurityScanner** — Unified static security scan combining 15 checks (secrets, injections, crypto, SSRF, deserialization, redirects, XSS, CORS, cookies, mass assignment, and more)
+- **SecurityScanner** — Unified static security scan combining 16 checks (secrets, injections, crypto, SSRF, deserialization, redirects, XSS, CORS, cookies, TLS, mass assignment, and more)
 
 ## Installation
 

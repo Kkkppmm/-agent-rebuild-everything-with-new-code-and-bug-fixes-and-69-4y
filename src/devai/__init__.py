@@ -84,6 +84,7 @@ from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberSta
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.cors_misconfig import CorsMisconfigAnalyzer, CorsMisconfigFinding, CorsMisconfigStats
 from devai.insecure_cookies import InsecureCookieAnalyzer, InsecureCookieFinding, InsecureCookieStats
+from devai.insecure_tls import InsecureTLSAnalyzer, InsecureTLSFinding, InsecureTLSStats
 from devai.mass_assignment import MassAssignmentAnalyzer, MassAssignmentFinding, MassAssignmentStats
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.xss_vulnerabilities import XssVulnerabilityAnalyzer, XssVulnerabilityFinding, XssVulnerabilityStats
@@ -277,6 +278,9 @@ __all__ = [
     "InsecureCookieAnalyzer",
     "InsecureCookieFinding",
     "InsecureCookieStats",
+    "InsecureTLSAnalyzer",
+    "InsecureTLSFinding",
+    "InsecureTLSStats",
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",

@@ -30,6 +30,7 @@ from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.cors_misconfig import CorsMisconfigAnalyzer
 from devai.insecure_cookies import InsecureCookieAnalyzer
+from devai.insecure_tls import InsecureTLSAnalyzer
 from devai.mass_assignment import MassAssignmentAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
@@ -370,12 +371,16 @@ class DevAI:
         """Detect cookies missing secure, httponly, or samesite attributes."""
         return InsecureCookieAnalyzer(str(path), **kwargs)
 
+    def insecure_tls(self, path: str | Path = ".", **kwargs: Any) -> InsecureTLSAnalyzer:
+        """Detect disabled TLS certificate verification in HTTP clients."""
+        return InsecureTLSAnalyzer(str(path), **kwargs)
+
     def mass_assignment(self, path: str | Path = ".", **kwargs: Any) -> MassAssignmentAnalyzer:
         """Detect ORM mass-assignment from request data."""
         return MassAssignmentAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (15 checks)."""
+        """Run unified static security analysis (16 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod

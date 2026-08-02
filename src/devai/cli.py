@@ -589,6 +589,19 @@ def cmd_insecure_cookies(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_insecure_tls(args: argparse.Namespace) -> None:
+    from devai.insecure_tls import InsecureTLSAnalyzer
+
+    analyzer = InsecureTLSAnalyzer(args.directory)
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_mass_assignment(args: argparse.Namespace) -> None:
     from devai.mass_assignment import MassAssignmentAnalyzer
 
@@ -1598,6 +1611,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--context", action="store_true", help="Output LLM-ready context")
     p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
     p.set_defaults(func=cmd_insecure_cookies)
+
+    p = sub.add_parser("insecure-tls", help="Detect disabled TLS certificate verification")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.set_defaults(func=cmd_insecure_tls)
 
     p = sub.add_parser("mass-assignment", help="Detect ORM mass-assignment from request data")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

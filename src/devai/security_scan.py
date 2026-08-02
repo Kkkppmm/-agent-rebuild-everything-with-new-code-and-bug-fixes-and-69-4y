@@ -17,6 +17,7 @@ from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.cors_misconfig import CorsMisconfigAnalyzer
 from devai.insecure_cookies import InsecureCookieAnalyzer
+from devai.insecure_tls import InsecureTLSAnalyzer
 from devai.mass_assignment import MassAssignmentAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.ssrf import SSRFAnalyzer
@@ -39,6 +40,7 @@ CHECK_NAMES = (
     "xss_vulnerabilities",
     "cors_misconfig",
     "insecure_cookies",
+    "insecure_tls",
     "mass_assignment",
 )
 
@@ -134,7 +136,7 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     insecure random usage, path-traversal risks, command injection, weak crypto,
     log injection, SSRF, unsafe deserialization, open redirects, XSS, CORS,
-    insecure cookies, and mass assignment into one report.
+    insecure cookies, insecure TLS, and mass assignment into one report.
   """
 
     def __init__(
@@ -166,6 +168,7 @@ class SecurityScanner:
         self._xss: XssVulnerabilityAnalyzer | None = None
         self._cors: CorsMisconfigAnalyzer | None = None
         self._cookies: InsecureCookieAnalyzer | None = None
+        self._tls: InsecureTLSAnalyzer | None = None
         self._mass: MassAssignmentAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
@@ -240,6 +243,11 @@ class SecurityScanner:
             self._cookies = InsecureCookieAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._cookies
 
+    def _tls_analyzer(self) -> InsecureTLSAnalyzer:
+        if self._tls is None:
+            self._tls = InsecureTLSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._tls
+
     def _mass_analyzer(self) -> MassAssignmentAnalyzer:
         if self._mass is None:
             self._mass = MassAssignmentAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
@@ -281,6 +289,8 @@ class SecurityScanner:
             recs.append("Restrict CORS origins to trusted domains instead of wildcard *.")
         if by_name.get("insecure_cookies", SecurityScanCategory("insecure_cookies", 100, 0, "")).findings:
             recs.append("Set secure=True, httponly=True, and samesite='Lax' on session cookies.")
+        if by_name.get("insecure_tls", SecurityScanCategory("insecure_tls", 100, 0, "")).findings:
+            recs.append("Enable TLS certificate verification — remove verify=False and unverified SSL contexts.")
         if by_name.get("mass_assignment", SecurityScanCategory("mass_assignment", 100, 0, "")).findings:
             recs.append("Whitelist allowed model fields instead of passing request data directly to ORMs.")
         return recs
@@ -461,6 +471,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_tls" in self.checks:
+            analyzer = self._tls_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_tls",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         if "mass_assignment" in self.checks:
             analyzer = self._mass_analyzer()
             findings = analyzer.analyze()
@@ -534,6 +556,8 @@ class SecurityScanner:
             lines.extend(["## CORS", self._cors_analyzer().to_context(limit=limit), ""])
         if "insecure_cookies" in self.checks:
             lines.extend(["## Insecure cookies", self._cookies_analyzer().to_context(limit=limit), ""])
+        if "insecure_tls" in self.checks:
+            lines.extend(["## Insecure TLS", self._tls_analyzer().to_context(limit=limit), ""])
         if "mass_assignment" in self.checks:
             lines.extend(["## Mass assignment", self._mass_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
@@ -607,6 +631,11 @@ class SecurityScanner:
     def insecure_cookies(self) -> InsecureCookieAnalyzer:
         """Underlying insecure-cookie analyzer."""
         return self._cookies_analyzer()
+
+    @property
+    def insecure_tls(self) -> InsecureTLSAnalyzer:
+        """Underlying insecure-TLS analyzer."""
+        return self._tls_analyzer()
 
     @property
     def mass_assignment(self) -> MassAssignmentAnalyzer:
