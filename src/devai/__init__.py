@@ -99,7 +99,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.4.0"
+__version__ = "5.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
