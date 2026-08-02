@@ -28,6 +28,8 @@ from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
+from devai.insecure_cookies import InsecureCookieAnalyzer
+from devai.mass_assignment import MassAssignmentAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
@@ -354,8 +356,16 @@ class DevAI:
         """Detect open redirect vulnerabilities in web handlers."""
         return OpenRedirectAnalyzer(str(path), **kwargs)
 
+    def insecure_cookies(self, path: str | Path = ".", **kwargs: Any) -> InsecureCookieAnalyzer:
+        """Detect cookies set without secure, httponly, or samesite flags."""
+        return InsecureCookieAnalyzer(str(path), **kwargs)
+
+    def mass_assignment(self, path: str | Path = ".", **kwargs: Any) -> MassAssignmentAnalyzer:
+        """Detect ORM mass-assignment from user-controlled dictionaries."""
+        return MassAssignmentAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (11 checks)."""
+        """Run unified static security analysis (13 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod

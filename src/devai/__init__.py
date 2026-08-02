@@ -82,6 +82,8 @@ from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, Reso
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
+from devai.insecure_cookies import InsecureCookieAnalyzer, InsecureCookieFinding, InsecureCookieStats
+from devai.mass_assignment import MassAssignmentAnalyzer, MassAssignmentFinding, MassAssignmentStats
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.unsafe_deserialization import (
@@ -99,7 +101,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.4.0"
+__version__ = "5.5.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -208,6 +210,9 @@ __all__ = [
     "MagicNumber",
     "MagicNumberDetector",
     "MagicNumberStats",
+    "MassAssignmentAnalyzer",
+    "MassAssignmentFinding",
+    "MassAssignmentStats",
     "ModuleCouplingAnalyzer",
     "ModuleMapping",
     "NamingConventionAnalyzer",
@@ -264,6 +269,9 @@ __all__ = [
     "SecurityFinding",
     "ImportEdge",
     "ImportGraph",
+    "InsecureCookieAnalyzer",
+    "InsecureCookieFinding",
+    "InsecureCookieStats",
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
