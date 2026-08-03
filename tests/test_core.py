@@ -34,6 +34,12 @@ class TestDevAIConfig:
         assert config.model == "gpt-4"
         assert config.api_key == "env-key"
 
+    def test_from_env(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_PROVIDER", "mock")
+        config = DevAIConfig.from_env()
+        assert config.api_key == "mock"
+        assert config.model == "mock-model"
+
 
 class TestMessage:
     def test_system_message(self):

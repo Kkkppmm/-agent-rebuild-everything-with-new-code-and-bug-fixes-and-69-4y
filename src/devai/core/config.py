@@ -75,6 +75,17 @@ class DevAIConfig:
         )
 
     @classmethod
+    def from_env(cls, **kwargs: Any) -> DevAIConfig:
+        """Create config from environment variables.
+
+        Reads ``DEVAI_PROVIDER`` (default: ``openai``), plus ``DEVAI_API_KEY``,
+        ``DEVAI_BASE_URL``, ``DEVAI_MODEL``, ``DEVAI_MAX_TOKENS``, and
+        ``DEVAI_TEMPERATURE``.
+        """
+        provider = os.environ.get("DEVAI_PROVIDER", "openai")
+        return cls.from_provider(provider, **kwargs)
+
+    @classmethod
     def from_provider(
         cls,
         provider: str,

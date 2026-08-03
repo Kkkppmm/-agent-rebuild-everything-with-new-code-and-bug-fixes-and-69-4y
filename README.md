@@ -121,6 +121,9 @@ from devai import DevAI
 # Fastest path — mock mode, no API key required
 ai = DevAI.mock()
 print(ai.review("def add(a, b): return a + b"))
+
+# Or bootstrap from environment variables (DEVAI_PROVIDER, DEVAI_API_KEY, …)
+# ai = DevAI.from_env()
 ```
 
 ```python

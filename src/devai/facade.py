@@ -27,6 +27,8 @@ from devai.secrets import SecretsScanner
 from devai.security_scan import SecurityScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.open_redirect import OpenRedirectAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.naming_conventions import NamingConventionAnalyzer
 from devai.dead_code import DeadCodeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -100,6 +102,31 @@ class DevAI:
                 provider="ollama",
                 model=model,
                 base_url=base_url,
+                project_path=project_path,
+                **kwargs,
+            )
+        )
+
+    @classmethod
+    def from_env(
+        cls,
+        *,
+        project_path: str | Path | None = None,
+        **kwargs: Any,
+    ) -> DevAI:
+        """Create a DevAI instance from environment variables.
+
+        Uses ``DEVAI_PROVIDER`` (``openai``, ``ollama``, or ``mock``) and the
+        standard ``DEVAI_*`` config variables.
+        """
+        import os
+
+        provider = os.environ.get("DEVAI_PROVIDER", "openai").lower().strip()
+        if provider == "mock":
+            return cls.mock(project_path=project_path, **kwargs)
+        return cls(
+            DevRuntime.create(
+                provider=provider,
                 project_path=project_path,
                 **kwargs,
             )
@@ -342,8 +369,18 @@ class DevAI:
         """Detect server-side request forgery risks in outbound HTTP calls."""
         return SSRFAnalyzer(str(path), **kwargs)
 
+    def unsafe_deserialization(
+        self, path: str | Path = ".", **kwargs: Any
+    ) -> UnsafeDeserializationAnalyzer:
+        """Detect unsafe pickle, yaml, and marshal deserialization."""
+        return UnsafeDeserializationAnalyzer(str(path), **kwargs)
+
+    def open_redirect(self, path: str | Path = ".", **kwargs: Any) -> OpenRedirectAnalyzer:
+        """Detect open redirect vulnerabilities in web handlers."""
+        return OpenRedirectAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
-        """Run unified static security analysis (secrets, injections, dangerous calls)."""
+        """Run unified static security analysis (11 checks)."""
         return SecurityScanner(str(path), **kwargs)
 
     @staticmethod

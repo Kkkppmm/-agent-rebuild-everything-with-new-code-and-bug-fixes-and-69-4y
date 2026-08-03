@@ -72,6 +72,12 @@ class TestDevAI:
         assert ai.kit is ai.runtime.kit
         assert ai.config is ai.runtime.config
 
+    def test_from_env_mock(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_PROVIDER", "mock")
+        ai = DevAI.from_env()
+        assert isinstance(ai, DevAI)
+        assert ai.review("def add(a, b): return a + b")
+
     def test_api_surface_and_hotspots(self, tmp_path):
         src = tmp_path / "src"
         src.mkdir()
@@ -109,4 +115,6 @@ class TestDevAI:
         assert ai.weak_crypto(str(tmp_path)).health_score() >= 0
         assert ai.log_injection(str(tmp_path)).health_score() >= 0
         assert ai.ssrf(str(tmp_path)).health_score() >= 0
+        assert ai.unsafe_deserialization(str(tmp_path)).health_score() >= 0
+        assert ai.open_redirect(str(tmp_path)).health_score() >= 0
         assert ai.security_scan(str(tmp_path)).health_score() == 100.0
