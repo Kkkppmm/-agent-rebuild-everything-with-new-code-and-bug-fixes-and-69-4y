@@ -8,19 +8,26 @@ from pathlib import Path
 from typing import Any
 
 from devai.command_injection import CommandInjectionAnalyzer
+from devai.cors import CORSAnalyzer
+from devai.csrf import CSRFAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
+from devai.insecure_cookies import InsecureCookieAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
+from devai.nosql_injection import NoSQLInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
+from devai.redos import ReDoSAnalyzer
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.timing_attack import TimingAttackAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xss import XSSAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -36,6 +43,13 @@ CHECK_NAMES = (
     "open_redirect",
     "hardcoded_config",
     "timing_attack",
+    "nosql_injection",
+    "insecure_cookies",
+    "jwt_security",
+    "cors",
+    "csrf",
+    "redos",
+    "xss",
 )
 
 
@@ -127,10 +141,11 @@ class SecurityScanReport:
 class SecurityScanner:
     """Run multiple static security analyzers and aggregate results.
 
-    Combines secrets scanning, dangerous-call detection, SQL injection checks,
-    command injection checks, insecure random usage, path-traversal risks,
-    weak crypto usage, log injection risks, SSRF risks, unsafe deserialization,
-    open redirect, hardcoded config, and timing-attack checks into one report.
+    Combines secrets scanning, dangerous-call detection, SQL/NoSQL injection,
+    command injection, insecure random, path traversal, weak crypto, log
+    injection, SSRF, unsafe deserialization, open redirect, hardcoded config,
+    timing attacks, insecure cookies, JWT security, CORS, CSRF, ReDoS, and
+    XSS checks into one report.
     """
 
     def __init__(
@@ -161,6 +176,13 @@ class SecurityScanner:
         self._redirect: OpenRedirectAnalyzer | None = None
         self._hardcoded_config: HardcodedConfigAnalyzer | None = None
         self._timing_attack: TimingAttackAnalyzer | None = None
+        self._nosql: NoSQLInjectionAnalyzer | None = None
+        self._cookies: InsecureCookieAnalyzer | None = None
+        self._jwt: JWTSecurityAnalyzer | None = None
+        self._cors: CORSAnalyzer | None = None
+        self._csrf: CSRFAnalyzer | None = None
+        self._redos: ReDoSAnalyzer | None = None
+        self._xss: XSSAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -231,6 +253,41 @@ class SecurityScanner:
             self._timing_attack = TimingAttackAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._timing_attack
 
+    def _nosql_analyzer(self) -> NoSQLInjectionAnalyzer:
+        if self._nosql is None:
+            self._nosql = NoSQLInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._nosql
+
+    def _cookies_analyzer(self) -> InsecureCookieAnalyzer:
+        if self._cookies is None:
+            self._cookies = InsecureCookieAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._cookies
+
+    def _jwt_analyzer(self) -> JWTSecurityAnalyzer:
+        if self._jwt is None:
+            self._jwt = JWTSecurityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._jwt
+
+    def _cors_analyzer(self) -> CORSAnalyzer:
+        if self._cors is None:
+            self._cors = CORSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._cors
+
+    def _csrf_analyzer(self) -> CSRFAnalyzer:
+        if self._csrf is None:
+            self._csrf = CSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._csrf
+
+    def _redos_analyzer(self) -> ReDoSAnalyzer:
+        if self._redos is None:
+            self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redos
+
+    def _xss_analyzer(self) -> XSSAnalyzer:
+        if self._xss is None:
+            self._xss = XSSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xss
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -265,6 +322,20 @@ class SecurityScanner:
             recs.append("Move hardcoded URLs, IPs, and DB URLs to environment variables or config files.")
         if by_name.get("timing_attack", SecurityScanCategory("timing_attack", 100, 0, "")).findings:
             recs.append("Use hmac.compare_digest() for secret comparisons instead of == or !=.")
+        if by_name.get("nosql_injection", SecurityScanCategory("nosql_injection", 100, 0, "")).findings:
+            recs.append("Use parameterized NoSQL filters instead of dynamic query construction.")
+        if by_name.get("insecure_cookies", SecurityScanCategory("insecure_cookies", 100, 0, "")).findings:
+            recs.append("Set secure=True, httponly=True, and samesite='Lax' on session cookies.")
+        if by_name.get("jwt_security", SecurityScanCategory("jwt_security", 100, 0, "")).findings:
+            recs.append("Store JWT secrets in environment variables and always verify signatures.")
+        if by_name.get("cors", SecurityScanCategory("cors", 100, 0, "")).findings:
+            recs.append("Restrict CORS origins to trusted domains instead of wildcard (*).")
+        if by_name.get("csrf", SecurityScanCategory("csrf", 100, 0, "")).findings:
+            recs.append("Add CSRF tokens to state-changing form submissions and API endpoints.")
+        if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
+            recs.append("Simplify regex patterns to avoid nested quantifiers that cause ReDoS.")
+        if by_name.get("xss", SecurityScanCategory("xss", 100, 0, "")).findings:
+            recs.append("Escape or sanitize user input before rendering in HTML responses.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -431,6 +502,90 @@ class SecurityScanner:
                 )
             )
 
+        if "nosql_injection" in self.checks:
+            analyzer = self._nosql_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="nosql_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_cookies" in self.checks:
+            analyzer = self._cookies_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_cookies",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "jwt_security" in self.checks:
+            analyzer = self._jwt_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="jwt_security",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "cors" in self.checks:
+            analyzer = self._cors_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="cors",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "csrf" in self.checks:
+            analyzer = self._csrf_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="csrf",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "redos" in self.checks:
+            analyzer = self._redos_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="redos",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "xss" in self.checks:
+            analyzer = self._xss_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xss",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -492,6 +647,20 @@ class SecurityScanner:
             )
         if "timing_attack" in self.checks:
             lines.extend(["## Timing attack", self._timing_attack_analyzer().to_context(limit=limit), ""])
+        if "nosql_injection" in self.checks:
+            lines.extend(["## NoSQL injection", self._nosql_analyzer().to_context(limit=limit), ""])
+        if "insecure_cookies" in self.checks:
+            lines.extend(["## Insecure cookies", self._cookies_analyzer().to_context(limit=limit), ""])
+        if "jwt_security" in self.checks:
+            lines.extend(["## JWT security", self._jwt_analyzer().to_context(limit=limit), ""])
+        if "cors" in self.checks:
+            lines.extend(["## CORS", self._cors_analyzer().to_context(limit=limit), ""])
+        if "csrf" in self.checks:
+            lines.extend(["## CSRF", self._csrf_analyzer().to_context(limit=limit), ""])
+        if "redos" in self.checks:
+            lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
+        if "xss" in self.checks:
+            lines.extend(["## XSS", self._xss_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -558,3 +727,38 @@ class SecurityScanner:
     def timing_attack(self) -> TimingAttackAnalyzer:
         """Underlying timing-attack analyzer."""
         return self._timing_attack_analyzer()
+
+    @property
+    def nosql_injection(self) -> NoSQLInjectionAnalyzer:
+        """Underlying NoSQL injection analyzer."""
+        return self._nosql_analyzer()
+
+    @property
+    def insecure_cookies(self) -> InsecureCookieAnalyzer:
+        """Underlying insecure-cookie analyzer."""
+        return self._cookies_analyzer()
+
+    @property
+    def jwt_security(self) -> JWTSecurityAnalyzer:
+        """Underlying JWT security analyzer."""
+        return self._jwt_analyzer()
+
+    @property
+    def cors(self) -> CORSAnalyzer:
+        """Underlying CORS analyzer."""
+        return self._cors_analyzer()
+
+    @property
+    def csrf(self) -> CSRFAnalyzer:
+        """Underlying CSRF analyzer."""
+        return self._csrf_analyzer()
+
+    @property
+    def redos(self) -> ReDoSAnalyzer:
+        """Underlying ReDoS analyzer."""
+        return self._redos_analyzer()
+
+    @property
+    def xss(self) -> XSSAnalyzer:
+        """Underlying XSS analyzer."""
+        return self._xss_analyzer()

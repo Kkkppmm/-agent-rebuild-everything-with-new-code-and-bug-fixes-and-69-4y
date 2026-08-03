@@ -48,9 +48,12 @@ from devai.hardcoded_config import (
 from devai.import_graph import ImportEdge, ImportGraph
 from devai.interpolate import interpolate, interpolate_context
 from devai.library import ProgramEntry, ProgramLibrary
+from devai.nosql_injection import NoSQLInjectionAnalyzer, NoSQLInjectionFinding, NoSQLInjectionStats
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
+from devai.xss import XSSAnalyzer, XSSFinding, XSSStats
 from devai.trace import DevTrace, TraceEvent
 from devai.schedule import DevSchedule, ScheduleResult, ScheduledJob, cron_matches, validate_cron
 from devai.schedule_config import apply_schedule_config, load_schedule_config, schedule_from_config
@@ -78,10 +81,14 @@ from devai.command_injection import (
     CommandInjectionFinding,
     CommandInjectionStats,
 )
+from devai.cors import CORSAnalyzer, CORSFinding, CORSStats
+from devai.csrf import CSRFAnalyzer, CSRFFinding, CSRFStats
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
+from devai.insecure_cookies import InsecureCookieAnalyzer, InsecureCookieFinding, InsecureCookieStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
+from devai.jwt_security import JWTSecurityAnalyzer, JWTSecurityFinding, JWTSecurityStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
@@ -109,7 +116,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.6.0"
+__version__ = "6.0.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -160,6 +167,12 @@ __all__ = [
     "CodeSandbox",
     "CodeSymbolIndex",
     "CoderAgent",
+    "CORSAnalyzer",
+    "CORSFinding",
+    "CORSStats",
+    "CSRFAnalyzer",
+    "CSRFFinding",
+    "CSRFStats",
     "DebugArtifact",
     "DebugArtifactDetector",
     "DebugArtifactStats",
@@ -243,6 +256,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "ResourceLeakAnalyzer",
     "ResourceLeakFinding",
     "ResourceLeakStats",
@@ -269,8 +285,14 @@ __all__ = [
     "SSRFStats",
     "SecurityAuditResult",
     "SecurityFinding",
+    "JWTSecurityAnalyzer",
+    "JWTSecurityFinding",
+    "JWTSecurityStats",
     "ImportEdge",
     "ImportGraph",
+    "InsecureCookieAnalyzer",
+    "InsecureCookieFinding",
+    "InsecureCookieStats",
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
@@ -287,6 +309,9 @@ __all__ = [
     "TestMapReport",
     "TestMapper",
     "TokenBudget",
+    "NoSQLInjectionAnalyzer",
+    "NoSQLInjectionFinding",
+    "NoSQLInjectionStats",
     "NotebookCell",
     "NotebookReader",
     "TypingCoverage",
@@ -295,6 +320,9 @@ __all__ = [
     "TraceEvent",
     "WatchEvent",
     "WatchResult",
+    "XSSAnalyzer",
+    "XSSFinding",
+    "XSSStats",
     "WorkflowResult",
     "WorkflowStepResult",
     "apply_unified_diff",
