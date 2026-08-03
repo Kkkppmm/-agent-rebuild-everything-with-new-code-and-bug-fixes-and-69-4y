@@ -124,6 +124,14 @@ print(ai.review("def add(a, b): return a + b"))
 ```
 
 ```python
+from devai import DevAI
+
+# Bootstrap from environment variables (DEVAI_API_KEY, DEVAI_PROVIDER, etc.)
+ai = DevAI.from_env()  # set DEVAI_USE_MOCK=1 for local dev without an API key
+print(ai.explain("x = [i**2 for i in range(10)]"))
+```
+
+```python
 from devai import quickstart
 
 # Full runtime with programs, presets, and workflows
@@ -592,11 +600,14 @@ Set environment variables, create a project config file (`.devai.yaml`), or pass
 
 | Variable | Description |
 |----------|-------------|
+| `DEVAI_PROVIDER` | Provider name: `openai`, `ollama`, or `mock` |
+| `DEVAI_USE_MOCK` | Set to `1` or `true` to use the mock LLM |
 | `DEVAI_API_KEY` | API key for the LLM provider |
 | `DEVAI_BASE_URL` | Base URL (default: OpenAI) |
 | `DEVAI_MODEL` | Model name (default: `gpt-4o-mini`) |
 | `DEVAI_MAX_TOKENS` | Max tokens per request |
 | `DEVAI_TEMPERATURE` | Sampling temperature |
+| `DEVAI_PROJECT_PATH` | Default project directory for `DevAI.from_env()` |
 
 ## License
 

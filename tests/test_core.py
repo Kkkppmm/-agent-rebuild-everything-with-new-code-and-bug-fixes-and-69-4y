@@ -34,6 +34,27 @@ class TestDevAIConfig:
         assert config.model == "gpt-4"
         assert config.api_key == "env-key"
 
+    def test_from_env_openai(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_PROVIDER", "openai")
+        monkeypatch.setenv("DEVAI_API_KEY", "sk-test")
+        monkeypatch.setenv("DEVAI_MODEL", "gpt-4o")
+        config = DevAIConfig.from_env()
+        assert config.api_key == "sk-test"
+        assert config.model == "gpt-4o"
+
+    def test_from_env_mock(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_USE_MOCK", "true")
+        config = DevAIConfig.from_env()
+        assert config.api_key == "mock"
+        assert config.model == "mock-model"
+
+    def test_from_env_ollama(self, monkeypatch):
+        monkeypatch.delenv("DEVAI_API_KEY", raising=False)
+        monkeypatch.setenv("DEVAI_PROVIDER", "ollama")
+        config = DevAIConfig.from_env()
+        assert config.api_key == "ollama"
+        assert "11434" in config.base_url
+
 
 class TestMessage:
     def test_system_message(self):

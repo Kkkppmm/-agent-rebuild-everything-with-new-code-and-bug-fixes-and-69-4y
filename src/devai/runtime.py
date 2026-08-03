@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -63,6 +64,16 @@ class DevRuntime:
             kit=kit,
             project_path=project_path,
         )
+
+    @classmethod
+    def from_env(cls, **kwargs: Any) -> DevRuntime:
+        """Bootstrap a runtime from environment variables.
+
+        Uses ``DevAIConfig.from_env()`` and optional ``DEVAI_PROJECT_PATH``.
+        """
+        project_path = kwargs.pop("project_path", None) or os.environ.get("DEVAI_PROJECT_PATH")
+        config = DevAIConfig.from_env(**kwargs)
+        return cls.from_config(config, project_path=project_path)
 
     @classmethod
     def from_config(

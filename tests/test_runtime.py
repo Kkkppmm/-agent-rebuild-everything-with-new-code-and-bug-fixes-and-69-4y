@@ -58,6 +58,12 @@ class TestDevRuntime:
         runtime = DevRuntime.from_config(config, client=MockLLMClient())
         assert runtime.config.model == "test"
 
+    def test_from_env_mock(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_USE_MOCK", "true")
+        runtime = DevRuntime.from_env()
+        assert runtime.config.api_key == "mock"
+        assert runtime.review("def foo(): pass")
+
     def test_program_and_run(self):
         runtime = DevRuntime.create(use_mock=True)
         program = runtime.program("audit").add("review", "review")
