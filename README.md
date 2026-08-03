@@ -105,7 +105,12 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **OpenRedirectAnalyzer** — Detect open redirect vulnerabilities from user-controlled URLs
 - **TimingAttackAnalyzer** — Detect non-constant-time secret comparisons
 - **HardcodedConfigAnalyzer** — Detect hardcoded database URLs, passwords, and API endpoints
-- **SecurityScanner** — Unified static security scan with 15 checks: secrets, injections, dangerous calls, insecure random, weak crypto, log injection, SSRF, path traversal, XSS, CSRF, ReDoS, open redirect, timing attacks, and hardcoded config
+- **UnsafeDeserializationAnalyzer** — Detect pickle, yaml.load, and marshal deserialization risks
+- **JWTSecurityAnalyzer** — Detect insecure JWT decode and hardcoded secrets
+- **CORSAnalyzer** — Detect overly permissive CORS configurations
+- **NoSQLInjectionAnalyzer** — Detect dynamic NoSQL query construction in MongoDB-style calls
+- **InsecureCookieAnalyzer** — Detect missing secure/httponly flags on session cookies
+- **SecurityScanner** — Unified static security scan with 20 checks: secrets, injections, dangerous calls, insecure random, weak crypto, log injection, SSRF, path traversal, XSS, CSRF, ReDoS, open redirect, timing attacks, hardcoded config, unsafe deserialization, JWT security, CORS, NoSQL injection, and insecure cookies
 
 ## Installation
 

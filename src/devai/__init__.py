@@ -80,6 +80,7 @@ from devai.csrf import CSRFAnalyzer, CSRFFinding, CSRFStats
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
+from devai.insecure_cookies import InsecureCookieAnalyzer, InsecureCookieFinding, InsecureCookieStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
 from devai.jwt_security import JWTSecurityAnalyzer, JWTSecurityFinding, JWTSecurityStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
@@ -91,6 +92,7 @@ from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLIn
 from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
 from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberStats
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
+from devai.nosql_injection import NoSQLInjectionAnalyzer, NoSQLInjectionFinding, NoSQLInjectionStats
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
@@ -110,7 +112,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.9.0"
+__version__ = "6.0.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -226,6 +228,9 @@ __all__ = [
     "MagicNumberDetector",
     "MagicNumberStats",
     "ModuleCouplingAnalyzer",
+    "NoSQLInjectionAnalyzer",
+    "NoSQLInjectionFinding",
+    "NoSQLInjectionStats",
     "ModuleMapping",
     "NamingConventionAnalyzer",
     "NamingStats",
@@ -284,6 +289,9 @@ __all__ = [
     "SecurityFinding",
     "ImportEdge",
     "ImportGraph",
+    "InsecureCookieAnalyzer",
+    "InsecureCookieFinding",
+    "InsecureCookieStats",
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",

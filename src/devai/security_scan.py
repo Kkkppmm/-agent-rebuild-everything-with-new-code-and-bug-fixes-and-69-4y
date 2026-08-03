@@ -13,8 +13,10 @@ from devai.csrf import CSRFAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.insecure_cookies import InsecureCookieAnalyzer
 from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
+from devai.nosql_injection import NoSQLInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
@@ -46,6 +48,8 @@ CHECK_NAMES = (
     "unsafe_deserialization",
     "jwt_security",
     "cors",
+    "nosql_injection",
+    "insecure_cookies",
 )
 
 
@@ -141,7 +145,8 @@ class SecurityScanner:
     command injection checks, insecure random usage, path-traversal risks,
     weak crypto usage, log injection risks, SSRF risks, XSS, CSRF, ReDoS,
     open redirect, timing attacks, hardcoded configuration, unsafe deserialization,
-    JWT security, and CORS misconfigurations into one report.
+    JWT security, CORS misconfigurations, NoSQL injection, and insecure cookies
+    into one report.
   """
 
     def __init__(
@@ -177,6 +182,8 @@ class SecurityScanner:
         self._unsafe_deserialization: UnsafeDeserializationAnalyzer | None = None
         self._jwt_security: JWTSecurityAnalyzer | None = None
         self._cors: CORSAnalyzer | None = None
+        self._nosql: NoSQLInjectionAnalyzer | None = None
+        self._insecure_cookies: InsecureCookieAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -270,6 +277,18 @@ class SecurityScanner:
             self._cors = CORSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._cors
 
+    def _nosql_analyzer(self) -> NoSQLInjectionAnalyzer:
+        if self._nosql is None:
+            self._nosql = NoSQLInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._nosql
+
+    def _insecure_cookies_analyzer(self) -> InsecureCookieAnalyzer:
+        if self._insecure_cookies is None:
+            self._insecure_cookies = InsecureCookieAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_cookies
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -314,6 +333,10 @@ class SecurityScanner:
             recs.append("Always verify JWT signatures and specify an explicit algorithms allowlist.")
         if by_name.get("cors", SecurityScanCategory("cors", 100, 0, "")).findings:
             recs.append("Restrict CORS origins to trusted domains instead of using wildcards.")
+        if by_name.get("nosql_injection", SecurityScanCategory("nosql_injection", 100, 0, "")).findings:
+            recs.append("Use structured query dicts instead of string-built NoSQL filters.")
+        if by_name.get("insecure_cookies", SecurityScanCategory("insecure_cookies", 100, 0, "")).findings:
+            recs.append("Set secure=True, httponly=True, and samesite='Lax' on session cookies.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -540,6 +563,30 @@ class SecurityScanner:
                 )
             )
 
+        if "nosql_injection" in self.checks:
+            analyzer = self._nosql_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="nosql_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_cookies" in self.checks:
+            analyzer = self._insecure_cookies_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_cookies",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -609,6 +656,12 @@ class SecurityScanner:
             lines.extend(["## JWT security", self._jwt_security_analyzer().to_context(limit=limit), ""])
         if "cors" in self.checks:
             lines.extend(["## CORS", self._cors_analyzer().to_context(limit=limit), ""])
+        if "nosql_injection" in self.checks:
+            lines.extend(["## NoSQL injection", self._nosql_analyzer().to_context(limit=limit), ""])
+        if "insecure_cookies" in self.checks:
+            lines.extend(
+                ["## Insecure cookies", self._insecure_cookies_analyzer().to_context(limit=limit), ""]
+            )
         return "\n".join(lines).rstrip()
 
     @property
@@ -700,3 +753,13 @@ class SecurityScanner:
     def cors(self) -> CORSAnalyzer:
         """Underlying CORS analyzer."""
         return self._cors_analyzer()
+
+    @property
+    def nosql_injection(self) -> NoSQLInjectionAnalyzer:
+        """Underlying NoSQL injection analyzer."""
+        return self._nosql_analyzer()
+
+    @property
+    def insecure_cookies(self) -> InsecureCookieAnalyzer:
+        """Underlying insecure-cookie analyzer."""
+        return self._insecure_cookies_analyzer()
