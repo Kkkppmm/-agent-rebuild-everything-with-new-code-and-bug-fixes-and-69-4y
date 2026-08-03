@@ -49,6 +49,7 @@ from devai.import_graph import ImportEdge, ImportGraph
 from devai.interpolate import interpolate, interpolate_context
 from devai.library import ProgramEntry, ProgramLibrary
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
 from devai.trace import DevTrace, TraceEvent
@@ -78,6 +79,7 @@ from devai.command_injection import (
     CommandInjectionFinding,
     CommandInjectionStats,
 )
+from devai.csrf import CSRFAnalyzer, CSRFFinding, CSRFStats
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
@@ -100,6 +102,7 @@ from devai.unsafe_deserialization import (
     UnsafeDeserializationStats,
 )
 from devai.weak_crypto import WeakCryptoAnalyzer, WeakCryptoFinding, WeakCryptoStats
+from devai.xss import XSSAnalyzer, XSSFinding, XSSStats
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -109,7 +112,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.6.0"
+__version__ = "5.7.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -144,6 +147,9 @@ __all__ = [
     "CommandInjectionAnalyzer",
     "CommandInjectionFinding",
     "CommandInjectionStats",
+    "CSRFAnalyzer",
+    "CSRFFinding",
+    "CSRFStats",
     "ComplexityHotspot",
     "ComplexityHotspotAnalyzer",
     "CodeSmell",
@@ -243,6 +249,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "ResourceLeakAnalyzer",
     "ResourceLeakFinding",
     "ResourceLeakStats",
@@ -277,6 +286,9 @@ __all__ = [
     "LogInjectionAnalyzer",
     "LogInjectionFinding",
     "LogInjectionStats",
+    "XSSAnalyzer",
+    "XSSFinding",
+    "XSSStats",
     "WeakCryptoAnalyzer",
     "WeakCryptoFinding",
     "WeakCryptoStats",
