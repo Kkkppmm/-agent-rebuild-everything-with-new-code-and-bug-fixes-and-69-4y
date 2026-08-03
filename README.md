@@ -101,7 +101,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **SSRFAnalyzer** — Detect server-side request forgery risks in outbound HTTP client calls
 - **ReDoSAnalyzer** — Detect regex patterns vulnerable to catastrophic backtracking
 - **XSSAnalyzer** — Detect reflected XSS risks in Python web handlers
-- **SecurityScanner** — Unified static security scan (15 checks: secrets, injections, dangerous calls, crypto, SSRF, ReDoS, XSS, and more)
+- **CSRFAnalyzer** — Detect missing CSRF protection on state-changing web handlers
+- **SecurityScanner** — Unified static security scan (16 checks: secrets, injections, dangerous calls, crypto, SSRF, ReDoS, XSS, CSRF, and more)
 
 ## Installation
 

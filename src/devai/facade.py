@@ -39,6 +39,7 @@ from devai.tech_debt import TechDebtScanner
 from devai.test_mapper import TestMapper
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.xss import XSSAnalyzer
+from devai.csrf import CSRFAnalyzer
 from devai.project_health import ProjectHealth
 from devai.program import DevProgram, ProgramResult
 from devai.project_detect import ProjectDetector, ProjectProfile
@@ -371,6 +372,10 @@ class DevAI:
     def xss(self, path: str | Path = ".", **kwargs: Any) -> XSSAnalyzer:
         """Detect reflected XSS risks in web handlers."""
         return XSSAnalyzer(str(path), **kwargs)
+
+    def csrf(self, path: str | Path = ".", **kwargs: Any) -> CSRFAnalyzer:
+        """Detect missing CSRF protection on state-changing web handlers."""
+        return CSRFAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""

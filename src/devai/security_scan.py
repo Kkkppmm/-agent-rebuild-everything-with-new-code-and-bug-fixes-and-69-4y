@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from devai.command_injection import CommandInjectionAnalyzer
+from devai.csrf import CSRFAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
@@ -40,6 +41,7 @@ CHECK_NAMES = (
     "timing_attack",
     "redos",
     "xss",
+    "csrf",
 )
 
 
@@ -167,6 +169,7 @@ class SecurityScanner:
         self._timing_attack: TimingAttackAnalyzer | None = None
         self._redos: ReDoSAnalyzer | None = None
         self._xss: XSSAnalyzer | None = None
+        self._csrf: CSRFAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -247,6 +250,11 @@ class SecurityScanner:
             self._xss = XSSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._xss
 
+    def _csrf_analyzer(self) -> CSRFAnalyzer:
+        if self._csrf is None:
+            self._csrf = CSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._csrf
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -285,6 +293,8 @@ class SecurityScanner:
             recs.append("Simplify regex patterns — avoid nested quantifiers and repeated (.*) groups.")
         if by_name.get("xss", SecurityScanCategory("xss", 100, 0, "")).findings:
             recs.append("Escape user input in HTML responses with html.escape() or framework auto-escaping.")
+        if by_name.get("csrf", SecurityScanCategory("csrf", 100, 0, "")).findings:
+            recs.append("Add CSRF tokens or middleware to state-changing POST/PUT/DELETE/PATCH handlers.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -475,6 +485,18 @@ class SecurityScanner:
                 )
             )
 
+        if "csrf" in self.checks:
+            analyzer = self._csrf_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="csrf",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -540,6 +562,8 @@ class SecurityScanner:
             lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
         if "xss" in self.checks:
             lines.extend(["## XSS", self._xss_analyzer().to_context(limit=limit), ""])
+        if "csrf" in self.checks:
+            lines.extend(["## CSRF", self._csrf_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -616,3 +640,8 @@ class SecurityScanner:
     def xss(self) -> XSSAnalyzer:
         """Underlying XSS analyzer."""
         return self._xss_analyzer()
+
+    @property
+    def csrf(self) -> CSRFAnalyzer:
+        """Underlying CSRF analyzer."""
+        return self._csrf_analyzer()
