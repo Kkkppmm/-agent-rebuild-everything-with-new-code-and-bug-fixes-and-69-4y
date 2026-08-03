@@ -75,11 +75,13 @@ from devai.command_injection import (
     CommandInjectionFinding,
     CommandInjectionStats,
 )
+from devai.cors import CORSAnalyzer, CORSFinding, CORSStats
 from devai.csrf import CSRFAnalyzer, CSRFFinding, CSRFStats
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
+from devai.jwt_security import JWTSecurityAnalyzer, JWTSecurityFinding, JWTSecurityStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
 from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
@@ -92,6 +94,11 @@ from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, Nami
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
+from devai.unsafe_deserialization import (
+    UnsafeDeserializationAnalyzer,
+    UnsafeDeserializationFinding,
+    UnsafeDeserializationStats,
+)
 from devai.xss import XSSAnalyzer, XSSFinding, XSSStats
 from devai.weak_crypto import WeakCryptoAnalyzer, WeakCryptoFinding, WeakCryptoStats
 from devai.schemas import (
@@ -103,7 +110,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.8.0"
+__version__ = "5.9.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -141,6 +148,9 @@ __all__ = [
     "CSRFStats",
     "ComplexityHotspot",
     "ComplexityHotspotAnalyzer",
+    "CORSAnalyzer",
+    "CORSFinding",
+    "CORSStats",
     "CodeSmell",
     "CodeSmellDetector",
     "CodeSmellStats",
@@ -277,6 +287,9 @@ __all__ = [
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
+    "JWTSecurityAnalyzer",
+    "JWTSecurityFinding",
+    "JWTSecurityStats",
     "LogInjectionAnalyzer",
     "LogInjectionFinding",
     "LogInjectionStats",
@@ -293,6 +306,9 @@ __all__ = [
     "TimingAttackAnalyzer",
     "TimingAttackFinding",
     "TimingAttackStats",
+    "UnsafeDeserializationAnalyzer",
+    "UnsafeDeserializationFinding",
+    "UnsafeDeserializationStats",
     "TestMapReport",
     "TestMapper",
     "TokenBudget",

@@ -8,10 +8,12 @@ from pathlib import Path
 from typing import Any
 
 from devai.command_injection import CommandInjectionAnalyzer
+from devai.cors import CORSAnalyzer
 from devai.csrf import CSRFAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
+from devai.jwt_security import JWTSecurityAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
@@ -21,6 +23,7 @@ from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.timing_attack import TimingAttackAnalyzer
+from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.xss import XSSAnalyzer
 
@@ -40,6 +43,9 @@ CHECK_NAMES = (
     "open_redirect",
     "timing_attack",
     "hardcoded_config",
+    "unsafe_deserialization",
+    "jwt_security",
+    "cors",
 )
 
 
@@ -134,7 +140,8 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
     weak crypto usage, log injection risks, SSRF risks, XSS, CSRF, ReDoS,
-    open redirect, timing attacks, and hardcoded configuration into one report.
+    open redirect, timing attacks, hardcoded configuration, unsafe deserialization,
+    JWT security, and CORS misconfigurations into one report.
   """
 
     def __init__(
@@ -167,6 +174,9 @@ class SecurityScanner:
         self._open_redirect: OpenRedirectAnalyzer | None = None
         self._timing_attack: TimingAttackAnalyzer | None = None
         self._hardcoded_config: HardcodedConfigAnalyzer | None = None
+        self._unsafe_deserialization: UnsafeDeserializationAnalyzer | None = None
+        self._jwt_security: JWTSecurityAnalyzer | None = None
+        self._cors: CORSAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -243,6 +253,23 @@ class SecurityScanner:
             self._hardcoded_config = HardcodedConfigAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._hardcoded_config
 
+    def _unsafe_deserialization_analyzer(self) -> UnsafeDeserializationAnalyzer:
+        if self._unsafe_deserialization is None:
+            self._unsafe_deserialization = UnsafeDeserializationAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._unsafe_deserialization
+
+    def _jwt_security_analyzer(self) -> JWTSecurityAnalyzer:
+        if self._jwt_security is None:
+            self._jwt_security = JWTSecurityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._jwt_security
+
+    def _cors_analyzer(self) -> CORSAnalyzer:
+        if self._cors is None:
+            self._cors = CORSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._cors
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -281,6 +308,12 @@ class SecurityScanner:
             recs.append("Use hmac.compare_digest() or secrets.compare_digest() for secret comparisons.")
         if by_name.get("hardcoded_config", SecurityScanCategory("hardcoded_config", 100, 0, "")).findings:
             recs.append("Move configuration values to environment variables or a secrets manager.")
+        if by_name.get("unsafe_deserialization", SecurityScanCategory("unsafe_deserialization", 100, 0, "")).findings:
+            recs.append("Avoid pickle/marshal on untrusted data; use json or yaml.safe_load instead.")
+        if by_name.get("jwt_security", SecurityScanCategory("jwt_security", 100, 0, "")).findings:
+            recs.append("Always verify JWT signatures and specify an explicit algorithms allowlist.")
+        if by_name.get("cors", SecurityScanCategory("cors", 100, 0, "")).findings:
+            recs.append("Restrict CORS origins to trusted domains instead of using wildcards.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -471,6 +504,42 @@ class SecurityScanner:
                 )
             )
 
+        if "unsafe_deserialization" in self.checks:
+            analyzer = self._unsafe_deserialization_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="unsafe_deserialization",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "jwt_security" in self.checks:
+            analyzer = self._jwt_security_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="jwt_security",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "cors" in self.checks:
+            analyzer = self._cors_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="cors",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -532,6 +601,14 @@ class SecurityScanner:
             lines.extend(["## Timing attack", self._timing_attack_analyzer().to_context(limit=limit), ""])
         if "hardcoded_config" in self.checks:
             lines.extend(["## Hardcoded config", self._hardcoded_config_analyzer().to_context(limit=limit), ""])
+        if "unsafe_deserialization" in self.checks:
+            lines.extend(
+                ["## Unsafe deserialization", self._unsafe_deserialization_analyzer().to_context(limit=limit), ""]
+            )
+        if "jwt_security" in self.checks:
+            lines.extend(["## JWT security", self._jwt_security_analyzer().to_context(limit=limit), ""])
+        if "cors" in self.checks:
+            lines.extend(["## CORS", self._cors_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -608,3 +685,18 @@ class SecurityScanner:
     def hardcoded_config(self) -> HardcodedConfigAnalyzer:
         """Underlying hardcoded-config analyzer."""
         return self._hardcoded_config_analyzer()
+
+    @property
+    def unsafe_deserialization(self) -> UnsafeDeserializationAnalyzer:
+        """Underlying unsafe-deserialization analyzer."""
+        return self._unsafe_deserialization_analyzer()
+
+    @property
+    def jwt_security(self) -> JWTSecurityAnalyzer:
+        """Underlying JWT security analyzer."""
+        return self._jwt_security_analyzer()
+
+    @property
+    def cors(self) -> CORSAnalyzer:
+        """Underlying CORS analyzer."""
+        return self._cors_analyzer()
