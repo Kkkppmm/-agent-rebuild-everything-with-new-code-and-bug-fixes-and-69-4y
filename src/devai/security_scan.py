@@ -8,15 +8,21 @@ from pathlib import Path
 from typing import Any
 
 from devai.command_injection import CommandInjectionAnalyzer
+from devai.csrf import CSRFAnalyzer
 from devai.dangerous_calls import DangerousCallsAnalyzer
+from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
+from devai.open_redirect import OpenRedirectAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
+from devai.redos import ReDoSAnalyzer
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
+from devai.timing_attack import TimingAttackAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xss import XSSAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -28,6 +34,12 @@ CHECK_NAMES = (
     "weak_crypto",
     "log_injection",
     "ssrf",
+    "xss",
+    "csrf",
+    "redos",
+    "open_redirect",
+    "timing_attack",
+    "hardcoded_config",
 )
 
 
@@ -121,7 +133,8 @@ class SecurityScanner:
 
     Combines secrets scanning, dangerous-call detection, SQL injection checks,
     command injection checks, insecure random usage, path-traversal risks,
-    weak crypto usage, log injection risks, and SSRF risks into one report.
+    weak crypto usage, log injection risks, SSRF risks, XSS, CSRF, ReDoS,
+    open redirect, timing attacks, and hardcoded configuration into one report.
   """
 
     def __init__(
@@ -148,6 +161,12 @@ class SecurityScanner:
         self._weak_crypto: WeakCryptoAnalyzer | None = None
         self._log_injection: LogInjectionAnalyzer | None = None
         self._ssrf: SSRFAnalyzer | None = None
+        self._xss: XSSAnalyzer | None = None
+        self._csrf: CSRFAnalyzer | None = None
+        self._redos: ReDoSAnalyzer | None = None
+        self._open_redirect: OpenRedirectAnalyzer | None = None
+        self._timing_attack: TimingAttackAnalyzer | None = None
+        self._hardcoded_config: HardcodedConfigAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -194,6 +213,36 @@ class SecurityScanner:
             self._ssrf = SSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._ssrf
 
+    def _xss_analyzer(self) -> XSSAnalyzer:
+        if self._xss is None:
+            self._xss = XSSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xss
+
+    def _csrf_analyzer(self) -> CSRFAnalyzer:
+        if self._csrf is None:
+            self._csrf = CSRFAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._csrf
+
+    def _redos_analyzer(self) -> ReDoSAnalyzer:
+        if self._redos is None:
+            self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redos
+
+    def _open_redirect_analyzer(self) -> OpenRedirectAnalyzer:
+        if self._open_redirect is None:
+            self._open_redirect = OpenRedirectAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._open_redirect
+
+    def _timing_attack_analyzer(self) -> TimingAttackAnalyzer:
+        if self._timing_attack is None:
+            self._timing_attack = TimingAttackAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._timing_attack
+
+    def _hardcoded_config_analyzer(self) -> HardcodedConfigAnalyzer:
+        if self._hardcoded_config is None:
+            self._hardcoded_config = HardcodedConfigAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._hardcoded_config
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -220,6 +269,18 @@ class SecurityScanner:
             recs.append("Use structured logging with extra={} instead of interpolating user data into messages.")
         if by_name.get("ssrf", SecurityScanCategory("ssrf", 100, 0, "")).findings:
             recs.append("Validate outbound URLs, block internal/private IP ranges, and use an allowlist of hosts.")
+        if by_name.get("xss", SecurityScanCategory("xss", 100, 0, "")).findings:
+            recs.append("Escape user input in HTML output and use auto-escaping templates.")
+        if by_name.get("csrf", SecurityScanCategory("csrf", 100, 0, "")).findings:
+            recs.append("Add CSRF token validation to all state-changing routes.")
+        if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
+            recs.append("Simplify regex patterns to avoid nested quantifiers and catastrophic backtracking.")
+        if by_name.get("open_redirect", SecurityScanCategory("open_redirect", 100, 0, "")).findings:
+            recs.append("Validate redirect URLs against an allowlist of trusted domains.")
+        if by_name.get("timing_attack", SecurityScanCategory("timing_attack", 100, 0, "")).findings:
+            recs.append("Use hmac.compare_digest() or secrets.compare_digest() for secret comparisons.")
+        if by_name.get("hardcoded_config", SecurityScanCategory("hardcoded_config", 100, 0, "")).findings:
+            recs.append("Move configuration values to environment variables or a secrets manager.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -338,6 +399,78 @@ class SecurityScanner:
                 )
             )
 
+        if "xss" in self.checks:
+            analyzer = self._xss_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xss",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "csrf" in self.checks:
+            analyzer = self._csrf_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="csrf",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "redos" in self.checks:
+            analyzer = self._redos_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="redos",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "open_redirect" in self.checks:
+            analyzer = self._open_redirect_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="open_redirect",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "timing_attack" in self.checks:
+            analyzer = self._timing_attack_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="timing_attack",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "hardcoded_config" in self.checks:
+            analyzer = self._hardcoded_config_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="hardcoded_config",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -387,6 +520,18 @@ class SecurityScanner:
             lines.extend(["## Log injection", self._log_injection_analyzer().to_context(limit=limit), ""])
         if "ssrf" in self.checks:
             lines.extend(["## SSRF", self._ssrf_analyzer().to_context(limit=limit), ""])
+        if "xss" in self.checks:
+            lines.extend(["## XSS", self._xss_analyzer().to_context(limit=limit), ""])
+        if "csrf" in self.checks:
+            lines.extend(["## CSRF", self._csrf_analyzer().to_context(limit=limit), ""])
+        if "redos" in self.checks:
+            lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
+        if "open_redirect" in self.checks:
+            lines.extend(["## Open redirect", self._open_redirect_analyzer().to_context(limit=limit), ""])
+        if "timing_attack" in self.checks:
+            lines.extend(["## Timing attack", self._timing_attack_analyzer().to_context(limit=limit), ""])
+        if "hardcoded_config" in self.checks:
+            lines.extend(["## Hardcoded config", self._hardcoded_config_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -433,3 +578,33 @@ class SecurityScanner:
     def ssrf(self) -> SSRFAnalyzer:
         """Underlying SSRF analyzer."""
         return self._ssrf_analyzer()
+
+    @property
+    def xss(self) -> XSSAnalyzer:
+        """Underlying XSS analyzer."""
+        return self._xss_analyzer()
+
+    @property
+    def csrf(self) -> CSRFAnalyzer:
+        """Underlying CSRF analyzer."""
+        return self._csrf_analyzer()
+
+    @property
+    def redos(self) -> ReDoSAnalyzer:
+        """Underlying ReDoS analyzer."""
+        return self._redos_analyzer()
+
+    @property
+    def open_redirect(self) -> OpenRedirectAnalyzer:
+        """Underlying open-redirect analyzer."""
+        return self._open_redirect_analyzer()
+
+    @property
+    def timing_attack(self) -> TimingAttackAnalyzer:
+        """Underlying timing-attack analyzer."""
+        return self._timing_attack_analyzer()
+
+    @property
+    def hardcoded_config(self) -> HardcodedConfigAnalyzer:
+        """Underlying hardcoded-config analyzer."""
+        return self._hardcoded_config_analyzer()

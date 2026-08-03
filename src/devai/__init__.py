@@ -34,6 +34,7 @@ from devai.duplicate_code import (
     DuplicateStats,
 )
 from devai.git_context import GitContext
+from devai.hardcoded_config import HardcodedConfigAnalyzer, HardcodedConfigFinding, HardcodedConfigStats
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
 from devai.health import HealthChecker, HealthResult, check_health
@@ -74,12 +75,15 @@ from devai.command_injection import (
     CommandInjectionFinding,
     CommandInjectionStats,
 )
+from devai.csrf import CSRFAnalyzer, CSRFFinding, CSRFStats
 from devai.async_blocking import AsyncBlockingDetector, AsyncBlockingFinding, AsyncBlockingStats
 from devai.dangerous_calls import DangerousCall, DangerousCallsAnalyzer, DangerousCallStats
 from devai.debug_artifacts import DebugArtifact, DebugArtifactDetector, DebugArtifactStats
 from devai.insecure_random import InsecureRandomAnalyzer, InsecureRandomFinding, InsecureRandomStats
 from devai.log_injection import LogInjectionAnalyzer, LogInjectionFinding, LogInjectionStats
+from devai.open_redirect import OpenRedirectAnalyzer, OpenRedirectFinding, OpenRedirectStats
 from devai.path_traversal import PathTraversalAnalyzer, PathTraversalFinding, PathTraversalStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.resource_leaks import ResourceLeakAnalyzer, ResourceLeakFinding, ResourceLeakStats
 from devai.sql_injection import SQLInjectionAnalyzer, SQLInjectionFinding, SQLInjectionStats
 from devai.ssrf import SSRFAnalyzer, SSRFFinding, SSRFStats
@@ -87,6 +91,8 @@ from devai.magic_numbers import MagicNumber, MagicNumberDetector, MagicNumberSta
 from devai.naming_conventions import NamingConventionAnalyzer, NamingStats, NamingViolation
 from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthReport
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
+from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
+from devai.xss import XSSAnalyzer, XSSFinding, XSSStats
 from devai.weak_crypto import WeakCryptoAnalyzer, WeakCryptoFinding, WeakCryptoStats
 from devai.schemas import (
     CodeIssue,
@@ -97,7 +103,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.5.0"
+__version__ = "5.8.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -130,6 +136,9 @@ __all__ = [
     "CommandInjectionAnalyzer",
     "CommandInjectionFinding",
     "CommandInjectionStats",
+    "CSRFAnalyzer",
+    "CSRFFinding",
+    "CSRFStats",
     "ComplexityHotspot",
     "ComplexityHotspotAnalyzer",
     "CodeSmell",
@@ -179,6 +188,9 @@ __all__ = [
     "DiskCachedLLMClient",
     "GitChangelog",
     "GitContext",
+    "HardcodedConfigAnalyzer",
+    "HardcodedConfigFinding",
+    "HardcodedConfigStats",
     "DuplicateBlock",
     "DuplicateCluster",
     "DuplicateCodeDetector",
@@ -211,6 +223,9 @@ __all__ = [
     "ModuleSurface",
     "NotebookCell",
     "NotebookReader",
+    "OpenRedirectAnalyzer",
+    "OpenRedirectFinding",
+    "OpenRedirectStats",
     "PatchResult",
     "PathTraversalAnalyzer",
     "PathTraversalFinding",
@@ -228,6 +243,9 @@ __all__ = [
     "ProjectDetector",
     "ProjectProfile",
     "PromptRegistry",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
     "ResourceLeakAnalyzer",
     "ResourceLeakFinding",
     "ResourceLeakStats",
@@ -265,10 +283,16 @@ __all__ = [
     "WeakCryptoAnalyzer",
     "WeakCryptoFinding",
     "WeakCryptoStats",
+    "XSSAnalyzer",
+    "XSSFinding",
+    "XSSStats",
     "SymbolInfo",
     "TechDebtItem",
     "TechDebtScanner",
     "TechDebtStats",
+    "TimingAttackAnalyzer",
+    "TimingAttackFinding",
+    "TimingAttackStats",
     "TestMapReport",
     "TestMapper",
     "TokenBudget",
