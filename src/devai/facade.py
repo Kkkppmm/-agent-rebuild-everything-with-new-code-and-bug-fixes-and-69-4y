@@ -116,6 +116,19 @@ class DevAI:
         """Bootstrap from a project directory and optional ``.devai.yaml`` config."""
         return cls(DevRuntime.from_project(path, use_mock=use_mock, **kwargs))
 
+    @classmethod
+    def from_env(
+        cls,
+        *,
+        project_path: str | Path | None = None,
+        **kwargs: Any,
+    ) -> DevAI:
+        """Bootstrap from environment variables (``DEVAI_PROVIDER``, ``DEVAI_API_KEY``, etc.)."""
+        from devai.core.config import DevAIConfig
+
+        config = DevAIConfig.from_env(**kwargs)
+        return cls(DevRuntime.from_config(config, project_path=project_path))
+
     @property
     def runtime(self) -> DevRuntime:
         """Underlying :class:`DevRuntime` for advanced usage."""

@@ -97,7 +97,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.5.0"
+__version__ = "5.5.1"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",

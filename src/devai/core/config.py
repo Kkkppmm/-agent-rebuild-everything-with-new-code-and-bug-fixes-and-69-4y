@@ -75,6 +75,24 @@ class DevAIConfig:
         )
 
     @classmethod
+    def from_env(cls, **overrides: Any) -> DevAIConfig:
+        """Create config from environment variables.
+
+        Reads ``DEVAI_PROVIDER`` (openai, ollama, mock; default openai),
+        ``DEVAI_API_KEY``, ``DEVAI_BASE_URL``, ``DEVAI_MODEL``,
+        ``DEVAI_MAX_TOKENS``, and ``DEVAI_TEMPERATURE``.
+        Explicit keyword arguments override environment values.
+        """
+        provider = overrides.pop("provider", None) or os.environ.get("DEVAI_PROVIDER", "openai")
+        normalized = provider.lower().strip()
+        if normalized == "mock":
+            model = overrides.pop("model", None) or os.environ.get("DEVAI_MODEL", "mock-model")
+            return cls(api_key="mock", model=model, **overrides)
+        api_key = overrides.pop("api_key", None)
+        model = overrides.pop("model", None)
+        return cls.from_provider(normalized, api_key=api_key, model=model, **overrides)
+
+    @classmethod
     def from_provider(
         cls,
         provider: str,

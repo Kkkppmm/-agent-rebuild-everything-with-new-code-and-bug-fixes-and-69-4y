@@ -110,3 +110,10 @@ class TestDevAI:
         assert ai.log_injection(str(tmp_path)).health_score() >= 0
         assert ai.ssrf(str(tmp_path)).health_score() >= 0
         assert ai.security_scan(str(tmp_path)).health_score() == 100.0
+
+    def test_from_env_mock(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_PROVIDER", "mock")
+        ai = DevAI.from_env()
+        assert isinstance(ai, DevAI)
+        assert ai.config.api_key == "mock"
+        assert ai.review("def add(a, b): return a + b")
