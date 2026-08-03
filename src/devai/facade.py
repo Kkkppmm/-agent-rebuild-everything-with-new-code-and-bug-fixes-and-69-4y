@@ -106,6 +106,17 @@ class DevAI:
         )
 
     @classmethod
+    def from_env(
+        cls,
+        *,
+        project_path: str | Path | None = None,
+        provider: str | None = None,
+        **kwargs: Any,
+    ) -> DevAI:
+        """Create a DevAI instance from ``DEVAI_*`` environment variables."""
+        return cls(DevRuntime.from_env(project_path=project_path, provider=provider, **kwargs))
+
+    @classmethod
     def from_project(
         cls,
         path: str | Path | None = None,

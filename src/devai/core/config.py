@@ -75,6 +75,24 @@ class DevAIConfig:
         )
 
     @classmethod
+    def from_env(cls, *, provider: str | None = None, **kwargs: Any) -> DevAIConfig:
+        """Create configuration from ``DEVAI_*`` environment variables.
+
+        Supported variables:
+        - ``DEVAI_PROVIDER`` — ``openai``, ``ollama``, or ``mock`` (default: ``openai``)
+        - ``DEVAI_API_KEY``, ``DEVAI_BASE_URL``, ``DEVAI_MODEL``
+        - ``DEVAI_MAX_TOKENS``, ``DEVAI_TEMPERATURE``
+        """
+        prov = (provider or os.environ.get("DEVAI_PROVIDER", "openai")).lower().strip()
+        if prov == "mock":
+            return cls(
+                api_key="mock",
+                model=kwargs.pop("model", None) or os.environ.get("DEVAI_MODEL", "mock-model"),
+                **kwargs,
+            )
+        return cls.from_provider(prov, **kwargs)
+
+    @classmethod
     def from_provider(
         cls,
         provider: str,

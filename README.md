@@ -36,6 +36,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Resilient Client** — One-line wrapper combining rate limiting, circuit breaker, and metrics
 - **Health Checks** — Verify LLM provider connectivity before running jobs
 - **Quickstart** — `quickstart()` and `assistant()` helpers for minimal setup
+- **Environment Bootstrap** — `DevAI.from_env()` and `DevAIConfig.from_env()` for `DEVAI_*` env vars
 - **GitContext** — One-line git-aware reviews, commit messages, and PR descriptions
 - **DevTrace** — Lightweight tracing spans for program steps and workflows
 - **Program Templates** — `${var:}`, `${env:}`, and `${file:}` interpolation in program context
@@ -120,6 +121,16 @@ from devai import DevAI
 
 # Fastest path — mock mode, no API key required
 ai = DevAI.mock()
+print(ai.review("def add(a, b): return a + b"))
+```
+
+```python
+from devai import DevAI
+
+# Bootstrap from environment variables (DEVAI_PROVIDER, DEVAI_API_KEY, etc.)
+# export DEVAI_PROVIDER=openai
+# export DEVAI_API_KEY=sk-...
+ai = DevAI.from_env()
 print(ai.review("def add(a, b): return a + b"))
 ```
 

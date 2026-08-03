@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -63,6 +64,21 @@ class DevRuntime:
             kit=kit,
             project_path=project_path,
         )
+
+    @classmethod
+    def from_env(
+        cls,
+        *,
+        project_path: str | Path | None = None,
+        provider: str | None = None,
+        **kwargs: Any,
+    ) -> DevRuntime:
+        """Bootstrap a runtime from ``DEVAI_*`` environment variables."""
+        prov = (provider or os.environ.get("DEVAI_PROVIDER", "openai")).lower().strip()
+        if prov == "mock":
+            return cls.create(use_mock=True, project_path=project_path, **kwargs)
+        config = DevAIConfig.from_env(provider=provider, **kwargs)
+        return cls.from_config(config, project_path=project_path)
 
     @classmethod
     def from_config(

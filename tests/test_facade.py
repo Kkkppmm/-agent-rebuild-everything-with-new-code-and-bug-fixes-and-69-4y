@@ -11,6 +11,13 @@ class TestDevAI:
         assert isinstance(ai.runtime, DevRuntime)
         assert ai.review("def add(a, b): return a + b")
 
+    def test_from_env_mock(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_PROVIDER", "mock")
+        ai = DevAI.from_env()
+        assert isinstance(ai, DevAI)
+        assert ai.config.api_key == "mock"
+        assert ai.review("def add(a, b): return a + b")
+
     def test_delegates_assistant(self):
         ai = DevAI.mock()
         assert ai.assistant is ai.runtime.assistant

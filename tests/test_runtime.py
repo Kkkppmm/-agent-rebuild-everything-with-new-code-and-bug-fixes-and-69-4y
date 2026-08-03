@@ -40,6 +40,18 @@ class TestDevAIConfigProviders:
         except ConfigError:
             pass
 
+    def test_from_env_runtime_mock(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_PROVIDER", "mock")
+        runtime = DevRuntime.from_env()
+        assert runtime.config.api_key == "mock"
+        assert runtime.review("def foo(): pass")
+
+    def test_from_env_runtime_openai(self, monkeypatch):
+        monkeypatch.setenv("DEVAI_PROVIDER", "openai")
+        monkeypatch.setenv("DEVAI_API_KEY", "sk-test")
+        runtime = DevRuntime.from_env()
+        assert runtime.config.api_key == "sk-test"
+
 
 class TestDevRuntime:
     def test_create_mock(self):
