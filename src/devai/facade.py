@@ -38,10 +38,12 @@ from devai.duplicate_code import DuplicateCodeDetector
 from devai.tech_debt import TechDebtScanner
 from devai.test_mapper import TestMapper
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xss import XSSAnalyzer
 from devai.project_health import ProjectHealth
 from devai.program import DevProgram, ProgramResult
 from devai.project_detect import ProjectDetector, ProjectProfile
 from devai.prompt_registry import PromptRegistry
+from devai.redos import ReDoSAnalyzer
 from devai.runtime import DevRuntime
 from devai.workflow import DevWorkflow, WorkflowResult
 
@@ -361,6 +363,14 @@ class DevAI:
     def timing_attack(self, path: str | Path = ".", **kwargs: Any) -> TimingAttackAnalyzer:
         """Detect non-constant-time secret comparisons."""
         return TimingAttackAnalyzer(str(path), **kwargs)
+
+    def redos(self, path: str | Path = ".", **kwargs: Any) -> ReDoSAnalyzer:
+        """Detect regex patterns vulnerable to catastrophic backtracking."""
+        return ReDoSAnalyzer(str(path), **kwargs)
+
+    def xss(self, path: str | Path = ".", **kwargs: Any) -> XSSAnalyzer:
+        """Detect reflected XSS risks in web handlers."""
+        return XSSAnalyzer(str(path), **kwargs)
 
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""

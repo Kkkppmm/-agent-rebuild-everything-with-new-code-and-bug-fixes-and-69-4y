@@ -15,12 +15,14 @@ from devai.log_injection import LogInjectionAnalyzer
 from devai.open_redirect import OpenRedirectAnalyzer
 from devai.path_traversal import PathTraversalAnalyzer
 from devai.project import DEFAULT_IGNORE_DIRS
+from devai.redos import ReDoSAnalyzer
 from devai.secrets import SecretsScanner
 from devai.sql_injection import SQLInjectionAnalyzer
 from devai.ssrf import SSRFAnalyzer
 from devai.timing_attack import TimingAttackAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
+from devai.xss import XSSAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -36,6 +38,8 @@ CHECK_NAMES = (
     "open_redirect",
     "hardcoded_config",
     "timing_attack",
+    "redos",
+    "xss",
 )
 
 
@@ -161,6 +165,8 @@ class SecurityScanner:
         self._redirect: OpenRedirectAnalyzer | None = None
         self._hardcoded_config: HardcodedConfigAnalyzer | None = None
         self._timing_attack: TimingAttackAnalyzer | None = None
+        self._redos: ReDoSAnalyzer | None = None
+        self._xss: XSSAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -231,6 +237,16 @@ class SecurityScanner:
             self._timing_attack = TimingAttackAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._timing_attack
 
+    def _redos_analyzer(self) -> ReDoSAnalyzer:
+        if self._redos is None:
+            self._redos = ReDoSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._redos
+
+    def _xss_analyzer(self) -> XSSAnalyzer:
+        if self._xss is None:
+            self._xss = XSSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xss
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -265,6 +281,10 @@ class SecurityScanner:
             recs.append("Move hardcoded URLs, IPs, and DB URLs to environment variables or config files.")
         if by_name.get("timing_attack", SecurityScanCategory("timing_attack", 100, 0, "")).findings:
             recs.append("Use hmac.compare_digest() for secret comparisons instead of == or !=.")
+        if by_name.get("redos", SecurityScanCategory("redos", 100, 0, "")).findings:
+            recs.append("Simplify regex patterns — avoid nested quantifiers and repeated (.*) groups.")
+        if by_name.get("xss", SecurityScanCategory("xss", 100, 0, "")).findings:
+            recs.append("Escape user input in HTML responses with html.escape() or framework auto-escaping.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -431,6 +451,30 @@ class SecurityScanner:
                 )
             )
 
+        if "redos" in self.checks:
+            analyzer = self._redos_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="redos",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "xss" in self.checks:
+            analyzer = self._xss_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xss",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -492,6 +536,10 @@ class SecurityScanner:
             )
         if "timing_attack" in self.checks:
             lines.extend(["## Timing attack", self._timing_attack_analyzer().to_context(limit=limit), ""])
+        if "redos" in self.checks:
+            lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
+        if "xss" in self.checks:
+            lines.extend(["## XSS", self._xss_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -558,3 +606,13 @@ class SecurityScanner:
     def timing_attack(self) -> TimingAttackAnalyzer:
         """Underlying timing-attack analyzer."""
         return self._timing_attack_analyzer()
+
+    @property
+    def redos(self) -> ReDoSAnalyzer:
+        """Underlying ReDoS analyzer."""
+        return self._redos_analyzer()
+
+    @property
+    def xss(self) -> XSSAnalyzer:
+        """Underlying XSS analyzer."""
+        return self._xss_analyzer()

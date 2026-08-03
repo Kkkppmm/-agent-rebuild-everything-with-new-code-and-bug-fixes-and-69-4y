@@ -100,6 +100,8 @@ from devai.unsafe_deserialization import (
     UnsafeDeserializationStats,
 )
 from devai.weak_crypto import WeakCryptoAnalyzer, WeakCryptoFinding, WeakCryptoStats
+from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
+from devai.xss import XSSAnalyzer, XSSFinding, XSSStats
 from devai.schemas import (
     CodeIssue,
     CodeReviewResult,
@@ -109,7 +111,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "5.6.0"
+__version__ = "5.7.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -280,6 +282,12 @@ __all__ = [
     "WeakCryptoAnalyzer",
     "WeakCryptoFinding",
     "WeakCryptoStats",
+    "ReDoSAnalyzer",
+    "ReDoSFinding",
+    "ReDoSStats",
+    "XSSAnalyzer",
+    "XSSFinding",
+    "XSSStats",
     "SymbolInfo",
     "TechDebtItem",
     "TechDebtScanner",
