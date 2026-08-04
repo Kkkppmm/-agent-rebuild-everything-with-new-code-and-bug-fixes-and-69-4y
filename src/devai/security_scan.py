@@ -40,6 +40,8 @@ from devai.information_disclosure import InformationDisclosureAnalyzer
 from devai.clickjacking import ClickjackingAnalyzer
 from devai.host_header import HostHeaderAnalyzer
 from devai.session_fixation import SessionFixationAnalyzer
+from devai.insecure_file_upload import InsecureFileUploadAnalyzer
+from devai.weak_password import WeakPasswordAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -74,6 +76,8 @@ CHECK_NAMES = (
     "clickjacking",
     "host_header",
     "session_fixation",
+    "insecure_file_upload",
+    "weak_password",
 )
 
 
@@ -171,7 +175,8 @@ class SecurityScanner:
     timing attacks, insecure cookies, JWT security, CORS, CSRF, ReDoS, XSS,
     XXE, LDAP injection, debug exposure, TLS verification, SSTI, header injection,
     mass assignment, file permissions, information disclosure, clickjacking,
-    host header injection, and session fixation checks into one report.
+    host header injection, session fixation, insecure file upload, and weak
+    password checks into one report.
     """
 
     def __init__(
@@ -221,6 +226,8 @@ class SecurityScanner:
         self._clickjacking: ClickjackingAnalyzer | None = None
         self._host_header: HostHeaderAnalyzer | None = None
         self._session_fixation: SessionFixationAnalyzer | None = None
+        self._insecure_file_upload: InsecureFileUploadAnalyzer | None = None
+        self._weak_password: WeakPasswordAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -390,6 +397,20 @@ class SecurityScanner:
             )
         return self._session_fixation
 
+    def _insecure_file_upload_analyzer(self) -> InsecureFileUploadAnalyzer:
+        if self._insecure_file_upload is None:
+            self._insecure_file_upload = InsecureFileUploadAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_file_upload
+
+    def _weak_password_analyzer(self) -> WeakPasswordAnalyzer:
+        if self._weak_password is None:
+            self._weak_password = WeakPasswordAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._weak_password
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -462,6 +483,12 @@ class SecurityScanner:
             recs.append("Validate the Host header against a trusted allowlist before building URLs.")
         if by_name.get("session_fixation", SecurityScanCategory("session_fixation", 100, 0, "")).findings:
             recs.append("Regenerate session IDs on login and never pass session IDs in URL parameters.")
+        if by_name.get("insecure_file_upload", SecurityScanCategory("insecure_file_upload", 100, 0, "")).findings:
+            recs.append(
+                "Validate file extensions and MIME types, sanitize filenames, and store uploads outside the web root."
+            )
+        if by_name.get("weak_password", SecurityScanCategory("weak_password", 100, 0, "")).findings:
+            recs.append("Hash passwords with bcrypt or argon2 and enforce a minimum length of 12+ characters.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -856,6 +883,30 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_file_upload" in self.checks:
+            analyzer = self._insecure_file_upload_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_file_upload",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "weak_password" in self.checks:
+            analyzer = self._weak_password_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="weak_password",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -958,6 +1009,18 @@ class SecurityScanner:
         if "session_fixation" in self.checks:
             lines.extend(
                 ["## Session fixation", self._session_fixation_analyzer().to_context(limit=limit), ""]
+            )
+        if "insecure_file_upload" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure file upload",
+                    self._insecure_file_upload_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "weak_password" in self.checks:
+            lines.extend(
+                ["## Weak password", self._weak_password_analyzer().to_context(limit=limit), ""]
             )
         return "\n".join(lines).rstrip()
 
@@ -1120,3 +1183,13 @@ class SecurityScanner:
     def session_fixation(self) -> SessionFixationAnalyzer:
         """Underlying session-fixation analyzer."""
         return self._session_fixation_analyzer()
+
+    @property
+    def insecure_file_upload(self) -> InsecureFileUploadAnalyzer:
+        """Underlying insecure-file-upload analyzer."""
+        return self._insecure_file_upload_analyzer()
+
+    @property
+    def weak_password(self) -> WeakPasswordAnalyzer:
+        """Underlying weak-password analyzer."""
+        return self._weak_password_analyzer()

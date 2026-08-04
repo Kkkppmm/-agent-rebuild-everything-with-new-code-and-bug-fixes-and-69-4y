@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.5.0"
+        assert devai.__version__ == "6.6.0"
 
     def test_exports(self):
         expected = {
@@ -211,6 +211,12 @@ class TestPublicAPI:
             "SessionFixationAnalyzer",
             "SessionFixationFinding",
             "SessionFixationStats",
+            "InsecureFileUploadAnalyzer",
+            "InsecureFileUploadFinding",
+            "InsecureFileUploadStats",
+            "WeakPasswordAnalyzer",
+            "WeakPasswordFinding",
+            "WeakPasswordStats",
             "SSTIAnalyzer",
             "SSTIFinding",
             "SSTIStats",

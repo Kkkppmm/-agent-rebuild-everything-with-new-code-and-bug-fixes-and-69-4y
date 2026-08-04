@@ -117,7 +117,7 @@ class TestSecurityScannerV65:
         assert "clickjacking" in names
         assert "host_header" in names
         assert "session_fixation" in names
-        assert len(report.categories) == 32
+        assert len(report.categories) >= 32
 
     def test_recommendations_for_new_checks(self, tmp_path: Path):
         (tmp_path / "views.py").write_text(CLICKJACKING_RISKY, encoding="utf-8")

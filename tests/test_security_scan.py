@@ -17,7 +17,7 @@ class TestSecurityScanner:
         report = scanner.scan()
         assert report.overall_score == 100.0
         assert report.total_findings == 0
-        assert len(report.categories) == 32
+        assert len(report.categories) == 34
 
     def test_detects_secrets(self, tmp_path: Path):
         (tmp_path / "config.py").write_text(

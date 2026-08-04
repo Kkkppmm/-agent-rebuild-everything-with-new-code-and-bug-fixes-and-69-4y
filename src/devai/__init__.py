@@ -121,6 +121,12 @@ from devai.session_fixation import (
     SessionFixationFinding,
     SessionFixationStats,
 )
+from devai.insecure_file_upload import (
+    InsecureFileUploadAnalyzer,
+    InsecureFileUploadFinding,
+    InsecureFileUploadStats,
+)
+from devai.weak_password import WeakPasswordAnalyzer, WeakPasswordFinding, WeakPasswordStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -136,7 +142,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.5.0"
+__version__ = "6.6.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -319,6 +325,12 @@ __all__ = [
     "SessionFixationAnalyzer",
     "SessionFixationFinding",
     "SessionFixationStats",
+    "InsecureFileUploadAnalyzer",
+    "InsecureFileUploadFinding",
+    "InsecureFileUploadStats",
+    "WeakPasswordAnalyzer",
+    "WeakPasswordFinding",
+    "WeakPasswordStats",
     "SSTIAnalyzer",
     "SSTIFinding",
     "SSTIStats",

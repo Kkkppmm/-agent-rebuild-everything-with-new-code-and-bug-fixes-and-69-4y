@@ -362,6 +362,18 @@ class DevAI:
         """Detect non-constant-time secret comparisons."""
         return TimingAttackAnalyzer(str(path), **kwargs)
 
+    def insecure_file_upload(self, path: str | Path = ".", **kwargs: Any) -> InsecureFileUploadAnalyzer:
+        """Detect unsafe file upload handling."""
+        from devai.insecure_file_upload import InsecureFileUploadAnalyzer
+
+        return InsecureFileUploadAnalyzer(str(path), **kwargs)
+
+    def weak_password(self, path: str | Path = ".", **kwargs: Any) -> WeakPasswordAnalyzer:
+        """Detect weak password policies and plaintext storage."""
+        from devai.weak_password import WeakPasswordAnalyzer
+
+        return WeakPasswordAnalyzer(str(path), **kwargs)
+
     def security_scan(self, path: str | Path = ".", **kwargs: Any) -> SecurityScanner:
         """Run unified static security analysis (secrets, injections, dangerous calls)."""
         return SecurityScanner(str(path), **kwargs)
