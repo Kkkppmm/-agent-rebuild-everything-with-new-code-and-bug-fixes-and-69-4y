@@ -54,6 +54,9 @@ from devai.redos import ReDoSAnalyzer, ReDoSFinding, ReDoSStats
 from devai.quickstart import assistant, quickstart
 from devai.runtime import DevRuntime
 from devai.xss import XSSAnalyzer, XSSFinding, XSSStats
+from devai.xxe import XXEAnalyzer, XXEFinding, XXEStats
+from devai.ldap_injection import LDAPInjectionAnalyzer, LDAPInjectionFinding, LDAPInjectionStats
+from devai.debug_exposure import DebugExposureAnalyzer, DebugExposureFinding, DebugExposureStats
 from devai.trace import DevTrace, TraceEvent
 from devai.schedule import DevSchedule, ScheduleResult, ScheduledJob, cron_matches, validate_cron
 from devai.schedule_config import apply_schedule_config, load_schedule_config, schedule_from_config
@@ -116,7 +119,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.0.0"
+__version__ = "6.1.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -173,6 +176,9 @@ __all__ = [
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
+    "DebugExposureAnalyzer",
+    "DebugExposureFinding",
+    "DebugExposureStats",
     "DebugArtifact",
     "DebugArtifactDetector",
     "DebugArtifactStats",
@@ -296,6 +302,9 @@ __all__ = [
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
+    "LDAPInjectionAnalyzer",
+    "LDAPInjectionFinding",
+    "LDAPInjectionStats",
     "LogInjectionAnalyzer",
     "LogInjectionFinding",
     "LogInjectionStats",
@@ -323,6 +332,9 @@ __all__ = [
     "XSSAnalyzer",
     "XSSFinding",
     "XSSStats",
+    "XXEAnalyzer",
+    "XXEFinding",
+    "XXEStats",
     "WorkflowResult",
     "WorkflowStepResult",
     "apply_unified_diff",

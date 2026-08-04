@@ -28,6 +28,9 @@ from devai.timing_attack import TimingAttackAnalyzer
 from devai.unsafe_deserialization import UnsafeDeserializationAnalyzer
 from devai.weak_crypto import WeakCryptoAnalyzer
 from devai.xss import XSSAnalyzer
+from devai.xxe import XXEAnalyzer
+from devai.ldap_injection import LDAPInjectionAnalyzer
+from devai.debug_exposure import DebugExposureAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -50,6 +53,9 @@ CHECK_NAMES = (
     "csrf",
     "redos",
     "xss",
+    "xxe",
+    "ldap_injection",
+    "debug_exposure",
 )
 
 
@@ -144,8 +150,8 @@ class SecurityScanner:
     Combines secrets scanning, dangerous-call detection, SQL/NoSQL injection,
     command injection, insecure random, path traversal, weak crypto, log
     injection, SSRF, unsafe deserialization, open redirect, hardcoded config,
-    timing attacks, insecure cookies, JWT security, CORS, CSRF, ReDoS, and
-    XSS checks into one report.
+    timing attacks, insecure cookies, JWT security, CORS, CSRF, ReDoS, XSS,
+    XXE, LDAP injection, and debug exposure checks into one report.
     """
 
     def __init__(
@@ -183,6 +189,9 @@ class SecurityScanner:
         self._csrf: CSRFAnalyzer | None = None
         self._redos: ReDoSAnalyzer | None = None
         self._xss: XSSAnalyzer | None = None
+        self._xxe: XXEAnalyzer | None = None
+        self._ldap: LDAPInjectionAnalyzer | None = None
+        self._debug_exposure: DebugExposureAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -288,6 +297,21 @@ class SecurityScanner:
             self._xss = XSSAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._xss
 
+    def _xxe_analyzer(self) -> XXEAnalyzer:
+        if self._xxe is None:
+            self._xxe = XXEAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._xxe
+
+    def _ldap_analyzer(self) -> LDAPInjectionAnalyzer:
+        if self._ldap is None:
+            self._ldap = LDAPInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._ldap
+
+    def _debug_exposure_analyzer(self) -> DebugExposureAnalyzer:
+        if self._debug_exposure is None:
+            self._debug_exposure = DebugExposureAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._debug_exposure
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -336,6 +360,12 @@ class SecurityScanner:
             recs.append("Simplify regex patterns to avoid nested quantifiers that cause ReDoS.")
         if by_name.get("xss", SecurityScanCategory("xss", 100, 0, "")).findings:
             recs.append("Escape or sanitize user input before rendering in HTML responses.")
+        if by_name.get("xxe", SecurityScanCategory("xxe", 100, 0, "")).findings:
+            recs.append("Use defusedxml and disable external entity resolution when parsing XML.")
+        if by_name.get("ldap_injection", SecurityScanCategory("ldap_injection", 100, 0, "")).findings:
+            recs.append("Use parameterized LDAP filters instead of string-built search filters.")
+        if by_name.get("debug_exposure", SecurityScanCategory("debug_exposure", 100, 0, "")).findings:
+            recs.append("Disable DEBUG mode and avoid exposing tracebacks in production.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -586,6 +616,42 @@ class SecurityScanner:
                 )
             )
 
+        if "xxe" in self.checks:
+            analyzer = self._xxe_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="xxe",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "ldap_injection" in self.checks:
+            analyzer = self._ldap_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="ldap_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "debug_exposure" in self.checks:
+            analyzer = self._debug_exposure_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="debug_exposure",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -661,6 +727,12 @@ class SecurityScanner:
             lines.extend(["## ReDoS", self._redos_analyzer().to_context(limit=limit), ""])
         if "xss" in self.checks:
             lines.extend(["## XSS", self._xss_analyzer().to_context(limit=limit), ""])
+        if "xxe" in self.checks:
+            lines.extend(["## XXE", self._xxe_analyzer().to_context(limit=limit), ""])
+        if "ldap_injection" in self.checks:
+            lines.extend(["## LDAP injection", self._ldap_analyzer().to_context(limit=limit), ""])
+        if "debug_exposure" in self.checks:
+            lines.extend(["## Debug exposure", self._debug_exposure_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -762,3 +834,18 @@ class SecurityScanner:
     def xss(self) -> XSSAnalyzer:
         """Underlying XSS analyzer."""
         return self._xss_analyzer()
+
+    @property
+    def xxe(self) -> XXEAnalyzer:
+        """Underlying XXE analyzer."""
+        return self._xxe_analyzer()
+
+    @property
+    def ldap_injection(self) -> LDAPInjectionAnalyzer:
+        """Underlying LDAP injection analyzer."""
+        return self._ldap_analyzer()
+
+    @property
+    def debug_exposure(self) -> DebugExposureAnalyzer:
+        """Underlying debug-exposure analyzer."""
+        return self._debug_exposure_analyzer()
