@@ -31,6 +31,8 @@ from devai.xss import XSSAnalyzer
 from devai.xxe import XXEAnalyzer
 from devai.ldap_injection import LDAPInjectionAnalyzer
 from devai.debug_exposure import DebugExposureAnalyzer
+from devai.tls_verification import TLSVerificationAnalyzer
+from devai.ssti import SSTIAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -56,6 +58,8 @@ CHECK_NAMES = (
     "xxe",
     "ldap_injection",
     "debug_exposure",
+    "tls_verification",
+    "ssti",
 )
 
 
@@ -151,7 +155,7 @@ class SecurityScanner:
     command injection, insecure random, path traversal, weak crypto, log
     injection, SSRF, unsafe deserialization, open redirect, hardcoded config,
     timing attacks, insecure cookies, JWT security, CORS, CSRF, ReDoS, XSS,
-    XXE, LDAP injection, and debug exposure checks into one report.
+    XXE, LDAP injection, debug exposure, TLS verification, and SSTI checks into one report.
     """
 
     def __init__(
@@ -192,6 +196,8 @@ class SecurityScanner:
         self._xxe: XXEAnalyzer | None = None
         self._ldap: LDAPInjectionAnalyzer | None = None
         self._debug_exposure: DebugExposureAnalyzer | None = None
+        self._tls_verification: TLSVerificationAnalyzer | None = None
+        self._ssti: SSTIAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -312,6 +318,16 @@ class SecurityScanner:
             self._debug_exposure = DebugExposureAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._debug_exposure
 
+    def _tls_verification_analyzer(self) -> TLSVerificationAnalyzer:
+        if self._tls_verification is None:
+            self._tls_verification = TLSVerificationAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._tls_verification
+
+    def _ssti_analyzer(self) -> SSTIAnalyzer:
+        if self._ssti is None:
+            self._ssti = SSTIAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._ssti
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -366,6 +382,10 @@ class SecurityScanner:
             recs.append("Use parameterized LDAP filters instead of string-built search filters.")
         if by_name.get("debug_exposure", SecurityScanCategory("debug_exposure", 100, 0, "")).findings:
             recs.append("Disable DEBUG mode and avoid exposing tracebacks in production.")
+        if by_name.get("tls_verification", SecurityScanCategory("tls_verification", 100, 0, "")).findings:
+            recs.append("Enable TLS certificate verification — never use verify=False in production.")
+        if by_name.get("ssti", SecurityScanCategory("ssti", 100, 0, "")).findings:
+            recs.append("Use static templates with auto-escaping instead of rendering user-supplied template strings.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -652,6 +672,30 @@ class SecurityScanner:
                 )
             )
 
+        if "tls_verification" in self.checks:
+            analyzer = self._tls_verification_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="tls_verification",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "ssti" in self.checks:
+            analyzer = self._ssti_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="ssti",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -733,6 +777,10 @@ class SecurityScanner:
             lines.extend(["## LDAP injection", self._ldap_analyzer().to_context(limit=limit), ""])
         if "debug_exposure" in self.checks:
             lines.extend(["## Debug exposure", self._debug_exposure_analyzer().to_context(limit=limit), ""])
+        if "tls_verification" in self.checks:
+            lines.extend(["## TLS verification", self._tls_verification_analyzer().to_context(limit=limit), ""])
+        if "ssti" in self.checks:
+            lines.extend(["## SSTI", self._ssti_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -849,3 +897,13 @@ class SecurityScanner:
     def debug_exposure(self) -> DebugExposureAnalyzer:
         """Underlying debug-exposure analyzer."""
         return self._debug_exposure_analyzer()
+
+    @property
+    def tls_verification(self) -> TLSVerificationAnalyzer:
+        """Underlying TLS verification analyzer."""
+        return self._tls_verification_analyzer()
+
+    @property
+    def ssti(self) -> SSTIAnalyzer:
+        """Underlying SSTI analyzer."""
+        return self._ssti_analyzer()

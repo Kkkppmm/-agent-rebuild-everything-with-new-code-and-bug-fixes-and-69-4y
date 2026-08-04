@@ -103,7 +103,9 @@ from devai.project_health import HealthCategory, ProjectHealth, ProjectHealthRep
 from devai.git_changelog import CommitInfo, GitChangelog
 from devai.notebook import NotebookCell, NotebookReader
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
+from devai.ssti import SSTIAnalyzer, SSTIFinding, SSTIStats
 from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
+from devai.tls_verification import TLSVerificationAnalyzer, TLSVerificationFinding, TLSVerificationStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -119,7 +121,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.1.0"
+__version__ = "6.2.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -283,6 +285,9 @@ __all__ = [
     "SecurityScanCategory",
     "SecurityScanner",
     "SecurityScanReport",
+    "SSTIAnalyzer",
+    "SSTIFinding",
+    "SSTIStats",
     "SQLInjectionAnalyzer",
     "SQLInjectionFinding",
     "SQLInjectionStats",
@@ -317,6 +322,12 @@ __all__ = [
     "TechDebtStats",
     "TestMapReport",
     "TestMapper",
+    "TimingAttackAnalyzer",
+    "TimingAttackFinding",
+    "TimingAttackStats",
+    "TLSVerificationAnalyzer",
+    "TLSVerificationFinding",
+    "TLSVerificationStats",
     "TokenBudget",
     "NoSQLInjectionAnalyzer",
     "NoSQLInjectionFinding",
