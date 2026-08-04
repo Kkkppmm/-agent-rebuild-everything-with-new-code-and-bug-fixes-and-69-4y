@@ -214,6 +214,66 @@ class DevAI:
         """Preview program steps without calling the LLM."""
         return self._runtime.dry_run(program, context)
 
+    def run_inline(
+        self,
+        program: str | dict[str, Any],
+        context: dict[str, str] | None = None,
+        *,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run a program defined inline as JSON/YAML text or a dict."""
+        return self._runtime.run_inline(program, context, trace=trace)
+
+    async def arun_inline(
+        self,
+        program: str | dict[str, Any],
+        context: dict[str, str] | None = None,
+        *,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run an inline program asynchronously."""
+        return await self._runtime.arun_inline(program, context, trace=trace)
+
+    def dry_run_inline(
+        self,
+        program: str | dict[str, Any],
+        context: dict[str, str] | None = None,
+    ) -> list:
+        """Preview inline program steps without calling the LLM."""
+        return self._runtime.dry_run_inline(program, context)
+
+    def run_on_file(
+        self,
+        program: DevProgram | str | dict[str, Any],
+        path: str | Path,
+        *,
+        context_key: str = "code",
+        extra_context: dict[str, str] | None = None,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run a program with context loaded from a source file."""
+        return self._runtime.run_on_file(
+            program, path, context_key=context_key, extra_context=extra_context, trace=trace
+        )
+
+    async def arun_on_file(
+        self,
+        program: DevProgram | str | dict[str, Any],
+        path: str | Path,
+        *,
+        context_key: str = "code",
+        extra_context: dict[str, str] | None = None,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run a program asynchronously with context loaded from a source file."""
+        return await self._runtime.arun_on_file(
+            program, path, context_key=context_key, extra_context=extra_context, trace=trace
+        )
+
+    def quick_action(self, action: str, code: str, **kwargs: Any) -> str:
+        """Run a single program action on code and return the output."""
+        return self._runtime.quick_action(action, code, **kwargs)
+
     def preset(self, name: str) -> DevProgram:
         """Load a built-in program preset."""
         return self._runtime.preset(name)

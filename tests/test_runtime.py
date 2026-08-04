@@ -116,3 +116,58 @@ class TestDevRuntime:
         workflow = runtime.workflow("async").add("step", "hotfix")
         result = await runtime.arun_workflow(workflow, {"code": "x = 1"})
         assert len(result.steps) == 1
+
+    def test_run_inline_dict(self):
+        runtime = DevRuntime.create(use_mock=True)
+        program = {"name": "inline", "tasks": [{"name": "review", "action": "review"}]}
+        results = runtime.run_inline(program, {"code": "def foo(): pass"})
+        assert len(results) == 1
+        assert results[0].action == "review"
+
+    def test_run_inline_json_text(self):
+        runtime = DevRuntime.create(use_mock=True)
+        text = '{"name": "inline-json", "tasks": [{"name": "review", "action": "review"}]}'
+        results = runtime.run_inline(text, {"code": "pass"})
+        assert len(results) == 1
+
+    def test_dry_run_inline(self):
+        runtime = DevRuntime.create(use_mock=True)
+        program = {"tasks": [{"name": "review", "action": "review"}]}
+        plan = runtime.dry_run_inline(program, {"code": "x = 1"})
+        assert len(plan) == 1
+        assert plan[0].action == "review"
+
+    def test_context_from_file(self, tmp_path: Path):
+        source = tmp_path / "module.py"
+        source.write_text("def add(a, b): return a + b", encoding="utf-8")
+        context = DevRuntime.context_from_file(source)
+        assert "add" in context["code"]
+
+    def test_run_on_file_preset(self, tmp_path: Path):
+        source = tmp_path / "app.py"
+        source.write_text("def foo(): pass", encoding="utf-8")
+        runtime = DevRuntime.create(use_mock=True)
+        results = runtime.run_on_file("pre-commit", source)
+        assert len(results) == 3
+
+    def test_run_on_file_inline(self, tmp_path: Path):
+        source = tmp_path / "lib.py"
+        source.write_text("x = 1", encoding="utf-8")
+        runtime = DevRuntime.create(use_mock=True)
+        inline = {"tasks": [{"name": "review", "action": "review"}]}
+        results = runtime.run_on_file(inline, source)
+        assert len(results) == 1
+
+    @pytest.mark.asyncio
+    async def test_arun_on_file(self, tmp_path: Path):
+        source = tmp_path / "async.py"
+        source.write_text("async def foo(): pass", encoding="utf-8")
+        runtime = DevRuntime.create(use_mock=True)
+        inline = {"tasks": [{"name": "review", "action": "review"}]}
+        results = await runtime.arun_on_file(inline, source)
+        assert len(results) == 1
+
+    def test_quick_action(self):
+        runtime = DevRuntime.create(use_mock=True)
+        output = runtime.quick_action("review", "def bar(): pass")
+        assert isinstance(output, str)

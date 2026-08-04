@@ -61,6 +61,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **Test Failure Analysis** — Analyze pytest/unittest output with `analyze_test_failures()`
 - **Stack Trace Analysis** — Debug crashes with `analyze_stacktrace()`
 - **ProgramComposer** — Fluent Python API for building DevProgram workflows without JSON/YAML
+- **Inline Programs** — Run programs from inline JSON/YAML text or dicts with `run_inline()` / `arun_inline()`
+- **Run on File** — `run_on_file()` loads source file context and runs a preset, file, or inline program
+- **Quick Action** — `quick_action()` runs a single program step on code without defining a workflow
 - **Schedule Config** — Load cron job definitions from JSON/YAML files for DevSchedule and ProgramLibrary
 - **ImportGraph** — Analyze Python import dependencies, find circular imports, and export LLM context
 - **SecretsScanner** — Heuristic scan for hardcoded API keys, tokens, and credentials

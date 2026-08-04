@@ -147,3 +147,30 @@ tasks:
         p2 = DevProgram("two", a2).add("security", "security")
         with pytest.raises(ValueError, match="same CodeAssistant"):
             DevProgram.compose(p1, p2)
+
+    def test_from_inline_dict(self):
+        data = {"name": "inline", "tasks": [{"name": "review", "action": "review"}]}
+        assistant = CodeAssistant(client=MockLLMClient(default_response="inline ok"))
+        program = DevProgram.from_inline(data, assistant)
+        assert program.name == "inline"
+        results = program.run({"code": "x = 1"})
+        assert results[0].output == "inline ok"
+
+    def test_from_inline_json_text(self):
+        text = '{"name": "json-inline", "tasks": [{"name": "review", "action": "review"}]}'
+        assistant = CodeAssistant(client=MockLLMClient(default_response="json ok"))
+        program = DevProgram.from_inline(text, assistant)
+        assert program.name == "json-inline"
+        results = program.run({"code": "pass"})
+        assert results[0].output == "json ok"
+
+    def test_from_text_yaml(self):
+        yaml_text = """name: text-yaml
+tasks:
+  - name: review
+    action: review
+"""
+        assistant = CodeAssistant(client=MockLLMClient())
+        program = DevProgram.from_text(yaml_text, assistant)
+        assert program.name == "text-yaml"
+        assert program.tasks[0].action == "review"

@@ -30,6 +30,17 @@ class TestDevAI:
         steps = ai.dry_run("pre-commit")
         assert len(steps) >= 1
 
+    def test_run_inline_and_on_file(self, tmp_path):
+        source = tmp_path / "module.py"
+        source.write_text("def foo(): pass", encoding="utf-8")
+        ai = DevAI.mock()
+        inline = {"tasks": [{"name": "review", "action": "review"}]}
+        results = ai.run_inline(inline, {"code": "pass"})
+        assert len(results) == 1
+        file_results = ai.run_on_file(inline, source)
+        assert len(file_results) == 1
+        assert ai.quick_action("review", "x = 1")
+
     def test_from_env_mock(self, monkeypatch):
         monkeypatch.setenv("DEVAI_PROVIDER", "mock")
         ai = DevAI.from_env()

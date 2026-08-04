@@ -129,6 +129,130 @@ class DevRuntime:
         self._programs[program.name] = program
         return program
 
+    def inline_program(self, program: str | dict[str, Any]) -> DevProgram:
+        """Parse inline JSON/YAML text or a dict into a :class:`DevProgram`."""
+        return DevProgram.from_inline(program, self.assistant)
+
+    def run_inline(
+        self,
+        program: str | dict[str, Any],
+        context: dict[str, str] | None = None,
+        *,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run a program defined inline as JSON/YAML text or a dict."""
+        active_trace = self._trace if trace else None
+        return self.inline_program(program).run(context or {}, trace=active_trace)
+
+    async def arun_inline(
+        self,
+        program: str | dict[str, Any],
+        context: dict[str, str] | None = None,
+        *,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run an inline program asynchronously."""
+        active_trace = self._trace if trace else None
+        return await self.inline_program(program).arun(context or {}, trace=active_trace)
+
+    def dry_run_inline(
+        self,
+        program: str | dict[str, Any],
+        context: dict[str, str] | None = None,
+    ) -> list:
+        """Preview inline program steps without calling the LLM."""
+        return self.inline_program(program).dry_run(context or {})
+
+    @staticmethod
+    def context_from_file(
+        path: str | Path,
+        *,
+        key: str = "code",
+        encoding: str = "utf-8",
+        **extra: str,
+    ) -> dict[str, str]:
+        """Build a program context dict from a source file's contents."""
+        context: dict[str, str] = {key: Path(path).read_text(encoding=encoding)}
+        context.update(extra)
+        return context
+
+    def _resolve_program_run(
+        self,
+        program: DevProgram | str | dict[str, Any],
+        context: dict[str, str],
+        *,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Resolve a program reference and run it with context."""
+        active_trace = self._trace if trace else None
+        if isinstance(program, DevProgram):
+            return program.run(context, trace=active_trace)
+        if isinstance(program, dict):
+            return self.run_inline(program, context, trace=trace)
+        path = Path(program)
+        if path.exists() and path.is_file():
+            return self.load_program(path).run(context, trace=active_trace)
+        stripped = program.strip()
+        if stripped.startswith("{") or stripped.startswith("["):
+            return self.run_inline(program, context, trace=trace)
+        return self.run(program, context, trace=trace)
+
+    async def _aresolve_program_run(
+        self,
+        program: DevProgram | str | dict[str, Any],
+        context: dict[str, str],
+        *,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Resolve a program reference and run it asynchronously with context."""
+        active_trace = self._trace if trace else None
+        if isinstance(program, DevProgram):
+            return await program.arun(context, trace=active_trace)
+        if isinstance(program, dict):
+            return await self.arun_inline(program, context, trace=trace)
+        path = Path(program)
+        if path.exists() and path.is_file():
+            return await self.load_program(path).arun(context, trace=active_trace)
+        stripped = program.strip()
+        if stripped.startswith("{") or stripped.startswith("["):
+            return await self.arun_inline(program, context, trace=trace)
+        return await self.arun(program, context, trace=trace)
+
+    def run_on_file(
+        self,
+        program: DevProgram | str | dict[str, Any],
+        path: str | Path,
+        *,
+        context_key: str = "code",
+        extra_context: dict[str, str] | None = None,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run a program with context loaded from a source file."""
+        context = self.context_from_file(path, key=context_key)
+        if extra_context:
+            context.update(extra_context)
+        return self._resolve_program_run(program, context, trace=trace)
+
+    async def arun_on_file(
+        self,
+        program: DevProgram | str | dict[str, Any],
+        path: str | Path,
+        *,
+        context_key: str = "code",
+        extra_context: dict[str, str] | None = None,
+        trace: bool = False,
+    ) -> list[ProgramResult]:
+        """Run a program asynchronously with context loaded from a source file."""
+        context = self.context_from_file(path, key=context_key)
+        if extra_context:
+            context.update(extra_context)
+        return await self._aresolve_program_run(program, context, trace=trace)
+
+    def quick_action(self, action: str, code: str, **kwargs: Any) -> str:
+        """Run a single program action on code and return the output."""
+        program = DevProgram("quick", self.assistant).add(action, action, **kwargs)
+        return program.run({"code": code})[0].output
+
     def preset(self, name: str) -> DevProgram:
         """Load a built-in program preset."""
         program = self.kit.preset(name)

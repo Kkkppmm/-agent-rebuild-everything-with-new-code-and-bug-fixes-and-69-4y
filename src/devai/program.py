@@ -145,6 +145,27 @@ class DevProgram:
         return cls.from_dict(data, assistant)
 
     @classmethod
+    def from_text(cls, text: str, assistant: CodeAssistant) -> DevProgram:
+        """Load a program from inline JSON or YAML text.
+
+        JSON is detected when the text starts with ``{`` or ``[``; otherwise YAML
+        is assumed (requires ``pip install 'devai[yaml]'``).
+        """
+        stripped = text.strip()
+        if stripped.startswith("{") or stripped.startswith("["):
+            return cls.from_json(stripped, assistant)
+        return cls.from_yaml(stripped, assistant)
+
+    @classmethod
+    def from_inline(
+        cls, program: str | dict[str, Any], assistant: CodeAssistant
+    ) -> DevProgram:
+        """Load a program from inline JSON/YAML text or a dict."""
+        if isinstance(program, dict):
+            return cls.from_dict(program, assistant)
+        return cls.from_text(program, assistant)
+
+    @classmethod
     def from_file(cls, path: str | Path, assistant: CodeAssistant) -> DevProgram:
         """Load a program from a JSON or YAML file."""
         path = Path(path)
