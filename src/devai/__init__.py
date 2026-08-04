@@ -106,6 +106,17 @@ from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.ssti import SSTIAnalyzer, SSTIFinding, SSTIStats
 from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
 from devai.tls_verification import TLSVerificationAnalyzer, TLSVerificationFinding, TLSVerificationStats
+from devai.file_permissions import FilePermissionAnalyzer, FilePermissionFinding, FilePermissionStats
+from devai.information_disclosure import (
+    InformationDisclosureAnalyzer,
+    InformationDisclosureFinding,
+    InformationDisclosureStats,
+)
+from devai.header_injection import HeaderInjectionAnalyzer, HeaderInjectionFinding, HeaderInjectionStats
+from devai.mass_assignment import MassAssignmentAnalyzer, MassAssignmentFinding, MassAssignmentStats
+from devai.clickjacking import ClickjackingAnalyzer, ClickjackingFinding, ClickjackingStats
+from devai.host_header import HostHeaderAnalyzer, HostHeaderFinding, HostHeaderStats
+from devai.session_fixation import SessionFixationAnalyzer, SessionFixationFinding, SessionFixationStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -121,7 +132,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.2.0"
+__version__ = "6.5.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -140,6 +151,9 @@ __all__ = [
     "HardcodedConfigFinding",
     "HardcodedConfigStats",
     "HotspotStats",
+    "HeaderInjectionAnalyzer",
+    "HeaderInjectionFinding",
+    "HeaderInjectionStats",
     "HealthChecker",
     "HealthResult",
     "BroadExceptHandler",
@@ -172,6 +186,9 @@ __all__ = [
     "CodeSandbox",
     "CodeSymbolIndex",
     "CoderAgent",
+    "ClickjackingAnalyzer",
+    "ClickjackingFinding",
+    "ClickjackingStats",
     "CORSAnalyzer",
     "CORSFinding",
     "CORSStats",
@@ -212,6 +229,9 @@ __all__ = [
     "DevWatcher",
     "DevWorkflow",
     "DiskCachedLLMClient",
+    "FilePermissionAnalyzer",
+    "FilePermissionFinding",
+    "FilePermissionStats",
     "GitChangelog",
     "GitContext",
     "DuplicateBlock",
@@ -234,6 +254,9 @@ __all__ = [
     "LLMClient",
     "MockEmbeddingClient",
     "MockLLMClient",
+    "MassAssignmentAnalyzer",
+    "MassAssignmentFinding",
+    "MassAssignmentStats",
     "ModuleCoupling",
     "MagicNumber",
     "MagicNumberDetector",
@@ -285,6 +308,9 @@ __all__ = [
     "SecurityScanCategory",
     "SecurityScanner",
     "SecurityScanReport",
+    "SessionFixationAnalyzer",
+    "SessionFixationFinding",
+    "SessionFixationStats",
     "SSTIAnalyzer",
     "SSTIFinding",
     "SSTIStats",
@@ -299,8 +325,14 @@ __all__ = [
     "JWTSecurityAnalyzer",
     "JWTSecurityFinding",
     "JWTSecurityStats",
+    "HostHeaderAnalyzer",
+    "HostHeaderFinding",
+    "HostHeaderStats",
     "ImportEdge",
     "ImportGraph",
+    "InformationDisclosureAnalyzer",
+    "InformationDisclosureFinding",
+    "InformationDisclosureStats",
     "InsecureCookieAnalyzer",
     "InsecureCookieFinding",
     "InsecureCookieStats",
