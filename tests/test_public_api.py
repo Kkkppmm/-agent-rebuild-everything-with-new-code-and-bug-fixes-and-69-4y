@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.7.0"
+        assert devai.__version__ == "6.8.0"
 
     def test_exports(self):
         expected = {
@@ -16,6 +16,9 @@ class TestPublicAPI:
             "APISurfaceAnalyzer",
             "APISurfaceStats",
             "BroadExceptHandler",
+            "BrokenAuthAnalyzer",
+            "BrokenAuthFinding",
+            "BrokenAuthStats",
             "BatchReviewReport",
             "BatchReviewer",
             "BatchRunner",
@@ -118,6 +121,9 @@ class TestPublicAPI:
             "FunctionMetrics",
             "GitChangelog",
             "GitContext",
+            "GraphQLInjectionAnalyzer",
+            "GraphQLInjectionFinding",
+            "GraphQLInjectionStats",
             "HardcodedConfigAnalyzer",
             "HardcodedConfigFinding",
             "HardcodedConfigStats",
@@ -150,6 +156,9 @@ class TestPublicAPI:
             "InsecureRandomAnalyzer",
             "InsecureRandomFinding",
             "InsecureRandomStats",
+            "InsecureTempfileAnalyzer",
+            "InsecureTempfileFinding",
+            "InsecureTempfileStats",
             "LDAPInjectionAnalyzer",
             "LDAPInjectionFinding",
             "LDAPInjectionStats",

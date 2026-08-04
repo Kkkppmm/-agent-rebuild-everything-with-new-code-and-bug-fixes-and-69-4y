@@ -125,6 +125,17 @@ from devai.insecure_file_upload import (
 from devai.weak_password import WeakPasswordAnalyzer, WeakPasswordFinding, WeakPasswordStats
 from devai.idor import IDORAnalyzer, IDORFinding, IDORStats
 from devai.race_condition import RaceConditionAnalyzer, RaceConditionFinding, RaceConditionStats
+from devai.insecure_tempfile import (
+    InsecureTempfileAnalyzer,
+    InsecureTempfileFinding,
+    InsecureTempfileStats,
+)
+from devai.graphql_injection import (
+    GraphQLInjectionAnalyzer,
+    GraphQLInjectionFinding,
+    GraphQLInjectionStats,
+)
+from devai.broken_auth import BrokenAuthAnalyzer, BrokenAuthFinding, BrokenAuthStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -140,7 +151,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.7.0"
+__version__ = "6.8.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -168,6 +179,9 @@ __all__ = [
     "HealthChecker",
     "HealthResult",
     "BroadExceptHandler",
+    "BrokenAuthAnalyzer",
+    "BrokenAuthFinding",
+    "BrokenAuthStats",
     "BatchReviewReport",
     "BatchReviewer",
     "BatchRunner",
@@ -242,6 +256,9 @@ __all__ = [
     "DiskCachedLLMClient",
     "GitChangelog",
     "GitContext",
+    "GraphQLInjectionAnalyzer",
+    "GraphQLInjectionFinding",
+    "GraphQLInjectionStats",
     "DuplicateBlock",
     "DuplicateCluster",
     "DuplicateCodeDetector",
@@ -356,6 +373,9 @@ __all__ = [
     "InsecureRandomAnalyzer",
     "InsecureRandomFinding",
     "InsecureRandomStats",
+    "InsecureTempfileAnalyzer",
+    "InsecureTempfileFinding",
+    "InsecureTempfileStats",
     "LDAPInjectionAnalyzer",
     "LDAPInjectionFinding",
     "LDAPInjectionStats",

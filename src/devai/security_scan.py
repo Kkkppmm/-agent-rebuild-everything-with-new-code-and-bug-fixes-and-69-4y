@@ -44,6 +44,9 @@ from devai.insecure_file_upload import InsecureFileUploadAnalyzer
 from devai.weak_password import WeakPasswordAnalyzer
 from devai.idor import IDORAnalyzer
 from devai.race_condition import RaceConditionAnalyzer
+from devai.insecure_tempfile import InsecureTempfileAnalyzer
+from devai.graphql_injection import GraphQLInjectionAnalyzer
+from devai.broken_auth import BrokenAuthAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -82,6 +85,9 @@ CHECK_NAMES = (
     "weak_password",
     "idor",
     "race_condition",
+    "insecure_tempfile",
+    "graphql_injection",
+    "broken_auth",
 )
 
 
@@ -179,8 +185,8 @@ class SecurityScanner:
     timing attacks, insecure cookies, JWT security, CORS, CSRF, ReDoS, XSS,
     XXE, LDAP injection, debug exposure, TLS verification, SSTI, file permissions,
     information disclosure, header injection, mass assignment, clickjacking, host header,
-    session fixation, insecure file upload, weak password, IDOR, and race condition
-    checks into one report.
+    session fixation, insecure file upload, weak password, IDOR, race condition,
+    insecure tempfile, GraphQL injection, and broken auth checks into one report.
     """
 
     def __init__(
@@ -234,6 +240,9 @@ class SecurityScanner:
         self._weak_password: WeakPasswordAnalyzer | None = None
         self._idor: IDORAnalyzer | None = None
         self._race_condition: RaceConditionAnalyzer | None = None
+        self._insecure_tempfile: InsecureTempfileAnalyzer | None = None
+        self._graphql_injection: GraphQLInjectionAnalyzer | None = None
+        self._broken_auth: BrokenAuthAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -423,6 +432,25 @@ class SecurityScanner:
             self._race_condition = RaceConditionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._race_condition
 
+    def _insecure_tempfile_analyzer(self) -> InsecureTempfileAnalyzer:
+        if self._insecure_tempfile is None:
+            self._insecure_tempfile = InsecureTempfileAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_tempfile
+
+    def _graphql_injection_analyzer(self) -> GraphQLInjectionAnalyzer:
+        if self._graphql_injection is None:
+            self._graphql_injection = GraphQLInjectionAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._graphql_injection
+
+    def _broken_auth_analyzer(self) -> BrokenAuthAnalyzer:
+        if self._broken_auth is None:
+            self._broken_auth = BrokenAuthAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._broken_auth
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -503,6 +531,12 @@ class SecurityScanner:
             recs.append("Verify object ownership before returning resources by user-supplied IDs.")
         if by_name.get("race_condition", SecurityScanCategory("race_condition", 100, 0, "")).findings:
             recs.append("Use file locks or atomic operations instead of check-then-write patterns.")
+        if by_name.get("insecure_tempfile", SecurityScanCategory("insecure_tempfile", 100, 0, "")).findings:
+            recs.append("Use tempfile.NamedTemporaryFile or mkstemp instead of mktemp or hardcoded /tmp paths.")
+        if by_name.get("graphql_injection", SecurityScanCategory("graphql_injection", 100, 0, "")).findings:
+            recs.append("Use parameterized GraphQL clients instead of string-built queries.")
+        if by_name.get("broken_auth", SecurityScanCategory("broken_auth", 100, 0, "")).findings:
+            recs.append("Add authentication decorators or dependency injection to sensitive route handlers.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -945,6 +979,42 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_tempfile" in self.checks:
+            analyzer = self._insecure_tempfile_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_tempfile",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "graphql_injection" in self.checks:
+            analyzer = self._graphql_injection_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="graphql_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "broken_auth" in self.checks:
+            analyzer = self._broken_auth_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="broken_auth",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1056,6 +1126,16 @@ class SecurityScanner:
             lines.extend(["## IDOR", self._idor_analyzer().to_context(limit=limit), ""])
         if "race_condition" in self.checks:
             lines.extend(["## Race condition", self._race_condition_analyzer().to_context(limit=limit), ""])
+        if "insecure_tempfile" in self.checks:
+            lines.extend(
+                ["## Insecure tempfile", self._insecure_tempfile_analyzer().to_context(limit=limit), ""]
+            )
+        if "graphql_injection" in self.checks:
+            lines.extend(
+                ["## GraphQL injection", self._graphql_injection_analyzer().to_context(limit=limit), ""]
+            )
+        if "broken_auth" in self.checks:
+            lines.extend(["## Broken auth", self._broken_auth_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -1237,3 +1317,18 @@ class SecurityScanner:
     def race_condition(self) -> RaceConditionAnalyzer:
         """Underlying race-condition analyzer."""
         return self._race_condition_analyzer()
+
+    @property
+    def insecure_tempfile(self) -> InsecureTempfileAnalyzer:
+        """Underlying insecure-tempfile analyzer."""
+        return self._insecure_tempfile_analyzer()
+
+    @property
+    def graphql_injection(self) -> GraphQLInjectionAnalyzer:
+        """Underlying GraphQL-injection analyzer."""
+        return self._graphql_injection_analyzer()
+
+    @property
+    def broken_auth(self) -> BrokenAuthAnalyzer:
+        """Underlying broken-auth analyzer."""
+        return self._broken_auth_analyzer()
