@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.2.0"
+        assert devai.__version__ == "6.3.0"
 
     def test_exports(self):
         expected = {
@@ -115,6 +115,9 @@ class TestPublicAPI:
             "HardcodedConfigAnalyzer",
             "HardcodedConfigFinding",
             "HardcodedConfigStats",
+            "HeaderInjectionAnalyzer",
+            "HeaderInjectionFinding",
+            "HeaderInjectionStats",
             "HotspotStats",
             "HealthChecker",
             "HealthResult",
@@ -142,6 +145,9 @@ class TestPublicAPI:
             "MagicNumber",
             "MagicNumberDetector",
             "MagicNumberStats",
+            "MassAssignmentAnalyzer",
+            "MassAssignmentFinding",
+            "MassAssignmentStats",
             "ModuleCoupling",
             "ModuleCouplingAnalyzer",
             "ModuleMapping",
