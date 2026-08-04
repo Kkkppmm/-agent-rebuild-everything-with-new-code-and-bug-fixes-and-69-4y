@@ -104,6 +104,17 @@ from devai.git_changelog import CommitInfo, GitChangelog
 from devai.notebook import NotebookCell, NotebookReader
 from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.ssti import SSTIAnalyzer, SSTIFinding, SSTIStats
+from devai.file_permissions import FilePermissionAnalyzer, FilePermissionFinding, FilePermissionStats
+from devai.information_disclosure import (
+    InformationDisclosureAnalyzer,
+    InformationDisclosureFinding,
+    InformationDisclosureStats,
+)
+from devai.header_injection import HeaderInjectionAnalyzer, HeaderInjectionFinding, HeaderInjectionStats
+from devai.mass_assignment import MassAssignmentAnalyzer, MassAssignmentFinding, MassAssignmentStats
+from devai.clickjacking import ClickjackingAnalyzer, ClickjackingFinding, ClickjackingStats
+from devai.host_header import HostHeaderAnalyzer, HostHeaderFinding, HostHeaderStats
+from devai.session_fixation import SessionFixationAnalyzer, SessionFixationFinding, SessionFixationStats
 from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
 from devai.tls_verification import TLSVerificationAnalyzer, TLSVerificationFinding, TLSVerificationStats
 from devai.unsafe_deserialization import (
@@ -121,7 +132,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.2.0"
+__version__ = "6.5.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -164,6 +175,9 @@ __all__ = [
     "DocstringCoverage",
     "DocstringGap",
     "DocstringStats",
+    "ClickjackingAnalyzer",
+    "ClickjackingFinding",
+    "ClickjackingStats",
     "CodeIssue",
     "CodeProject",
     "CompareResult",
@@ -230,12 +244,16 @@ __all__ = [
     "FileMetrics",
     "FunctionMetrics",
     "export_program_to_file",
-    "FallbackLLMClient",
+    "FilePermissionAnalyzer",
+    "FilePermissionFinding",
+    "FilePermissionStats",
     "LLMClient",
     "MockEmbeddingClient",
     "MockLLMClient",
     "ModuleCoupling",
-    "MagicNumber",
+    "MassAssignmentAnalyzer",
+    "MassAssignmentFinding",
+    "MassAssignmentStats",
     "MagicNumberDetector",
     "MagicNumberStats",
     "ModuleCouplingAnalyzer",
@@ -280,6 +298,9 @@ __all__ = [
     "SandboxResult",
     "ScheduleResult",
     "ScheduledJob",
+    "SessionFixationAnalyzer",
+    "SessionFixationFinding",
+    "SessionFixationStats",
     "SecretFinding",
     "SecretsScanner",
     "SecurityScanCategory",
@@ -299,7 +320,15 @@ __all__ = [
     "JWTSecurityAnalyzer",
     "JWTSecurityFinding",
     "JWTSecurityStats",
-    "ImportEdge",
+    "HeaderInjectionAnalyzer",
+    "HeaderInjectionFinding",
+    "HeaderInjectionStats",
+    "HostHeaderAnalyzer",
+    "HostHeaderFinding",
+    "HostHeaderStats",
+    "InformationDisclosureAnalyzer",
+    "InformationDisclosureFinding",
+    "InformationDisclosureStats",
     "ImportGraph",
     "InsecureCookieAnalyzer",
     "InsecureCookieFinding",

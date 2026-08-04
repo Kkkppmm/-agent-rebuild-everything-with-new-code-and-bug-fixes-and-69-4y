@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.2.0"
+        assert devai.__version__ == "6.5.0"
 
     def test_exports(self):
         expected = {
@@ -42,6 +42,7 @@ class TestPublicAPI:
             "DocstringGap",
             "DocstringStats",
             "CodeIssue",
+            "CodeIssue",
             "CodeProject",
             "CompareResult",
             "CodeReviewResult",
@@ -49,6 +50,9 @@ class TestPublicAPI:
             "ContextSection",
             "CodeSandbox",
             "CoderAgent",
+            "ClickjackingAnalyzer",
+            "ClickjackingFinding",
+            "ClickjackingStats",
             "CORSAnalyzer",
             "CORSFinding",
             "CORSStats",
@@ -121,7 +125,15 @@ class TestPublicAPI:
             "JWTSecurityAnalyzer",
             "JWTSecurityFinding",
             "JWTSecurityStats",
-            "ImportEdge",
+            "HeaderInjectionAnalyzer",
+            "HeaderInjectionFinding",
+            "HeaderInjectionStats",
+            "HostHeaderAnalyzer",
+            "HostHeaderFinding",
+            "HostHeaderStats",
+            "InformationDisclosureAnalyzer",
+            "InformationDisclosureFinding",
+            "InformationDisclosureStats",
             "ImportGraph",
             "InsecureCookieAnalyzer",
             "InsecureCookieFinding",
@@ -135,11 +147,15 @@ class TestPublicAPI:
             "LogInjectionAnalyzer",
             "LogInjectionFinding",
             "LogInjectionStats",
-            "FallbackLLMClient",
+            "FilePermissionAnalyzer",
+            "FilePermissionFinding",
+            "FilePermissionStats",
             "LLMClient",
             "MockEmbeddingClient",
             "MockLLMClient",
-            "MagicNumber",
+            "MassAssignmentAnalyzer",
+            "MassAssignmentFinding",
+            "MassAssignmentStats",
             "MagicNumberDetector",
             "MagicNumberStats",
             "ModuleCoupling",
@@ -185,6 +201,9 @@ class TestPublicAPI:
             "SandboxResult",
             "ScheduleResult",
             "ScheduledJob",
+            "SessionFixationAnalyzer",
+            "SessionFixationFinding",
+            "SessionFixationStats",
             "SecretFinding",
             "SecretsScanner",
             "SecurityScanCategory",
