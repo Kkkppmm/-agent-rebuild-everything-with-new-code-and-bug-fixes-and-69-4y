@@ -75,10 +75,18 @@ class _WeakPasswordVisitor(ast.NodeVisitor):
         self._function_stack.pop()
 
     def visit_Compare(self, node: ast.Compare) -> None:
-        for left, op in zip(node.left, node.ops, strict=False):
-            if isinstance(left, ast.Call) and isinstance(left.func, ast.Name):
-                if left.func.id == "len" and isinstance(op, (ast.Lt, ast.LtE)):
-                    if left.args and _is_password_var(left.args[0]):
+        left = node.left
+        if isinstance(left, ast.Call) and isinstance(left.func, ast.Name):
+            if left.func.id == "len" and left.args:
+                for op, comparator in zip(node.ops, node.comparators, strict=False):
+                    weak_threshold = False
+                    if isinstance(op, (ast.Lt, ast.LtE)) and isinstance(comparator, ast.Constant):
+                        if isinstance(comparator.value, int) and comparator.value <= 8:
+                            weak_threshold = True
+                    if isinstance(op, ast.GtE) and isinstance(comparator, ast.Constant):
+                        if isinstance(comparator.value, int) and comparator.value < 8:
+                            weak_threshold = True
+                    if weak_threshold and _is_password_var(left.args[0]):
                         self.findings.append(
                             WeakPasswordFinding(
                                 path=self.path,
@@ -89,6 +97,7 @@ class _WeakPasswordVisitor(ast.NodeVisitor):
                                 function=self._current_function(),
                             )
                         )
+                        break
         self.generic_visit(node)
 
     def visit_Assign(self, node: ast.Assign) -> None:

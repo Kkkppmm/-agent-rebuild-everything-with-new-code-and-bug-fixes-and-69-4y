@@ -67,6 +67,8 @@ def _is_user_controlled(node: ast.AST) -> bool:
         return True
     if isinstance(node, ast.Attribute) and _is_user_controlled(node.value):
         return True
+    if isinstance(node, ast.Call):
+        return _is_user_controlled(node.func)
     return False
 
 
@@ -92,7 +94,7 @@ class _HeaderInjectionVisitor(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call) -> None:
         func = node.func
         if isinstance(func, ast.Attribute):
-            if func.attr in _HEADER_METHODS:
+            if func.attr in _HEADER_METHODS or func.attr == "set":
                 value_arg = node.args[1] if len(node.args) > 1 else None
                 if value_arg and _is_user_controlled(value_arg):
                     self.findings.append(
@@ -105,19 +107,6 @@ class _HeaderInjectionVisitor(ast.NodeVisitor):
                             function=self._current_function(),
                         )
                     )
-            if func.attr == "set" and isinstance(func.value, ast.Attribute):
-                if func.value.attr in _HEADER_ATTRS and len(node.args) >= 2:
-                    if _is_user_controlled(node.args[1]):
-                        self.findings.append(
-                            HeaderInjectionFinding(
-                                path=self.path,
-                                lineno=node.lineno,
-                                pattern="user_input_in_header",
-                                severity="high",
-                                message="User-controlled data used in HTTP response header",
-                                function=self._current_function(),
-                            )
-                        )
         self.generic_visit(node)
 
 
