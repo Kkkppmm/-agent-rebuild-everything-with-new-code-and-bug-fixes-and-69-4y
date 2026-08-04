@@ -33,6 +33,8 @@ from devai.ldap_injection import LDAPInjectionAnalyzer
 from devai.debug_exposure import DebugExposureAnalyzer
 from devai.tls_verification import TLSVerificationAnalyzer
 from devai.ssti import SSTIAnalyzer
+from devai.header_injection import HeaderInjectionAnalyzer
+from devai.mass_assignment import MassAssignmentAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -60,6 +62,8 @@ CHECK_NAMES = (
     "debug_exposure",
     "tls_verification",
     "ssti",
+    "header_injection",
+    "mass_assignment",
 )
 
 
@@ -155,7 +159,8 @@ class SecurityScanner:
     command injection, insecure random, path traversal, weak crypto, log
     injection, SSRF, unsafe deserialization, open redirect, hardcoded config,
     timing attacks, insecure cookies, JWT security, CORS, CSRF, ReDoS, XSS,
-    XXE, LDAP injection, debug exposure, TLS verification, and SSTI checks into one report.
+    XXE, LDAP injection, debug exposure, TLS verification, SSTI, header injection,
+    and mass assignment checks into one report.
     """
 
     def __init__(
@@ -198,6 +203,8 @@ class SecurityScanner:
         self._debug_exposure: DebugExposureAnalyzer | None = None
         self._tls_verification: TLSVerificationAnalyzer | None = None
         self._ssti: SSTIAnalyzer | None = None
+        self._header_injection: HeaderInjectionAnalyzer | None = None
+        self._mass_assignment: MassAssignmentAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -328,6 +335,16 @@ class SecurityScanner:
             self._ssti = SSTIAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._ssti
 
+    def _header_injection_analyzer(self) -> HeaderInjectionAnalyzer:
+        if self._header_injection is None:
+            self._header_injection = HeaderInjectionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._header_injection
+
+    def _mass_assignment_analyzer(self) -> MassAssignmentAnalyzer:
+        if self._mass_assignment is None:
+            self._mass_assignment = MassAssignmentAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._mass_assignment
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -386,6 +403,10 @@ class SecurityScanner:
             recs.append("Enable TLS certificate verification — never use verify=False in production.")
         if by_name.get("ssti", SecurityScanCategory("ssti", 100, 0, "")).findings:
             recs.append("Use static templates with auto-escaping instead of rendering user-supplied template strings.")
+        if by_name.get("header_injection", SecurityScanCategory("header_injection", 100, 0, "")).findings:
+            recs.append("Sanitize user input in HTTP headers and cookies — strip CR/LF characters.")
+        if by_name.get("mass_assignment", SecurityScanCategory("mass_assignment", 100, 0, "")).findings:
+            recs.append("Whitelist assignable model fields instead of passing request data directly to ORM calls.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -696,6 +717,30 @@ class SecurityScanner:
                 )
             )
 
+        if "header_injection" in self.checks:
+            analyzer = self._header_injection_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="header_injection",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "mass_assignment" in self.checks:
+            analyzer = self._mass_assignment_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="mass_assignment",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -781,6 +826,10 @@ class SecurityScanner:
             lines.extend(["## TLS verification", self._tls_verification_analyzer().to_context(limit=limit), ""])
         if "ssti" in self.checks:
             lines.extend(["## SSTI", self._ssti_analyzer().to_context(limit=limit), ""])
+        if "header_injection" in self.checks:
+            lines.extend(["## Header injection", self._header_injection_analyzer().to_context(limit=limit), ""])
+        if "mass_assignment" in self.checks:
+            lines.extend(["## Mass assignment", self._mass_assignment_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -907,3 +956,13 @@ class SecurityScanner:
     def ssti(self) -> SSTIAnalyzer:
         """Underlying SSTI analyzer."""
         return self._ssti_analyzer()
+
+    @property
+    def header_injection(self) -> HeaderInjectionAnalyzer:
+        """Underlying header injection analyzer."""
+        return self._header_injection_analyzer()
+
+    @property
+    def mass_assignment(self) -> MassAssignmentAnalyzer:
+        """Underlying mass assignment analyzer."""
+        return self._mass_assignment_analyzer()
