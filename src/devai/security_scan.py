@@ -35,6 +35,8 @@ from devai.tls_verification import TLSVerificationAnalyzer
 from devai.ssti import SSTIAnalyzer
 from devai.header_injection import HeaderInjectionAnalyzer
 from devai.mass_assignment import MassAssignmentAnalyzer
+from devai.file_permissions import FilePermissionAnalyzer
+from devai.info_disclosure import InformationDisclosureAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -64,6 +66,8 @@ CHECK_NAMES = (
     "ssti",
     "header_injection",
     "mass_assignment",
+    "file_permissions",
+    "info_disclosure",
 )
 
 
@@ -205,6 +209,8 @@ class SecurityScanner:
         self._ssti: SSTIAnalyzer | None = None
         self._header_injection: HeaderInjectionAnalyzer | None = None
         self._mass_assignment: MassAssignmentAnalyzer | None = None
+        self._file_permissions: FilePermissionAnalyzer | None = None
+        self._info_disclosure: InformationDisclosureAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -345,6 +351,16 @@ class SecurityScanner:
             self._mass_assignment = MassAssignmentAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._mass_assignment
 
+    def _file_permissions_analyzer(self) -> FilePermissionAnalyzer:
+        if self._file_permissions is None:
+            self._file_permissions = FilePermissionAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._file_permissions
+
+    def _info_disclosure_analyzer(self) -> InformationDisclosureAnalyzer:
+        if self._info_disclosure is None:
+            self._info_disclosure = InformationDisclosureAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._info_disclosure
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -407,6 +423,10 @@ class SecurityScanner:
             recs.append("Sanitize user input in HTTP headers and cookies — strip CR/LF characters.")
         if by_name.get("mass_assignment", SecurityScanCategory("mass_assignment", 100, 0, "")).findings:
             recs.append("Whitelist assignable model fields instead of passing request data directly to ORM calls.")
+        if by_name.get("file_permissions", SecurityScanCategory("file_permissions", 100, 0, "")).findings:
+            recs.append("Use restrictive file permissions (e.g. 0o600) instead of world-writable modes.")
+        if by_name.get("info_disclosure", SecurityScanCategory("info_disclosure", 100, 0, "")).findings:
+            recs.append("Return generic error messages to clients — never expose tracebacks or sensitive fields.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -741,6 +761,30 @@ class SecurityScanner:
                 )
             )
 
+        if "file_permissions" in self.checks:
+            analyzer = self._file_permissions_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="file_permissions",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "info_disclosure" in self.checks:
+            analyzer = self._info_disclosure_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="info_disclosure",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -830,6 +874,10 @@ class SecurityScanner:
             lines.extend(["## Header injection", self._header_injection_analyzer().to_context(limit=limit), ""])
         if "mass_assignment" in self.checks:
             lines.extend(["## Mass assignment", self._mass_assignment_analyzer().to_context(limit=limit), ""])
+        if "file_permissions" in self.checks:
+            lines.extend(["## File permissions", self._file_permissions_analyzer().to_context(limit=limit), ""])
+        if "info_disclosure" in self.checks:
+            lines.extend(["## Information disclosure", self._info_disclosure_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -966,3 +1014,13 @@ class SecurityScanner:
     def mass_assignment(self) -> MassAssignmentAnalyzer:
         """Underlying mass assignment analyzer."""
         return self._mass_assignment_analyzer()
+
+    @property
+    def file_permissions(self) -> FilePermissionAnalyzer:
+        """Underlying file-permission analyzer."""
+        return self._file_permissions_analyzer()
+
+    @property
+    def info_disclosure(self) -> InformationDisclosureAnalyzer:
+        """Underlying information-disclosure analyzer."""
+        return self._info_disclosure_analyzer()
