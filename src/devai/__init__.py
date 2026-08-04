@@ -106,6 +106,14 @@ from devai.typing_coverage import TypingCoverage, TypingGap, TypingStats
 from devai.ssti import SSTIAnalyzer, SSTIFinding, SSTIStats
 from devai.timing_attack import TimingAttackAnalyzer, TimingAttackFinding, TimingAttackStats
 from devai.tls_verification import TLSVerificationAnalyzer, TLSVerificationFinding, TLSVerificationStats
+from devai.file_permissions import FilePermissionAnalyzer, FilePermissionFinding, FilePermissionStats
+from devai.information_disclosure import (
+    InformationDisclosureAnalyzer,
+    InformationDisclosureFinding,
+    InformationDisclosureStats,
+)
+from devai.header_injection import HeaderInjectionAnalyzer, HeaderInjectionFinding, HeaderInjectionStats
+from devai.mass_assignment import MassAssignmentAnalyzer, MassAssignmentFinding, MassAssignmentStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -121,7 +129,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.2.0"
+__version__ = "6.4.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -139,6 +147,9 @@ __all__ = [
     "HardcodedConfigAnalyzer",
     "HardcodedConfigFinding",
     "HardcodedConfigStats",
+    "HeaderInjectionAnalyzer",
+    "HeaderInjectionFinding",
+    "HeaderInjectionStats",
     "HotspotStats",
     "HealthChecker",
     "HealthResult",
@@ -228,6 +239,9 @@ __all__ = [
     "extract_first_code_block",
     "export_program",
     "FileMetrics",
+    "FilePermissionAnalyzer",
+    "FilePermissionFinding",
+    "FilePermissionStats",
     "FunctionMetrics",
     "export_program_to_file",
     "FallbackLLMClient",
@@ -238,6 +252,9 @@ __all__ = [
     "MagicNumber",
     "MagicNumberDetector",
     "MagicNumberStats",
+    "MassAssignmentAnalyzer",
+    "MassAssignmentFinding",
+    "MassAssignmentStats",
     "ModuleCouplingAnalyzer",
     "ModuleMapping",
     "NamingConventionAnalyzer",
@@ -301,6 +318,9 @@ __all__ = [
     "JWTSecurityStats",
     "ImportEdge",
     "ImportGraph",
+    "InformationDisclosureAnalyzer",
+    "InformationDisclosureFinding",
+    "InformationDisclosureStats",
     "InsecureCookieAnalyzer",
     "InsecureCookieFinding",
     "InsecureCookieStats",
