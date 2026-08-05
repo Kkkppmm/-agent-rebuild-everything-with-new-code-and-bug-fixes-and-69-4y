@@ -49,6 +49,7 @@ from devai.graphql_injection import GraphQLInjectionAnalyzer
 from devai.broken_auth import BrokenAuthAnalyzer
 from devai.insecure_http import InsecureHTTPAnalyzer
 from devai.zip_slip import ZipSlipAnalyzer
+from devai.dynamic_import import DynamicImportAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -92,6 +93,7 @@ CHECK_NAMES = (
     "broken_auth",
     "insecure_http",
     "zip_slip",
+    "dynamic_import",
 )
 
 
@@ -249,6 +251,7 @@ class SecurityScanner:
         self._broken_auth: BrokenAuthAnalyzer | None = None
         self._insecure_http: InsecureHTTPAnalyzer | None = None
         self._zip_slip: ZipSlipAnalyzer | None = None
+        self._dynamic_import: DynamicImportAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -467,6 +470,11 @@ class SecurityScanner:
             self._zip_slip = ZipSlipAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._zip_slip
 
+    def _dynamic_import_analyzer(self) -> DynamicImportAnalyzer:
+        if self._dynamic_import is None:
+            self._dynamic_import = DynamicImportAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._dynamic_import
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -559,6 +567,8 @@ class SecurityScanner:
             recs.append(
                 "Validate archive member paths before extraction — reject '..' and absolute paths."
             )
+        if by_name.get("dynamic_import", SecurityScanCategory("dynamic_import", 100, 0, "")).findings:
+            recs.append("Avoid dynamic imports from user input — use an allowlist of module names.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -1061,6 +1071,18 @@ class SecurityScanner:
                 )
             )
 
+        if "dynamic_import" in self.checks:
+            analyzer = self._dynamic_import_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="dynamic_import",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1186,6 +1208,10 @@ class SecurityScanner:
             lines.extend(["## Insecure HTTP", self._insecure_http_analyzer().to_context(limit=limit), ""])
         if "zip_slip" in self.checks:
             lines.extend(["## Zip slip", self._zip_slip_analyzer().to_context(limit=limit), ""])
+        if "dynamic_import" in self.checks:
+            lines.extend(
+                ["## Dynamic import", self._dynamic_import_analyzer().to_context(limit=limit), ""]
+            )
         return "\n".join(lines).rstrip()
 
     @property
@@ -1392,3 +1418,8 @@ class SecurityScanner:
     def zip_slip(self) -> ZipSlipAnalyzer:
         """Underlying zip-slip analyzer."""
         return self._zip_slip_analyzer()
+
+    @property
+    def dynamic_import(self) -> DynamicImportAnalyzer:
+        """Underlying dynamic-import analyzer."""
+        return self._dynamic_import_analyzer()
