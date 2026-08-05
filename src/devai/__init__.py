@@ -156,6 +156,16 @@ from devai.insecure_secret_key import (
     InsecureSecretKeyFinding,
     InsecureSecretKeyStats,
 )
+from devai.insecure_bind import (
+    InsecureBindAnalyzer,
+    InsecureBindFinding,
+    InsecureBindStats,
+)
+from devai.missing_timeout import (
+    MissingTimeoutAnalyzer,
+    MissingTimeoutFinding,
+    MissingTimeoutStats,
+)
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -171,7 +181,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.16.0"
+__version__ = "6.18.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -389,6 +399,12 @@ __all__ = [
     "InsecureSecretKeyAnalyzer",
     "InsecureSecretKeyFinding",
     "InsecureSecretKeyStats",
+    "InsecureBindAnalyzer",
+    "InsecureBindFinding",
+    "InsecureBindStats",
+    "MissingTimeoutAnalyzer",
+    "MissingTimeoutFinding",
+    "MissingTimeoutStats",
     "SSTIAnalyzer",
     "SSTIFinding",
     "SSTIStats",

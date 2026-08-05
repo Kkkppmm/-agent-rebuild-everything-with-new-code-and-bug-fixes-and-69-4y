@@ -55,6 +55,8 @@ from devai.sensitive_logging import SensitiveLoggingAnalyzer
 from devai.proxy_trust import ProxyTrustAnalyzer
 from devai.wildcard_hosts import WildcardHostsAnalyzer
 from devai.insecure_secret_key import InsecureSecretKeyAnalyzer
+from devai.insecure_bind import InsecureBindAnalyzer
+from devai.missing_timeout import MissingTimeoutAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -104,6 +106,8 @@ CHECK_NAMES = (
     "proxy_trust",
     "wildcard_hosts",
     "insecure_secret_key",
+    "insecure_bind",
+    "missing_timeout",
 )
 
 
@@ -267,6 +271,8 @@ class SecurityScanner:
         self._proxy_trust: ProxyTrustAnalyzer | None = None
         self._wildcard_hosts: WildcardHostsAnalyzer | None = None
         self._insecure_secret_key: InsecureSecretKeyAnalyzer | None = None
+        self._insecure_bind: InsecureBindAnalyzer | None = None
+        self._missing_timeout: MissingTimeoutAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -517,6 +523,16 @@ class SecurityScanner:
             )
         return self._insecure_secret_key
 
+    def _insecure_bind_analyzer(self) -> InsecureBindAnalyzer:
+        if self._insecure_bind is None:
+            self._insecure_bind = InsecureBindAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._insecure_bind
+
+    def _missing_timeout_analyzer(self) -> MissingTimeoutAnalyzer:
+        if self._missing_timeout is None:
+            self._missing_timeout = MissingTimeoutAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._missing_timeout
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -634,6 +650,14 @@ class SecurityScanner:
         ).findings:
             recs.append(
                 "Generate a strong random SECRET_KEY from environment variables — never use defaults."
+            )
+        if by_name.get("insecure_bind", SecurityScanCategory("insecure_bind", 100, 0, "")).findings:
+            recs.append(
+                "Bind development servers to 127.0.0.1 — avoid 0.0.0.0 unless the service must be network-accessible."
+            )
+        if by_name.get("missing_timeout", SecurityScanCategory("missing_timeout", 100, 0, "")).findings:
+            recs.append(
+                "Add timeout= to HTTP, socket, and subprocess calls to prevent indefinite hangs."
             )
         return recs
 
@@ -1207,6 +1231,28 @@ class SecurityScanner:
                     summary=analyzer.summary().splitlines()[0],
                 )
             )
+        if "insecure_bind" in self.checks:
+            analyzer = self._insecure_bind_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_bind",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+        if "missing_timeout" in self.checks:
+            analyzer = self._missing_timeout_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="missing_timeout",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
 
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
@@ -1360,6 +1406,14 @@ class SecurityScanner:
                     self._insecure_secret_key_analyzer().to_context(limit=limit),
                     "",
                 ]
+            )
+        if "insecure_bind" in self.checks:
+            lines.extend(
+                ["## Insecure bind", self._insecure_bind_analyzer().to_context(limit=limit), ""]
+            )
+        if "missing_timeout" in self.checks:
+            lines.extend(
+                ["## Missing timeouts", self._missing_timeout_analyzer().to_context(limit=limit), ""]
             )
         return "\n".join(lines).rstrip()
 
@@ -1597,3 +1651,13 @@ class SecurityScanner:
     def insecure_secret_key(self) -> InsecureSecretKeyAnalyzer:
         """Underlying insecure-secret-key analyzer."""
         return self._insecure_secret_key_analyzer()
+
+    @property
+    def insecure_bind(self) -> InsecureBindAnalyzer:
+        """Underlying insecure-bind analyzer."""
+        return self._insecure_bind_analyzer()
+
+    @property
+    def missing_timeout(self) -> MissingTimeoutAnalyzer:
+        """Underlying missing-timeout analyzer."""
+        return self._missing_timeout_analyzer()
