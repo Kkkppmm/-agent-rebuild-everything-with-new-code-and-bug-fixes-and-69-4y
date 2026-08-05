@@ -146,6 +146,11 @@ from devai.sensitive_logging import (
     SensitiveLoggingStats,
 )
 from devai.proxy_trust import ProxyTrustAnalyzer, ProxyTrustFinding, ProxyTrustStats
+from devai.wildcard_hosts import (
+    WildcardHostsAnalyzer,
+    WildcardHostsFinding,
+    WildcardHostsStats,
+)
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -161,7 +166,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.14.0"
+__version__ = "6.15.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -373,6 +378,9 @@ __all__ = [
     "ProxyTrustAnalyzer",
     "ProxyTrustFinding",
     "ProxyTrustStats",
+    "WildcardHostsAnalyzer",
+    "WildcardHostsFinding",
+    "WildcardHostsStats",
     "SSTIAnalyzer",
     "SSTIFinding",
     "SSTIStats",
