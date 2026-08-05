@@ -151,6 +151,11 @@ from devai.wildcard_hosts import (
     WildcardHostsFinding,
     WildcardHostsStats,
 )
+from devai.insecure_secret_key import (
+    InsecureSecretKeyAnalyzer,
+    InsecureSecretKeyFinding,
+    InsecureSecretKeyStats,
+)
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -166,7 +171,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.15.0"
+__version__ = "6.16.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -381,6 +386,9 @@ __all__ = [
     "WildcardHostsAnalyzer",
     "WildcardHostsFinding",
     "WildcardHostsStats",
+    "InsecureSecretKeyAnalyzer",
+    "InsecureSecretKeyFinding",
+    "InsecureSecretKeyStats",
     "SSTIAnalyzer",
     "SSTIFinding",
     "SSTIStats",

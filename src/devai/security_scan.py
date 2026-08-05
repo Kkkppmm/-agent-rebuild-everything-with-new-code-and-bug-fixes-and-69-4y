@@ -54,6 +54,7 @@ from devai.assert_security import AssertSecurityAnalyzer
 from devai.sensitive_logging import SensitiveLoggingAnalyzer
 from devai.proxy_trust import ProxyTrustAnalyzer
 from devai.wildcard_hosts import WildcardHostsAnalyzer
+from devai.insecure_secret_key import InsecureSecretKeyAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -102,6 +103,7 @@ CHECK_NAMES = (
     "sensitive_logging",
     "proxy_trust",
     "wildcard_hosts",
+    "insecure_secret_key",
 )
 
 
@@ -264,6 +266,7 @@ class SecurityScanner:
         self._sensitive_logging: SensitiveLoggingAnalyzer | None = None
         self._proxy_trust: ProxyTrustAnalyzer | None = None
         self._wildcard_hosts: WildcardHostsAnalyzer | None = None
+        self._insecure_secret_key: InsecureSecretKeyAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -507,6 +510,13 @@ class SecurityScanner:
             self._wildcard_hosts = WildcardHostsAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._wildcard_hosts
 
+    def _insecure_secret_key_analyzer(self) -> InsecureSecretKeyAnalyzer:
+        if self._insecure_secret_key is None:
+            self._insecure_secret_key = InsecureSecretKeyAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_secret_key
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -618,6 +628,12 @@ class SecurityScanner:
         if by_name.get("wildcard_hosts", SecurityScanCategory("wildcard_hosts", 100, 0, "")).findings:
             recs.append(
                 "Set ALLOWED_HOSTS to explicit domain names — never use '*' in production."
+            )
+        if by_name.get(
+            "insecure_secret_key", SecurityScanCategory("insecure_secret_key", 100, 0, "")
+        ).findings:
+            recs.append(
+                "Generate a strong random SECRET_KEY from environment variables — never use defaults."
             )
         return recs
 
@@ -1180,6 +1196,17 @@ class SecurityScanner:
                     summary=analyzer.summary().splitlines()[0],
                 )
             )
+        if "insecure_secret_key" in self.checks:
+            analyzer = self._insecure_secret_key_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_secret_key",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
 
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
@@ -1325,6 +1352,14 @@ class SecurityScanner:
         if "wildcard_hosts" in self.checks:
             lines.extend(
                 ["## Wildcard hosts", self._wildcard_hosts_analyzer().to_context(limit=limit), ""]
+            )
+        if "insecure_secret_key" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure secret keys",
+                    self._insecure_secret_key_analyzer().to_context(limit=limit),
+                    "",
+                ]
             )
         return "\n".join(lines).rstrip()
 
@@ -1557,3 +1592,8 @@ class SecurityScanner:
     def wildcard_hosts(self) -> WildcardHostsAnalyzer:
         """Underlying wildcard-hosts analyzer."""
         return self._wildcard_hosts_analyzer()
+
+    @property
+    def insecure_secret_key(self) -> InsecureSecretKeyAnalyzer:
+        """Underlying insecure-secret-key analyzer."""
+        return self._insecure_secret_key_analyzer()
