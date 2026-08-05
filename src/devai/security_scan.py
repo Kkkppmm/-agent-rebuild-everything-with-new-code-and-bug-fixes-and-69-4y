@@ -58,6 +58,7 @@ from devai.credentials_in_url import CredentialsInURLAnalyzer
 from devai.missing_timeout import MissingTimeoutAnalyzer
 from devai.insecure_bind import InsecureBindAnalyzer
 from devai.template_autoescape import TemplateAutoescapeAnalyzer
+from devai.insecure_dotenv import InsecureDotenvAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -110,6 +111,7 @@ CHECK_NAMES = (
     "missing_timeout",
     "insecure_bind",
     "template_autoescape",
+    "insecure_dotenv",
 )
 
 
@@ -276,6 +278,7 @@ class SecurityScanner:
         self._missing_timeout: MissingTimeoutAnalyzer | None = None
         self._insecure_bind: InsecureBindAnalyzer | None = None
         self._template_autoescape: TemplateAutoescapeAnalyzer | None = None
+        self._insecure_dotenv: InsecureDotenvAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -549,6 +552,13 @@ class SecurityScanner:
             )
         return self._template_autoescape
 
+    def _insecure_dotenv_analyzer(self) -> InsecureDotenvAnalyzer:
+        if self._insecure_dotenv is None:
+            self._insecure_dotenv = InsecureDotenvAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_dotenv
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -678,6 +688,11 @@ class SecurityScanner:
         if by_name.get("template_autoescape", SecurityScanCategory("template_autoescape", 100, 0, "")).findings:
             recs.append(
                 "Enable Jinja2 autoescape=True to prevent XSS via server-side templates."
+            )
+        if by_name.get("insecure_dotenv", SecurityScanCategory("insecure_dotenv", 100, 0, "")).findings:
+            recs.append(
+                "Avoid load_dotenv(override=True) in production — it can overwrite "
+                "deployed environment variables with local .env values."
             )
         return recs
 
@@ -1289,6 +1304,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_dotenv" in self.checks:
+            analyzer = self._insecure_dotenv_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_dotenv",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1467,6 +1494,14 @@ class SecurityScanner:
                 [
                     "## Template autoescape",
                     self._template_autoescape_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_dotenv" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure dotenv",
+                    self._insecure_dotenv_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1721,3 +1756,8 @@ class SecurityScanner:
     def template_autoescape(self) -> TemplateAutoescapeAnalyzer:
         """Underlying template-autoescape analyzer."""
         return self._template_autoescape_analyzer()
+
+    @property
+    def insecure_dotenv(self) -> InsecureDotenvAnalyzer:
+        """Underlying insecure-dotenv analyzer."""
+        return self._insecure_dotenv_analyzer()
