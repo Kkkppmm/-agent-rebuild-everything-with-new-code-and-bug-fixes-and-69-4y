@@ -137,6 +137,7 @@ from devai.graphql_injection import (
 )
 from devai.broken_auth import BrokenAuthAnalyzer, BrokenAuthFinding, BrokenAuthStats
 from devai.insecure_http import InsecureHTTPAnalyzer, InsecureHTTPFinding, InsecureHTTPStats
+from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -152,7 +153,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.9.0"
+__version__ = "6.10.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -322,6 +323,9 @@ __all__ = [
     "InsecureHTTPAnalyzer",
     "InsecureHTTPFinding",
     "InsecureHTTPStats",
+    "ZipSlipAnalyzer",
+    "ZipSlipFinding",
+    "ZipSlipStats",
     "RaceConditionAnalyzer",
     "RaceConditionFinding",
     "RaceConditionStats",
