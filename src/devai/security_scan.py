@@ -53,6 +53,7 @@ from devai.dynamic_import import DynamicImportAnalyzer
 from devai.assert_security import AssertSecurityAnalyzer
 from devai.sensitive_logging import SensitiveLoggingAnalyzer
 from devai.proxy_trust import ProxyTrustAnalyzer
+from devai.insecure_websocket import InsecureWebSocketAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -100,6 +101,7 @@ CHECK_NAMES = (
     "assert_security",
     "sensitive_logging",
     "proxy_trust",
+    "insecure_websocket",
 )
 
 
@@ -261,6 +263,7 @@ class SecurityScanner:
         self._assert_security: AssertSecurityAnalyzer | None = None
         self._sensitive_logging: SensitiveLoggingAnalyzer | None = None
         self._proxy_trust: ProxyTrustAnalyzer | None = None
+        self._insecure_websocket: InsecureWebSocketAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -499,6 +502,13 @@ class SecurityScanner:
             self._proxy_trust = ProxyTrustAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._proxy_trust
 
+    def _insecure_websocket_analyzer(self) -> InsecureWebSocketAnalyzer:
+        if self._insecure_websocket is None:
+            self._insecure_websocket = InsecureWebSocketAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_websocket
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -606,6 +616,11 @@ class SecurityScanner:
             recs.append(
                 "Validate proxy headers only from trusted reverse proxies — never use "
                 "X-Forwarded-For for access control without hop validation."
+            )
+        if by_name.get("insecure_websocket", SecurityScanCategory("insecure_websocket", 100, 0, "")).findings:
+            recs.append(
+                "Use wss:// for WebSocket connections in production — ws:// transmits "
+                "real-time data without encryption."
             )
         return recs
 
@@ -1157,6 +1172,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_websocket" in self.checks:
+            analyzer = self._insecure_websocket_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_websocket",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1297,6 +1324,14 @@ class SecurityScanner:
         if "proxy_trust" in self.checks:
             lines.extend(
                 ["## Proxy trust", self._proxy_trust_analyzer().to_context(limit=limit), ""]
+            )
+        if "insecure_websocket" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure WebSocket",
+                    self._insecure_websocket_analyzer().to_context(limit=limit),
+                    "",
+                ]
             )
         return "\n".join(lines).rstrip()
 
@@ -1524,3 +1559,8 @@ class SecurityScanner:
     def proxy_trust(self) -> ProxyTrustAnalyzer:
         """Underlying proxy-trust analyzer."""
         return self._proxy_trust_analyzer()
+
+    @property
+    def insecure_websocket(self) -> InsecureWebSocketAnalyzer:
+        """Underlying insecure-WebSocket analyzer."""
+        return self._insecure_websocket_analyzer()

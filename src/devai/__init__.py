@@ -137,6 +137,11 @@ from devai.graphql_injection import (
 )
 from devai.broken_auth import BrokenAuthAnalyzer, BrokenAuthFinding, BrokenAuthStats
 from devai.insecure_http import InsecureHTTPAnalyzer, InsecureHTTPFinding, InsecureHTTPStats
+from devai.insecure_websocket import (
+    InsecureWebSocketAnalyzer,
+    InsecureWebSocketFinding,
+    InsecureWebSocketStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -161,7 +166,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.14.0"
+__version__ = "6.15.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -334,6 +339,9 @@ __all__ = [
     "InsecureHTTPAnalyzer",
     "InsecureHTTPFinding",
     "InsecureHTTPStats",
+    "InsecureWebSocketAnalyzer",
+    "InsecureWebSocketFinding",
+    "InsecureWebSocketStats",
     "ZipSlipAnalyzer",
     "ZipSlipFinding",
     "ZipSlipStats",
