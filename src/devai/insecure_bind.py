@@ -20,6 +20,18 @@ _SERVER_CALLS = frozenset(
         "make_server",
     }
 )
+_SERVER_CLASSES = frozenset(
+    {
+        "HTTPServer",
+        "ThreadingHTTPServer",
+        "TCPServer",
+        "ThreadingTCPServer",
+        "UDPServer",
+        "ThreadingUDPServer",
+        "UnixStreamServer",
+        "UnixDatagramServer",
+    }
+)
 
 
 @dataclass
@@ -146,6 +158,10 @@ class _InsecureBindVisitor(ast.NodeVisitor):
             callee = func.attr
         elif isinstance(func, ast.Name) and func.id in _SERVER_CALLS:
             callee = func.id
+        elif isinstance(func, ast.Name) and func.id in _SERVER_CLASSES:
+            callee = func.id
+        elif isinstance(func, ast.Attribute) and func.attr in _SERVER_CLASSES:
+            callee = func.attr
         else:
             return
 
