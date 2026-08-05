@@ -59,6 +59,7 @@ from devai.missing_timeout import MissingTimeoutAnalyzer
 from devai.insecure_bind import InsecureBindAnalyzer
 from devai.template_autoescape import TemplateAutoescapeAnalyzer
 from devai.insecure_dotenv import InsecureDotenvAnalyzer
+from devai.insecure_allowed_hosts import InsecureAllowedHostsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -112,6 +113,7 @@ CHECK_NAMES = (
     "insecure_bind",
     "template_autoescape",
     "insecure_dotenv",
+    "insecure_allowed_hosts",
 )
 
 
@@ -279,6 +281,7 @@ class SecurityScanner:
         self._insecure_bind: InsecureBindAnalyzer | None = None
         self._template_autoescape: TemplateAutoescapeAnalyzer | None = None
         self._insecure_dotenv: InsecureDotenvAnalyzer | None = None
+        self._insecure_allowed_hosts: InsecureAllowedHostsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -559,6 +562,13 @@ class SecurityScanner:
             )
         return self._insecure_dotenv
 
+    def _insecure_allowed_hosts_analyzer(self) -> InsecureAllowedHostsAnalyzer:
+        if self._insecure_allowed_hosts is None:
+            self._insecure_allowed_hosts = InsecureAllowedHostsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_allowed_hosts
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -693,6 +703,13 @@ class SecurityScanner:
             recs.append(
                 "Avoid load_dotenv(override=True) in production — it can overwrite "
                 "deployed environment variables with local .env values."
+            )
+        if by_name.get(
+            "insecure_allowed_hosts",
+            SecurityScanCategory("insecure_allowed_hosts", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Replace wildcard ALLOWED_HOSTS with an explicit list of trusted domains."
             )
         return recs
 
@@ -1316,6 +1333,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_allowed_hosts" in self.checks:
+            analyzer = self._insecure_allowed_hosts_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_allowed_hosts",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1502,6 +1531,14 @@ class SecurityScanner:
                 [
                     "## Insecure dotenv",
                     self._insecure_dotenv_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_allowed_hosts" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure allowed hosts",
+                    self._insecure_allowed_hosts_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1761,3 +1798,8 @@ class SecurityScanner:
     def insecure_dotenv(self) -> InsecureDotenvAnalyzer:
         """Underlying insecure-dotenv analyzer."""
         return self._insecure_dotenv_analyzer()
+
+    @property
+    def insecure_allowed_hosts(self) -> InsecureAllowedHostsAnalyzer:
+        """Underlying insecure-allowed-hosts analyzer."""
+        return self._insecure_allowed_hosts_analyzer()

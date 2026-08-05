@@ -167,6 +167,11 @@ from devai.insecure_dotenv import (
     InsecureDotenvFinding,
     InsecureDotenvStats,
 )
+from devai.insecure_allowed_hosts import (
+    InsecureAllowedHostsAnalyzer,
+    InsecureAllowedHostsFinding,
+    InsecureAllowedHostsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -191,7 +196,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.20.0"
+__version__ = "6.21.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -272,6 +277,9 @@ __all__ = [
     "InsecureDotenvAnalyzer",
     "InsecureDotenvFinding",
     "InsecureDotenvStats",
+    "InsecureAllowedHostsAnalyzer",
+    "InsecureAllowedHostsFinding",
+    "InsecureAllowedHostsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
