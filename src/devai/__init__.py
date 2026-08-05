@@ -166,6 +166,11 @@ from devai.missing_timeout import (
     MissingTimeoutFinding,
     MissingTimeoutStats,
 )
+from devai.template_autoescape import (
+    TemplateAutoescapeAnalyzer,
+    TemplateAutoescapeFinding,
+    TemplateAutoescapeStats,
+)
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -181,7 +186,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.18.0"
+__version__ = "6.19.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -405,6 +410,9 @@ __all__ = [
     "MissingTimeoutAnalyzer",
     "MissingTimeoutFinding",
     "MissingTimeoutStats",
+    "TemplateAutoescapeAnalyzer",
+    "TemplateAutoescapeFinding",
+    "TemplateAutoescapeStats",
     "SSTIAnalyzer",
     "SSTIFinding",
     "SSTIStats",

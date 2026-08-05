@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.18.0"
+        assert devai.__version__ == "6.19.0"
 
     def test_exports(self):
         expected = {
@@ -253,6 +253,9 @@ class TestPublicAPI:
             "MissingTimeoutAnalyzer",
             "MissingTimeoutFinding",
             "MissingTimeoutStats",
+            "TemplateAutoescapeAnalyzer",
+            "TemplateAutoescapeFinding",
+            "TemplateAutoescapeStats",
             "SSTIAnalyzer",
             "SSTIFinding",
             "SSTIStats",

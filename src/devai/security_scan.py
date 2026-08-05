@@ -57,6 +57,7 @@ from devai.wildcard_hosts import WildcardHostsAnalyzer
 from devai.insecure_secret_key import InsecureSecretKeyAnalyzer
 from devai.insecure_bind import InsecureBindAnalyzer
 from devai.missing_timeout import MissingTimeoutAnalyzer
+from devai.template_autoescape import TemplateAutoescapeAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -108,6 +109,7 @@ CHECK_NAMES = (
     "insecure_secret_key",
     "insecure_bind",
     "missing_timeout",
+    "template_autoescape",
 )
 
 
@@ -273,6 +275,7 @@ class SecurityScanner:
         self._insecure_secret_key: InsecureSecretKeyAnalyzer | None = None
         self._insecure_bind: InsecureBindAnalyzer | None = None
         self._missing_timeout: MissingTimeoutAnalyzer | None = None
+        self._template_autoescape: TemplateAutoescapeAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -533,6 +536,11 @@ class SecurityScanner:
             self._missing_timeout = MissingTimeoutAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._missing_timeout
 
+    def _template_autoescape_analyzer(self) -> TemplateAutoescapeAnalyzer:
+        if self._template_autoescape is None:
+            self._template_autoescape = TemplateAutoescapeAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._template_autoescape
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -658,6 +666,12 @@ class SecurityScanner:
         if by_name.get("missing_timeout", SecurityScanCategory("missing_timeout", 100, 0, "")).findings:
             recs.append(
                 "Add timeout= to HTTP, socket, and subprocess calls to prevent indefinite hangs."
+            )
+        if by_name.get(
+            "template_autoescape", SecurityScanCategory("template_autoescape", 100, 0, "")
+        ).findings:
+            recs.append(
+                "Enable Jinja2 autoescape with autoescape=True or select_autoescape() to prevent XSS."
             )
         return recs
 
@@ -1253,6 +1267,17 @@ class SecurityScanner:
                     summary=analyzer.summary().splitlines()[0],
                 )
             )
+        if "template_autoescape" in self.checks:
+            analyzer = self._template_autoescape_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="template_autoescape",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
 
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
@@ -1414,6 +1439,14 @@ class SecurityScanner:
         if "missing_timeout" in self.checks:
             lines.extend(
                 ["## Missing timeouts", self._missing_timeout_analyzer().to_context(limit=limit), ""]
+            )
+        if "template_autoescape" in self.checks:
+            lines.extend(
+                [
+                    "## Template autoescape",
+                    self._template_autoescape_analyzer().to_context(limit=limit),
+                    "",
+                ]
             )
         return "\n".join(lines).rstrip()
 
@@ -1661,3 +1694,8 @@ class SecurityScanner:
     def missing_timeout(self) -> MissingTimeoutAnalyzer:
         """Underlying missing-timeout analyzer."""
         return self._missing_timeout_analyzer()
+
+    @property
+    def template_autoescape(self) -> TemplateAutoescapeAnalyzer:
+        """Underlying template-autoescape analyzer."""
+        return self._template_autoescape_analyzer()
