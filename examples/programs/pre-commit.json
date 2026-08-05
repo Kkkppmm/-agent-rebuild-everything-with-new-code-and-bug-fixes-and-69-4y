@@ -1,0 +1,8 @@
+{
+  "name": "pre-commit",
+  "tasks": [
+    {"name": "review", "action": "review"},
+    {"name": "security", "action": "security"},
+    {"name": "type_hints", "action": "type_hints"}
+  ]
+}
