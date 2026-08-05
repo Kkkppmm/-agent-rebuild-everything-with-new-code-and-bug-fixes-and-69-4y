@@ -147,6 +147,21 @@ from devai.credentials_in_url import (
     CredentialsInURLFinding,
     CredentialsInURLStats,
 )
+from devai.missing_timeout import (
+    MissingTimeoutAnalyzer,
+    MissingTimeoutFinding,
+    MissingTimeoutStats,
+)
+from devai.insecure_bind import (
+    InsecureBindAnalyzer,
+    InsecureBindFinding,
+    InsecureBindStats,
+)
+from devai.template_autoescape import (
+    TemplateAutoescapeAnalyzer,
+    TemplateAutoescapeFinding,
+    TemplateAutoescapeStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -171,7 +186,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.16.0"
+__version__ = "6.19.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -240,6 +255,15 @@ __all__ = [
     "CredentialsInURLAnalyzer",
     "CredentialsInURLFinding",
     "CredentialsInURLStats",
+    "MissingTimeoutAnalyzer",
+    "MissingTimeoutFinding",
+    "MissingTimeoutStats",
+    "InsecureBindAnalyzer",
+    "InsecureBindFinding",
+    "InsecureBindStats",
+    "TemplateAutoescapeAnalyzer",
+    "TemplateAutoescapeFinding",
+    "TemplateAutoescapeStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",

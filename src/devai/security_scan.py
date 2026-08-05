@@ -55,6 +55,9 @@ from devai.sensitive_logging import SensitiveLoggingAnalyzer
 from devai.proxy_trust import ProxyTrustAnalyzer
 from devai.insecure_websocket import InsecureWebSocketAnalyzer
 from devai.credentials_in_url import CredentialsInURLAnalyzer
+from devai.missing_timeout import MissingTimeoutAnalyzer
+from devai.insecure_bind import InsecureBindAnalyzer
+from devai.template_autoescape import TemplateAutoescapeAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -104,6 +107,9 @@ CHECK_NAMES = (
     "proxy_trust",
     "insecure_websocket",
     "credentials_in_url",
+    "missing_timeout",
+    "insecure_bind",
+    "template_autoescape",
 )
 
 
@@ -267,6 +273,9 @@ class SecurityScanner:
         self._proxy_trust: ProxyTrustAnalyzer | None = None
         self._insecure_websocket: InsecureWebSocketAnalyzer | None = None
         self._credentials_in_url: CredentialsInURLAnalyzer | None = None
+        self._missing_timeout: MissingTimeoutAnalyzer | None = None
+        self._insecure_bind: InsecureBindAnalyzer | None = None
+        self._template_autoescape: TemplateAutoescapeAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -519,6 +528,27 @@ class SecurityScanner:
             )
         return self._credentials_in_url
 
+    def _missing_timeout_analyzer(self) -> MissingTimeoutAnalyzer:
+        if self._missing_timeout is None:
+            self._missing_timeout = MissingTimeoutAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._missing_timeout
+
+    def _insecure_bind_analyzer(self) -> InsecureBindAnalyzer:
+        if self._insecure_bind is None:
+            self._insecure_bind = InsecureBindAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_bind
+
+    def _template_autoescape_analyzer(self) -> TemplateAutoescapeAnalyzer:
+        if self._template_autoescape is None:
+            self._template_autoescape = TemplateAutoescapeAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._template_autoescape
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -636,6 +666,18 @@ class SecurityScanner:
             recs.append(
                 "Never embed passwords, tokens, or API keys in URLs — use environment "
                 "variables or a secrets manager."
+            )
+        if by_name.get("missing_timeout", SecurityScanCategory("missing_timeout", 100, 0, "")).findings:
+            recs.append(
+                "Add timeout= to HTTP, socket, and subprocess calls to prevent indefinite hangs."
+            )
+        if by_name.get("insecure_bind", SecurityScanCategory("insecure_bind", 100, 0, "")).findings:
+            recs.append(
+                "Bind services to 127.0.0.1 or a specific interface instead of 0.0.0.0 in production."
+            )
+        if by_name.get("template_autoescape", SecurityScanCategory("template_autoescape", 100, 0, "")).findings:
+            recs.append(
+                "Enable Jinja2 autoescape=True to prevent XSS via server-side templates."
             )
         return recs
 
@@ -1211,6 +1253,42 @@ class SecurityScanner:
                 )
             )
 
+        if "missing_timeout" in self.checks:
+            analyzer = self._missing_timeout_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="missing_timeout",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_bind" in self.checks:
+            analyzer = self._insecure_bind_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_bind",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "template_autoescape" in self.checks:
+            analyzer = self._template_autoescape_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="template_autoescape",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1365,6 +1443,30 @@ class SecurityScanner:
                 [
                     "## Credentials in URL",
                     self._credentials_in_url_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "missing_timeout" in self.checks:
+            lines.extend(
+                [
+                    "## Missing timeout",
+                    self._missing_timeout_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_bind" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure bind",
+                    self._insecure_bind_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "template_autoescape" in self.checks:
+            lines.extend(
+                [
+                    "## Template autoescape",
+                    self._template_autoescape_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1604,3 +1706,18 @@ class SecurityScanner:
     def credentials_in_url(self) -> CredentialsInURLAnalyzer:
         """Underlying credentials-in-URL analyzer."""
         return self._credentials_in_url_analyzer()
+
+    @property
+    def missing_timeout(self) -> MissingTimeoutAnalyzer:
+        """Underlying missing-timeout analyzer."""
+        return self._missing_timeout_analyzer()
+
+    @property
+    def insecure_bind(self) -> InsecureBindAnalyzer:
+        """Underlying insecure-bind analyzer."""
+        return self._insecure_bind_analyzer()
+
+    @property
+    def template_autoescape(self) -> TemplateAutoescapeAnalyzer:
+        """Underlying template-autoescape analyzer."""
+        return self._template_autoescape_analyzer()
