@@ -47,6 +47,7 @@ from devai.race_condition import RaceConditionAnalyzer
 from devai.insecure_tempfile import InsecureTempfileAnalyzer
 from devai.graphql_injection import GraphQLInjectionAnalyzer
 from devai.broken_auth import BrokenAuthAnalyzer
+from devai.insecure_http import InsecureHTTPAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -88,6 +89,7 @@ CHECK_NAMES = (
     "insecure_tempfile",
     "graphql_injection",
     "broken_auth",
+    "insecure_http",
 )
 
 
@@ -243,6 +245,7 @@ class SecurityScanner:
         self._insecure_tempfile: InsecureTempfileAnalyzer | None = None
         self._graphql_injection: GraphQLInjectionAnalyzer | None = None
         self._broken_auth: BrokenAuthAnalyzer | None = None
+        self._insecure_http: InsecureHTTPAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -451,6 +454,11 @@ class SecurityScanner:
             self._broken_auth = BrokenAuthAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._broken_auth
 
+    def _insecure_http_analyzer(self) -> InsecureHTTPAnalyzer:
+        if self._insecure_http is None:
+            self._insecure_http = InsecureHTTPAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
+        return self._insecure_http
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -537,6 +545,8 @@ class SecurityScanner:
             recs.append("Use GraphQL variables instead of string interpolation in queries.")
         if by_name.get("broken_auth", SecurityScanCategory("broken_auth", 100, 0, "")).findings:
             recs.append("Enforce authentication on sensitive routes and avoid hardcoded credential checks.")
+        if by_name.get("insecure_http", SecurityScanCategory("insecure_http", 100, 0, "")).findings:
+            recs.append("Use https:// for external URLs and never disable TLS certificate verification.")
         return recs
 
     def scan(self) -> SecurityScanReport:
@@ -1015,6 +1025,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_http" in self.checks:
+            analyzer = self._insecure_http_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_http",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1136,6 +1158,8 @@ class SecurityScanner:
             )
         if "broken_auth" in self.checks:
             lines.extend(["## Broken auth", self._broken_auth_analyzer().to_context(limit=limit), ""])
+        if "insecure_http" in self.checks:
+            lines.extend(["## Insecure HTTP", self._insecure_http_analyzer().to_context(limit=limit), ""])
         return "\n".join(lines).rstrip()
 
     @property
@@ -1332,3 +1356,8 @@ class SecurityScanner:
     def broken_auth(self) -> BrokenAuthAnalyzer:
         """Underlying broken-auth analyzer."""
         return self._broken_auth_analyzer()
+
+    @property
+    def insecure_http(self) -> InsecureHTTPAnalyzer:
+        """Underlying insecure-HTTP analyzer."""
+        return self._insecure_http_analyzer()

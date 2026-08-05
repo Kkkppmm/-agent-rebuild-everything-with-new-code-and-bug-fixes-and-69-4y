@@ -136,6 +136,7 @@ from devai.graphql_injection import (
     GraphQLInjectionStats,
 )
 from devai.broken_auth import BrokenAuthAnalyzer, BrokenAuthFinding, BrokenAuthStats
+from devai.insecure_http import InsecureHTTPAnalyzer, InsecureHTTPFinding, InsecureHTTPStats
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -151,7 +152,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.8.0"
+__version__ = "6.9.0"
 __all__ = [
     "Agent",
     "AsyncBlockingDetector",
@@ -318,6 +319,9 @@ __all__ = [
     "InsecureTempfileAnalyzer",
     "InsecureTempfileFinding",
     "InsecureTempfileStats",
+    "InsecureHTTPAnalyzer",
+    "InsecureHTTPFinding",
+    "InsecureHTTPStats",
     "RaceConditionAnalyzer",
     "RaceConditionFinding",
     "RaceConditionStats",
