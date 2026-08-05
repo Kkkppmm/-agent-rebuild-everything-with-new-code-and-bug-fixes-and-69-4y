@@ -60,6 +60,7 @@ from devai.insecure_bind import InsecureBindAnalyzer
 from devai.template_autoescape import TemplateAutoescapeAnalyzer
 from devai.insecure_dotenv import InsecureDotenvAnalyzer
 from devai.insecure_allowed_hosts import InsecureAllowedHostsAnalyzer
+from devai.weak_secret_key import WeakSecretKeyAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -114,6 +115,7 @@ CHECK_NAMES = (
     "template_autoescape",
     "insecure_dotenv",
     "insecure_allowed_hosts",
+    "weak_secret_key",
 )
 
 
@@ -282,6 +284,7 @@ class SecurityScanner:
         self._template_autoescape: TemplateAutoescapeAnalyzer | None = None
         self._insecure_dotenv: InsecureDotenvAnalyzer | None = None
         self._insecure_allowed_hosts: InsecureAllowedHostsAnalyzer | None = None
+        self._weak_secret_key: WeakSecretKeyAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -569,6 +572,13 @@ class SecurityScanner:
             )
         return self._insecure_allowed_hosts
 
+    def _weak_secret_key_analyzer(self) -> WeakSecretKeyAnalyzer:
+        if self._weak_secret_key is None:
+            self._weak_secret_key = WeakSecretKeyAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._weak_secret_key
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -710,6 +720,14 @@ class SecurityScanner:
         ).findings:
             recs.append(
                 "Replace wildcard ALLOWED_HOSTS with an explicit list of trusted domains."
+            )
+        if by_name.get(
+            "weak_secret_key",
+            SecurityScanCategory("weak_secret_key", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Load SECRET_KEY from environment variables and use a cryptographically "
+                "random value of at least 32 characters."
             )
         return recs
 
@@ -1345,6 +1363,18 @@ class SecurityScanner:
                 )
             )
 
+        if "weak_secret_key" in self.checks:
+            analyzer = self._weak_secret_key_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="weak_secret_key",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1539,6 +1569,14 @@ class SecurityScanner:
                 [
                     "## Insecure allowed hosts",
                     self._insecure_allowed_hosts_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "weak_secret_key" in self.checks:
+            lines.extend(
+                [
+                    "## Weak secret keys",
+                    self._weak_secret_key_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1803,3 +1841,8 @@ class SecurityScanner:
     def insecure_allowed_hosts(self) -> InsecureAllowedHostsAnalyzer:
         """Underlying insecure-allowed-hosts analyzer."""
         return self._insecure_allowed_hosts_analyzer()
+
+    @property
+    def weak_secret_key(self) -> WeakSecretKeyAnalyzer:
+        """Underlying weak-secret-key analyzer."""
+        return self._weak_secret_key_analyzer()
