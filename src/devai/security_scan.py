@@ -54,6 +54,7 @@ from devai.assert_security import AssertSecurityAnalyzer
 from devai.sensitive_logging import SensitiveLoggingAnalyzer
 from devai.proxy_trust import ProxyTrustAnalyzer
 from devai.insecure_websocket import InsecureWebSocketAnalyzer
+from devai.credentials_in_url import CredentialsInURLAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -102,6 +103,7 @@ CHECK_NAMES = (
     "sensitive_logging",
     "proxy_trust",
     "insecure_websocket",
+    "credentials_in_url",
 )
 
 
@@ -264,6 +266,7 @@ class SecurityScanner:
         self._sensitive_logging: SensitiveLoggingAnalyzer | None = None
         self._proxy_trust: ProxyTrustAnalyzer | None = None
         self._insecure_websocket: InsecureWebSocketAnalyzer | None = None
+        self._credentials_in_url: CredentialsInURLAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -509,6 +512,13 @@ class SecurityScanner:
             )
         return self._insecure_websocket
 
+    def _credentials_in_url_analyzer(self) -> CredentialsInURLAnalyzer:
+        if self._credentials_in_url is None:
+            self._credentials_in_url = CredentialsInURLAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._credentials_in_url
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -621,6 +631,11 @@ class SecurityScanner:
             recs.append(
                 "Use wss:// for WebSocket connections in production — ws:// transmits "
                 "real-time data without encryption."
+            )
+        if by_name.get("credentials_in_url", SecurityScanCategory("credentials_in_url", 100, 0, "")).findings:
+            recs.append(
+                "Never embed passwords, tokens, or API keys in URLs — use environment "
+                "variables or a secrets manager."
             )
         return recs
 
@@ -1184,6 +1199,18 @@ class SecurityScanner:
                 )
             )
 
+        if "credentials_in_url" in self.checks:
+            analyzer = self._credentials_in_url_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="credentials_in_url",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1330,6 +1357,14 @@ class SecurityScanner:
                 [
                     "## Insecure WebSocket",
                     self._insecure_websocket_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "credentials_in_url" in self.checks:
+            lines.extend(
+                [
+                    "## Credentials in URL",
+                    self._credentials_in_url_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1564,3 +1599,8 @@ class SecurityScanner:
     def insecure_websocket(self) -> InsecureWebSocketAnalyzer:
         """Underlying insecure-WebSocket analyzer."""
         return self._insecure_websocket_analyzer()
+
+    @property
+    def credentials_in_url(self) -> CredentialsInURLAnalyzer:
+        """Underlying credentials-in-URL analyzer."""
+        return self._credentials_in_url_analyzer()

@@ -142,6 +142,11 @@ from devai.insecure_websocket import (
     InsecureWebSocketFinding,
     InsecureWebSocketStats,
 )
+from devai.credentials_in_url import (
+    CredentialsInURLAnalyzer,
+    CredentialsInURLFinding,
+    CredentialsInURLStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -166,7 +171,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.15.0"
+__version__ = "6.16.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -232,6 +237,9 @@ __all__ = [
     "CORSAnalyzer",
     "CORSFinding",
     "CORSStats",
+    "CredentialsInURLAnalyzer",
+    "CredentialsInURLFinding",
+    "CredentialsInURLStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
