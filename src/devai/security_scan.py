@@ -61,6 +61,7 @@ from devai.template_autoescape import TemplateAutoescapeAnalyzer
 from devai.insecure_dotenv import InsecureDotenvAnalyzer
 from devai.insecure_allowed_hosts import InsecureAllowedHostsAnalyzer
 from devai.weak_secret_key import WeakSecretKeyAnalyzer
+from devai.insecure_session_settings import InsecureSessionSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -116,6 +117,7 @@ CHECK_NAMES = (
     "insecure_dotenv",
     "insecure_allowed_hosts",
     "weak_secret_key",
+    "insecure_session_settings",
 )
 
 
@@ -285,6 +287,7 @@ class SecurityScanner:
         self._insecure_dotenv: InsecureDotenvAnalyzer | None = None
         self._insecure_allowed_hosts: InsecureAllowedHostsAnalyzer | None = None
         self._weak_secret_key: WeakSecretKeyAnalyzer | None = None
+        self._insecure_session_settings: InsecureSessionSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -579,6 +582,13 @@ class SecurityScanner:
             )
         return self._weak_secret_key
 
+    def _insecure_session_settings_analyzer(self) -> InsecureSessionSettingsAnalyzer:
+        if self._insecure_session_settings is None:
+            self._insecure_session_settings = InsecureSessionSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_session_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -728,6 +738,14 @@ class SecurityScanner:
             recs.append(
                 "Load SECRET_KEY from environment variables and use a cryptographically "
                 "random value of at least 32 characters."
+            )
+        if by_name.get(
+            "insecure_session_settings",
+            SecurityScanCategory("insecure_session_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Enable SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, and "
+                "SESSION_COOKIE_SAMESITE='Lax' in production settings."
             )
         return recs
 
@@ -1375,6 +1393,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_session_settings" in self.checks:
+            analyzer = self._insecure_session_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_session_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1577,6 +1607,14 @@ class SecurityScanner:
                 [
                     "## Weak secret keys",
                     self._weak_secret_key_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_session_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure session settings",
+                    self._insecure_session_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1846,3 +1884,8 @@ class SecurityScanner:
     def weak_secret_key(self) -> WeakSecretKeyAnalyzer:
         """Underlying weak-secret-key analyzer."""
         return self._weak_secret_key_analyzer()
+
+    @property
+    def insecure_session_settings(self) -> InsecureSessionSettingsAnalyzer:
+        """Underlying insecure-session-settings analyzer."""
+        return self._insecure_session_settings_analyzer()
