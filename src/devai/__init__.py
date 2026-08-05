@@ -140,6 +140,11 @@ from devai.insecure_http import InsecureHTTPAnalyzer, InsecureHTTPFinding, Insec
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
+from devai.sensitive_logging import (
+    SensitiveLoggingAnalyzer,
+    SensitiveLoggingFinding,
+    SensitiveLoggingStats,
+)
 from devai.unsafe_deserialization import (
     UnsafeDeserializationAnalyzer,
     UnsafeDeserializationFinding,
@@ -155,7 +160,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.12.0"
+__version__ = "6.13.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -361,6 +366,9 @@ __all__ = [
     "SecurityScanCategory",
     "SecurityScanner",
     "SecurityScanReport",
+    "SensitiveLoggingAnalyzer",
+    "SensitiveLoggingFinding",
+    "SensitiveLoggingStats",
     "SSTIAnalyzer",
     "SSTIFinding",
     "SSTIStats",

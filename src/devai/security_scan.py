@@ -51,6 +51,7 @@ from devai.insecure_http import InsecureHTTPAnalyzer
 from devai.zip_slip import ZipSlipAnalyzer
 from devai.dynamic_import import DynamicImportAnalyzer
 from devai.assert_security import AssertSecurityAnalyzer
+from devai.sensitive_logging import SensitiveLoggingAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -96,6 +97,7 @@ CHECK_NAMES = (
     "zip_slip",
     "dynamic_import",
     "assert_security",
+    "sensitive_logging",
 )
 
 
@@ -255,6 +257,7 @@ class SecurityScanner:
         self._zip_slip: ZipSlipAnalyzer | None = None
         self._dynamic_import: DynamicImportAnalyzer | None = None
         self._assert_security: AssertSecurityAnalyzer | None = None
+        self._sensitive_logging: SensitiveLoggingAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -483,6 +486,13 @@ class SecurityScanner:
             self._assert_security = AssertSecurityAnalyzer(str(self.root), ignore_dirs=self.ignore_dirs)
         return self._assert_security
 
+    def _sensitive_logging_analyzer(self) -> SensitiveLoggingAnalyzer:
+        if self._sensitive_logging is None:
+            self._sensitive_logging = SensitiveLoggingAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._sensitive_logging
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -581,6 +591,13 @@ class SecurityScanner:
             recs.append(
                 "Replace security assert checks with explicit raises — asserts are removed when "
                 "Python runs with -O or PYTHONOPTIMIZE."
+            )
+        if by_name.get(
+            "sensitive_logging", SecurityScanCategory("sensitive_logging", 100, 0, "")
+        ).findings:
+            recs.append(
+                "Redact passwords, tokens, and secrets before logging — use structured logging "
+                "with field filtering."
             )
         return recs
 
@@ -1108,6 +1125,18 @@ class SecurityScanner:
                 )
             )
 
+        if "sensitive_logging" in self.checks:
+            analyzer = self._sensitive_logging_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="sensitive_logging",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1240,6 +1269,14 @@ class SecurityScanner:
         if "assert_security" in self.checks:
             lines.extend(
                 ["## Assert security", self._assert_security_analyzer().to_context(limit=limit), ""]
+            )
+        if "sensitive_logging" in self.checks:
+            lines.extend(
+                [
+                    "## Sensitive logging",
+                    self._sensitive_logging_analyzer().to_context(limit=limit),
+                    "",
+                ]
             )
         return "\n".join(lines).rstrip()
 
@@ -1457,3 +1494,8 @@ class SecurityScanner:
     def assert_security(self) -> AssertSecurityAnalyzer:
         """Underlying assert-security analyzer."""
         return self._assert_security_analyzer()
+
+    @property
+    def sensitive_logging(self) -> SensitiveLoggingAnalyzer:
+        """Underlying sensitive-logging analyzer."""
+        return self._sensitive_logging_analyzer()
