@@ -69,6 +69,7 @@ from devai.insecure_email_settings import InsecureEmailSettingsAnalyzer
 from devai.insecure_logging_settings import InsecureLoggingSettingsAnalyzer
 from devai.insecure_cors_settings import InsecureCorsSettingsAnalyzer
 from devai.insecure_storage_settings import InsecureStorageSettingsAnalyzer
+from devai.insecure_auth_settings import InsecureAuthSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -132,6 +133,7 @@ CHECK_NAMES = (
     "insecure_logging_settings",
     "insecure_cors_settings",
     "insecure_storage_settings",
+    "insecure_auth_settings",
 )
 
 
@@ -309,6 +311,7 @@ class SecurityScanner:
         self._insecure_logging_settings: InsecureLoggingSettingsAnalyzer | None = None
         self._insecure_cors_settings: InsecureCorsSettingsAnalyzer | None = None
         self._insecure_storage_settings: InsecureStorageSettingsAnalyzer | None = None
+        self._insecure_auth_settings: InsecureAuthSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -659,6 +662,13 @@ class SecurityScanner:
             )
         return self._insecure_storage_settings
 
+    def _insecure_auth_settings_analyzer(self) -> InsecureAuthSettingsAnalyzer:
+        if self._insecure_auth_settings is None:
+            self._insecure_auth_settings = InsecureAuthSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_auth_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -872,6 +882,14 @@ class SecurityScanner:
             recs.append(
                 "Use cloud storage (S3/GCS) in production with private ACLs and "
                 "IAM roles instead of hardcoded AWS credentials."
+            )
+        if by_name.get(
+            "insecure_auth_settings",
+            SecurityScanCategory("insecure_auth_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Use strong password hashers (Argon2/PBKDF2), enable password validators, "
+                "remove AllowAllUsersModelBackend, and require TLS for LDAP authentication."
             )
         return recs
 
@@ -1615,6 +1633,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_auth_settings" in self.checks:
+            analyzer = self._insecure_auth_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_auth_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1881,6 +1911,14 @@ class SecurityScanner:
                 [
                     "## Insecure storage settings",
                     self._insecure_storage_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_auth_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure auth settings",
+                    self._insecure_auth_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2190,3 +2228,8 @@ class SecurityScanner:
     def insecure_storage_settings(self) -> InsecureStorageSettingsAnalyzer:
         """Underlying insecure-storage-settings analyzer."""
         return self._insecure_storage_settings_analyzer()
+
+    @property
+    def insecure_auth_settings(self) -> InsecureAuthSettingsAnalyzer:
+        """Underlying insecure-auth-settings analyzer."""
+        return self._insecure_auth_settings_analyzer()
