@@ -62,6 +62,7 @@ from devai.insecure_dotenv import InsecureDotenvAnalyzer
 from devai.insecure_allowed_hosts import InsecureAllowedHostsAnalyzer
 from devai.weak_secret_key import WeakSecretKeyAnalyzer
 from devai.insecure_session_settings import InsecureSessionSettingsAnalyzer
+from devai.insecure_transport_settings import InsecureTransportSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -118,6 +119,7 @@ CHECK_NAMES = (
     "insecure_allowed_hosts",
     "weak_secret_key",
     "insecure_session_settings",
+    "insecure_transport_settings",
 )
 
 
@@ -288,6 +290,7 @@ class SecurityScanner:
         self._insecure_allowed_hosts: InsecureAllowedHostsAnalyzer | None = None
         self._weak_secret_key: WeakSecretKeyAnalyzer | None = None
         self._insecure_session_settings: InsecureSessionSettingsAnalyzer | None = None
+        self._insecure_transport_settings: InsecureTransportSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -589,6 +592,13 @@ class SecurityScanner:
             )
         return self._insecure_session_settings
 
+    def _insecure_transport_settings_analyzer(self) -> InsecureTransportSettingsAnalyzer:
+        if self._insecure_transport_settings is None:
+            self._insecure_transport_settings = InsecureTransportSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_transport_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -746,6 +756,14 @@ class SecurityScanner:
             recs.append(
                 "Enable SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, and "
                 "SESSION_COOKIE_SAMESITE='Lax' in production settings."
+            )
+        if by_name.get(
+            "insecure_transport_settings",
+            SecurityScanCategory("insecure_transport_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Enable SECURE_SSL_REDIRECT, set SECURE_HSTS_SECONDS, and use "
+                "PREFERRED_URL_SCHEME='https' in production settings."
             )
         return recs
 
@@ -1405,6 +1423,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_transport_settings" in self.checks:
+            analyzer = self._insecure_transport_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_transport_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1615,6 +1645,14 @@ class SecurityScanner:
                 [
                     "## Insecure session settings",
                     self._insecure_session_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_transport_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure transport settings",
+                    self._insecure_transport_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1889,3 +1927,8 @@ class SecurityScanner:
     def insecure_session_settings(self) -> InsecureSessionSettingsAnalyzer:
         """Underlying insecure-session-settings analyzer."""
         return self._insecure_session_settings_analyzer()
+
+    @property
+    def insecure_transport_settings(self) -> InsecureTransportSettingsAnalyzer:
+        """Underlying insecure-transport-settings analyzer."""
+        return self._insecure_transport_settings_analyzer()

@@ -182,6 +182,11 @@ from devai.insecure_session_settings import (
     InsecureSessionSettingsFinding,
     InsecureSessionSettingsStats,
 )
+from devai.insecure_transport_settings import (
+    InsecureTransportSettingsAnalyzer,
+    InsecureTransportSettingsFinding,
+    InsecureTransportSettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -206,7 +211,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.23.0"
+__version__ = "6.24.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -296,6 +301,9 @@ __all__ = [
     "InsecureSessionSettingsAnalyzer",
     "InsecureSessionSettingsFinding",
     "InsecureSessionSettingsStats",
+    "InsecureTransportSettingsAnalyzer",
+    "InsecureTransportSettingsFinding",
+    "InsecureTransportSettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
