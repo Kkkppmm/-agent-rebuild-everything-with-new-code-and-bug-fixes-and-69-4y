@@ -68,6 +68,7 @@ from devai.insecure_cache_settings import InsecureCacheSettingsAnalyzer
 from devai.insecure_email_settings import InsecureEmailSettingsAnalyzer
 from devai.insecure_logging_settings import InsecureLoggingSettingsAnalyzer
 from devai.insecure_cors_settings import InsecureCorsSettingsAnalyzer
+from devai.insecure_storage_settings import InsecureStorageSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -130,6 +131,7 @@ CHECK_NAMES = (
     "insecure_email_settings",
     "insecure_logging_settings",
     "insecure_cors_settings",
+    "insecure_storage_settings",
 )
 
 
@@ -306,6 +308,7 @@ class SecurityScanner:
         self._insecure_email_settings: InsecureEmailSettingsAnalyzer | None = None
         self._insecure_logging_settings: InsecureLoggingSettingsAnalyzer | None = None
         self._insecure_cors_settings: InsecureCorsSettingsAnalyzer | None = None
+        self._insecure_storage_settings: InsecureStorageSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -649,6 +652,13 @@ class SecurityScanner:
             )
         return self._insecure_cors_settings
 
+    def _insecure_storage_settings_analyzer(self) -> InsecureStorageSettingsAnalyzer:
+        if self._insecure_storage_settings is None:
+            self._insecure_storage_settings = InsecureStorageSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_storage_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -854,6 +864,14 @@ class SecurityScanner:
             recs.append(
                 "Restrict CORS to trusted origins — avoid wildcards and "
                 "never combine permissive origins with credentials."
+            )
+        if by_name.get(
+            "insecure_storage_settings",
+            SecurityScanCategory("insecure_storage_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Use object storage (S3/GCS) in production — avoid FileSystemStorage, "
+                "private S3 ACLs, and never hardcode AWS credentials."
             )
         return recs
 
@@ -1585,6 +1603,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_storage_settings" in self.checks:
+            analyzer = self._insecure_storage_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_storage_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1843,6 +1873,14 @@ class SecurityScanner:
                 [
                     "## Insecure CORS settings",
                     self._insecure_cors_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_storage_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure storage settings",
+                    self._insecure_storage_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2147,3 +2185,8 @@ class SecurityScanner:
     def insecure_cors_settings(self) -> InsecureCorsSettingsAnalyzer:
         """Underlying insecure-CORS-settings analyzer."""
         return self._insecure_cors_settings_analyzer()
+
+    @property
+    def insecure_storage_settings(self) -> InsecureStorageSettingsAnalyzer:
+        """Underlying insecure-storage-settings analyzer."""
+        return self._insecure_storage_settings_analyzer()
