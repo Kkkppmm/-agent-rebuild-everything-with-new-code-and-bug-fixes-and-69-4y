@@ -207,6 +207,11 @@ from devai.insecure_logging_settings import (
     InsecureLoggingSettingsFinding,
     InsecureLoggingSettingsStats,
 )
+from devai.insecure_cors_settings import (
+    InsecureCorsSettingsAnalyzer,
+    InsecureCorsSettingsFinding,
+    InsecureCorsSettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -231,7 +236,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.28.0"
+__version__ = "6.29.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -336,6 +341,9 @@ __all__ = [
     "InsecureLoggingSettingsAnalyzer",
     "InsecureLoggingSettingsFinding",
     "InsecureLoggingSettingsStats",
+    "InsecureCorsSettingsAnalyzer",
+    "InsecureCorsSettingsFinding",
+    "InsecureCorsSettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
