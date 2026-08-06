@@ -188,14 +188,6 @@ class _InsecureAuthSettingsVisitor(ast.NodeVisitor):
                 uri = _string_value(node.value)
                 if uri:
                     self._ldap_uri = uri
-                    if uri.lower().startswith("ldap://"):
-                        self._add(
-                            node.lineno,
-                            "ldap_without_tls",
-                            "high",
-                            "LDAP server URI uses unencrypted ldap:// — use ldaps:// or START_TLS",
-                            setting="AUTH_LDAP_SERVER_URI",
-                        )
             elif name == "AUTH_LDAP_START_TLS":
                 if _bool_value(node.value) is True:
                     self._ldap_start_tls = True
@@ -205,15 +197,13 @@ class _InsecureAuthSettingsVisitor(ast.NodeVisitor):
         if self.filename not in _PROD_FILENAMES:
             return
         if self._ldap_uri and self._ldap_uri.lower().startswith("ldap://") and not self._ldap_start_tls:
-            already = any(f.pattern == "ldap_without_tls" for f in self.findings)
-            if not already:
-                self._add(
-                    0,
-                    "ldap_without_tls",
-                    "high",
-                    "LDAP configured without TLS — enable AUTH_LDAP_START_TLS or use ldaps://",
-                    setting="AUTH_LDAP_SERVER_URI",
-                )
+            self._add(
+                0,
+                "ldap_without_tls",
+                "high",
+                "LDAP configured without TLS — enable AUTH_LDAP_START_TLS or use ldaps://",
+                setting="AUTH_LDAP_SERVER_URI",
+            )
 
 
 class InsecureAuthSettingsAnalyzer:
@@ -290,7 +280,7 @@ class InsecureAuthSettingsAnalyzer:
                         setting="AUTHENTICATION_BACKENDS",
                     )
                 )
-            if _LDAP_URI_RE.search(line):
+            if _LDAP_URI_RE.search(line) and not has_start_tls:
                 findings.append(
                     InsecureAuthSettingsFinding(
                         path=rel,
