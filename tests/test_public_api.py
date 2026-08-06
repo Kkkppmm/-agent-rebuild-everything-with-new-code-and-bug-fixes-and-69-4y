@@ -89,6 +89,8 @@ class TestPublicAPI:
             "InsecureDatabaseSettingsAnalyzer",
             "InsecureTransportSettingsFinding",
             "InsecureTransportSettingsStats",
+            "InsecureDatabaseSettingsFinding",
+            "InsecureDatabaseSettingsStats",
             "CSRFAnalyzer",
             "CSRFFinding",
             "CSRFStats",
