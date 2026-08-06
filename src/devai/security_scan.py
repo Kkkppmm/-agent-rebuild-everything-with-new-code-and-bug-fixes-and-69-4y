@@ -70,6 +70,7 @@ from devai.insecure_logging_settings import InsecureLoggingSettingsAnalyzer
 from devai.insecure_cors_settings import InsecureCorsSettingsAnalyzer
 from devai.insecure_storage_settings import InsecureStorageSettingsAnalyzer
 from devai.insecure_auth_settings import InsecureAuthSettingsAnalyzer
+from devai.insecure_middleware_settings import InsecureMiddlewareSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -134,6 +135,7 @@ CHECK_NAMES = (
     "insecure_cors_settings",
     "insecure_storage_settings",
     "insecure_auth_settings",
+    "insecure_middleware_settings",
 )
 
 
@@ -312,6 +314,7 @@ class SecurityScanner:
         self._insecure_cors_settings: InsecureCorsSettingsAnalyzer | None = None
         self._insecure_storage_settings: InsecureStorageSettingsAnalyzer | None = None
         self._insecure_auth_settings: InsecureAuthSettingsAnalyzer | None = None
+        self._insecure_middleware_settings: InsecureMiddlewareSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -669,6 +672,13 @@ class SecurityScanner:
             )
         return self._insecure_auth_settings
 
+    def _insecure_middleware_settings_analyzer(self) -> InsecureMiddlewareSettingsAnalyzer:
+        if self._insecure_middleware_settings is None:
+            self._insecure_middleware_settings = InsecureMiddlewareSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_middleware_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -890,6 +900,14 @@ class SecurityScanner:
             recs.append(
                 "Use strong password hashers (Argon2/PBKDF2), enable password validators, "
                 "remove AllowAllUsersModelBackend, and use ldaps:// for LDAP."
+            )
+        if by_name.get(
+            "insecure_middleware_settings",
+            SecurityScanCategory("insecure_middleware_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Include SecurityMiddleware, CsrfViewMiddleware, and XFrameOptionsMiddleware "
+                "in MIDDLEWARE — remove DebugToolbarMiddleware from production."
             )
         return recs
 
@@ -1645,6 +1663,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_middleware_settings" in self.checks:
+            analyzer = self._insecure_middleware_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_middleware_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1919,6 +1949,14 @@ class SecurityScanner:
                 [
                     "## Insecure auth settings",
                     self._insecure_auth_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_middleware_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure middleware settings",
+                    self._insecure_middleware_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2233,3 +2271,8 @@ class SecurityScanner:
     def insecure_auth_settings(self) -> InsecureAuthSettingsAnalyzer:
         """Underlying insecure-auth-settings analyzer."""
         return self._insecure_auth_settings_analyzer()
+
+    @property
+    def insecure_middleware_settings(self) -> InsecureMiddlewareSettingsAnalyzer:
+        """Underlying insecure-middleware-settings analyzer."""
+        return self._insecure_middleware_settings_analyzer()
