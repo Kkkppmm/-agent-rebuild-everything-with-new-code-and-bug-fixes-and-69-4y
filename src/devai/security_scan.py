@@ -66,6 +66,9 @@ from devai.insecure_transport_settings import InsecureTransportSettingsAnalyzer
 from devai.insecure_database_settings import InsecureDatabaseSettingsAnalyzer
 from devai.insecure_cache_settings import InsecureCacheSettingsAnalyzer
 from devai.insecure_email_settings import InsecureEmailSettingsAnalyzer
+from devai.insecure_logging_settings import InsecureLoggingSettingsAnalyzer
+from devai.insecure_cors_settings import InsecureCorsSettingsAnalyzer
+from devai.insecure_storage_settings import InsecureStorageSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -126,6 +129,9 @@ CHECK_NAMES = (
     "insecure_database_settings",
     "insecure_cache_settings",
     "insecure_email_settings",
+    "insecure_logging_settings",
+    "insecure_cors_settings",
+    "insecure_storage_settings",
 )
 
 
@@ -300,6 +306,9 @@ class SecurityScanner:
         self._insecure_database_settings: InsecureDatabaseSettingsAnalyzer | None = None
         self._insecure_cache_settings: InsecureCacheSettingsAnalyzer | None = None
         self._insecure_email_settings: InsecureEmailSettingsAnalyzer | None = None
+        self._insecure_logging_settings: InsecureLoggingSettingsAnalyzer | None = None
+        self._insecure_cors_settings: InsecureCorsSettingsAnalyzer | None = None
+        self._insecure_storage_settings: InsecureStorageSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -629,6 +638,27 @@ class SecurityScanner:
             )
         return self._insecure_email_settings
 
+    def _insecure_logging_settings_analyzer(self) -> InsecureLoggingSettingsAnalyzer:
+        if self._insecure_logging_settings is None:
+            self._insecure_logging_settings = InsecureLoggingSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_logging_settings
+
+    def _insecure_cors_settings_analyzer(self) -> InsecureCorsSettingsAnalyzer:
+        if self._insecure_cors_settings is None:
+            self._insecure_cors_settings = InsecureCorsSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_cors_settings
+
+    def _insecure_storage_settings_analyzer(self) -> InsecureStorageSettingsAnalyzer:
+        if self._insecure_storage_settings is None:
+            self._insecure_storage_settings = InsecureStorageSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_storage_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -818,6 +848,30 @@ class SecurityScanner:
             recs.append(
                 "Configure SMTP with TLS/SSL for production email — "
                 "avoid console/file backends and empty SMTP credentials."
+            )
+        if by_name.get(
+            "insecure_logging_settings",
+            SecurityScanCategory("insecure_logging_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Disable DEBUG logging in production — use structured logging without "
+                "sensitive fields and avoid console handlers."
+            )
+        if by_name.get(
+            "insecure_cors_settings",
+            SecurityScanCategory("insecure_cors_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Restrict CORS to explicit trusted origins — never combine "
+                "CORS_ALLOW_CREDENTIALS with wildcard or allow-all origins."
+            )
+        if by_name.get(
+            "insecure_storage_settings",
+            SecurityScanCategory("insecure_storage_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Use cloud storage (S3/GCS) in production with private ACLs and "
+                "IAM roles instead of hardcoded AWS credentials."
             )
         return recs
 
@@ -1525,6 +1579,42 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_logging_settings" in self.checks:
+            analyzer = self._insecure_logging_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_logging_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_cors_settings" in self.checks:
+            analyzer = self._insecure_cors_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_cors_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_storage_settings" in self.checks:
+            analyzer = self._insecure_storage_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_storage_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1767,6 +1857,30 @@ class SecurityScanner:
                 [
                     "## Insecure email settings",
                     self._insecure_email_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_logging_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure logging settings",
+                    self._insecure_logging_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_cors_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure CORS settings",
+                    self._insecure_cors_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_storage_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure storage settings",
+                    self._insecure_storage_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2061,3 +2175,18 @@ class SecurityScanner:
     def insecure_email_settings(self) -> InsecureEmailSettingsAnalyzer:
         """Underlying insecure-email-settings analyzer."""
         return self._insecure_email_settings_analyzer()
+
+    @property
+    def insecure_logging_settings(self) -> InsecureLoggingSettingsAnalyzer:
+        """Underlying insecure-logging-settings analyzer."""
+        return self._insecure_logging_settings_analyzer()
+
+    @property
+    def insecure_cors_settings(self) -> InsecureCorsSettingsAnalyzer:
+        """Underlying insecure-CORS-settings analyzer."""
+        return self._insecure_cors_settings_analyzer()
+
+    @property
+    def insecure_storage_settings(self) -> InsecureStorageSettingsAnalyzer:
+        """Underlying insecure-storage-settings analyzer."""
+        return self._insecure_storage_settings_analyzer()
