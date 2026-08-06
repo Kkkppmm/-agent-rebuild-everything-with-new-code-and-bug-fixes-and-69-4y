@@ -197,6 +197,11 @@ from devai.insecure_cache_settings import (
     InsecureCacheSettingsFinding,
     InsecureCacheSettingsStats,
 )
+from devai.insecure_email_settings import (
+    InsecureEmailSettingsAnalyzer,
+    InsecureEmailSettingsFinding,
+    InsecureEmailSettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -221,7 +226,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.26.0"
+__version__ = "6.27.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -320,6 +325,9 @@ __all__ = [
     "InsecureCacheSettingsAnalyzer",
     "InsecureCacheSettingsFinding",
     "InsecureCacheSettingsStats",
+    "InsecureEmailSettingsAnalyzer",
+    "InsecureEmailSettingsFinding",
+    "InsecureEmailSettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",

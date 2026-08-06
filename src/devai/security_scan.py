@@ -65,6 +65,7 @@ from devai.insecure_session_settings import InsecureSessionSettingsAnalyzer
 from devai.insecure_transport_settings import InsecureTransportSettingsAnalyzer
 from devai.insecure_database_settings import InsecureDatabaseSettingsAnalyzer
 from devai.insecure_cache_settings import InsecureCacheSettingsAnalyzer
+from devai.insecure_email_settings import InsecureEmailSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -124,6 +125,7 @@ CHECK_NAMES = (
     "insecure_transport_settings",
     "insecure_database_settings",
     "insecure_cache_settings",
+    "insecure_email_settings",
 )
 
 
@@ -297,6 +299,7 @@ class SecurityScanner:
         self._insecure_transport_settings: InsecureTransportSettingsAnalyzer | None = None
         self._insecure_database_settings: InsecureDatabaseSettingsAnalyzer | None = None
         self._insecure_cache_settings: InsecureCacheSettingsAnalyzer | None = None
+        self._insecure_email_settings: InsecureEmailSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -619,6 +622,13 @@ class SecurityScanner:
             )
         return self._insecure_cache_settings
 
+    def _insecure_email_settings_analyzer(self) -> InsecureEmailSettingsAnalyzer:
+        if self._insecure_email_settings is None:
+            self._insecure_email_settings = InsecureEmailSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_email_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -800,6 +810,14 @@ class SecurityScanner:
             recs.append(
                 "Use Redis or Memcached with authentication for production caching — "
                 "avoid LocMemCache and unauthenticated Redis URLs."
+            )
+        if by_name.get(
+            "insecure_email_settings",
+            SecurityScanCategory("insecure_email_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Configure SMTP with TLS/SSL for production email — "
+                "avoid console/file backends and empty SMTP credentials."
             )
         return recs
 
@@ -1495,6 +1513,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_email_settings" in self.checks:
+            analyzer = self._insecure_email_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_email_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1729,6 +1759,14 @@ class SecurityScanner:
                 [
                     "## Insecure cache settings",
                     self._insecure_cache_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_email_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure email settings",
+                    self._insecure_email_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2018,3 +2056,8 @@ class SecurityScanner:
     def insecure_cache_settings(self) -> InsecureCacheSettingsAnalyzer:
         """Underlying insecure-cache-settings analyzer."""
         return self._insecure_cache_settings_analyzer()
+
+    @property
+    def insecure_email_settings(self) -> InsecureEmailSettingsAnalyzer:
+        """Underlying insecure-email-settings analyzer."""
+        return self._insecure_email_settings_analyzer()
