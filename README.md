@@ -103,6 +103,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **ProxyTrustAnalyzer** — Detect unvalidated trust of X-Forwarded-For and proxy headers for client IP and access control
 - **InsecureWebSocketAnalyzer** — Detect hardcoded ws:// URLs and disabled WebSocket TLS in real-time applications
 - **InsecureMiddlewareSettingsAnalyzer** — Detect missing SecurityMiddleware, CSRF, and clickjacking middleware in Django production settings
+- **InsecureRestFrameworkSettingsAnalyzer** — Detect AllowAny defaults, missing auth/throttle classes, and BrowsableAPIRenderer in Django REST Framework settings
 
 ## Installation
 
