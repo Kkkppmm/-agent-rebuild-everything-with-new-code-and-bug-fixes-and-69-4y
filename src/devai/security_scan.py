@@ -64,6 +64,7 @@ from devai.weak_secret_key import WeakSecretKeyAnalyzer
 from devai.insecure_session_settings import InsecureSessionSettingsAnalyzer
 from devai.insecure_transport_settings import InsecureTransportSettingsAnalyzer
 from devai.insecure_database_settings import InsecureDatabaseSettingsAnalyzer
+from devai.insecure_cache_settings import InsecureCacheSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -122,6 +123,7 @@ CHECK_NAMES = (
     "insecure_session_settings",
     "insecure_transport_settings",
     "insecure_database_settings",
+    "insecure_cache_settings",
 )
 
 
@@ -294,6 +296,7 @@ class SecurityScanner:
         self._insecure_session_settings: InsecureSessionSettingsAnalyzer | None = None
         self._insecure_transport_settings: InsecureTransportSettingsAnalyzer | None = None
         self._insecure_database_settings: InsecureDatabaseSettingsAnalyzer | None = None
+        self._insecure_cache_settings: InsecureCacheSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -609,6 +612,13 @@ class SecurityScanner:
             )
         return self._insecure_database_settings
 
+    def _insecure_cache_settings_analyzer(self) -> InsecureCacheSettingsAnalyzer:
+        if self._insecure_cache_settings is None:
+            self._insecure_cache_settings = InsecureCacheSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_cache_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -782,6 +792,14 @@ class SecurityScanner:
             recs.append(
                 "Use a production-grade database (PostgreSQL/MySQL), strong passwords, "
                 "and credentials from environment variables."
+            )
+        if by_name.get(
+            "insecure_cache_settings",
+            SecurityScanCategory("insecure_cache_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Use Redis or Memcached with authentication for production caching — "
+                "avoid LocMemCache and unauthenticated Redis URLs."
             )
         return recs
 
@@ -1465,6 +1483,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_cache_settings" in self.checks:
+            analyzer = self._insecure_cache_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_cache_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1691,6 +1721,14 @@ class SecurityScanner:
                 [
                     "## Insecure database settings",
                     self._insecure_database_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_cache_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure cache settings",
+                    self._insecure_cache_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -1975,3 +2013,8 @@ class SecurityScanner:
     def insecure_database_settings(self) -> InsecureDatabaseSettingsAnalyzer:
         """Underlying insecure-database-settings analyzer."""
         return self._insecure_database_settings_analyzer()
+
+    @property
+    def insecure_cache_settings(self) -> InsecureCacheSettingsAnalyzer:
+        """Underlying insecure-cache-settings analyzer."""
+        return self._insecure_cache_settings_analyzer()
