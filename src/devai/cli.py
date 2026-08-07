@@ -341,6 +341,22 @@ def cmd_env_vars(args: argparse.Namespace) -> None:
             print(gap.format())
 
 
+def cmd_gitignore(args: argparse.Namespace) -> None:
+    from devai.gitignore_analyzer import GitignoreAnalyzer
+
+    analyzer = GitignoreAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for gap in analyzer.analyze():
+            print(gap.format())
+
+
 def cmd_duplicates(args: argparse.Namespace) -> None:
     from devai.duplicate_code import DuplicateCodeDetector
 
@@ -1475,6 +1491,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a scaffolded .env.example from code references",
     )
     p.set_defaults(func=cmd_env_vars)
+
+    p = sub.add_parser("gitignore", help="Audit .gitignore coverage and detect exposed files")
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all gaps")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a scaffolded .gitignore from recommended patterns",
+    )
+    p.set_defaults(func=cmd_gitignore)
 
     p = sub.add_parser("duplicates", help="Find duplicate code blocks")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

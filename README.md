@@ -67,6 +67,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **GitChangelog** — Generate Keep a Changelog-style release notes from git commit history
 - **TypingCoverage** — Analyze type hint coverage across Python projects and export LLM context
 - **EnvVarAnalyzer** — Inventory environment variables, detect drift between code and `.env.example`, and scaffold env templates
+- **GitignoreAnalyzer** — Audit `.gitignore` coverage, recommend patterns by language, and detect exposed sensitive files
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets
@@ -78,7 +79,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DocstringCoverage** — Analyze docstring coverage for functions, methods, and classes
 - **TestMapper** — Map source modules to test files and find untested modules
 - **Async Facade** — `areview()` and `aexplain()` async methods on the `DevAI` entry point
-- **ProjectHealth** — Unified project health dashboard combining metrics, typing, docstrings, tests, dependencies, secrets, env vars, code smells, tech-debt, exceptions, and coupling analysis with scored recommendations
+- **ProjectHealth** — Unified project health dashboard combining metrics, typing, docstrings, tests, dependencies, secrets, env vars, gitignore, code smells, tech-debt, exceptions, and coupling analysis with scored recommendations
 - **CodeSmellDetector** — AST-based detection of long functions, deep nesting, bare except, god classes, and excessive parameters
 - **TechDebtScanner** — Scan for TODO, FIXME, HACK, XXX, and other tech-debt comment markers across multiple languages
 - **DuplicateCodeDetector** — Find duplicate and near-duplicate code blocks using normalized line hashing

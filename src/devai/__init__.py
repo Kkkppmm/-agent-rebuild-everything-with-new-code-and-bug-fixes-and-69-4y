@@ -34,6 +34,12 @@ from devai.duplicate_code import (
     DuplicateStats,
 )
 from devai.env_vars import EnvVarAnalyzer, EnvVarDefinition, EnvVarGap, EnvVarReference, EnvVarStats
+from devai.gitignore_analyzer import (
+    GitignoreAnalyzer,
+    GitignoreGap,
+    GitignorePattern,
+    GitignoreStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -520,6 +526,10 @@ __all__ = [
     "DiskCachedLLMClient",
     "GitChangelog",
     "GitContext",
+    "GitignoreAnalyzer",
+    "GitignoreGap",
+    "GitignorePattern",
+    "GitignoreStats",
     "DuplicateBlock",
     "DuplicateCluster",
     "DuplicateCodeDetector",

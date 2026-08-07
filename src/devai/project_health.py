@@ -14,6 +14,7 @@ from devai.exception_analyzer import ExceptionHierarchyAnalyzer
 from devai.module_coupling import ModuleCouplingAnalyzer
 from devai.deps_parser import DependencyParser
 from devai.env_vars import EnvVarAnalyzer
+from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -121,7 +122,8 @@ class ProjectHealth:
         "hotspots": 0.05,
         "exceptions": 0.06,
         "coupling": 0.06,
-        "env": 0.05,
+        "env": 0.04,
+        "gitignore": 0.04,
     }
 
     def __init__(
@@ -242,6 +244,24 @@ class ProjectHealth:
             "density": stats.smell_density,
         }
 
+    def _score_gitignore(self, analyzer: GitignoreAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        high = sum(1 for g in analyzer._gaps if g.severity == "high")
+        summary = (
+            f"{stats.covered}/{stats.recommended} patterns covered, "
+            f"{stats.gaps} gap(s)"
+        )
+        return score, summary, {
+            "patterns": stats.patterns,
+            "covered": stats.covered,
+            "recommended": stats.recommended,
+            "gaps": stats.gaps,
+            "exposed_files": stats.exposed_files,
+            "high_severity": high,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -305,6 +325,14 @@ class ProjectHealth:
             elif cat.name == "env" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Sync .env.example with code — add missing env vars referenced in source"
+                )
+            elif cat.name == "gitignore" and cat.details.get("exposed_files", 0) > 0:
+                recs.append(
+                    "Add .gitignore rules for sensitive files (.env, keys) present in the repo"
+                )
+            elif cat.name == "gitignore" and cat.score < 70:
+                recs.append(
+                    "Improve .gitignore coverage — add recommended patterns for your stack"
                 )
         return recs
 
@@ -451,6 +479,10 @@ class ProjectHealth:
         env_analyzer = EnvVarAnalyzer(root_str, ignore_dirs=self.ignore_dirs)
         score, summary, details = self._score_env(env_analyzer)
         categories.append(HealthCategory("env", score, summary, details))
+
+        gitignore = GitignoreAnalyzer(root_str)
+        score, summary, details = self._score_gitignore(gitignore)
+        categories.append(HealthCategory("gitignore", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

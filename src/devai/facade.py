@@ -20,6 +20,7 @@ from devai.dangerous_calls import DangerousCallsAnalyzer
 from devai.debug_artifacts import DebugArtifactDetector
 from devai.magic_numbers import MagicNumberDetector
 from devai.env_vars import EnvVarAnalyzer
+from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -358,6 +359,10 @@ class DevAI:
     def env_vars(self, path: str | Path = ".", **kwargs: Any) -> EnvVarAnalyzer:
         """Inventory environment variables and detect drift between code and env files."""
         return EnvVarAnalyzer(str(path), **kwargs)
+
+    def gitignore(self, path: str | Path = ".", **kwargs: Any) -> GitignoreAnalyzer:
+        """Audit .gitignore coverage and detect exposed sensitive files."""
+        return GitignoreAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
