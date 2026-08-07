@@ -252,6 +252,11 @@ from devai.insecure_api_docs_settings import (
     InsecureApiDocsSettingsFinding,
     InsecureApiDocsSettingsStats,
 )
+from devai.insecure_oauth_settings import (
+    InsecureOAuthSettingsAnalyzer,
+    InsecureOAuthSettingsFinding,
+    InsecureOAuthSettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -276,7 +281,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.37.0"
+__version__ = "6.38.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -408,6 +413,9 @@ __all__ = [
     "InsecureApiDocsSettingsAnalyzer",
     "InsecureApiDocsSettingsFinding",
     "InsecureApiDocsSettingsStats",
+    "InsecureOAuthSettingsAnalyzer",
+    "InsecureOAuthSettingsFinding",
+    "InsecureOAuthSettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",

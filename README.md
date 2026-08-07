@@ -108,6 +108,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **InsecureChannelsSettingsAnalyzer** — Detect InMemoryChannelLayer, unauthenticated Redis hosts, and weak encryption keys in Django Channels settings
 - **InsecureSentrySettingsAnalyzer** — Detect hardcoded DSN, send_default_pii, debug mode, and full trace sampling in Sentry SDK configuration
 - **InsecureApiDocsSettingsAnalyzer** — Detect exposed Swagger/OpenAPI docs, SERVE_PUBLIC, and public schema views
+- **InsecureOAuthSettingsAnalyzer** — Detect hardcoded OAuth secrets, HTTP redirect URIs, and OAUTHLIB_INSECURE_TRANSPORT
 
 ## Installation
 
