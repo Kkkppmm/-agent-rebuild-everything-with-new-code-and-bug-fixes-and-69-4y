@@ -77,6 +77,7 @@ from devai.insecure_channels_settings import InsecureChannelsSettingsAnalyzer
 from devai.insecure_sentry_settings import InsecureSentrySettingsAnalyzer
 from devai.insecure_api_docs_settings import InsecureApiDocsSettingsAnalyzer
 from devai.insecure_oauth_settings import InsecureOAuthSettingsAnalyzer
+from devai.insecure_csp_settings import InsecureCspSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -148,6 +149,7 @@ CHECK_NAMES = (
     "insecure_sentry_settings",
     "insecure_api_docs_settings",
     "insecure_oauth_settings",
+    "insecure_csp_settings",
 )
 
 
@@ -333,6 +335,7 @@ class SecurityScanner:
         self._insecure_sentry_settings: InsecureSentrySettingsAnalyzer | None = None
         self._insecure_api_docs_settings: InsecureApiDocsSettingsAnalyzer | None = None
         self._insecure_oauth_settings: InsecureOAuthSettingsAnalyzer | None = None
+        self._insecure_csp_settings: InsecureCspSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -741,6 +744,13 @@ class SecurityScanner:
             )
         return self._insecure_oauth_settings
 
+    def _insecure_csp_settings_analyzer(self) -> InsecureCspSettingsAnalyzer:
+        if self._insecure_csp_settings is None:
+            self._insecure_csp_settings = InsecureCspSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_csp_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -1018,6 +1028,15 @@ class SecurityScanner:
             recs.append(
                 "Load OAuth client secrets from environment variables, use HTTPS redirect URIs, "
                 "disable OAUTHLIB_INSECURE_TRANSPORT, and avoid wildcard redirect patterns."
+            )
+        if by_name.get(
+            "insecure_csp_settings",
+            SecurityScanCategory("insecure_csp_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Remove 'unsafe-inline' and 'unsafe-eval' from CSP directives, avoid wildcard "
+                "sources, enable enforcement CSP (not report-only), and use nonces or hashes "
+                "for inline scripts."
             )
         return recs
 
@@ -1857,6 +1876,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_csp_settings" in self.checks:
+            analyzer = self._insecure_csp_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_csp_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -2187,6 +2218,14 @@ class SecurityScanner:
                 [
                     "## Insecure OAuth settings",
                     self._insecure_oauth_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_csp_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure CSP settings",
+                    self._insecure_csp_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2536,3 +2575,8 @@ class SecurityScanner:
     def insecure_oauth_settings(self) -> InsecureOAuthSettingsAnalyzer:
         """Underlying insecure-OAuth-settings analyzer."""
         return self._insecure_oauth_settings_analyzer()
+
+    @property
+    def insecure_csp_settings(self) -> InsecureCspSettingsAnalyzer:
+        """Underlying insecure-CSP-settings analyzer."""
+        return self._insecure_csp_settings_analyzer()
