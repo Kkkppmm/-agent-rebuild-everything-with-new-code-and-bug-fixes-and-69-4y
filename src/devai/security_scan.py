@@ -80,6 +80,7 @@ from devai.insecure_oauth_settings import InsecureOAuthSettingsAnalyzer
 from devai.insecure_csp_settings import InsecureCspSettingsAnalyzer
 from devai.insecure_graphql_settings import InsecureGraphqlSettingsAnalyzer
 from devai.insecure_webhook_settings import InsecureWebhookSettingsAnalyzer
+from devai.insecure_jwt_settings import InsecureJwtSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -154,6 +155,7 @@ CHECK_NAMES = (
     "insecure_csp_settings",
     "insecure_graphql_settings",
     "insecure_webhook_settings",
+    "insecure_jwt_settings",
 )
 
 
@@ -342,6 +344,7 @@ class SecurityScanner:
         self._insecure_csp_settings: InsecureCspSettingsAnalyzer | None = None
         self._insecure_graphql_settings: InsecureGraphqlSettingsAnalyzer | None = None
         self._insecure_webhook_settings: InsecureWebhookSettingsAnalyzer | None = None
+        self._insecure_jwt_settings: InsecureJwtSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -771,6 +774,13 @@ class SecurityScanner:
             )
         return self._insecure_webhook_settings
 
+    def _insecure_jwt_settings_analyzer(self) -> InsecureJwtSettingsAnalyzer:
+        if self._insecure_jwt_settings is None:
+            self._insecure_jwt_settings = InsecureJwtSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_jwt_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -1072,6 +1082,14 @@ class SecurityScanner:
             recs.append(
                 "Load webhook secrets from environment variables, always verify HMAC/signatures, "
                 "use HTTPS callback URLs, and avoid csrf_exempt on webhook handlers."
+            )
+        if by_name.get(
+            "insecure_jwt_settings",
+            SecurityScanCategory("insecure_jwt_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Load JWT signing keys from environment variables, reject 'none' algorithm, "
+                "always verify signatures, use short access token lifetimes, and enable refresh rotation."
             )
         return recs
 
@@ -1947,6 +1965,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_jwt_settings" in self.checks:
+            analyzer = self._insecure_jwt_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_jwt_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -2301,6 +2331,14 @@ class SecurityScanner:
                 [
                     "## Insecure webhook settings",
                     self._insecure_webhook_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_jwt_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure JWT settings",
+                    self._insecure_jwt_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2665,3 +2703,8 @@ class SecurityScanner:
     def insecure_webhook_settings(self) -> InsecureWebhookSettingsAnalyzer:
         """Underlying insecure-webhook-settings analyzer."""
         return self._insecure_webhook_settings_analyzer()
+
+    @property
+    def insecure_jwt_settings(self) -> InsecureJwtSettingsAnalyzer:
+        """Underlying insecure-JWT-settings analyzer."""
+        return self._insecure_jwt_settings_analyzer()
