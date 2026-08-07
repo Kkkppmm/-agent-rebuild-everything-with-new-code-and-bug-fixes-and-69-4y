@@ -20,7 +20,7 @@ _PROD_FILENAMES = frozenset(
     }
 )
 _SWAGGER_URL_RE = re.compile(
-    r"path\s*\(\s*['\"](?:swagger|redoc|api-docs|docs|schema)['\"]",
+    r"path\s*\(\s*['\"](?:swagger|redoc|api-docs|docs|schema)(?:/)?['\"]",
     re.IGNORECASE,
 )
 _SPECTACULAR_VIEW_RE = re.compile(
@@ -159,21 +159,23 @@ class _InsecureApiDocsSettingsVisitor(ast.NodeVisitor):
         if func_name == "path" and self.filename in {"urls.py", "api_urls.py"}:
             for arg in node.args[:2]:
                 value = _dict_string_value(arg)
-                if value and value.lower() in {
-                    "swagger",
-                    "redoc",
-                    "api-docs",
-                    "docs",
-                    "schema",
-                    "openapi",
-                }:
-                    self._add(
-                        node.lineno,
-                        "swagger_url_exposed",
-                        "medium",
-                        f"API documentation route '{value}' is exposed — protect with authentication",
-                        setting=value,
-                    )
+                if value:
+                    route = value.rstrip("/").lower()
+                    if route in {
+                        "swagger",
+                        "redoc",
+                        "api-docs",
+                        "docs",
+                        "schema",
+                        "openapi",
+                    }:
+                        self._add(
+                            node.lineno,
+                            "swagger_url_exposed",
+                            "medium",
+                            f"API documentation route '{value}' is exposed — protect with authentication",
+                            setting=value,
+                        )
 
         self.generic_visit(node)
 
