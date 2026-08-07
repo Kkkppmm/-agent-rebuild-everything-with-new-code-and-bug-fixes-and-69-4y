@@ -72,6 +72,7 @@ from devai.insecure_storage_settings import InsecureStorageSettingsAnalyzer
 from devai.insecure_auth_settings import InsecureAuthSettingsAnalyzer
 from devai.insecure_middleware_settings import InsecureMiddlewareSettingsAnalyzer
 from devai.insecure_rest_framework_settings import InsecureRestFrameworkSettingsAnalyzer
+from devai.insecure_celery_settings import InsecureCelerySettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -138,6 +139,7 @@ CHECK_NAMES = (
     "insecure_auth_settings",
     "insecure_middleware_settings",
     "insecure_rest_framework_settings",
+    "insecure_celery_settings",
 )
 
 
@@ -318,6 +320,7 @@ class SecurityScanner:
         self._insecure_auth_settings: InsecureAuthSettingsAnalyzer | None = None
         self._insecure_middleware_settings: InsecureMiddlewareSettingsAnalyzer | None = None
         self._insecure_rest_framework_settings: InsecureRestFrameworkSettingsAnalyzer | None = None
+        self._insecure_celery_settings: InsecureCelerySettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -691,6 +694,13 @@ class SecurityScanner:
             )
         return self._insecure_rest_framework_settings
 
+    def _insecure_celery_settings_analyzer(self) -> InsecureCelerySettingsAnalyzer:
+        if self._insecure_celery_settings is None:
+            self._insecure_celery_settings = InsecureCelerySettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_celery_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -928,6 +938,14 @@ class SecurityScanner:
             recs.append(
                 "Set IsAuthenticated as the default permission, enable authentication classes, "
                 "disable BrowsableAPIRenderer in production, and configure rate throttling."
+            )
+        if by_name.get(
+            "insecure_celery_settings",
+            SecurityScanCategory("insecure_celery_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Disable task_always_eager in production, use json serializers, remove pickle "
+                "from accept_content, and require authenticated Redis/AMQP broker URLs."
             )
         return recs
 
@@ -1707,6 +1725,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_celery_settings" in self.checks:
+            analyzer = self._insecure_celery_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_celery_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -1997,6 +2027,14 @@ class SecurityScanner:
                 [
                     "## Insecure REST framework settings",
                     self._insecure_rest_framework_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_celery_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure Celery settings",
+                    self._insecure_celery_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2321,3 +2359,8 @@ class SecurityScanner:
     def insecure_rest_framework_settings(self) -> InsecureRestFrameworkSettingsAnalyzer:
         """Underlying insecure-REST-framework-settings analyzer."""
         return self._insecure_rest_framework_settings_analyzer()
+
+    @property
+    def insecure_celery_settings(self) -> InsecureCelerySettingsAnalyzer:
+        """Underlying insecure-Celery-settings analyzer."""
+        return self._insecure_celery_settings_analyzer()

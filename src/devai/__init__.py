@@ -232,6 +232,11 @@ from devai.insecure_rest_framework_settings import (
     InsecureRestFrameworkSettingsFinding,
     InsecureRestFrameworkSettingsStats,
 )
+from devai.insecure_celery_settings import (
+    InsecureCelerySettingsAnalyzer,
+    InsecureCelerySettingsFinding,
+    InsecureCelerySettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -256,7 +261,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.33.0"
+__version__ = "6.34.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -376,6 +381,9 @@ __all__ = [
     "InsecureRestFrameworkSettingsAnalyzer",
     "InsecureRestFrameworkSettingsFinding",
     "InsecureRestFrameworkSettingsStats",
+    "InsecureCelerySettingsAnalyzer",
+    "InsecureCelerySettingsFinding",
+    "InsecureCelerySettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
