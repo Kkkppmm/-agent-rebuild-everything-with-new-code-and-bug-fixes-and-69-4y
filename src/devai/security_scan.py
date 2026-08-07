@@ -73,6 +73,7 @@ from devai.insecure_auth_settings import InsecureAuthSettingsAnalyzer
 from devai.insecure_middleware_settings import InsecureMiddlewareSettingsAnalyzer
 from devai.insecure_rest_framework_settings import InsecureRestFrameworkSettingsAnalyzer
 from devai.insecure_celery_settings import InsecureCelerySettingsAnalyzer
+from devai.insecure_channels_settings import InsecureChannelsSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -140,6 +141,7 @@ CHECK_NAMES = (
     "insecure_middleware_settings",
     "insecure_rest_framework_settings",
     "insecure_celery_settings",
+    "insecure_channels_settings",
 )
 
 
@@ -321,6 +323,7 @@ class SecurityScanner:
         self._insecure_middleware_settings: InsecureMiddlewareSettingsAnalyzer | None = None
         self._insecure_rest_framework_settings: InsecureRestFrameworkSettingsAnalyzer | None = None
         self._insecure_celery_settings: InsecureCelerySettingsAnalyzer | None = None
+        self._insecure_channels_settings: InsecureChannelsSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -701,6 +704,13 @@ class SecurityScanner:
             )
         return self._insecure_celery_settings
 
+    def _insecure_channels_settings_analyzer(self) -> InsecureChannelsSettingsAnalyzer:
+        if self._insecure_channels_settings is None:
+            self._insecure_channels_settings = InsecureChannelsSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_channels_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -946,6 +956,14 @@ class SecurityScanner:
             recs.append(
                 "Use json/msgpack serializers instead of pickle, disable CELERY_TASK_ALWAYS_EAGER "
                 "in production, and authenticate Redis/AMQP broker connections."
+            )
+        if by_name.get(
+            "insecure_channels_settings",
+            SecurityScanCategory("insecure_channels_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Use RedisChannelLayer with authenticated hosts, strong symmetric_encryption_keys, "
+                "and avoid InMemoryChannelLayer in production."
             )
         return recs
 
@@ -1737,6 +1755,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_channels_settings" in self.checks:
+            analyzer = self._insecure_channels_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_channels_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -2035,6 +2065,14 @@ class SecurityScanner:
                 [
                     "## Insecure Celery settings",
                     self._insecure_celery_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_channels_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure Channels settings",
+                    self._insecure_channels_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2364,3 +2402,8 @@ class SecurityScanner:
     def insecure_celery_settings(self) -> InsecureCelerySettingsAnalyzer:
         """Underlying insecure-Celery-settings analyzer."""
         return self._insecure_celery_settings_analyzer()
+
+    @property
+    def insecure_channels_settings(self) -> InsecureChannelsSettingsAnalyzer:
+        """Underlying insecure-Channels-settings analyzer."""
+        return self._insecure_channels_settings_analyzer()

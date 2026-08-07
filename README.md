@@ -105,6 +105,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **InsecureMiddlewareSettingsAnalyzer** — Detect missing SecurityMiddleware, CSRF, and clickjacking middleware in Django production settings
 - **InsecureRestFrameworkSettingsAnalyzer** — Detect AllowAny defaults, missing auth/throttle classes, and BrowsableAPIRenderer in Django REST Framework settings
 - **InsecureCelerySettingsAnalyzer** — Detect pickle serializers, task_always_eager, and unauthenticated Redis/AMQP in Celery settings
+- **InsecureChannelsSettingsAnalyzer** — Detect InMemoryChannelLayer, unauthenticated Redis hosts, and weak encryption keys in Django Channels settings
 
 ## Installation
 
