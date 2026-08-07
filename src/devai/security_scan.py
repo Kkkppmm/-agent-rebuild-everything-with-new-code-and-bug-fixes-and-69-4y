@@ -82,6 +82,9 @@ from devai.insecure_elasticsearch_settings import InsecureElasticsearchSettingsA
 from devai.insecure_redis_settings import InsecureRedisSettingsAnalyzer
 from devai.insecure_mongo_settings import InsecureMongoSettingsAnalyzer
 from devai.insecure_kafka_settings import InsecureKafkaSettingsAnalyzer
+from devai.insecure_s3_settings import InsecureS3SettingsAnalyzer
+from devai.insecure_stripe_settings import InsecureStripeSettingsAnalyzer
+from devai.insecure_sentry_settings import InsecureSentrySettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -158,6 +161,9 @@ CHECK_NAMES = (
     "insecure_redis_settings",
     "insecure_mongo_settings",
     "insecure_kafka_settings",
+    "insecure_s3_settings",
+    "insecure_stripe_settings",
+    "insecure_sentry_settings",
 )
 
 
@@ -348,6 +354,9 @@ class SecurityScanner:
         self._insecure_redis_settings: InsecureRedisSettingsAnalyzer | None = None
         self._insecure_mongo_settings: InsecureMongoSettingsAnalyzer | None = None
         self._insecure_kafka_settings: InsecureKafkaSettingsAnalyzer | None = None
+        self._insecure_s3_settings: InsecureS3SettingsAnalyzer | None = None
+        self._insecure_stripe_settings: InsecureStripeSettingsAnalyzer | None = None
+        self._insecure_sentry_settings: InsecureSentrySettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -791,6 +800,27 @@ class SecurityScanner:
             )
         return self._insecure_kafka_settings
 
+    def _insecure_s3_settings_analyzer(self) -> InsecureS3SettingsAnalyzer:
+        if self._insecure_s3_settings is None:
+            self._insecure_s3_settings = InsecureS3SettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_s3_settings
+
+    def _insecure_stripe_settings_analyzer(self) -> InsecureStripeSettingsAnalyzer:
+        if self._insecure_stripe_settings is None:
+            self._insecure_stripe_settings = InsecureStripeSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_stripe_settings
+
+    def _insecure_sentry_settings_analyzer(self) -> InsecureSentrySettingsAnalyzer:
+        if self._insecure_sentry_settings is None:
+            self._insecure_sentry_settings = InsecureSentrySettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_sentry_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -1108,6 +1138,30 @@ class SecurityScanner:
             recs.append(
                 "Use SASL_SSL or SSL for Kafka, prefer SCRAM-SHA-256, and load credentials from "
                 "environment variables."
+            )
+        if by_name.get(
+            "insecure_s3_settings",
+            SecurityScanCategory("insecure_s3_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Use private S3 ACLs, HTTPS endpoints, IAM roles instead of hardcoded AWS keys, "
+                "and signed URLs for object access."
+            )
+        if by_name.get(
+            "insecure_stripe_settings",
+            SecurityScanCategory("insecure_stripe_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Load Stripe secret keys and webhook secrets from environment variables — never "
+                "commit payment API credentials to source control."
+            )
+        if by_name.get(
+            "insecure_sentry_settings",
+            SecurityScanCategory("insecure_sentry_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Load Sentry DSN from environment variables, disable default PII collection, and "
+                "set appropriate trace sample rates for production."
             )
         return recs
 
@@ -2007,6 +2061,42 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_s3_settings" in self.checks:
+            analyzer = self._insecure_s3_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_s3_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_stripe_settings" in self.checks:
+            analyzer = self._insecure_stripe_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_stripe_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_sentry_settings" in self.checks:
+            analyzer = self._insecure_sentry_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_sentry_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -2377,6 +2467,30 @@ class SecurityScanner:
                 [
                     "## Insecure Kafka settings",
                     self._insecure_kafka_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_s3_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure S3 settings",
+                    self._insecure_s3_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_stripe_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure Stripe settings",
+                    self._insecure_stripe_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_sentry_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure Sentry settings",
+                    self._insecure_sentry_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2751,3 +2865,18 @@ class SecurityScanner:
     def insecure_kafka_settings(self) -> InsecureKafkaSettingsAnalyzer:
         """Underlying insecure-Kafka-settings analyzer."""
         return self._insecure_kafka_settings_analyzer()
+
+    @property
+    def insecure_s3_settings(self) -> InsecureS3SettingsAnalyzer:
+        """Underlying insecure-S3-settings analyzer."""
+        return self._insecure_s3_settings_analyzer()
+
+    @property
+    def insecure_stripe_settings(self) -> InsecureStripeSettingsAnalyzer:
+        """Underlying insecure-Stripe-settings analyzer."""
+        return self._insecure_stripe_settings_analyzer()
+
+    @property
+    def insecure_sentry_settings(self) -> InsecureSentrySettingsAnalyzer:
+        """Underlying insecure-Sentry-settings analyzer."""
+        return self._insecure_sentry_settings_analyzer()

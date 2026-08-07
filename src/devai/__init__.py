@@ -282,6 +282,21 @@ from devai.insecure_kafka_settings import (
     InsecureKafkaSettingsFinding,
     InsecureKafkaSettingsStats,
 )
+from devai.insecure_s3_settings import (
+    InsecureS3SettingsAnalyzer,
+    InsecureS3SettingsFinding,
+    InsecureS3SettingsStats,
+)
+from devai.insecure_stripe_settings import (
+    InsecureStripeSettingsAnalyzer,
+    InsecureStripeSettingsFinding,
+    InsecureStripeSettingsStats,
+)
+from devai.insecure_sentry_settings import (
+    InsecureSentrySettingsAnalyzer,
+    InsecureSentrySettingsFinding,
+    InsecureSentrySettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -306,7 +321,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.42.0"
+__version__ = "6.43.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -456,6 +471,15 @@ __all__ = [
     "InsecureKafkaSettingsAnalyzer",
     "InsecureKafkaSettingsFinding",
     "InsecureKafkaSettingsStats",
+    "InsecureS3SettingsAnalyzer",
+    "InsecureS3SettingsFinding",
+    "InsecureS3SettingsStats",
+    "InsecureStripeSettingsAnalyzer",
+    "InsecureStripeSettingsFinding",
+    "InsecureStripeSettingsStats",
+    "InsecureSentrySettingsAnalyzer",
+    "InsecureSentrySettingsFinding",
+    "InsecureSentrySettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
