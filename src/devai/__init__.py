@@ -237,6 +237,21 @@ from devai.insecure_celery_settings import (
     InsecureCelerySettingsFinding,
     InsecureCelerySettingsStats,
 )
+from devai.insecure_graphql_settings import (
+    InsecureGraphqlSettingsAnalyzer,
+    InsecureGraphqlSettingsFinding,
+    InsecureGraphqlSettingsStats,
+)
+from devai.insecure_webhook_settings import (
+    InsecureWebhookSettingsAnalyzer,
+    InsecureWebhookSettingsFinding,
+    InsecureWebhookSettingsStats,
+)
+from devai.insecure_jwt_settings import (
+    InsecureJwtSettingsAnalyzer,
+    InsecureJwtSettingsFinding,
+    InsecureJwtSettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -261,7 +276,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.34.0"
+__version__ = "6.35.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -384,6 +399,15 @@ __all__ = [
     "InsecureCelerySettingsAnalyzer",
     "InsecureCelerySettingsFinding",
     "InsecureCelerySettingsStats",
+    "InsecureGraphqlSettingsAnalyzer",
+    "InsecureGraphqlSettingsFinding",
+    "InsecureGraphqlSettingsStats",
+    "InsecureWebhookSettingsAnalyzer",
+    "InsecureWebhookSettingsFinding",
+    "InsecureWebhookSettingsStats",
+    "InsecureJwtSettingsAnalyzer",
+    "InsecureJwtSettingsFinding",
+    "InsecureJwtSettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",

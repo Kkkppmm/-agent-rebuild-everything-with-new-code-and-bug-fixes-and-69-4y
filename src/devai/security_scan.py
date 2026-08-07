@@ -73,6 +73,9 @@ from devai.insecure_auth_settings import InsecureAuthSettingsAnalyzer
 from devai.insecure_middleware_settings import InsecureMiddlewareSettingsAnalyzer
 from devai.insecure_rest_framework_settings import InsecureRestFrameworkSettingsAnalyzer
 from devai.insecure_celery_settings import InsecureCelerySettingsAnalyzer
+from devai.insecure_graphql_settings import InsecureGraphqlSettingsAnalyzer
+from devai.insecure_webhook_settings import InsecureWebhookSettingsAnalyzer
+from devai.insecure_jwt_settings import InsecureJwtSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -140,6 +143,9 @@ CHECK_NAMES = (
     "insecure_middleware_settings",
     "insecure_rest_framework_settings",
     "insecure_celery_settings",
+    "insecure_graphql_settings",
+    "insecure_webhook_settings",
+    "insecure_jwt_settings",
 )
 
 
@@ -321,6 +327,9 @@ class SecurityScanner:
         self._insecure_middleware_settings: InsecureMiddlewareSettingsAnalyzer | None = None
         self._insecure_rest_framework_settings: InsecureRestFrameworkSettingsAnalyzer | None = None
         self._insecure_celery_settings: InsecureCelerySettingsAnalyzer | None = None
+        self._insecure_graphql_settings: InsecureGraphqlSettingsAnalyzer | None = None
+        self._insecure_webhook_settings: InsecureWebhookSettingsAnalyzer | None = None
+        self._insecure_jwt_settings: InsecureJwtSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -701,6 +710,27 @@ class SecurityScanner:
             )
         return self._insecure_celery_settings
 
+    def _insecure_graphql_settings_analyzer(self) -> InsecureGraphqlSettingsAnalyzer:
+        if self._insecure_graphql_settings is None:
+            self._insecure_graphql_settings = InsecureGraphqlSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_graphql_settings
+
+    def _insecure_webhook_settings_analyzer(self) -> InsecureWebhookSettingsAnalyzer:
+        if self._insecure_webhook_settings is None:
+            self._insecure_webhook_settings = InsecureWebhookSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_webhook_settings
+
+    def _insecure_jwt_settings_analyzer(self) -> InsecureJwtSettingsAnalyzer:
+        if self._insecure_jwt_settings is None:
+            self._insecure_jwt_settings = InsecureJwtSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_jwt_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -946,6 +976,30 @@ class SecurityScanner:
             recs.append(
                 "Disable task_always_eager in production, use json serializers, remove pickle "
                 "from accept_content, and require authenticated Redis/AMQP broker URLs."
+            )
+        if by_name.get(
+            "insecure_graphql_settings",
+            SecurityScanCategory("insecure_graphql_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Disable GraphQL playground/GraphiQL and introspection in production, "
+                "and enable query depth/complexity middleware."
+            )
+        if by_name.get(
+            "insecure_webhook_settings",
+            SecurityScanCategory("insecure_webhook_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Enable webhook signature verification, use HTTPS endpoints, "
+                "and store webhook secrets in environment variables."
+            )
+        if by_name.get(
+            "insecure_jwt_settings",
+            SecurityScanCategory("insecure_jwt_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Use strong JWT signing keys from env, enable signature and expiration "
+                "verification, and never use the 'none' algorithm."
             )
         return recs
 
@@ -1737,6 +1791,42 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_graphql_settings" in self.checks:
+            analyzer = self._insecure_graphql_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_graphql_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_webhook_settings" in self.checks:
+            analyzer = self._insecure_webhook_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_webhook_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
+        if "insecure_jwt_settings" in self.checks:
+            analyzer = self._insecure_jwt_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_jwt_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -2035,6 +2125,30 @@ class SecurityScanner:
                 [
                     "## Insecure Celery settings",
                     self._insecure_celery_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_graphql_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure GraphQL settings",
+                    self._insecure_graphql_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_webhook_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure webhook settings",
+                    self._insecure_webhook_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_jwt_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure JWT settings",
+                    self._insecure_jwt_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2364,3 +2478,18 @@ class SecurityScanner:
     def insecure_celery_settings(self) -> InsecureCelerySettingsAnalyzer:
         """Underlying insecure-Celery-settings analyzer."""
         return self._insecure_celery_settings_analyzer()
+
+    @property
+    def insecure_graphql_settings(self) -> InsecureGraphqlSettingsAnalyzer:
+        """Underlying insecure-GraphQL-settings analyzer."""
+        return self._insecure_graphql_settings_analyzer()
+
+    @property
+    def insecure_webhook_settings(self) -> InsecureWebhookSettingsAnalyzer:
+        """Underlying insecure-webhook-settings analyzer."""
+        return self._insecure_webhook_settings_analyzer()
+
+    @property
+    def insecure_jwt_settings(self) -> InsecureJwtSettingsAnalyzer:
+        """Underlying insecure-JWT-settings analyzer."""
+        return self._insecure_jwt_settings_analyzer()
