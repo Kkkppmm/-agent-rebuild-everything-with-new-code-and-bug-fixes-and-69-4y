@@ -99,7 +99,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PathTraversalAnalyzer** — Detect unsafe file path construction from user-controlled input
 - **CommandInjectionAnalyzer** — Detect dynamic shell command construction in os/subprocess calls
 - **SSRFAnalyzer** — Detect server-side request forgery risks in outbound HTTP client calls
-- **SecurityScanner** — Unified static security scan combining secrets, injections, dangerous calls, insecure random, weak crypto, log injection, SSRF, path traversal, and 68 security checks
+- **SecurityScanner** — Unified static security scan combining secrets, injections, dangerous calls, insecure random, weak crypto, log injection, SSRF, path traversal, and 69 security checks
 - **ProxyTrustAnalyzer** — Detect unvalidated trust of X-Forwarded-For and proxy headers for client IP and access control
 - **InsecureWebSocketAnalyzer** — Detect hardcoded ws:// URLs and disabled WebSocket TLS in real-time applications
 - **InsecureMiddlewareSettingsAnalyzer** — Detect missing SecurityMiddleware, CSRF, and clickjacking middleware in Django production settings
@@ -109,6 +109,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **InsecureSentrySettingsAnalyzer** — Detect hardcoded DSN, send_default_pii, debug mode, and full trace sampling in Sentry SDK configuration
 - **InsecureApiDocsSettingsAnalyzer** — Detect exposed Swagger/OpenAPI docs, SERVE_PUBLIC, and public schema views
 - **InsecureOAuthSettingsAnalyzer** — Detect hardcoded OAuth secrets, HTTP redirect URIs, and OAUTHLIB_INSECURE_TRANSPORT
+- **InsecureCspSettingsAnalyzer** — Detect unsafe-inline, unsafe-eval, wildcard sources, disabled CSP, and report-only mode
 
 ## Installation
 
