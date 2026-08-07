@@ -242,6 +242,11 @@ from devai.insecure_channels_settings import (
     InsecureChannelsSettingsFinding,
     InsecureChannelsSettingsStats,
 )
+from devai.insecure_sentry_settings import (
+    InsecureSentrySettingsAnalyzer,
+    InsecureSentrySettingsFinding,
+    InsecureSentrySettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -266,7 +271,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.35.0"
+__version__ = "6.36.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -392,6 +397,9 @@ __all__ = [
     "InsecureChannelsSettingsAnalyzer",
     "InsecureChannelsSettingsFinding",
     "InsecureChannelsSettingsStats",
+    "InsecureSentrySettingsAnalyzer",
+    "InsecureSentrySettingsFinding",
+    "InsecureSentrySettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",

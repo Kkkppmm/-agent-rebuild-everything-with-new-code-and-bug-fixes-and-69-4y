@@ -74,6 +74,7 @@ from devai.insecure_middleware_settings import InsecureMiddlewareSettingsAnalyze
 from devai.insecure_rest_framework_settings import InsecureRestFrameworkSettingsAnalyzer
 from devai.insecure_celery_settings import InsecureCelerySettingsAnalyzer
 from devai.insecure_channels_settings import InsecureChannelsSettingsAnalyzer
+from devai.insecure_sentry_settings import InsecureSentrySettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -142,6 +143,7 @@ CHECK_NAMES = (
     "insecure_rest_framework_settings",
     "insecure_celery_settings",
     "insecure_channels_settings",
+    "insecure_sentry_settings",
 )
 
 
@@ -324,6 +326,7 @@ class SecurityScanner:
         self._insecure_rest_framework_settings: InsecureRestFrameworkSettingsAnalyzer | None = None
         self._insecure_celery_settings: InsecureCelerySettingsAnalyzer | None = None
         self._insecure_channels_settings: InsecureChannelsSettingsAnalyzer | None = None
+        self._insecure_sentry_settings: InsecureSentrySettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -711,6 +714,13 @@ class SecurityScanner:
             )
         return self._insecure_channels_settings
 
+    def _insecure_sentry_settings_analyzer(self) -> InsecureSentrySettingsAnalyzer:
+        if self._insecure_sentry_settings is None:
+            self._insecure_sentry_settings = InsecureSentrySettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_sentry_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -964,6 +974,14 @@ class SecurityScanner:
             recs.append(
                 "Use RedisChannelLayer with authenticated hosts, strong symmetric_encryption_keys, "
                 "and avoid InMemoryChannelLayer in production."
+            )
+        if by_name.get(
+            "insecure_sentry_settings",
+            SecurityScanCategory("insecure_sentry_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Load Sentry DSN from environment variables, disable send_default_pii and debug mode, "
+                "and lower traces_sample_rate in production."
             )
         return recs
 
@@ -1767,6 +1785,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_sentry_settings" in self.checks:
+            analyzer = self._insecure_sentry_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_sentry_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -2073,6 +2103,14 @@ class SecurityScanner:
                 [
                     "## Insecure Channels settings",
                     self._insecure_channels_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_sentry_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure Sentry settings",
+                    self._insecure_sentry_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2407,3 +2445,8 @@ class SecurityScanner:
     def insecure_channels_settings(self) -> InsecureChannelsSettingsAnalyzer:
         """Underlying insecure-Channels-settings analyzer."""
         return self._insecure_channels_settings_analyzer()
+
+    @property
+    def insecure_sentry_settings(self) -> InsecureSentrySettingsAnalyzer:
+        """Underlying insecure-Sentry-settings analyzer."""
+        return self._insecure_sentry_settings_analyzer()
