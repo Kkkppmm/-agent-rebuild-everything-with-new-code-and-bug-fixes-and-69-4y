@@ -99,7 +99,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PathTraversalAnalyzer** — Detect unsafe file path construction from user-controlled input
 - **CommandInjectionAnalyzer** — Detect dynamic shell command construction in os/subprocess calls
 - **SSRFAnalyzer** — Detect server-side request forgery risks in outbound HTTP client calls
-- **SecurityScanner** — Unified static security scan combining secrets, injections, dangerous calls, insecure random, weak crypto, log injection, SSRF, path traversal, and 65 security checks
+- **SecurityScanner** — Unified static security scan combining secrets, injections, dangerous calls, insecure random, weak crypto, log injection, SSRF, path traversal, and 68 security checks
 - **ProxyTrustAnalyzer** — Detect unvalidated trust of X-Forwarded-For and proxy headers for client IP and access control
 - **InsecureWebSocketAnalyzer** — Detect hardcoded ws:// URLs and disabled WebSocket TLS in real-time applications
 - **InsecureMiddlewareSettingsAnalyzer** — Detect missing SecurityMiddleware, CSRF, and clickjacking middleware in Django production settings
@@ -107,6 +107,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **InsecureCelerySettingsAnalyzer** — Detect pickle serializers, task_always_eager, and unauthenticated Redis/AMQP in Celery settings
 - **InsecureChannelsSettingsAnalyzer** — Detect InMemoryChannelLayer, unauthenticated Redis hosts, and weak encryption keys in Django Channels settings
 - **InsecureSentrySettingsAnalyzer** — Detect hardcoded DSN, send_default_pii, debug mode, and full trace sampling in Sentry SDK configuration
+- **InsecureApiDocsSettingsAnalyzer** — Detect exposed Swagger/OpenAPI docs, SERVE_PUBLIC, and public schema views
 
 ## Installation
 

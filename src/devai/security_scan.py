@@ -75,6 +75,7 @@ from devai.insecure_rest_framework_settings import InsecureRestFrameworkSettings
 from devai.insecure_celery_settings import InsecureCelerySettingsAnalyzer
 from devai.insecure_channels_settings import InsecureChannelsSettingsAnalyzer
 from devai.insecure_sentry_settings import InsecureSentrySettingsAnalyzer
+from devai.insecure_api_docs_settings import InsecureApiDocsSettingsAnalyzer
 
 CHECK_NAMES = (
     "secrets",
@@ -144,6 +145,7 @@ CHECK_NAMES = (
     "insecure_celery_settings",
     "insecure_channels_settings",
     "insecure_sentry_settings",
+    "insecure_api_docs_settings",
 )
 
 
@@ -327,6 +329,7 @@ class SecurityScanner:
         self._insecure_celery_settings: InsecureCelerySettingsAnalyzer | None = None
         self._insecure_channels_settings: InsecureChannelsSettingsAnalyzer | None = None
         self._insecure_sentry_settings: InsecureSentrySettingsAnalyzer | None = None
+        self._insecure_api_docs_settings: InsecureApiDocsSettingsAnalyzer | None = None
 
     def _secrets_scanner(self) -> SecretsScanner:
         if self._secrets is None:
@@ -721,6 +724,13 @@ class SecurityScanner:
             )
         return self._insecure_sentry_settings
 
+    def _insecure_api_docs_settings_analyzer(self) -> InsecureApiDocsSettingsAnalyzer:
+        if self._insecure_api_docs_settings is None:
+            self._insecure_api_docs_settings = InsecureApiDocsSettingsAnalyzer(
+                str(self.root), ignore_dirs=self.ignore_dirs
+            )
+        return self._insecure_api_docs_settings
+
     def _secrets_score(self, findings: int) -> float:
         if findings == 0:
             return 100.0
@@ -982,6 +992,14 @@ class SecurityScanner:
             recs.append(
                 "Load Sentry DSN from environment variables, disable send_default_pii and debug mode, "
                 "and lower traces_sample_rate in production."
+            )
+        if by_name.get(
+            "insecure_api_docs_settings",
+            SecurityScanCategory("insecure_api_docs_settings", 100, 0, ""),
+        ).findings:
+            recs.append(
+                "Disable SERVE_PUBLIC in SPECTACULAR_SETTINGS, protect schema/Swagger/ReDoc routes "
+                "with authentication, and avoid AllowAny on documentation views."
             )
         return recs
 
@@ -1797,6 +1815,18 @@ class SecurityScanner:
                 )
             )
 
+        if "insecure_api_docs_settings" in self.checks:
+            analyzer = self._insecure_api_docs_settings_analyzer()
+            findings = analyzer.analyze()
+            categories.append(
+                SecurityScanCategory(
+                    name="insecure_api_docs_settings",
+                    score=analyzer.health_score(),
+                    findings=len(findings),
+                    summary=analyzer.summary().splitlines()[0],
+                )
+            )
+
         total_findings = sum(cat.findings for cat in categories)
         overall = 100.0
         if categories:
@@ -2111,6 +2141,14 @@ class SecurityScanner:
                 [
                     "## Insecure Sentry settings",
                     self._insecure_sentry_settings_analyzer().to_context(limit=limit),
+                    "",
+                ]
+            )
+        if "insecure_api_docs_settings" in self.checks:
+            lines.extend(
+                [
+                    "## Insecure API docs settings",
+                    self._insecure_api_docs_settings_analyzer().to_context(limit=limit),
                     "",
                 ]
             )
@@ -2450,3 +2488,8 @@ class SecurityScanner:
     def insecure_sentry_settings(self) -> InsecureSentrySettingsAnalyzer:
         """Underlying insecure-Sentry-settings analyzer."""
         return self._insecure_sentry_settings_analyzer()
+
+    @property
+    def insecure_api_docs_settings(self) -> InsecureApiDocsSettingsAnalyzer:
+        """Underlying insecure-API-docs-settings analyzer."""
+        return self._insecure_api_docs_settings_analyzer()
