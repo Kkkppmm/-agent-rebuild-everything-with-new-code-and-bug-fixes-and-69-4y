@@ -262,6 +262,11 @@ from devai.insecure_csp_settings import (
     InsecureCspSettingsFinding,
     InsecureCspSettingsStats,
 )
+from devai.insecure_graphql_settings import (
+    InsecureGraphqlSettingsAnalyzer,
+    InsecureGraphqlSettingsFinding,
+    InsecureGraphqlSettingsStats,
+)
 from devai.zip_slip import ZipSlipAnalyzer, ZipSlipFinding, ZipSlipStats
 from devai.dynamic_import import DynamicImportAnalyzer, DynamicImportFinding, DynamicImportStats
 from devai.assert_security import AssertSecurityAnalyzer, AssertSecurityFinding, AssertSecurityStats
@@ -286,7 +291,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.39.0"
+__version__ = "6.40.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -424,6 +429,9 @@ __all__ = [
     "InsecureCspSettingsAnalyzer",
     "InsecureCspSettingsFinding",
     "InsecureCspSettingsStats",
+    "InsecureGraphqlSettingsAnalyzer",
+    "InsecureGraphqlSettingsFinding",
+    "InsecureGraphqlSettingsStats",
     "CSRFAnalyzer",
     "CSRFFinding",
     "CSRFStats",
