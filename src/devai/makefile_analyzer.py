@@ -158,17 +158,26 @@ class MakefileAnalyzer:
 
             if line.startswith(".PHONY"):
                 info.has_phony = True
-                continue
 
-            if ":" in line and not line.startswith("\t") and not line.startswith(" "):
+            is_recipe = raw.startswith("\t") or (raw.startswith(" ") and not raw.startswith("  "))
+
+            if not is_recipe and ":" in line:
                 target_part = line.split(":", 1)[0].strip()
-                if target_part and not target_part.startswith("."):
+                if (
+                    target_part
+                    and not target_part.startswith(".")
+                    and "://" not in line
+                    and "/" not in target_part
+                ):
                     current_target = target_part.split()[0]
                     if current_target not in info.targets:
                         info.targets.append(current_target)
                 continue
 
-            recipe = line.lstrip("\t").strip()
+            if not is_recipe:
+                continue
+
+            recipe = raw.lstrip("\t ").strip()
             if not recipe:
                 continue
 

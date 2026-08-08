@@ -99,15 +99,7 @@ class TestKubernetesAnalyzer:
         assert any(f.kind == "run_as_root" for f in findings)
 
     def test_detects_plain_secret(self, tmp_path: Path):
-        manifest = GOOD_DEPLOYMENT.replace(
-            """            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: app-secrets
-                  key: database-url""",
-            """            - name: DATABASE_URL
-              value: 'supersecretpassword'""",
-        )
+        manifest = GOOD_DEPLOYMENT + "\n  password: 'supersecretpassword'\n"
         k8s = tmp_path / "k8s"
         k8s.mkdir()
         (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
