@@ -1,0 +1,159 @@
+"""Tests for KubernetesAnalyzer."""
+
+from pathlib import Path
+
+from devai.kubernetes_analyzer import KubernetesAnalyzer, KubernetesFinding
+
+
+GOOD_MANIFEST = """\
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: app
+          image: ghcr.io/org/app:1.0.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+"""
+
+
+class TestKubernetesAnalyzer:
+    def test_no_manifests_returns_empty(self, tmp_path: Path):
+        analyzer = KubernetesAnalyzer(str(tmp_path))
+        findings = analyzer.analyze()
+        assert findings == []
+        assert analyzer.health_score() == 100.0
+        assert "no manifests" in analyzer.summary().lower()
+
+    def test_clean_manifest(self, tmp_path: Path):
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(GOOD_MANIFEST, encoding="utf-8")
+        analyzer = KubernetesAnalyzer(str(tmp_path))
+        findings = analyzer.analyze()
+        assert not findings
+        stats = analyzer.stats
+        assert stats.manifest_files == 1
+        assert analyzer.health_score() == 100.0
+
+    def test_detects_privileged(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace(
+            "allowPrivilegeEscalation: false",
+            "privileged: true",
+        )
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "privileged" for f in findings)
+
+    def test_detects_host_network(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST + "\n      hostNetwork: true\n"
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "host_network" for f in findings)
+
+    def test_detects_run_as_root(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace("runAsUser: 1000", "runAsUser: 0")
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "run_as_root" for f in findings)
+
+    def test_detects_latest_tag(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace("ghcr.io/org/app:1.0.0", "nginx:latest")
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "latest_tag" for f in findings)
+
+    def test_detects_secret_in_manifest(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace(
+            "cpu: 100m",
+            "password: 'supersecret123'\n              cpu: 100m",
+        )
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "secret_in_manifest" for f in findings)
+
+    def test_detects_sensitive_hostpath(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST + """
+          volumes:
+            - name: docker-sock
+              hostPath:
+                path: /var/run/docker.sock
+"""
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "sensitive_hostpath" for f in findings)
+
+    def test_detects_missing_resource_limits(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace("resources:\n", "ports:\n")
+        manifest = manifest.replace(
+            "requests:\n              cpu: 100m\n              memory: 128Mi\n            limits:\n              cpu: 500m\n              memory: 512Mi",
+            "",
+        )
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "missing_resource_limits" for f in findings)
+
+    def test_generate_template(self, tmp_path: Path):
+        template = KubernetesAnalyzer(str(tmp_path)).generate_hardened_template()
+        assert "Generated by DevAI" in template
+        assert "runAsNonRoot: true" in template
+
+    def test_summary_context_and_infos(self, tmp_path: Path):
+        k8s = tmp_path / "k8s"
+        k8s.mkdir()
+        (k8s / "deployment.yaml").write_text(GOOD_MANIFEST, encoding="utf-8")
+        analyzer = KubernetesAnalyzer(str(tmp_path))
+        assert "Kubernetes:" in analyzer.summary()
+        assert "Kubernetes manifest analysis" in analyzer.to_context()
+        assert len(analyzer.infos) == 1
+        assert "Deployment" in analyzer.infos[0].resources
+
+    def test_finding_format(self):
+        finding = KubernetesFinding(
+            kind="privileged",
+            severity="high",
+            message="test message",
+            path="k8s/deployment.yaml",
+            lineno=10,
+            resource="Deployment",
+        )
+        assert "high" in finding.format()
+        assert "Deployment" in finding.format()
