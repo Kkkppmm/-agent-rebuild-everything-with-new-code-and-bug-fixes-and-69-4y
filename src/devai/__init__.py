@@ -65,6 +65,13 @@ from devai.precommit_analyzer import (
     PrecommitInfo,
     PrecommitStats,
 )
+from devai.makefile_analyzer import (
+    MakefileAnalyzer,
+    MakefileFinding,
+    MakefileInfo,
+    MakefileStats,
+    MakefileTargetInfo,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -566,6 +573,11 @@ __all__ = [
     "PrecommitHookInfo",
     "PrecommitInfo",
     "PrecommitStats",
+    "MakefileAnalyzer",
+    "MakefileFinding",
+    "MakefileInfo",
+    "MakefileStats",
+    "MakefileTargetInfo",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

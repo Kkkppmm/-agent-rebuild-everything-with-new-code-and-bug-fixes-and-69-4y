@@ -72,6 +72,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **WorkflowAnalyzer** — Audit GitHub Actions workflows for unpinned actions, pull_request_target misuse, broad permissions, and script injection
 - **ComposeAnalyzer** — Audit Docker Compose files for privileged mode, host mounts, :latest tags, secrets in environment, and missing resource limits
 - **PrecommitAnalyzer** — Audit `.pre-commit-config.yaml` for unpinned hook revisions, local hooks with unsafe entries, and secrets in config
+- **MakefileAnalyzer** — Audit Makefiles for dangerous `rm` patterns, curl-pipe-to-shell, `sudo`, hardcoded secrets, and missing `.PHONY` declarations
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets
@@ -582,6 +583,7 @@ devai dockerfile Dockerfile
 devai workflow-audit .
 devai compose-audit .
 devai precommit-audit .
+devai makefile-audit .
 devai migrate path/to/app.py --source "Django 3" --target "Django 5"
 devai generate "REST endpoint for user profiles" --language python
 devai fix-lint path/to/module.py "E501 line too long"

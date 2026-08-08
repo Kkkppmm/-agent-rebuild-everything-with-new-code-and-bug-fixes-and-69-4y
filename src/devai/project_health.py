@@ -19,6 +19,7 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.makefile_analyzer import MakefileAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -132,6 +133,7 @@ class ProjectHealth:
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
+        "makefile": 0.03,
     }
 
     def __init__(
@@ -342,6 +344,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_makefile(self, analyzer: MakefileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.makefiles == 0:
+            return 100.0, "No Makefiles found", {"makefiles": 0, "findings": 0}
+        summary = (
+            f"{stats.makefiles} Makefile(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "makefiles": stats.makefiles,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -445,6 +465,14 @@ class ProjectHealth:
             elif cat.name == "precommit" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
                 recs.append(
                     "Review pre-commit findings — pin repos to tags/SHAs and audit local hooks"
+                )
+            elif cat.name == "makefile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Makefiles — remove curl-pipe-to-shell, sudo, and hardcoded secrets"
+                )
+            elif cat.name == "makefile" and cat.score < 70 and cat.details.get("makefiles", 0) > 0:
+                recs.append(
+                    "Review Makefile findings — declare .PHONY targets and avoid dangerous rm patterns"
                 )
         return recs
 
@@ -611,6 +639,10 @@ class ProjectHealth:
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
         categories.append(HealthCategory("precommit", score, summary, details))
+
+        makefile = MakefileAnalyzer(root_str)
+        score, summary, details = self._score_makefile(makefile)
+        categories.append(HealthCategory("makefile", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
