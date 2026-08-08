@@ -17,6 +17,7 @@ from devai.env_vars import EnvVarAnalyzer
 from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
+from devai.compose_analyzer import ComposeAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -112,7 +113,7 @@ class ProjectHealth:
     """
 
     WEIGHTS = {
-        "metrics": 0.09,
+        "metrics": 0.06,
         "typing": 0.13,
         "docstrings": 0.09,
         "tests": 0.16,
@@ -128,6 +129,7 @@ class ProjectHealth:
         "gitignore": 0.04,
         "dockerfile": 0.03,
         "workflows": 0.03,
+        "compose": 0.03,
     }
 
     def __init__(
@@ -302,6 +304,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_compose(self, analyzer: ComposeAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.compose_files == 0:
+            return 100.0, "No Docker Compose files found", {"compose_files": 0, "findings": 0}
+        summary = (
+            f"{stats.compose_files} Compose file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "compose_files": stats.compose_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -389,6 +409,14 @@ class ProjectHealth:
             elif cat.name == "workflows" and cat.score < 70 and cat.details.get("workflows", 0) > 0:
                 recs.append(
                     "Review workflow findings — restrict permissions and avoid secrets in env blocks"
+                )
+            elif cat.name == "compose" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Docker Compose files — avoid privileged mode, host mounts, and secrets in environment"
+                )
+            elif cat.name == "compose" and cat.score < 70 and cat.details.get("compose_files", 0) > 0:
+                recs.append(
+                    "Review Compose findings — pin images, set resource limits, and run services as non-root"
                 )
         return recs
 
@@ -547,6 +575,10 @@ class ProjectHealth:
         workflows = WorkflowAnalyzer(root_str)
         score, summary, details = self._score_workflows(workflows)
         categories.append(HealthCategory("workflows", score, summary, details))
+
+        compose = ComposeAnalyzer(root_str)
+        score, summary, details = self._score_compose(compose)
+        categories.append(HealthCategory("compose", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

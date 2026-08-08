@@ -52,6 +52,12 @@ from devai.workflow_analyzer import (
     WorkflowInfo,
     WorkflowStats,
 )
+from devai.compose_analyzer import (
+    ComposeAnalyzer,
+    ComposeFinding,
+    ComposeInfo,
+    ComposeStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -340,7 +346,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.46.0"
+__version__ = "6.48.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -544,6 +550,10 @@ __all__ = [
     "WorkflowFinding",
     "WorkflowInfo",
     "WorkflowStats",
+    "ComposeAnalyzer",
+    "ComposeFinding",
+    "ComposeInfo",
+    "ComposeStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

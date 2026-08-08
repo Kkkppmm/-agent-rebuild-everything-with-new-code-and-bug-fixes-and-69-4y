@@ -23,6 +23,7 @@ from devai.env_vars import EnvVarAnalyzer
 from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
+from devai.compose_analyzer import ComposeAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -373,6 +374,10 @@ class DevAI:
     def workflows(self, path: str | Path = ".", **kwargs: Any) -> WorkflowAnalyzer:
         """Audit GitHub Actions workflows for security risks and CI best practices."""
         return WorkflowAnalyzer(str(path), **kwargs)
+
+    def compose(self, path: str | Path = ".", **kwargs: Any) -> ComposeAnalyzer:
+        """Audit Docker Compose files for security risks and container best practices."""
+        return ComposeAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
