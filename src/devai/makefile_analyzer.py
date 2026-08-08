@@ -18,7 +18,7 @@ CURL_PIPE_SHELL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 DANGEROUS_RM_PATTERN = re.compile(
-    r"\brm\s+(-[^\s]*\s+)*(-[^\s]*\s+)*(/?\s*\*|/\s*$|/\.\s|/\.\.\s)",
+    r"\brm\s+(-[^\s]*\s+)*(-[^\s]*\s+)*(/\s*$|/\s+\*|/\*\s*$|/\.\s|/\.\.\s|-[^\s]*r[^\s]*\s+/\s*$|-[^\s]*r[^\s]*\s+/\*)",
     re.IGNORECASE,
 )
 SUDO_PATTERN = re.compile(r"\bsudo\b", re.IGNORECASE)
