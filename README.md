@@ -69,6 +69,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **EnvVarAnalyzer** — Inventory environment variables, detect drift between code and `.env.example`, and scaffold env templates
 - **GitignoreAnalyzer** — Audit `.gitignore` coverage, recommend patterns by language, and detect exposed sensitive files
 - **DockerfileAnalyzer** — Audit Dockerfiles for security risks (root user, :latest tags, secrets in ENV) and container best practices
+- **KubernetesAnalyzer** — Audit Kubernetes manifests for privileged pods, host namespaces, root execution, and hardcoded secrets
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets

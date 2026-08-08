@@ -25,6 +25,7 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.kubernetes_analyzer import KubernetesAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -383,6 +384,10 @@ class DevAI:
     def precommit(self, path: str | Path = ".", **kwargs: Any) -> PrecommitAnalyzer:
         """Audit pre-commit configuration for unpinned hooks and unsafe entries."""
         return PrecommitAnalyzer(str(path), **kwargs)
+
+    def kubernetes(self, path: str | Path = ".", **kwargs: Any) -> KubernetesAnalyzer:
+        """Audit Kubernetes manifests for pod security and deployment risks."""
+        return KubernetesAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
