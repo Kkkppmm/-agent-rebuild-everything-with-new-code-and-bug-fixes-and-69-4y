@@ -1,0 +1,161 @@
+"""Tests for KubernetesAnalyzer."""
+
+from pathlib import Path
+
+from devai.kubernetes_analyzer import KubernetesAnalyzer, KubernetesFinding
+
+
+GOOD_MANIFEST = """\
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  template:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: app
+          image: ghcr.io/org/app:1.0.0
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+"""
+
+
+class TestKubernetesAnalyzer:
+    def test_no_manifests_returns_empty(self, tmp_path: Path):
+        analyzer = KubernetesAnalyzer(str(tmp_path))
+        findings = analyzer.analyze()
+        assert findings == []
+        assert analyzer.health_score() == 100.0
+        assert "no manifests" in analyzer.summary().lower()
+
+    def test_clean_manifest(self, tmp_path: Path):
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(GOOD_MANIFEST, encoding="utf-8")
+        analyzer = KubernetesAnalyzer(str(tmp_path))
+        findings = analyzer.analyze()
+        assert not findings
+        stats = analyzer.stats
+        assert stats.manifest_files == 1
+        assert stats.resources == 1
+        assert analyzer.health_score() == 100.0
+
+    def test_detects_privileged(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace(
+            "allowPrivilegeEscalation: false",
+            "privileged: true",
+        )
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "privileged" for f in findings)
+        assert any(f.severity == "high" for f in findings)
+
+    def test_detects_latest_tag(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace(
+            "image: ghcr.io/org/app:1.0.0",
+            "image: nginx:latest",
+        )
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "latest_tag" for f in findings)
+
+    def test_detects_host_network(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace(
+            "automountServiceAccountToken: false",
+            "hostNetwork: true\n      automountServiceAccountToken: false",
+        )
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "host_network" for f in findings)
+
+    def test_detects_secret_in_env(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST.replace(
+            "          image: ghcr.io/org/app:1.0.0\n",
+            "          image: ghcr.io/org/app:1.0.0\n"
+            "          env:\n"
+            "            - name: API_KEY\n"
+            "              value: sk_live_secret123\n",
+        )
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "secret_in_env" for f in findings)
+
+    def test_detects_dangerous_host_path(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST + """
+          volumes:
+            - name: docker-sock
+              hostPath:
+                path: /var/run/docker.sock
+"""
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind in ("host_path_volume", "dangerous_host_path") for f in findings)
+
+    def test_detects_missing_resources(self, tmp_path: Path):
+        manifest = GOOD_MANIFEST
+        for block in (
+            "          resources:\n            requests:\n              cpu: 100m\n              memory: 128Mi\n            limits:\n              cpu: 500m\n              memory: 512Mi\n",
+            "",
+        ):
+            manifest = manifest.replace(block, "")
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(manifest, encoding="utf-8")
+        findings = KubernetesAnalyzer(str(tmp_path)).analyze()
+        assert any(f.kind == "no_resource_limits" for f in findings)
+
+    def test_generate_template(self, tmp_path: Path):
+        template = KubernetesAnalyzer(str(tmp_path)).generate_hardened_template()
+        assert "Generated by DevAI" in template
+        assert "runAsNonRoot: true" in template
+        assert "drop:" in template
+
+    def test_summary_context_and_infos(self, tmp_path: Path):
+        k8s_dir = tmp_path / "k8s"
+        k8s_dir.mkdir()
+        (k8s_dir / "deployment.yaml").write_text(GOOD_MANIFEST, encoding="utf-8")
+        analyzer = KubernetesAnalyzer(str(tmp_path))
+        assert "Kubernetes:" in analyzer.summary()
+        assert "Kubernetes manifest analysis" in analyzer.to_context()
+        assert len(analyzer.infos) == 1
+        assert analyzer.infos[0].resources[0].kind == "Deployment"
+
+    def test_finding_format(self):
+        finding = KubernetesFinding(
+            kind="privileged",
+            severity="high",
+            message="test message",
+            path="k8s/deployment.yaml",
+            lineno=12,
+            resource="Deployment/app",
+            container="app",
+        )
+        assert "high" in finding.format()
+        assert "Deployment/app" in finding.format()
+        assert "test message" in finding.format()
