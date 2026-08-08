@@ -26,6 +26,7 @@ from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.makefile_analyzer import MakefileAnalyzer
+from devai.kubernetes_analyzer import KubernetesAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -388,6 +389,10 @@ class DevAI:
     def makefile(self, path: str | Path = ".", **kwargs: Any) -> MakefileAnalyzer:
         """Audit Makefiles for security risks and build best practices."""
         return MakefileAnalyzer(str(path), **kwargs)
+
+    def kubernetes(self, path: str | Path = ".", **kwargs: Any) -> KubernetesAnalyzer:
+        """Audit Kubernetes manifests for security risks and deployment best practices."""
+        return KubernetesAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

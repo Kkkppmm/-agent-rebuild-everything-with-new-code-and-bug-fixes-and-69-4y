@@ -20,6 +20,7 @@ from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.makefile_analyzer import MakefileAnalyzer
+from devai.kubernetes_analyzer import KubernetesAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -134,6 +135,7 @@ class ProjectHealth:
         "compose": 0.03,
         "precommit": 0.03,
         "makefile": 0.03,
+        "kubernetes": 0.03,
     }
 
     def __init__(
@@ -362,6 +364,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_kubernetes(self, analyzer: KubernetesAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Kubernetes manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -473,6 +493,14 @@ class ProjectHealth:
             elif cat.name == "makefile" and cat.score < 70 and cat.details.get("makefiles", 0) > 0:
                 recs.append(
                     "Review Makefile findings — avoid sudo, force pushes, and wildcard deletes"
+                )
+            elif cat.name == "kubernetes" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kubernetes manifests — avoid privileged mode, host namespaces, and secrets in env"
+                )
+            elif cat.name == "kubernetes" and cat.score < 70 and cat.details.get("manifests", 0) > 0:
+                recs.append(
+                    "Review Kubernetes findings — pin images, set resource limits, and run as non-root"
                 )
         return recs
 
@@ -643,6 +671,10 @@ class ProjectHealth:
         makefile = MakefileAnalyzer(root_str, ignore_dirs=self.ignore_dirs)
         score, summary, details = self._score_makefile(makefile)
         categories.append(HealthCategory("makefile", score, summary, details))
+
+        kubernetes = KubernetesAnalyzer(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_kubernetes(kubernetes)
+        categories.append(HealthCategory("kubernetes", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

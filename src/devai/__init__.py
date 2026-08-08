@@ -72,6 +72,12 @@ from devai.makefile_analyzer import (
     MakefileStats,
     MakefileTarget,
 )
+from devai.kubernetes_analyzer import (
+    KubernetesAnalyzer,
+    KubernetesFinding,
+    KubernetesInfo,
+    KubernetesStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -360,7 +366,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.48.0"
+__version__ = "6.51.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -578,6 +584,10 @@ __all__ = [
     "MakefileInfo",
     "MakefileStats",
     "MakefileTarget",
+    "KubernetesAnalyzer",
+    "KubernetesFinding",
+    "KubernetesInfo",
+    "KubernetesStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
