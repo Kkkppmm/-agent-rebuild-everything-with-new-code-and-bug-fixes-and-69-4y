@@ -28,6 +28,14 @@ SECRET_ENV_PATTERN = re.compile(
     r"(password|secret|api[_-]?key|token|credential|private[_-]?key)\s*:\s*['\"]?[^\s'\"#]{4,}",
     re.IGNORECASE,
 )
+SECRET_ENV_NAME_PATTERN = re.compile(
+    r"name:\s*['\"]?(?:.*)?(password|secret|api[_-]?key|token|credential|private[_-]?key)",
+    re.IGNORECASE,
+)
+PLAIN_ENV_VALUE_PATTERN = re.compile(
+    r"^\s*value:\s*['\"]?[^\s'\"#]{4,}['\"]?\s*$",
+    re.IGNORECASE,
+)
 HOST_PATH_PATTERN = re.compile(
     r"^\s*path:\s*['\"]?(?:/|/etc|/proc|/sys|/var/run/docker\.sock)['\"]?",
     re.IGNORECASE,
@@ -129,6 +137,7 @@ class KubernetesAnalyzer:
         in_security_context = False
         security_context_indent = 0
         doc_has_security_context = False
+        pending_secret_env_name = False
 
         for lineno, raw in enumerate(raw_lines, start=1):
             line = raw.strip()
@@ -244,6 +253,18 @@ class KubernetesAnalyzer:
                     "high",
                     "potential secret in env — use Secret references instead",
                 )
+
+            if SECRET_ENV_NAME_PATTERN.search(line):
+                pending_secret_env_name = True
+            elif pending_secret_env_name and PLAIN_ENV_VALUE_PATTERN.match(line):
+                add(
+                    "secret_in_env",
+                    "high",
+                    "potential secret in env value — use secretKeyRef instead of plain value",
+                )
+                pending_secret_env_name = False
+            elif pending_secret_env_name and not line.startswith("-"):
+                pending_secret_env_name = False
 
             if HOST_PATH_PATTERN.match(line):
                 add(
