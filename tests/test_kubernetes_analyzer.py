@@ -92,8 +92,11 @@ class TestKubernetesAnalyzer:
 
     def test_detects_secret_in_env(self, tmp_path: Path):
         manifest = GOOD_MANIFEST.replace(
-            "ports:",
-            "env:\n            - name: API_KEY\n              value: sk_live_secret123\n          ports:",
+            "          image: ghcr.io/org/app:1.0.0\n",
+            "          image: ghcr.io/org/app:1.0.0\n"
+            "          env:\n"
+            "            - name: API_KEY\n"
+            "              value: sk_live_secret123\n",
         )
         k8s_dir = tmp_path / "k8s"
         k8s_dir.mkdir()
@@ -115,7 +118,12 @@ class TestKubernetesAnalyzer:
         assert any(f.kind in ("host_path_volume", "dangerous_host_path") for f in findings)
 
     def test_detects_missing_resources(self, tmp_path: Path):
-        manifest = GOOD_MANIFEST.replace("resources:\n", "# resources:\n")
+        manifest = GOOD_MANIFEST
+        for block in (
+            "          resources:\n            requests:\n              cpu: 100m\n              memory: 128Mi\n            limits:\n              cpu: 500m\n              memory: 512Mi\n",
+            "",
+        ):
+            manifest = manifest.replace(block, "")
         k8s_dir = tmp_path / "k8s"
         k8s_dir.mkdir()
         (k8s_dir / "deployment.yaml").write_text(manifest, encoding="utf-8")

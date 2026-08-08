@@ -38,11 +38,17 @@ DANGEROUS_HOST_PATH_PATTERN = re.compile(
     r"path:\s*['\"]?(?:/|/etc|/proc|/sys|/var/run/docker\.sock)['\"]?",
     re.IGNORECASE,
 )
-SECRET_ENV_PATTERN = re.compile(
-    r"(password|secret|api[_-]?key|token|credential|private[_-]?key)\s*:\s*['\"]?[^\s'\"]{4,}",
+SECRET_VALUE_PATTERN = re.compile(
+    r"^\s*value:\s*['\"]?[^\s'\"]{4,}['\"]?\s*$",
     re.IGNORECASE,
 )
-CAP_ALL_PATTERN = re.compile(r"^\s*-\s*ALL\b", re.IGNORECASE)
+SECRET_NAME_PATTERN = re.compile(
+    r"(password|secret|api[_-]?key|token|credential|private[_-]?key)",
+    re.IGNORECASE,
+)
+CAP_ALL_ADD_PATTERN = re.compile(r"^\s*add:\s*$", re.IGNORECASE)
+CAP_ALL_DROP_PATTERN = re.compile(r"^\s*drop:\s*$", re.IGNORECASE)
+CAP_ALL_ITEM_PATTERN = re.compile(r"^\s*-\s*ALL\b", re.IGNORECASE)
 CAP_SYS_ADMIN_PATTERN = re.compile(r"^\s*-\s*SYS_ADMIN\b", re.IGNORECASE)
 RUN_AS_NON_ROOT_FALSE_PATTERN = re.compile(
     r"^\s*runAsNonRoot:\s*false\b",
@@ -215,6 +221,10 @@ class KubernetesAnalyzer:
         container_has_resources = False
         container_has_security_context = False
         container_run_as_non_root = False
+        in_cap_add = False
+        in_cap_drop = False
+        cap_indent = 0
+        last_env_name = ""
 
         def resource_label() -> str:
             if current_kind and current_name:
@@ -225,6 +235,7 @@ class KubernetesAnalyzer:
 
         def flush_container_checks(lineno: int) -> None:
             nonlocal container_has_resources, container_has_security_context, container_run_as_non_root
+            nonlocal in_cap_add, in_cap_drop, last_env_name
             if not current_container:
                 return
             if not container_has_security_context:
@@ -263,6 +274,9 @@ class KubernetesAnalyzer:
             container_has_resources = False
             container_has_security_context = False
             container_run_as_non_root = False
+            in_cap_add = False
+            in_cap_drop = False
+            last_env_name = ""
 
         for lineno, raw in enumerate(raw_lines, start=1):
             line = raw.strip()
@@ -300,7 +314,7 @@ class KubernetesAnalyzer:
                     current_container = ""
 
             container_match = CONTAINER_NAME_PATTERN.match(line)
-            if in_containers and container_match:
+            if in_containers and container_match and indent == containers_indent + 2:
                 flush_container_checks(lineno)
                 current_container = container_match.group(1)
                 container_indent = indent
@@ -323,6 +337,52 @@ class KubernetesAnalyzer:
 
                 if re.search(r"runAsNonRoot:\s*true\b", line, re.IGNORECASE):
                     container_run_as_non_root = True
+
+                if line.startswith("env:") or line == "env:":
+                    last_env_name = ""
+
+                env_name_match = re.match(r"^\s*-\s*name:\s*(\S+)", line)
+                if env_name_match:
+                    last_env_name = env_name_match.group(1)
+
+                if SECRET_VALUE_PATTERN.match(line) and last_env_name:
+                    if SECRET_NAME_PATTERN.search(last_env_name) or len(line.split(":", 1)[1].strip().strip("'\"")) >= 12:
+                        self._add_finding(
+                            findings,
+                            kind="secret_in_env",
+                            severity="high",
+                            message="possible secret in plain env — use Secrets or external secret managers",
+                            path=rel,
+                            lineno=lineno,
+                            resource=resource_label(),
+                            container=current_container,
+                            line=raw,
+                        )
+
+                if line.startswith("capabilities:") or line == "capabilities:":
+                    cap_indent = indent
+                    in_cap_add = False
+                    in_cap_drop = False
+
+                if indent > cap_indent and CAP_ALL_ADD_PATTERN.match(line):
+                    in_cap_add = True
+                    in_cap_drop = False
+                elif indent > cap_indent and CAP_ALL_DROP_PATTERN.match(line):
+                    in_cap_drop = True
+                    in_cap_add = False
+
+                if in_cap_add and CAP_ALL_ITEM_PATTERN.match(line):
+                    self._add_finding(
+                        findings,
+                        kind="cap_add_all",
+                        severity="high",
+                        message="capabilities add ALL — drop unnecessary capabilities instead",
+                        path=rel,
+                        lineno=lineno,
+                        resource=resource_label(),
+                        container=current_container,
+                        line=raw,
+                    )
 
                 if PRIVILEGED_PATTERN.match(line):
                     self._add_finding(
@@ -402,19 +462,6 @@ class KubernetesAnalyzer:
                         line=raw,
                     )
 
-                if SECRET_ENV_PATTERN.search(line):
-                    self._add_finding(
-                        findings,
-                        kind="secret_in_env",
-                        severity="high",
-                        message="possible secret in plain env — use Secrets or external secret managers",
-                        path=rel,
-                        lineno=lineno,
-                        resource=resource_label(),
-                        container=current_container,
-                        line=raw,
-                    )
-
             if HOST_NETWORK_PATTERN.match(line):
                 self._add_finding(
                     findings,
@@ -475,20 +522,7 @@ class KubernetesAnalyzer:
                     line=raw,
                 )
 
-            if CAP_ALL_PATTERN.match(line):
-                self._add_finding(
-                    findings,
-                    kind="cap_add_all",
-                    severity="high",
-                    message="capabilities include ALL — drop unnecessary capabilities",
-                    path=rel,
-                    lineno=lineno,
-                    resource=resource_label(),
-                    container=current_container,
-                    line=raw,
-                )
-
-            if CAP_SYS_ADMIN_PATTERN.match(line):
+            if CAP_SYS_ADMIN_PATTERN.match(line) and in_cap_add:
                 self._add_finding(
                     findings,
                     kind="cap_sys_admin",
