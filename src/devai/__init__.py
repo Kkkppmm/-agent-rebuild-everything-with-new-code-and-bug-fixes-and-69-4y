@@ -65,6 +65,18 @@ from devai.precommit_analyzer import (
     PrecommitInfo,
     PrecommitStats,
 )
+from devai.makefile_analyzer import (
+    MakefileAnalyzer,
+    MakefileFinding,
+    MakefileInfo,
+    MakefileStats,
+)
+from devai.kubernetes_analyzer import (
+    KubernetesAnalyzer,
+    KubernetesFinding,
+    KubernetesInfo,
+    KubernetesStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -353,7 +365,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.48.0"
+__version__ = "6.50.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -566,6 +578,14 @@ __all__ = [
     "PrecommitHookInfo",
     "PrecommitInfo",
     "PrecommitStats",
+    "MakefileAnalyzer",
+    "MakefileFinding",
+    "MakefileInfo",
+    "MakefileStats",
+    "KubernetesAnalyzer",
+    "KubernetesFinding",
+    "KubernetesInfo",
+    "KubernetesStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
