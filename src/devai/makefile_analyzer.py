@@ -14,7 +14,7 @@ CURL_PIPE_SHELL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 DANGEROUS_RM_PATTERN = re.compile(
-    r"\brm\s+.*(-rf?|--recursive).*(/\s|/\*|/usr|/etc|/var|/home|\$\(HOME\)|\$\{HOME\})",
+    r"\brm\s+.*?(-rf|--recursive).*?(?:/\s*$|/\s|/\*|/usr|/etc|/var|/home|\$\(HOME\)|\$\{HOME\})",
     re.IGNORECASE,
 )
 SUDO_PATTERN = re.compile(r"\bsudo\b", re.IGNORECASE)
