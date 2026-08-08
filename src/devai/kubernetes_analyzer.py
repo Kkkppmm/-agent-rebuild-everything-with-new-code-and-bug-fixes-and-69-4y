@@ -25,7 +25,7 @@ K8S_KINDS = (
 
 LATEST_TAG_PATTERN = re.compile(r"image:\s*[^\s]+:latest\b", re.IGNORECASE)
 SECRET_ENV_PATTERN = re.compile(
-    r"(password|secret|api[_-]?key|token|credential|private[_-]?key)\s*[:=]",
+    r"(password|secret|api[_-]?key|token|credential|private[_-]?key|[_-]key\b|[_-]token\b|[_-]secret\b)",
     re.IGNORECASE,
 )
 PRIVILEGED_PATTERN = re.compile(r"^\s*privileged:\s*true\b", re.IGNORECASE)
@@ -195,9 +195,11 @@ class KubernetesAnalyzer:
         current_name = ""
         in_security_context = False
         in_capabilities = False
+        in_cap_add = False
         in_resources = False
         in_env = False
         env_indent = 0
+        current_env_name = ""
         has_resource_limits = False
 
         for lineno, raw in enumerate(raw_lines, start=1):
@@ -213,9 +215,11 @@ class KubernetesAnalyzer:
                 current_name = ""
                 in_security_context = False
                 in_capabilities = False
+                in_cap_add = False
                 in_resources = False
                 in_env = False
                 has_resource_limits = False
+                current_env_name = ""
                 continue
 
             name_match = NAME_PATTERN.match(raw)
@@ -228,11 +232,21 @@ class KubernetesAnalyzer:
             if line.startswith("securityContext:"):
                 in_security_context = True
                 in_capabilities = False
+                in_cap_add = False
                 in_env = False
                 continue
 
             if line.startswith("capabilities:"):
                 in_capabilities = True
+                in_cap_add = False
+                continue
+
+            if in_capabilities and line.startswith("add:"):
+                in_cap_add = True
+                continue
+
+            if in_capabilities and line.startswith("drop:"):
+                in_cap_add = False
                 continue
 
             if line.startswith("resources:"):
@@ -240,15 +254,46 @@ class KubernetesAnalyzer:
                 has_resource_limits = True
                 continue
 
+            resource = f"{current_kind}/{current_name}" if current_kind and current_name else current_kind
+
             if line.startswith("env:") or line.startswith("envFrom:"):
                 in_env = True
                 env_indent = len(raw) - len(raw.lstrip())
+                current_env_name = ""
+                continue
+
+            if in_env and re.match(r"^\s*-\s*name:\s*(\S+)", raw):
+                current_env_name = re.match(r"^\s*-\s*name:\s*(\S+)", raw).group(1)  # type: ignore[union-attr]
+                if SECRET_ENV_PATTERN.search(current_env_name):
+                    self._add_finding(
+                        findings,
+                        kind="secret_in_env",
+                        severity="high",
+                        message="Secret-like env var name — use Kubernetes Secrets and secretKeyRef",
+                        path=path,
+                        lineno=lineno,
+                        line=raw,
+                        resource=resource,
+                    )
+                continue
+
+            if in_env and re.match(r"^\s*value:\s*\S+", raw) and SECRET_ENV_PATTERN.search(
+                current_env_name
+            ):
+                self._add_finding(
+                    findings,
+                    kind="secret_in_env",
+                    severity="high",
+                    message="Secret value in env block — use Kubernetes Secrets and secretKeyRef",
+                    path=path,
+                    lineno=lineno,
+                    line=raw,
+                    resource=resource,
+                )
                 continue
 
             if in_env and raw and not raw[0].isspace():
                 in_env = False
-
-            resource = f"{current_kind}/{current_name}" if current_kind and current_name else current_kind
 
             if PRIVILEGED_PATTERN.search(raw):
                 self._add_finding(
@@ -358,7 +403,7 @@ class KubernetesAnalyzer:
                     resource=resource,
                 )
 
-            if in_capabilities and CAP_ADD_ALL_PATTERN.search(raw):
+            if in_cap_add and CAP_ADD_ALL_PATTERN.search(raw):
                 self._add_finding(
                     findings,
                     kind="cap_add_all",
@@ -370,7 +415,7 @@ class KubernetesAnalyzer:
                     resource=resource,
                 )
 
-            if in_env and SECRET_ENV_PATTERN.search(raw):
+            if in_env and SECRET_ENV_PATTERN.search(raw) and "name:" not in raw:
                 self._add_finding(
                     findings,
                     kind="secret_in_env",
@@ -416,6 +461,7 @@ class KubernetesAnalyzer:
                     in_security_context = False
                 if in_capabilities and not line.startswith("capabilities"):
                     in_capabilities = False
+                    in_cap_add = False
                 if in_resources and not line.startswith("resources"):
                     in_resources = False
 
