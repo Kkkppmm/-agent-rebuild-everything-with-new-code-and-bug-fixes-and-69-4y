@@ -24,6 +24,10 @@ SECRET_ENV_PATTERN = re.compile(
     r"(password|secret|api[_-]?key|token|credential|private[_-]?key)\s*:\s*['\"][^'\"]{4,}",
     re.IGNORECASE,
 )
+SECRET_ENV_VALUE_PATTERN = re.compile(
+    r"value:\s*['\"][^'\"]{8,}['\"]",
+    re.IGNORECASE,
+)
 HOST_PATH_SENSITIVE_PATTERN = re.compile(
     r"^\s*path:\s*['\"]?(?:/|/etc|/proc|/sys|/var/run/docker\.sock)['\"]?",
     re.IGNORECASE,
@@ -212,7 +216,9 @@ class KubernetesAnalyzer:
             if in_env_block:
                 if indent <= env_indent and not line.startswith("-") and "value:" not in line:
                     in_env_block = False
-                elif SECRET_ENV_PATTERN.search(line):
+                elif SECRET_ENV_PATTERN.search(line) or (
+                    "value:" in line.lower() and SECRET_ENV_VALUE_PATTERN.search(line)
+                ):
                     findings.append(
                         KubernetesFinding(
                             kind="secret_in_env",

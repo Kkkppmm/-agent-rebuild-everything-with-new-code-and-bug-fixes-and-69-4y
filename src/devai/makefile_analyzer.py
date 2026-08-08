@@ -85,8 +85,8 @@ def _is_makefile(path: Path) -> bool:
 
 def _strip_comment(line: str) -> str:
     if "#" in line:
-        return line.split("#", 1)[0].strip()
-    return line.strip()
+        return line.split("#", 1)[0].rstrip()
+    return line.rstrip()
 
 
 class MakefileAnalyzer:
