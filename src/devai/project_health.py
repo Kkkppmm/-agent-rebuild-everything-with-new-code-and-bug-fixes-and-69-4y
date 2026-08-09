@@ -27,6 +27,8 @@ from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
 from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -148,6 +150,8 @@ class ProjectHealth:
         "ansible": 0.02,
         "jenkins": 0.02,
         "gitlab_ci": 0.02,
+        "circleci": 0.02,
+        "bitbucket_pipelines": 0.02,
     }
 
     def __init__(
@@ -506,6 +510,46 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_circleci(self, analyzer: CircleCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No CircleCI configs found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} CircleCI config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_bitbucket_pipelines(
+        self, analyzer: BitbucketPipelinesAnalyzer
+    ) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Bitbucket Pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Bitbucket Pipelines file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -641,6 +685,14 @@ class ProjectHealth:
             elif cat.name == "gitlab_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden GitLab CI — use CI/CD variables, pin images, and restrict merge request token scope"
+                )
+            elif cat.name == "circleci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden CircleCI — pin orbs, use contexts for secrets, and restrict setup_remote_docker"
+                )
+            elif cat.name == "bitbucket_pipelines" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Bitbucket Pipelines — use repository variables, pin images, and restrict fork PR secrets"
                 )
         return recs
 
@@ -839,6 +891,14 @@ class ProjectHealth:
         gitlab_ci = GitLabCIAnalyzer(root_str)
         score, summary, details = self._score_gitlab_ci(gitlab_ci)
         categories.append(HealthCategory("gitlab_ci", score, summary, details))
+
+        circleci = CircleCIAnalyzer(root_str)
+        score, summary, details = self._score_circleci(circleci)
+        categories.append(HealthCategory("circleci", score, summary, details))
+
+        bitbucket_pipelines = BitbucketPipelinesAnalyzer(root_str)
+        score, summary, details = self._score_bitbucket_pipelines(bitbucket_pipelines)
+        categories.append(HealthCategory("bitbucket_pipelines", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

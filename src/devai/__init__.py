@@ -113,6 +113,18 @@ from devai.gitlab_ci_analyzer import (
     GitLabCIInfo,
     GitLabCIStats,
 )
+from devai.circleci_analyzer import (
+    CircleCIAnalyzer,
+    CircleCIFinding,
+    CircleCIInfo,
+    CircleCIStats,
+)
+from devai.bitbucket_pipelines_analyzer import (
+    BitbucketPipelinesAnalyzer,
+    BitbucketPipelinesFinding,
+    BitbucketPipelinesInfo,
+    BitbucketPipelinesStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -401,7 +413,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.51.0"
+__version__ = "6.55.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -646,6 +658,14 @@ __all__ = [
     "GitLabCIFinding",
     "GitLabCIInfo",
     "GitLabCIStats",
+    "CircleCIAnalyzer",
+    "CircleCIFinding",
+    "CircleCIInfo",
+    "CircleCIStats",
+    "BitbucketPipelinesAnalyzer",
+    "BitbucketPipelinesFinding",
+    "BitbucketPipelinesInfo",
+    "BitbucketPipelinesStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

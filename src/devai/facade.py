@@ -33,6 +33,8 @@ from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
 from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -423,6 +425,14 @@ class DevAI:
     def gitlab_ci(self, path: str | Path = ".", **kwargs: Any) -> GitLabCIAnalyzer:
         """Audit GitLab CI pipelines for hardcoded secrets, unsafe scripts, and weak defaults."""
         return GitLabCIAnalyzer(str(path), **kwargs)
+
+    def circleci(self, path: str | Path = ".", **kwargs: Any) -> CircleCIAnalyzer:
+        """Audit CircleCI configs for hardcoded secrets, unpinned orbs, and unsafe scripts."""
+        return CircleCIAnalyzer(str(path), **kwargs)
+
+    def bitbucket_pipelines(self, path: str | Path = ".", **kwargs: Any) -> BitbucketPipelinesAnalyzer:
+        """Audit Bitbucket Pipelines for hardcoded secrets, unsafe scripts, and weak defaults."""
+        return BitbucketPipelinesAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
