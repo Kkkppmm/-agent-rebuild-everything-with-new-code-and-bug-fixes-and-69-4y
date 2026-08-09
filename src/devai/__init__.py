@@ -107,6 +107,12 @@ from devai.jenkinsfile_analyzer import (
     JenkinsPipelineInfo,
     JenkinsStats,
 )
+from devai.gitlab_ci_analyzer import (
+    GitLabCIAnalyzer,
+    GitLabCIFinding,
+    GitLabCIInfo,
+    GitLabCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -636,6 +642,10 @@ __all__ = [
     "JenkinsFinding",
     "JenkinsPipelineInfo",
     "JenkinsStats",
+    "GitLabCIAnalyzer",
+    "GitLabCIFinding",
+    "GitLabCIInfo",
+    "GitLabCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

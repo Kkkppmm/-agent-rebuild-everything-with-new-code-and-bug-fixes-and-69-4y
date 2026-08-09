@@ -26,6 +26,7 @@ from devai.nginx_analyzer import NginxAnalyzer
 from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
 from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -146,6 +147,7 @@ class ProjectHealth:
         "helm": 0.02,
         "ansible": 0.02,
         "jenkins": 0.02,
+        "gitlab_ci": 0.02,
     }
 
     def __init__(
@@ -485,6 +487,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_gitlab_ci(self, analyzer: GitLabCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No GitLab CI pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} GitLab CI pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -616,6 +637,10 @@ class ProjectHealth:
             elif cat.name == "jenkins" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Jenkins pipelines — use credentials store, single-quoted sh steps, and labeled agents"
+                )
+            elif cat.name == "gitlab_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden GitLab CI — use CI/CD variables, pin images, and restrict merge request token scope"
                 )
         return recs
 
@@ -810,6 +835,10 @@ class ProjectHealth:
         jenkins = JenkinsfileAnalyzer(root_str)
         score, summary, details = self._score_jenkins(jenkins)
         categories.append(HealthCategory("jenkins", score, summary, details))
+
+        gitlab_ci = GitLabCIAnalyzer(root_str)
+        score, summary, details = self._score_gitlab_ci(gitlab_ci)
+        categories.append(HealthCategory("gitlab_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

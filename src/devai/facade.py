@@ -32,6 +32,7 @@ from devai.nginx_analyzer import NginxAnalyzer
 from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
 from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -418,6 +419,10 @@ class DevAI:
     def jenkins(self, path: str | Path = ".", **kwargs: Any) -> JenkinsfileAnalyzer:
         """Audit Jenkinsfiles for script injection, hardcoded secrets, and unsafe shell steps."""
         return JenkinsfileAnalyzer(str(path), **kwargs)
+
+    def gitlab_ci(self, path: str | Path = ".", **kwargs: Any) -> GitLabCIAnalyzer:
+        """Audit GitLab CI pipelines for hardcoded secrets, unsafe scripts, and weak defaults."""
+        return GitLabCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
