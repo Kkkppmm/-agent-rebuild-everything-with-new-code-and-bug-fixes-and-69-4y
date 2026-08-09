@@ -65,6 +65,36 @@ from devai.precommit_analyzer import (
     PrecommitInfo,
     PrecommitStats,
 )
+from devai.makefile_analyzer import (
+    MakefileAnalyzer,
+    MakefileFinding,
+    MakefileInfo,
+    MakefileStats,
+)
+from devai.kubernetes_analyzer import (
+    KubernetesAnalyzer,
+    KubernetesFinding,
+    KubernetesInfo,
+    KubernetesStats,
+)
+from devai.terraform_analyzer import (
+    TerraformAnalyzer,
+    TerraformFinding,
+    TerraformInfo,
+    TerraformStats,
+)
+from devai.nginx_analyzer import (
+    NginxAnalyzer,
+    NginxFinding,
+    NginxInfo,
+    NginxStats,
+)
+from devai.helm_analyzer import (
+    HelmAnalyzer,
+    HelmChartInfo,
+    HelmFinding,
+    HelmStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -353,7 +383,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.48.0"
+__version__ = "6.50.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -566,6 +596,26 @@ __all__ = [
     "PrecommitHookInfo",
     "PrecommitInfo",
     "PrecommitStats",
+    "MakefileAnalyzer",
+    "MakefileFinding",
+    "MakefileInfo",
+    "MakefileStats",
+    "KubernetesAnalyzer",
+    "KubernetesFinding",
+    "KubernetesInfo",
+    "KubernetesStats",
+    "TerraformAnalyzer",
+    "TerraformFinding",
+    "TerraformInfo",
+    "TerraformStats",
+    "NginxAnalyzer",
+    "NginxFinding",
+    "NginxInfo",
+    "NginxStats",
+    "HelmAnalyzer",
+    "HelmChartInfo",
+    "HelmFinding",
+    "HelmStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

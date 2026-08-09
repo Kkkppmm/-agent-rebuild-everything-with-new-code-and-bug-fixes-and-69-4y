@@ -25,6 +25,11 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.makefile_analyzer import MakefileAnalyzer
+from devai.kubernetes_analyzer import KubernetesAnalyzer
+from devai.terraform_analyzer import TerraformAnalyzer
+from devai.nginx_analyzer import NginxAnalyzer
+from devai.helm_analyzer import HelmAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -383,6 +388,26 @@ class DevAI:
     def precommit(self, path: str | Path = ".", **kwargs: Any) -> PrecommitAnalyzer:
         """Audit pre-commit config files for unpinned hooks and unsafe entries."""
         return PrecommitAnalyzer(str(path), **kwargs)
+
+    def makefile(self, path: str | Path = ".", **kwargs: Any) -> MakefileAnalyzer:
+        """Audit Makefiles for security risks and build best practices."""
+        return MakefileAnalyzer(str(path), **kwargs)
+
+    def kubernetes(self, path: str | Path = ".", **kwargs: Any) -> KubernetesAnalyzer:
+        """Audit Kubernetes manifests for privileged mode, host namespaces, and secrets in env."""
+        return KubernetesAnalyzer(str(path), **kwargs)
+
+    def terraform(self, path: str | Path = ".", **kwargs: Any) -> TerraformAnalyzer:
+        """Audit Terraform files for open security groups, public S3 ACLs, and hardcoded secrets."""
+        return TerraformAnalyzer(str(path), **kwargs)
+
+    def nginx(self, path: str | Path = ".", **kwargs: Any) -> NginxAnalyzer:
+        """Audit Nginx configs for weak TLS, security headers, and insecure proxy_pass."""
+        return NginxAnalyzer(str(path), **kwargs)
+
+    def helm(self, path: str | Path = ".", **kwargs: Any) -> HelmAnalyzer:
+        """Audit Helm charts for privileged pods, latest tags, and hardcoded secrets."""
+        return HelmAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from devai.api_surface import APISurfaceAnalyzer
 from devai.code_metrics import CodeMetrics
@@ -19,6 +20,11 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.makefile_analyzer import MakefileAnalyzer
+from devai.kubernetes_analyzer import KubernetesAnalyzer
+from devai.terraform_analyzer import TerraformAnalyzer
+from devai.nginx_analyzer import NginxAnalyzer
+from devai.helm_analyzer import HelmAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -132,6 +138,11 @@ class ProjectHealth:
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
+        "makefile": 0.02,
+        "kubernetes": 0.02,
+        "terraform": 0.02,
+        "nginx": 0.02,
+        "helm": 0.02,
     }
 
     def __init__(
@@ -342,6 +353,32 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_infra(
+        self,
+        analyzer: Any,
+        *,
+        none_label: str,
+        count_attr: str,
+        count_label: str,
+    ) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        count = getattr(stats, count_attr)
+        if count == 0:
+            return 100.0, none_label, {count_attr: 0, "findings": 0}
+        summary = (
+            f"{count} {count_label}, {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            count_attr: count,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -445,6 +482,26 @@ class ProjectHealth:
             elif cat.name == "precommit" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
                 recs.append(
                     "Review pre-commit findings — pin repos to tags/SHAs and audit local hooks"
+                )
+            elif cat.name == "makefile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Makefiles — avoid curl-pipe-to-shell, sudo, and secrets in recipes"
+                )
+            elif cat.name == "kubernetes" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kubernetes manifests — disable privileged mode and run as non-root"
+                )
+            elif cat.name == "terraform" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Terraform — restrict security groups, enable encryption, and use variables for secrets"
+                )
+            elif cat.name == "nginx" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Nginx configs — use TLSv1.2+, add security headers, and use HTTPS upstreams"
+                )
+            elif cat.name == "helm" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Helm charts — pin image tags, run as non-root, and use Kubernetes Secrets"
                 )
         return recs
 
@@ -611,6 +668,51 @@ class ProjectHealth:
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
         categories.append(HealthCategory("precommit", score, summary, details))
+
+        makefile = MakefileAnalyzer(root_str)
+        score, summary, details = self._score_infra(
+            makefile,
+            none_label="No Makefiles found",
+            count_attr="makefiles",
+            count_label="Makefile(s)",
+        )
+        categories.append(HealthCategory("makefile", score, summary, details))
+
+        kubernetes = KubernetesAnalyzer(root_str)
+        score, summary, details = self._score_infra(
+            kubernetes,
+            none_label="No Kubernetes manifests found",
+            count_attr="manifests",
+            count_label="manifest(s)",
+        )
+        categories.append(HealthCategory("kubernetes", score, summary, details))
+
+        terraform = TerraformAnalyzer(root_str)
+        score, summary, details = self._score_infra(
+            terraform,
+            none_label="No Terraform files found",
+            count_attr="files",
+            count_label="file(s)",
+        )
+        categories.append(HealthCategory("terraform", score, summary, details))
+
+        nginx = NginxAnalyzer(root_str)
+        score, summary, details = self._score_infra(
+            nginx,
+            none_label="No Nginx configs found",
+            count_attr="configs",
+            count_label="config(s)",
+        )
+        categories.append(HealthCategory("nginx", score, summary, details))
+
+        helm = HelmAnalyzer(root_str)
+        score, summary, details = self._score_infra(
+            helm,
+            none_label="No Helm charts found",
+            count_attr="charts",
+            count_label="chart(s)",
+        )
+        categories.append(HealthCategory("helm", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
