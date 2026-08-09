@@ -1,0 +1,752 @@
+"""ProjectHealth — unified project health dashboard for developers."""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass, field
+from pathlib import Path
+
+from devai.api_surface import APISurfaceAnalyzer
+from devai.code_metrics import CodeMetrics
+from devai.code_smells import CodeSmellDetector
+from devai.complexity_hotspots import ComplexityHotspotAnalyzer
+from devai.exception_analyzer import ExceptionHierarchyAnalyzer
+from devai.module_coupling import ModuleCouplingAnalyzer
+from devai.deps_parser import DependencyParser
+from devai.env_vars import EnvVarAnalyzer
+from devai.gitignore_analyzer import GitignoreAnalyzer
+from devai.dockerfile_analyzer import DockerfileAnalyzer
+from devai.workflow_analyzer import WorkflowAnalyzer
+from devai.compose_analyzer import ComposeAnalyzer
+from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.kubernetes_analyzer import KubernetesAnalyzer
+from devai.makefile_analyzer import MakefileAnalyzer
+from devai.terraform_analyzer import TerraformAnalyzer
+from devai.docstring_coverage import DocstringCoverage
+from devai.project import DEFAULT_IGNORE_DIRS
+from devai.secrets import SecretsScanner
+from devai.tech_debt import TechDebtScanner
+from devai.test_mapper import TestMapper
+from devai.typing_coverage import TypingCoverage
+
+
+@dataclass
+class HealthCategory:
+    """Score and summary for one health dimension."""
+
+    name: str
+    score: float
+    summary: str
+    details: dict = field(default_factory=dict)
+
+
+@dataclass
+class ProjectHealthReport:
+    """Aggregate project health report."""
+
+    root: str
+    overall_score: float
+    categories: list[HealthCategory] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
+
+    def summary(self) -> str:
+        """Return a human-readable summary."""
+        lines = [
+            f"Project health: {self.overall_score:.0f}/100",
+            f"Root: {self.root}",
+            "",
+        ]
+        for cat in self.categories:
+            lines.append(f"  {cat.name}: {cat.score:.0f}/100 — {cat.summary}")
+        if self.recommendations:
+            lines.append("")
+            lines.append("Recommendations:")
+            for rec in self.recommendations:
+                lines.append(f"  - {rec}")
+        return "\n".join(lines)
+
+    def to_dict(self) -> dict:
+        """Export as a JSON-serializable dict."""
+        return {
+            "root": self.root,
+            "overall_score": self.overall_score,
+            "categories": [
+                {
+                    "name": c.name,
+                    "score": c.score,
+                    "summary": c.summary,
+                    "details": c.details,
+                }
+                for c in self.categories
+            ],
+            "recommendations": self.recommendations,
+        }
+
+    def to_json(self, indent: int = 2) -> str:
+        """Export as formatted JSON."""
+        return json.dumps(self.to_dict(), indent=indent)
+
+    def to_markdown(self) -> str:
+        """Export as a Markdown report."""
+        lines = [
+            "# Project Health Report",
+            "",
+            f"**Overall score:** {self.overall_score:.0f}/100",
+            f"**Root:** `{self.root}`",
+            "",
+            "## Categories",
+            "",
+            "| Category | Score | Summary |",
+            "|----------|-------|---------|",
+        ]
+        for cat in self.categories:
+            safe_summary = cat.summary.replace("|", "\\|")
+            lines.append(f"| {cat.name} | {cat.score:.0f} | {safe_summary} |")
+        if self.recommendations:
+            lines.extend(["", "## Recommendations", ""])
+            for rec in self.recommendations:
+                lines.append(f"- {rec}")
+        return "\n".join(lines)
+
+
+class ProjectHealth:
+    """Run static analysis across a project and produce a unified health report.
+
+    Combines code metrics, typing coverage, docstring coverage, test mapping,
+    dependency hygiene, and secrets scanning into a single developer dashboard.
+    """
+
+    WEIGHTS = {
+        "metrics": 0.06,
+        "typing": 0.13,
+        "docstrings": 0.09,
+        "tests": 0.16,
+        "dependencies": 0.06,
+        "secrets": 0.09,
+        "smells": 0.08,
+        "tech_debt": 0.07,
+        "api_surface": 0.07,
+        "hotspots": 0.05,
+        "exceptions": 0.06,
+        "coupling": 0.06,
+        "env": 0.04,
+        "gitignore": 0.04,
+        "dockerfile": 0.03,
+        "workflows": 0.03,
+        "compose": 0.03,
+        "precommit": 0.03,
+        "kubernetes": 0.02,
+        "makefile": 0.02,
+        "terraform": 0.02,
+    }
+
+    def __init__(
+        self,
+        root: str,
+        *,
+        source_dir: str = "src",
+        test_dir: str = "tests",
+        complexity_threshold: int = 10,
+        ignore_dirs: set[str] | None = None,
+        scan_secrets: bool = True,
+    ) -> None:
+        self.root = Path(root)
+        self.source_dir = source_dir
+        self.test_dir = test_dir
+        self.complexity_threshold = complexity_threshold
+        self.ignore_dirs = ignore_dirs or set(DEFAULT_IGNORE_DIRS)
+        self.scan_secrets = scan_secrets
+        self._report: ProjectHealthReport | None = None
+
+    def _score_complexity(self, metrics: CodeMetrics) -> tuple[float, str, dict]:
+        metrics.analyze()
+        project = metrics.project
+        high = metrics.high_complexity()
+        if project.total_functions == 0:
+            return 100.0, "No functions to analyze", {"high_complexity": 0}
+
+        ratio = len(high) / project.total_functions
+        score = max(0.0, 100.0 - ratio * 200.0)
+        summary = (
+            f"avg complexity {project.avg_complexity}, "
+            f"{len(high)} high-complexity functions"
+        )
+        return round(score, 1), summary, {
+            "avg_complexity": project.avg_complexity,
+            "max_complexity": project.max_complexity,
+            "high_complexity_count": len(high),
+            "total_functions": project.total_functions,
+            "total_sloc": project.total_sloc,
+        }
+
+    def _score_typing(self, typing: TypingCoverage) -> tuple[float, str, dict]:
+        typing.analyze()
+        pct = typing.coverage_pct()
+        stats = typing.stats
+        summary = f"{pct}% fully typed ({stats.fully_typed}/{stats.total_functions})"
+        return pct, summary, {
+            "coverage_pct": pct,
+            "fully_typed": stats.fully_typed,
+            "partially_typed": stats.partially_typed,
+            "untyped": stats.untyped,
+            "gaps": len(typing._gaps),
+        }
+
+    def _score_docstrings(self, docstrings: DocstringCoverage) -> tuple[float, str, dict]:
+        docstrings.analyze()
+        pct = docstrings.coverage_pct()
+        stats = docstrings.stats
+        summary = f"{pct}% documented ({stats.documented}/{stats.total_items})"
+        return pct, summary, {
+            "coverage_pct": pct,
+            "documented": stats.documented,
+            "undocumented": stats.undocumented,
+            "gaps": len(docstrings._gaps),
+        }
+
+    def _score_tests(self, mapper: TestMapper) -> tuple[float, str, dict]:
+        report = mapper.map()
+        pct = report.coverage_pct
+        summary = f"{pct}% modules have tests ({report.tested}/{report.total_modules})"
+        return pct, summary, {
+            "coverage_pct": pct,
+            "tested": report.tested,
+            "total_modules": report.total_modules,
+            "untested_count": len(report.untested),
+        }
+
+    def _score_dependencies(self, deps: DependencyParser) -> tuple[float, str, dict]:
+        all_deps = deps.parse()
+        if not all_deps:
+            return 100.0, "No dependencies declared", {"total": 0}
+
+        unpinned = deps.unpinned()
+        dupes = deps.duplicates()
+        unpinned_ratio = len(unpinned) / len(all_deps)
+        dupe_penalty = min(30.0, len(dupes) * 10.0)
+        score = max(0.0, 100.0 - unpinned_ratio * 70.0 - dupe_penalty)
+        summary = f"{len(all_deps)} deps, {len(unpinned)} unpinned, {len(dupes)} duplicates"
+        return round(score, 1), summary, {
+            "total": len(all_deps),
+            "unpinned": len(unpinned),
+            "duplicates": len(dupes),
+        }
+
+    def _score_secrets(self, scanner: SecretsScanner) -> tuple[float, str, dict]:
+        findings = scanner.scan()
+        if not findings:
+            return 100.0, "No potential secrets found", {"findings": 0}
+        high = sum(1 for f in findings if f.confidence == "high")
+        penalty = min(100.0, len(findings) * 15.0 + high * 10.0)
+        score = max(0.0, 100.0 - penalty)
+        summary = f"{len(findings)} potential secrets ({high} high confidence)"
+        return round(score, 1), summary, {
+            "findings": len(findings),
+            "high_confidence": high,
+        }
+
+    def _score_smells(self, detector: CodeSmellDetector) -> tuple[float, str, dict]:
+        smells = detector.analyze()
+        score = detector.health_score()
+        stats = detector.stats
+        high = sum(1 for s in smells if s.severity == "high")
+        summary = f"{len(smells)} smells ({high} high severity)"
+        return score, summary, {
+            "total_smells": len(smells),
+            "high_severity": high,
+            "by_kind": stats.by_kind,
+            "density": stats.smell_density,
+        }
+
+    def _score_gitignore(self, analyzer: GitignoreAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        high = sum(1 for g in analyzer._gaps if g.severity == "high")
+        summary = (
+            f"{stats.covered}/{stats.recommended} patterns covered, "
+            f"{stats.gaps} gap(s)"
+        )
+        return score, summary, {
+            "patterns": stats.patterns,
+            "covered": stats.covered,
+            "recommended": stats.recommended,
+            "gaps": stats.gaps,
+            "exposed_files": stats.exposed_files,
+            "high_severity": high,
+        }
+
+    def _score_dockerfile(self, analyzer: DockerfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.dockerfiles == 0:
+            return 100.0, "No Dockerfiles found", {"dockerfiles": 0, "findings": 0}
+        summary = (
+            f"{stats.dockerfiles} Dockerfile(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "dockerfiles": stats.dockerfiles,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_workflows(self, analyzer: WorkflowAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.workflows == 0:
+            return 100.0, "No GitHub Actions workflows found", {"workflows": 0, "findings": 0}
+        summary = (
+            f"{stats.workflows} workflow(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "workflows": stats.workflows,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_compose(self, analyzer: ComposeAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.compose_files == 0:
+            return 100.0, "No Docker Compose files found", {"compose_files": 0, "findings": 0}
+        summary = (
+            f"{stats.compose_files} Compose file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "compose_files": stats.compose_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_precommit(self, analyzer: PrecommitAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No pre-commit config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_kubernetes(self, analyzer: KubernetesAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Kubernetes manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_makefile(self, analyzer: MakefileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.makefiles == 0:
+            return 100.0, "No Makefiles found", {"makefiles": 0, "findings": 0}
+        summary = (
+            f"{stats.makefiles} Makefile(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "makefiles": stats.makefiles,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_terraform(self, analyzer: TerraformAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.terraform_files == 0:
+            return 100.0, "No Terraform files found", {"terraform_files": 0, "findings": 0}
+        summary = (
+            f"{stats.terraform_files} Terraform file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "terraform_files": stats.terraform_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        high = sum(1 for g in analyzer._gaps if g.severity == "high")
+        summary = (
+            f"{stats.referenced} referenced, {stats.example_vars} in .env.example, "
+            f"{stats.gaps} gap(s)"
+        )
+        return score, summary, {
+            "referenced": stats.referenced,
+            "example_vars": stats.example_vars,
+            "gaps": stats.gaps,
+            "high_severity": high,
+        }
+
+    def _score_tech_debt(self, scanner: TechDebtScanner) -> tuple[float, str, dict]:
+        items = scanner.scan()
+        score = scanner.health_score()
+        stats = scanner.stats
+        critical = sum(1 for i in items if i.marker in ("FIXME", "BUG", "HACK"))
+        summary = f"{len(items)} markers in {stats.files_with_debt} files ({critical} critical)"
+        return score, summary, {
+            "total_items": len(items),
+            "files_with_debt": stats.files_with_debt,
+            "critical": critical,
+            "by_marker": stats.by_marker,
+        }
+
+    def _build_recommendations(self, categories: list[HealthCategory]) -> list[str]:
+        recs: list[str] = []
+        for cat in categories:
+            if cat.name == "typing" and cat.score < 80:
+                recs.append("Add type hints to untyped functions to improve maintainability")
+            elif cat.name == "docstrings" and cat.score < 70:
+                recs.append("Document public functions, methods, and classes with docstrings")
+            elif cat.name == "tests" and cat.score < 60:
+                untested = cat.details.get("untested_count", 0)
+                if untested:
+                    recs.append(f"Add tests for {untested} untested module(s)")
+            elif cat.name == "metrics" and cat.details.get("high_complexity_count", 0) > 0:
+                recs.append(
+                    "Refactor high-complexity functions to reduce cyclomatic complexity"
+                )
+            elif cat.name == "dependencies" and cat.details.get("unpinned", 0) > 0:
+                recs.append("Pin unpinned dependencies with exact versions for reproducibility")
+            elif cat.name == "secrets" and cat.details.get("findings", 0) > 0:
+                recs.append("Review and remove hardcoded secrets; use environment variables")
+            elif cat.name == "smells" and cat.details.get("high_severity", 0) > 0:
+                recs.append("Refactor high-severity code smells (deep nesting, bare except, god classes)")
+            elif cat.name == "tech_debt" and cat.details.get("critical", 0) > 0:
+                recs.append("Address critical tech-debt markers (FIXME, BUG, HACK) before release")
+            elif cat.name == "api_surface" and cat.score < 70:
+                recs.append("Document public API symbols and declare __all__ in package modules")
+            elif cat.name == "hotspots" and cat.details.get("hotspots", 0) > 0:
+                recs.append("Refactor complexity hotspots — start with the highest-scoring files")
+            elif cat.name == "exceptions" and cat.details.get("bare_except", 0) > 0:
+                recs.append("Replace bare except handlers with specific exception types")
+            elif cat.name == "coupling" and cat.details.get("circular_imports", 0) > 0:
+                recs.append("Break circular import chains to improve module stability")
+            elif cat.name == "env" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Sync .env.example with code — add missing env vars referenced in source"
+                )
+            elif cat.name == "gitignore" and cat.details.get("exposed_files", 0) > 0:
+                recs.append(
+                    "Add .gitignore rules for sensitive files (.env, keys) present in the repo"
+                )
+            elif cat.name == "gitignore" and cat.score < 70:
+                recs.append(
+                    "Improve .gitignore coverage — add recommended patterns for your stack"
+                )
+            elif cat.name == "dockerfile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Dockerfiles — add non-root USER, pin base images, and remove secrets from ENV"
+                )
+            elif cat.name == "dockerfile" and cat.score < 70 and cat.details.get("dockerfiles", 0) > 0:
+                recs.append(
+                    "Review Dockerfile findings — prefer COPY over ADD and avoid curl-pipe-to-shell"
+                )
+            elif cat.name == "workflows" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden GitHub Actions workflows — pin actions to SHAs and avoid pull_request_target"
+                )
+            elif cat.name == "workflows" and cat.score < 70 and cat.details.get("workflows", 0) > 0:
+                recs.append(
+                    "Review workflow findings — restrict permissions and avoid secrets in env blocks"
+                )
+            elif cat.name == "compose" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Docker Compose files — avoid privileged mode, host mounts, and secrets in environment"
+                )
+            elif cat.name == "compose" and cat.score < 70 and cat.details.get("compose_files", 0) > 0:
+                recs.append(
+                    "Review Compose findings — pin images, set resource limits, and run services as non-root"
+                )
+            elif cat.name == "precommit" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden pre-commit config — pin hook revisions and avoid curl-pipe-to-shell entries"
+                )
+            elif cat.name == "precommit" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
+                recs.append(
+                    "Review pre-commit findings — pin repos to tags/SHAs and audit local hooks"
+                )
+            elif cat.name == "kubernetes" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kubernetes manifests — disable privileged mode, pin images, and use Secrets for credentials"
+                )
+            elif cat.name == "kubernetes" and cat.score < 70 and cat.details.get("manifests", 0) > 0:
+                recs.append(
+                    "Review K8s findings — set resource limits and run containers as non-root"
+                )
+            elif cat.name == "makefile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Makefiles — remove curl-pipe-to-shell, sudo, and hardcoded secrets"
+                )
+            elif cat.name == "makefile" and cat.score < 70 and cat.details.get("makefiles", 0) > 0:
+                recs.append(
+                    "Review Makefile findings — add .PHONY targets and avoid destructive rm patterns"
+                )
+            elif cat.name == "terraform" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Terraform — restrict security groups, enable encryption, and use secret managers"
+                )
+            elif cat.name == "terraform" and cat.score < 70 and cat.details.get("terraform_files", 0) > 0:
+                recs.append(
+                    "Review Terraform findings — avoid public S3 ACLs and overly permissive IAM policies"
+                )
+        return recs
+
+    def analyze(self) -> ProjectHealthReport:
+        """Run all analyzers and return a unified health report."""
+        if self._report is not None:
+            return self._report
+
+        root_str = str(self.root)
+        categories: list[HealthCategory] = []
+
+        metrics = CodeMetrics(
+            root_str,
+            complexity_threshold=self.complexity_threshold,
+            ignore_dirs=self.ignore_dirs,
+        )
+        score, summary, details = self._score_complexity(metrics)
+        categories.append(HealthCategory("metrics", score, summary, details))
+
+        typing = TypingCoverage(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_typing(typing)
+        categories.append(HealthCategory("typing", score, summary, details))
+
+        docstrings = DocstringCoverage(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_docstrings(docstrings)
+        categories.append(HealthCategory("docstrings", score, summary, details))
+
+        mapper = TestMapper(
+            root_str,
+            source_dir=self.source_dir,
+            test_dir=self.test_dir,
+            ignore_dirs=self.ignore_dirs,
+        )
+        score, summary, details = self._score_tests(mapper)
+        categories.append(HealthCategory("tests", score, summary, details))
+
+        deps = DependencyParser(root_str)
+        score, summary, details = self._score_dependencies(deps)
+        categories.append(HealthCategory("dependencies", score, summary, details))
+
+        if self.scan_secrets:
+            scanner = SecretsScanner(root_str, ignore_dirs=self.ignore_dirs)
+            score, summary, details = self._score_secrets(scanner)
+            categories.append(HealthCategory("secrets", score, summary, details))
+
+        smells = CodeSmellDetector(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_smells(smells)
+        categories.append(HealthCategory("smells", score, summary, details))
+
+        debt = TechDebtScanner(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_tech_debt(debt)
+        categories.append(HealthCategory("tech_debt", score, summary, details))
+
+        api = APISurfaceAnalyzer(root_str, source_dir=self.source_dir, ignore_dirs=self.ignore_dirs)
+        api.analyze()
+        api_score = api.health_score()
+        api_stats = api.stats
+        api_summary = (
+            f"{api_stats.public_symbols} public symbols, "
+            f"{api_stats.coverage_pct}% documented"
+        )
+        categories.append(
+            HealthCategory(
+                "api_surface",
+                api_score,
+                api_summary,
+                {
+                    "public_symbols": api_stats.public_symbols,
+                    "documented": api_stats.documented,
+                    "undocumented": api_stats.undocumented,
+                    "coverage_pct": api_stats.coverage_pct,
+                },
+            )
+        )
+
+        hotspots = ComplexityHotspotAnalyzer(
+            root_str,
+            complexity_threshold=self.complexity_threshold,
+            ignore_dirs=self.ignore_dirs,
+        )
+        hotspots.analyze()
+        hs_score = hotspots.health_score()
+        hs_stats = hotspots.stats
+        hs_summary = (
+            f"{hs_stats.hotspots} hotspot files, "
+            f"{hs_stats.total_high_complexity} high-complexity functions"
+        )
+        categories.append(
+            HealthCategory(
+                "hotspots",
+                hs_score,
+                hs_summary,
+                {
+                    "hotspots": hs_stats.hotspots,
+                    "total_high_complexity": hs_stats.total_high_complexity,
+                    "worst_score": hs_stats.worst_score,
+                },
+            )
+        )
+
+        exc_analyzer = ExceptionHierarchyAnalyzer(root_str, ignore_dirs=self.ignore_dirs)
+        exc_analyzer.analyze()
+        exc_score = exc_analyzer.health_score()
+        exc_stats = exc_analyzer.stats
+        exc_summary = (
+            f"{exc_stats.custom_exceptions} custom exceptions, "
+            f"{exc_stats.broad_handlers} risky handlers"
+        )
+        categories.append(
+            HealthCategory(
+                "exceptions",
+                exc_score,
+                exc_summary,
+                {
+                    "custom_exceptions": exc_stats.custom_exceptions,
+                    "broad_handlers": exc_stats.broad_handlers,
+                    "bare_except": exc_stats.bare_except,
+                },
+            )
+        )
+
+        coupling = ModuleCouplingAnalyzer(root_str, ignore_dirs=self.ignore_dirs)
+        coupling.analyze()
+        coup_score = coupling.health_score()
+        coup_stats = coupling.stats
+        coup_summary = (
+            f"{coup_stats.total_modules} modules, "
+            f"{coup_stats.circular_imports} circular imports"
+        )
+        categories.append(
+            HealthCategory(
+                "coupling",
+                coup_score,
+                coup_summary,
+                {
+                    "total_modules": coup_stats.total_modules,
+                    "avg_instability": coup_stats.avg_instability,
+                    "circular_imports": coup_stats.circular_imports,
+                    "highly_coupled": coup_stats.highly_coupled,
+                },
+            )
+        )
+
+        env_analyzer = EnvVarAnalyzer(root_str, ignore_dirs=self.ignore_dirs)
+        score, summary, details = self._score_env(env_analyzer)
+        categories.append(HealthCategory("env", score, summary, details))
+
+        gitignore = GitignoreAnalyzer(root_str)
+        score, summary, details = self._score_gitignore(gitignore)
+        categories.append(HealthCategory("gitignore", score, summary, details))
+
+        dockerfile = DockerfileAnalyzer(root_str)
+        score, summary, details = self._score_dockerfile(dockerfile)
+        categories.append(HealthCategory("dockerfile", score, summary, details))
+
+        workflows = WorkflowAnalyzer(root_str)
+        score, summary, details = self._score_workflows(workflows)
+        categories.append(HealthCategory("workflows", score, summary, details))
+
+        compose = ComposeAnalyzer(root_str)
+        score, summary, details = self._score_compose(compose)
+        categories.append(HealthCategory("compose", score, summary, details))
+
+        precommit = PrecommitAnalyzer(root_str)
+        score, summary, details = self._score_precommit(precommit)
+        categories.append(HealthCategory("precommit", score, summary, details))
+
+        kubernetes = KubernetesAnalyzer(root_str)
+        score, summary, details = self._score_kubernetes(kubernetes)
+        categories.append(HealthCategory("kubernetes", score, summary, details))
+
+        makefile = MakefileAnalyzer(root_str)
+        score, summary, details = self._score_makefile(makefile)
+        categories.append(HealthCategory("makefile", score, summary, details))
+
+        terraform = TerraformAnalyzer(root_str)
+        score, summary, details = self._score_terraform(terraform)
+        categories.append(HealthCategory("terraform", score, summary, details))
+
+        overall = 0.0
+        weight_sum = 0.0
+        for cat in categories:
+            weight = self.WEIGHTS.get(cat.name, 0.1)
+            overall += cat.score * weight
+            weight_sum += weight
+        overall_score = round(overall / weight_sum if weight_sum else 0.0, 1)
+
+        recommendations = self._build_recommendations(categories)
+        self._report = ProjectHealthReport(
+            root=root_str,
+            overall_score=overall_score,
+            categories=categories,
+            recommendations=recommendations,
+        )
+        return self._report
+
+    @property
+    def report(self) -> ProjectHealthReport:
+        """Return the health report (runs analysis on first access)."""
+        if self._report is None:
+            self.analyze()
+        return self._report
+
+    def summary(self) -> str:
+        """Return a human-readable summary."""
+        return self.report.summary()
+
+    def to_context(self) -> str:
+        """Build LLM-ready context describing project health."""
+        report = self.analyze()
+        lines = [
+            "Project health analysis:",
+            report.summary(),
+            "",
+            "Category details:",
+        ]
+        for cat in report.categories:
+            lines.append(f"  [{cat.name}] {cat.score:.0f}/100")
+            for key, value in cat.details.items():
+                lines.append(f"    {key}: {value}")
+        return "\n".join(lines)
