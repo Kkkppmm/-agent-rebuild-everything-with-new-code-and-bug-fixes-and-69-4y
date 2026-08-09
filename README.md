@@ -75,6 +75,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **MakefileAnalyzer** — Audit Makefiles for curl-pipe-to-shell, dangerous `rm`, `sudo`, and secrets in variable assignments
 - **KubernetesAnalyzer** — Audit Kubernetes manifests for privileged mode, host namespaces, :latest tags, and secrets in env
 - **TerraformAnalyzer** — Audit Terraform files for open security groups, public S3 ACLs, disabled encryption, and hardcoded secrets
+- **NginxAnalyzer** — Audit Nginx configs for weak TLS, missing security headers, wildcard CORS, and insecure proxy_pass
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets
@@ -588,6 +589,7 @@ devai precommit-audit .
 devai makefile-audit .
 devai kubernetes-audit .
 devai terraform-audit .
+devai nginx-audit .
 devai migrate path/to/app.py --source "Django 3" --target "Django 5"
 devai generate "REST endpoint for user profiles" --language python
 devai fix-lint path/to/module.py "E501 line too long"

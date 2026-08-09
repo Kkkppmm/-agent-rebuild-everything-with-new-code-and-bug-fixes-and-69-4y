@@ -28,6 +28,7 @@ from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.makefile_analyzer import MakefileAnalyzer
 from devai.kubernetes_analyzer import KubernetesAnalyzer
 from devai.terraform_analyzer import TerraformAnalyzer
+from devai.nginx_analyzer import NginxAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -398,6 +399,10 @@ class DevAI:
     def terraform(self, path: str | Path = ".", **kwargs: Any) -> TerraformAnalyzer:
         """Audit Terraform files for open security groups, public S3 ACLs, and hardcoded secrets."""
         return TerraformAnalyzer(str(path), **kwargs)
+
+    def nginx(self, path: str | Path = ".", **kwargs: Any) -> NginxAnalyzer:
+        """Audit Nginx configuration files for TLS, proxy, and security header issues."""
+        return NginxAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

@@ -83,6 +83,12 @@ from devai.terraform_analyzer import (
     TerraformInfo,
     TerraformStats,
 )
+from devai.nginx_analyzer import (
+    NginxAnalyzer,
+    NginxFinding,
+    NginxInfo,
+    NginxStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -371,7 +377,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.51.0"
+__version__ = "6.52.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -596,6 +602,10 @@ __all__ = [
     "TerraformFinding",
     "TerraformInfo",
     "TerraformStats",
+    "NginxAnalyzer",
+    "NginxFinding",
+    "NginxInfo",
+    "NginxStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

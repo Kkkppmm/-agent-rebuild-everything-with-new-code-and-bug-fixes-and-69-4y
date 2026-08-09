@@ -18,6 +18,7 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
+from devai.nginx_analyzer import NginxAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.makefile_analyzer import MakefileAnalyzer
 from devai.kubernetes_analyzer import KubernetesAnalyzer
@@ -138,6 +139,7 @@ class ProjectHealth:
         "makefile": 0.02,
         "kubernetes": 0.02,
         "terraform": 0.02,
+        "nginx": 0.02,
     }
 
     def __init__(
@@ -402,6 +404,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_nginx(self, analyzer: NginxAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Nginx configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -517,6 +537,14 @@ class ProjectHealth:
             elif cat.name == "terraform" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Terraform configs — restrict security groups, enable encryption, and avoid hardcoded secrets"
+                )
+            elif cat.name == "nginx" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Nginx configs — use TLSv1.2+, disable server_tokens, and add security headers"
+                )
+            elif cat.name == "nginx" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
+                recs.append(
+                    "Review Nginx findings — restrict stub_status, avoid wildcard CORS, and protect dotfiles"
                 )
         return recs
 
@@ -695,6 +723,10 @@ class ProjectHealth:
         terraform = TerraformAnalyzer(root_str)
         score, summary, details = self._score_terraform(terraform)
         categories.append(HealthCategory("terraform", score, summary, details))
+
+        nginx = NginxAnalyzer(root_str)
+        score, summary, details = self._score_nginx(nginx)
+        categories.append(HealthCategory("nginx", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
