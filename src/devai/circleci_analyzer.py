@@ -8,7 +8,7 @@ from pathlib import Path
 
 CONFIG_PATH = (".circleci", "config.yml")
 
-LATEST_IMAGE_PATTERN = re.compile(r"^\s*image:\s*[^\s]+:latest\b", re.IGNORECASE)
+LATEST_IMAGE_PATTERN = re.compile(r"image:\s*[^\s]+:latest\b", re.IGNORECASE)
 SECRET_ENV_PATTERN = re.compile(
     r"(password|secret|api[_-]?key|token|credential|private[_-]?key)\s*[:=]",
     re.IGNORECASE,
@@ -18,7 +18,7 @@ CURL_PIPE_SHELL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 UNPINNED_ORB_PATTERN = re.compile(
-    r"^\s*-\s*[a-z0-9-]+:\s*(main|master|dev|latest)\s*$",
+    r"^\s*(?:-\s*)?[a-z0-9-]+:\s*[^\s]+@(main|master|dev|latest)\b",
     re.IGNORECASE,
 )
 MUTABLE_ORB_TAG_PATTERN = re.compile(r"^\s*-\s*[a-z0-9-]+:\s*v\d+\s*$", re.IGNORECASE)
@@ -143,7 +143,7 @@ class CircleCIAnalyzer:
             if in_environment and indent <= env_indent and not line.startswith("-"):
                 in_environment = False
 
-            if LATEST_IMAGE_PATTERN.match(line):
+            if LATEST_IMAGE_PATTERN.search(line):
                 findings.append(
                     CircleCIFinding(
                         kind="latest_image",

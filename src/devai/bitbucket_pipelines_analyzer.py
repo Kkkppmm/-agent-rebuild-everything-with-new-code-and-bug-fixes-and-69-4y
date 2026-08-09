@@ -18,7 +18,7 @@ CURL_PIPE_SHELL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 UNPINNED_PIPE_PATTERN = re.compile(
-    r"^\s*-\s*pipe:\s*[^\s]+@(main|master|latest)\b",
+    r"pipe:\s*[^:]+:(main|master|latest)\b",
     re.IGNORECASE,
 )
 MUTABLE_PIPE_TAG_PATTERN = re.compile(r"^\s*-\s*pipe:\s*[^\s]+@v\d+\b(?![.\d])", re.IGNORECASE)
@@ -114,7 +114,7 @@ class BitbucketPipelinesAnalyzer:
                 if pipeline_name:
                     info.pipelines.append(pipeline_name)
 
-            if LATEST_IMAGE_PATTERN.match(line):
+            if LATEST_IMAGE_PATTERN.search(line):
                 findings.append(
                     BitbucketPipelinesFinding(
                         kind="latest_image",
@@ -126,7 +126,7 @@ class BitbucketPipelinesAnalyzer:
                     )
                 )
 
-            if UNPINNED_PIPE_PATTERN.match(line):
+            if UNPINNED_PIPE_PATTERN.search(line):
                 findings.append(
                     BitbucketPipelinesFinding(
                         kind="unpinned_pipe",

@@ -582,6 +582,11 @@ devai dockerfile Dockerfile
 devai workflow-audit .
 devai compose-audit .
 devai precommit-audit .
+devai gitlab-ci-audit .
+devai circleci-audit .
+devai jenkinsfile-audit .
+devai bitbucket-pipelines-audit .
+devai kubernetes-audit .
 devai migrate path/to/app.py --source "Django 3" --target "Django 5"
 devai generate "REST endpoint for user profiles" --language python
 devai fix-lint path/to/module.py "E501 line too long"
