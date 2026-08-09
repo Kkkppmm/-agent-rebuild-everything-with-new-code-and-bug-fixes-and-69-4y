@@ -421,6 +421,86 @@ def cmd_precommit_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_gitlab_ci_audit(args: argparse.Namespace) -> None:
+    from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+
+    analyzer = GitLabCIAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_circleci_audit(args: argparse.Namespace) -> None:
+    from devai.circleci_analyzer import CircleCIAnalyzer
+
+    analyzer = CircleCIAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_jenkinsfile_audit(args: argparse.Namespace) -> None:
+    from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+
+    analyzer = JenkinsfileAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_bitbucket_pipelines_audit(args: argparse.Namespace) -> None:
+    from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
+
+    analyzer = BitbucketPipelinesAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_kubernetes_audit(args: argparse.Namespace) -> None:
+    from devai.kubernetes_analyzer import K8sAnalyzer
+
+    analyzer = K8sAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_duplicates(args: argparse.Namespace) -> None:
     from devai.duplicate_code import DuplicateCodeDetector
 
@@ -1619,6 +1699,76 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened pre-commit configuration template",
     )
     p.set_defaults(func=cmd_precommit_audit)
+
+    p = sub.add_parser(
+        "gitlab-ci-audit",
+        help="Audit GitLab CI/CD pipelines for security and best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened GitLab CI pipeline template",
+    )
+    p.set_defaults(func=cmd_gitlab_ci_audit)
+
+    p = sub.add_parser(
+        "circleci-audit",
+        help="Audit CircleCI configs for security and CI best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened CircleCI config template",
+    )
+    p.set_defaults(func=cmd_circleci_audit)
+
+    p = sub.add_parser(
+        "jenkinsfile-audit",
+        help="Audit Jenkinsfiles for security and pipeline best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Jenkinsfile template",
+    )
+    p.set_defaults(func=cmd_jenkinsfile_audit)
+
+    p = sub.add_parser(
+        "bitbucket-pipelines-audit",
+        help="Audit Bitbucket Pipelines YAML for security and best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Bitbucket Pipelines template",
+    )
+    p.set_defaults(func=cmd_bitbucket_pipelines_audit)
+
+    p = sub.add_parser(
+        "kubernetes-audit",
+        help="Audit Kubernetes manifests for security and deployment best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Kubernetes Deployment template",
+    )
+    p.set_defaults(func=cmd_kubernetes_audit)
 
     p = sub.add_parser("duplicates", help="Find duplicate code blocks")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

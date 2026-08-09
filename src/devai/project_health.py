@@ -19,6 +19,11 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
+from devai.kubernetes_analyzer import K8sAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -115,9 +120,9 @@ class ProjectHealth:
 
     WEIGHTS = {
         "metrics": 0.06,
-        "typing": 0.13,
+        "typing": 0.09,
         "docstrings": 0.09,
-        "tests": 0.16,
+        "tests": 0.12,
         "dependencies": 0.06,
         "secrets": 0.09,
         "smells": 0.08,
@@ -132,6 +137,11 @@ class ProjectHealth:
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
+        "gitlab_ci": 0.02,
+        "circleci": 0.02,
+        "jenkinsfile": 0.02,
+        "bitbucket_pipelines": 0.02,
+        "kubernetes": 0.02,
     }
 
     def __init__(
@@ -342,6 +352,98 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_gitlab_ci(self, analyzer: GitLabCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No GitLab CI config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_circleci(self, analyzer: CircleCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No CircleCI config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_jenkinsfile(self, analyzer: JenkinsfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.jenkinsfiles == 0:
+            return 100.0, "No Jenkinsfile found", {"jenkinsfiles": 0, "findings": 0}
+        summary = (
+            f"{stats.jenkinsfiles} file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "jenkinsfiles": stats.jenkinsfiles,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_bitbucket_pipelines(
+        self, analyzer: BitbucketPipelinesAnalyzer
+    ) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Bitbucket Pipelines config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_kubernetes(self, analyzer: K8sAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Kubernetes manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -445,6 +547,26 @@ class ProjectHealth:
             elif cat.name == "precommit" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
                 recs.append(
                     "Review pre-commit findings — pin repos to tags/SHAs and audit local hooks"
+                )
+            elif cat.name == "gitlab_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden GitLab CI pipelines — pin includes and avoid secrets in variables"
+                )
+            elif cat.name == "circleci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden CircleCI config — pin orbs and avoid secrets in environment blocks"
+                )
+            elif cat.name == "jenkinsfile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Jenkins pipelines — use credentials store and keep sandbox enabled"
+                )
+            elif cat.name == "bitbucket_pipelines" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Bitbucket Pipelines — pin pipes and use secured repository variables"
+                )
+            elif cat.name == "kubernetes" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kubernetes manifests — avoid privileged mode and pin container images"
                 )
         return recs
 
@@ -611,6 +733,26 @@ class ProjectHealth:
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
         categories.append(HealthCategory("precommit", score, summary, details))
+
+        gitlab_ci = GitLabCIAnalyzer(root_str)
+        score, summary, details = self._score_gitlab_ci(gitlab_ci)
+        categories.append(HealthCategory("gitlab_ci", score, summary, details))
+
+        circleci = CircleCIAnalyzer(root_str)
+        score, summary, details = self._score_circleci(circleci)
+        categories.append(HealthCategory("circleci", score, summary, details))
+
+        jenkinsfile = JenkinsfileAnalyzer(root_str)
+        score, summary, details = self._score_jenkinsfile(jenkinsfile)
+        categories.append(HealthCategory("jenkinsfile", score, summary, details))
+
+        bitbucket = BitbucketPipelinesAnalyzer(root_str)
+        score, summary, details = self._score_bitbucket_pipelines(bitbucket)
+        categories.append(HealthCategory("bitbucket_pipelines", score, summary, details))
+
+        kubernetes = K8sAnalyzer(root_str)
+        score, summary, details = self._score_kubernetes(kubernetes)
+        categories.append(HealthCategory("kubernetes", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

@@ -25,6 +25,11 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
+from devai.kubernetes_analyzer import K8sAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -383,6 +388,26 @@ class DevAI:
     def precommit(self, path: str | Path = ".", **kwargs: Any) -> PrecommitAnalyzer:
         """Audit pre-commit config files for unpinned hooks and unsafe entries."""
         return PrecommitAnalyzer(str(path), **kwargs)
+
+    def gitlab_ci(self, path: str | Path = ".", **kwargs: Any) -> GitLabCIAnalyzer:
+        """Audit GitLab CI/CD pipelines for security risks and CI best practices."""
+        return GitLabCIAnalyzer(str(path), **kwargs)
+
+    def circleci(self, path: str | Path = ".", **kwargs: Any) -> CircleCIAnalyzer:
+        """Audit CircleCI configs for unpinned orbs and unsafe pipeline steps."""
+        return CircleCIAnalyzer(str(path), **kwargs)
+
+    def jenkinsfile(self, path: str | Path = ".", **kwargs: Any) -> JenkinsfileAnalyzer:
+        """Audit Jenkinsfiles for hardcoded credentials and unsafe pipeline steps."""
+        return JenkinsfileAnalyzer(str(path), **kwargs)
+
+    def bitbucket_pipelines(self, path: str | Path = ".", **kwargs: Any) -> BitbucketPipelinesAnalyzer:
+        """Audit Bitbucket Pipelines YAML for unpinned pipes and secrets."""
+        return BitbucketPipelinesAnalyzer(str(path), **kwargs)
+
+    def kubernetes(self, path: str | Path = ".", **kwargs: Any) -> K8sAnalyzer:
+        """Audit Kubernetes manifests for privileged containers and insecure settings."""
+        return K8sAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
