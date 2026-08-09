@@ -25,6 +25,7 @@ from devai.terraform_analyzer import TerraformAnalyzer
 from devai.nginx_analyzer import NginxAnalyzer
 from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -144,6 +145,7 @@ class ProjectHealth:
         "nginx": 0.02,
         "helm": 0.02,
         "ansible": 0.02,
+        "jenkins": 0.02,
     }
 
     def __init__(
@@ -464,6 +466,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_jenkins(self, analyzer: JenkinsfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Jenkins pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Jenkins pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -591,6 +612,10 @@ class ProjectHealth:
             elif cat.name == "ansible" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Ansible playbooks — use Vault for secrets, avoid raw/shell pipes, and set restrictive file modes"
+                )
+            elif cat.name == "jenkins" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Jenkins pipelines — use credentials store, single-quoted sh steps, and labeled agents"
                 )
         return recs
 
@@ -781,6 +806,10 @@ class ProjectHealth:
         ansible = AnsibleAnalyzer(root_str)
         score, summary, details = self._score_ansible(ansible)
         categories.append(HealthCategory("ansible", score, summary, details))
+
+        jenkins = JenkinsfileAnalyzer(root_str)
+        score, summary, details = self._score_jenkins(jenkins)
+        categories.append(HealthCategory("jenkins", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

@@ -517,6 +517,22 @@ def cmd_ansible_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_jenkins_audit(args: argparse.Namespace) -> None:
+    from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+
+    analyzer = JenkinsfileAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_pipeline_snippet())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_duplicates(args: argparse.Namespace) -> None:
     from devai.duplicate_code import DuplicateCodeDetector
 
@@ -1796,6 +1812,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Ansible task snippet",
     )
     p.set_defaults(func=cmd_ansible_audit)
+
+    p = sub.add_parser(
+        "jenkins-audit",
+        help="Audit Jenkinsfiles for script injection and hardcoded secrets",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened declarative pipeline skeleton",
+    )
+    p.set_defaults(func=cmd_jenkins_audit)
 
     p = sub.add_parser("duplicates", help="Find duplicate code blocks")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

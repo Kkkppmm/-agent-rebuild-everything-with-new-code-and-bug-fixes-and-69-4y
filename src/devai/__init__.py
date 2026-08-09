@@ -101,6 +101,12 @@ from devai.ansible_analyzer import (
     AnsiblePlaybookInfo,
     AnsibleStats,
 )
+from devai.jenkinsfile_analyzer import (
+    JenkinsfileAnalyzer,
+    JenkinsFinding,
+    JenkinsPipelineInfo,
+    JenkinsStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -626,6 +632,10 @@ __all__ = [
     "AnsibleFinding",
     "AnsiblePlaybookInfo",
     "AnsibleStats",
+    "JenkinsfileAnalyzer",
+    "JenkinsFinding",
+    "JenkinsPipelineInfo",
+    "JenkinsStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
