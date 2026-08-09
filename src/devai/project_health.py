@@ -19,6 +19,7 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.nginx_analyzer import NginxAnalyzer
+from devai.helm_analyzer import HelmAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.makefile_analyzer import MakefileAnalyzer
 from devai.kubernetes_analyzer import KubernetesAnalyzer
@@ -140,6 +141,7 @@ class ProjectHealth:
         "kubernetes": 0.02,
         "terraform": 0.02,
         "nginx": 0.02,
+        "helm": 0.02,
     }
 
     def __init__(
@@ -422,6 +424,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_helm(self, analyzer: HelmAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.charts == 0:
+            return 100.0, "No Helm charts found", {"charts": 0, "findings": 0}
+        summary = (
+            f"{stats.charts} Helm chart(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "charts": stats.charts,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -545,6 +566,10 @@ class ProjectHealth:
             elif cat.name == "nginx" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
                 recs.append(
                     "Review Nginx findings — restrict stub_status, avoid wildcard CORS, and protect dotfiles"
+                )
+            elif cat.name == "helm" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Helm charts — disable privileged mode, pin image tags, and use secrets for credentials"
                 )
         return recs
 
@@ -727,6 +752,10 @@ class ProjectHealth:
         nginx = NginxAnalyzer(root_str)
         score, summary, details = self._score_nginx(nginx)
         categories.append(HealthCategory("nginx", score, summary, details))
+
+        helm = HelmAnalyzer(root_str)
+        score, summary, details = self._score_helm(helm)
+        categories.append(HealthCategory("helm", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
