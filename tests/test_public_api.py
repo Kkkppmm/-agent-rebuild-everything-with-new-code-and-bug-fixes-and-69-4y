@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.48.0"
+        assert devai.__version__ == "6.50.0"
 
     def test_exports(self):
         expected = {
@@ -208,6 +208,26 @@ class TestPublicAPI:
             "PrecommitHookInfo",
             "PrecommitInfo",
             "PrecommitStats",
+            "CircleCIAnalyzer",
+            "CircleCIFinding",
+            "CircleCIInfo",
+            "CircleCIStats",
+            "GitLabCIAnalyzer",
+            "GitLabCIFinding",
+            "GitLabCIInfo",
+            "GitLabCIStats",
+            "JenkinsfileAnalyzer",
+            "JenkinsfileFinding",
+            "JenkinsfileInfo",
+            "JenkinsfileStats",
+            "BitbucketPipelinesAnalyzer",
+            "BitbucketPipelinesFinding",
+            "BitbucketPipelinesInfo",
+            "BitbucketPipelinesStats",
+            "K8sAnalyzer",
+            "K8sFinding",
+            "K8sManifestInfo",
+            "K8sStats",
             "TokenBudget",
             "WatchEvent",
             "WatchResult",

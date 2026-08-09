@@ -65,6 +65,36 @@ from devai.precommit_analyzer import (
     PrecommitInfo,
     PrecommitStats,
 )
+from devai.circleci_analyzer import (
+    CircleCIAnalyzer,
+    CircleCIFinding,
+    CircleCIInfo,
+    CircleCIStats,
+)
+from devai.gitlab_ci_analyzer import (
+    GitLabCIAnalyzer,
+    GitLabCIFinding,
+    GitLabCIInfo,
+    GitLabCIStats,
+)
+from devai.jenkinsfile_analyzer import (
+    JenkinsfileAnalyzer,
+    JenkinsfileFinding,
+    JenkinsfileInfo,
+    JenkinsfileStats,
+)
+from devai.bitbucket_pipelines_analyzer import (
+    BitbucketPipelinesAnalyzer,
+    BitbucketPipelinesFinding,
+    BitbucketPipelinesInfo,
+    BitbucketPipelinesStats,
+)
+from devai.kubernetes_analyzer import (
+    K8sAnalyzer,
+    K8sFinding,
+    K8sManifestInfo,
+    K8sStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -353,7 +383,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.48.0"
+__version__ = "6.50.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -566,6 +596,26 @@ __all__ = [
     "PrecommitHookInfo",
     "PrecommitInfo",
     "PrecommitStats",
+    "CircleCIAnalyzer",
+    "CircleCIFinding",
+    "CircleCIInfo",
+    "CircleCIStats",
+    "GitLabCIAnalyzer",
+    "GitLabCIFinding",
+    "GitLabCIInfo",
+    "GitLabCIStats",
+    "JenkinsfileAnalyzer",
+    "JenkinsfileFinding",
+    "JenkinsfileInfo",
+    "JenkinsfileStats",
+    "BitbucketPipelinesAnalyzer",
+    "BitbucketPipelinesFinding",
+    "BitbucketPipelinesInfo",
+    "BitbucketPipelinesStats",
+    "K8sAnalyzer",
+    "K8sFinding",
+    "K8sManifestInfo",
+    "K8sStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

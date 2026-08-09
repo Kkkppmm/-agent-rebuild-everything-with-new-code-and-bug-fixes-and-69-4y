@@ -19,6 +19,11 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
+from devai.kubernetes_analyzer import K8sAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -132,6 +137,11 @@ class ProjectHealth:
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
+        "circleci": 0.02,
+        "gitlab_ci": 0.02,
+        "jenkins": 0.02,
+        "bitbucket_pipelines": 0.02,
+        "kubernetes": 0.02,
     }
 
     def __init__(
@@ -342,6 +352,98 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_circleci(self, analyzer: CircleCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No CircleCI config found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_gitlab_ci(self, analyzer: GitLabCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No GitLab CI config found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_jenkins(self, analyzer: JenkinsfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Jenkinsfile found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_bitbucket_pipelines(
+        self, analyzer: BitbucketPipelinesAnalyzer
+    ) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Bitbucket Pipelines config found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_kubernetes(self, analyzer: K8sAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Kubernetes manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -445,6 +547,26 @@ class ProjectHealth:
             elif cat.name == "precommit" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
                 recs.append(
                     "Review pre-commit findings — pin repos to tags/SHAs and audit local hooks"
+                )
+            elif cat.name == "circleci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden CircleCI config — pin orbs and images, avoid privileged docker"
+                )
+            elif cat.name == "gitlab_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden GitLab CI — pin images, use CI/CD variables for secrets"
+                )
+            elif cat.name == "jenkins" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Jenkinsfile — use credentials store instead of hardcoded secrets"
+                )
+            elif cat.name == "bitbucket_pipelines" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Bitbucket Pipelines — pin images and use secured variables"
+                )
+            elif cat.name == "kubernetes" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kubernetes manifests — run as non-root, disable privileged mode"
                 )
         return recs
 
@@ -611,6 +733,26 @@ class ProjectHealth:
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
         categories.append(HealthCategory("precommit", score, summary, details))
+
+        circleci = CircleCIAnalyzer(root_str)
+        score, summary, details = self._score_circleci(circleci)
+        categories.append(HealthCategory("circleci", score, summary, details))
+
+        gitlab_ci = GitLabCIAnalyzer(root_str)
+        score, summary, details = self._score_gitlab_ci(gitlab_ci)
+        categories.append(HealthCategory("gitlab_ci", score, summary, details))
+
+        jenkins = JenkinsfileAnalyzer(root_str)
+        score, summary, details = self._score_jenkins(jenkins)
+        categories.append(HealthCategory("jenkins", score, summary, details))
+
+        bitbucket = BitbucketPipelinesAnalyzer(root_str)
+        score, summary, details = self._score_bitbucket_pipelines(bitbucket)
+        categories.append(HealthCategory("bitbucket_pipelines", score, summary, details))
+
+        k8s = K8sAnalyzer(root_str)
+        score, summary, details = self._score_kubernetes(k8s)
+        categories.append(HealthCategory("kubernetes", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
