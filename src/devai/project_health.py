@@ -19,6 +19,7 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -134,6 +135,7 @@ class ProjectHealth:
         "workflows": 0.03,
         "travis_ci": 0.02,
         "gitlab_ci": 0.02,
+        "circleci": 0.02,
         "compose": 0.03,
         "precommit": 0.03,
     }
@@ -346,6 +348,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_circleci(self, analyzer: CircleCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No CircleCI configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} CircleCI config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_compose(self, analyzer: ComposeAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -485,6 +505,14 @@ class ProjectHealth:
             elif cat.name == "gitlab_ci" and cat.score < 70 and cat.details.get("configs", 0) > 0:
                 recs.append(
                     "Review GitLab CI findings — pin images, restrict artifact access, and use protected environments"
+                )
+            elif cat.name == "circleci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden CircleCI configs — avoid privileged containers, hardcoded secrets, and curl-pipe-to-shell"
+                )
+            elif cat.name == "circleci" and cat.score < 70 and cat.details.get("configs", 0) > 0:
+                recs.append(
+                    "Review CircleCI findings — pin orbs and images, gate deploys with approval steps"
                 )
             elif cat.name == "compose" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -667,6 +695,10 @@ class ProjectHealth:
         gitlab_ci = GitLabCIAnalyzer(root_str)
         score, summary, details = self._score_gitlab_ci(gitlab_ci)
         categories.append(HealthCategory("gitlab_ci", score, summary, details))
+
+        circleci = CircleCIAnalyzer(root_str)
+        score, summary, details = self._score_circleci(circleci)
+        categories.append(HealthCategory("circleci", score, summary, details))
 
         compose = ComposeAnalyzer(root_str)
         score, summary, details = self._score_compose(compose)

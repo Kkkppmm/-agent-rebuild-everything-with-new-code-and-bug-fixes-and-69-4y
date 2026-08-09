@@ -64,6 +64,12 @@ from devai.gitlab_ci_analyzer import (
     GitLabCIInfo,
     GitLabCIStats,
 )
+from devai.circleci_analyzer import (
+    CircleCIAnalyzer,
+    CircleCIFinding,
+    CircleCIInfo,
+    CircleCIStats,
+)
 from devai.compose_analyzer import (
     ComposeAnalyzer,
     ComposeFinding,
@@ -577,6 +583,10 @@ __all__ = [
     "GitLabCIFinding",
     "GitLabCIInfo",
     "GitLabCIStats",
+    "CircleCIAnalyzer",
+    "CircleCIFinding",
+    "CircleCIInfo",
+    "CircleCIStats",
     "ComposeAnalyzer",
     "ComposeFinding",
     "ComposeInfo",

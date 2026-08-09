@@ -421,6 +421,22 @@ def cmd_gitlab_ci_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_circleci_audit(args: argparse.Namespace) -> None:
+    from devai.circleci_analyzer import CircleCIAnalyzer
+
+    analyzer = CircleCIAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_compose_audit(args: argparse.Namespace) -> None:
     from devai.compose_analyzer import ComposeAnalyzer
 
@@ -1651,6 +1667,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened GitLab CI configuration template",
     )
     p.set_defaults(func=cmd_gitlab_ci_audit)
+
+    p = sub.add_parser(
+        "circleci-audit",
+        help="Audit CircleCI configs for security and CI best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened CircleCI configuration template",
+    )
+    p.set_defaults(func=cmd_circleci_audit)
 
     p = sub.add_parser(
         "compose-audit",
