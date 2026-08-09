@@ -58,6 +58,12 @@ from devai.travis_ci_analyzer import (
     TravisCIInfo,
     TravisCIStats,
 )
+from devai.gitlab_ci_analyzer import (
+    GitLabCIAnalyzer,
+    GitLabCIFinding,
+    GitLabCIInfo,
+    GitLabCIStats,
+)
 from devai.compose_analyzer import (
     ComposeAnalyzer,
     ComposeFinding,
@@ -567,6 +573,10 @@ __all__ = [
     "TravisCIFinding",
     "TravisCIInfo",
     "TravisCIStats",
+    "GitLabCIAnalyzer",
+    "GitLabCIFinding",
+    "GitLabCIInfo",
+    "GitLabCIStats",
     "ComposeAnalyzer",
     "ComposeFinding",
     "ComposeInfo",
