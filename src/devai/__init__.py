@@ -58,6 +58,12 @@ from devai.compose_analyzer import (
     ComposeInfo,
     ComposeStats,
 )
+from devai.k8s_analyzer import (
+    K8sAnalyzer,
+    K8sFinding,
+    K8sInfo,
+    K8sStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -554,6 +560,10 @@ __all__ = [
     "ComposeFinding",
     "ComposeInfo",
     "ComposeStats",
+    "K8sAnalyzer",
+    "K8sFinding",
+    "K8sInfo",
+    "K8sStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

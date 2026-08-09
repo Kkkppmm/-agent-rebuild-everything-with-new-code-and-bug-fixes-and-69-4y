@@ -18,6 +18,7 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
+from devai.k8s_analyzer import K8sAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -130,6 +131,7 @@ class ProjectHealth:
         "dockerfile": 0.03,
         "workflows": 0.03,
         "compose": 0.03,
+        "k8s": 0.03,
     }
 
     def __init__(
@@ -322,6 +324,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_k8s(self, analyzer: K8sAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Kubernetes manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -417,6 +437,14 @@ class ProjectHealth:
             elif cat.name == "compose" and cat.score < 70 and cat.details.get("compose_files", 0) > 0:
                 recs.append(
                     "Review Compose findings — pin images, set resource limits, and run services as non-root"
+                )
+            elif cat.name == "k8s" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kubernetes manifests — avoid privileged pods, host mounts, and secrets in env literals"
+                )
+            elif cat.name == "k8s" and cat.score < 70 and cat.details.get("manifests", 0) > 0:
+                recs.append(
+                    "Review K8s findings — set resource limits, runAsNonRoot, and pin container images"
                 )
         return recs
 
@@ -579,6 +607,10 @@ class ProjectHealth:
         compose = ComposeAnalyzer(root_str)
         score, summary, details = self._score_compose(compose)
         categories.append(HealthCategory("compose", score, summary, details))
+
+        k8s = K8sAnalyzer(root_str)
+        score, summary, details = self._score_k8s(k8s)
+        categories.append(HealthCategory("k8s", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

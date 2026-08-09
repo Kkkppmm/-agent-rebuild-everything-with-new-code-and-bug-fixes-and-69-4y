@@ -71,6 +71,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DockerfileAnalyzer** — Audit Dockerfiles for security risks (root user, :latest tags, secrets in ENV) and container best practices
 - **WorkflowAnalyzer** — Audit GitHub Actions workflows for unpinned actions, pull_request_target misuse, broad permissions, and script injection
 - **ComposeAnalyzer** — Audit Docker Compose files for privileged mode, host mounts, :latest tags, secrets in environment, and missing resource limits
+- **K8sAnalyzer** — Audit Kubernetes manifests for privileged pods, host networking, secrets in env literals, dangerous hostPath mounts, and missing resource limits
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets
@@ -580,6 +581,7 @@ devai performance path/to/hot_path.py --context "10k RPS"
 devai dockerfile Dockerfile
 devai workflow-audit .
 devai compose-audit .
+devai k8s-audit .
 devai migrate path/to/app.py --source "Django 3" --target "Django 5"
 devai generate "REST endpoint for user profiles" --language python
 devai fix-lint path/to/module.py "E501 line too long"

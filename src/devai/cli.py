@@ -405,6 +405,22 @@ def cmd_compose_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_k8s_audit(args: argparse.Namespace) -> None:
+    from devai.k8s_analyzer import K8sAnalyzer
+
+    analyzer = K8sAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_duplicates(args: argparse.Namespace) -> None:
     from devai.duplicate_code import DuplicateCodeDetector
 
@@ -1589,6 +1605,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Docker Compose template",
     )
     p.set_defaults(func=cmd_compose_audit)
+
+    p = sub.add_parser(
+        "k8s-audit",
+        help="Audit Kubernetes manifests for security and cluster best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Kubernetes Deployment template",
+    )
+    p.set_defaults(func=cmd_k8s_audit)
 
     p = sub.add_parser("duplicates", help="Find duplicate code blocks")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

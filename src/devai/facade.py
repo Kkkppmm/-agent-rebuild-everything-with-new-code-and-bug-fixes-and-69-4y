@@ -24,6 +24,7 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
+from devai.k8s_analyzer import K8sAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -378,6 +379,10 @@ class DevAI:
     def compose(self, path: str | Path = ".", **kwargs: Any) -> ComposeAnalyzer:
         """Audit Docker Compose files for security risks and container best practices."""
         return ComposeAnalyzer(str(path), **kwargs)
+
+    def k8s(self, path: str | Path = ".", **kwargs: Any) -> K8sAnalyzer:
+        """Audit Kubernetes manifests for security risks and cluster best practices."""
+        return K8sAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
