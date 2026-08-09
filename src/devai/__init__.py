@@ -52,6 +52,12 @@ from devai.workflow_analyzer import (
     WorkflowInfo,
     WorkflowStats,
 )
+from devai.travis_ci_analyzer import (
+    TravisCIAnalyzer,
+    TravisCIFinding,
+    TravisCIInfo,
+    TravisCIStats,
+)
 from devai.compose_analyzer import (
     ComposeAnalyzer,
     ComposeFinding,
@@ -353,7 +359,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.48.0"
+__version__ = "6.50.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -557,6 +563,10 @@ __all__ = [
     "WorkflowFinding",
     "WorkflowInfo",
     "WorkflowStats",
+    "TravisCIAnalyzer",
+    "TravisCIFinding",
+    "TravisCIInfo",
+    "TravisCIStats",
     "ComposeAnalyzer",
     "ComposeFinding",
     "ComposeInfo",

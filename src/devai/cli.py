@@ -389,6 +389,22 @@ def cmd_workflow_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_travis_ci_audit(args: argparse.Namespace) -> None:
+    from devai.travis_ci_analyzer import TravisCIAnalyzer
+
+    analyzer = TravisCIAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_compose_audit(args: argparse.Namespace) -> None:
     from devai.compose_analyzer import ComposeAnalyzer
 
@@ -1591,6 +1607,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened GitHub Actions workflow template",
     )
     p.set_defaults(func=cmd_workflow_audit)
+
+    p = sub.add_parser(
+        "travis-ci-audit",
+        help="Audit Travis CI configs for security and CI best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Travis CI configuration template",
+    )
+    p.set_defaults(func=cmd_travis_ci_audit)
 
     p = sub.add_parser(
         "compose-audit",
