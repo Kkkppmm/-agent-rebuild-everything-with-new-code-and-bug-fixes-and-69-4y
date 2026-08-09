@@ -11,16 +11,19 @@ NGINX_SUFFIXES = (".conf",)
 NGINX_DIRS = ("nginx", "conf.d", "sites-enabled", "sites-available")
 
 WEAK_SSL_PROTOCOL_PATTERN = re.compile(
-    r"ssl_protocols\s+[^;]*\b(TLSv1\.1|TLSv1|SSLv3|SSLv2)\b",
+    r"ssl_protocols\s+[^;]*\b(TLSv1\.1|TLSv1(?!\.\d)|SSLv3|SSLv2)\b",
     re.IGNORECASE,
 )
 WEAK_CIPHER_PATTERN = re.compile(
-    r"ssl_ciphers\s+[^;]*\b(NULL|EXPORT|RC4|DES|MD5|anon)\b",
+    r"ssl_ciphers\s+[^;]*(?<!!)\b(NULL|EXPORT|RC4|DES|MD5|anon)\b",
     re.IGNORECASE,
 )
 SERVER_TOKENS_ON_PATTERN = re.compile(r"server_tokens\s+on\b", re.IGNORECASE)
 AUTOINDEX_ON_PATTERN = re.compile(r"autoindex\s+on\b", re.IGNORECASE)
-INSECURE_PROXY_PATTERN = re.compile(r"proxy_pass\s+https?://", re.IGNORECASE)
+INSECURE_PROXY_PATTERN = re.compile(
+    r"proxy_pass\s+http://(?!127\.0\.0\.1|localhost)",
+    re.IGNORECASE,
+)
 WILDCARD_CORS_PATTERN = re.compile(
     r"add_header\s+Access-Control-Allow-Origin\s+['\"]?\*['\"]?",
     re.IGNORECASE,
