@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.55.0"
+        assert devai.__version__ == "6.57.0"
 
     def test_exports(self):
         expected = {
@@ -252,6 +252,10 @@ class TestPublicAPI:
             "AzurePipelinesFinding",
             "AzurePipelinesInfo",
             "AzurePipelinesStats",
+            "TravisCIAnalyzer",
+            "TravisCIFinding",
+            "TravisCIInfo",
+            "TravisCIStats",
             "TokenBudget",
             "WatchEvent",
             "WatchResult",

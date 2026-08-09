@@ -30,6 +30,7 @@ from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
 from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
+from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -154,6 +155,7 @@ class ProjectHealth:
         "circleci": 0.02,
         "bitbucket_pipelines": 0.02,
         "azure_pipelines": 0.02,
+        "travis_ci": 0.02,
     }
 
     def __init__(
@@ -573,6 +575,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_travis_ci(self, analyzer: TravisCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Travis CI configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Travis CI config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -720,6 +741,10 @@ class ProjectHealth:
             elif cat.name == "azure_pipelines" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Azure Pipelines — use variable groups/Key Vault, pin tasks, and restrict fork PR secrets"
+                )
+            elif cat.name == "travis_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Travis CI — use encrypted env vars, pin language versions, and avoid curl-pipe-to-shell"
                 )
         return recs
 
@@ -930,6 +955,10 @@ class ProjectHealth:
         azure_pipelines = AzurePipelinesAnalyzer(root_str)
         score, summary, details = self._score_azure_pipelines(azure_pipelines)
         categories.append(HealthCategory("azure_pipelines", score, summary, details))
+
+        travis_ci = TravisCIAnalyzer(root_str)
+        score, summary, details = self._score_travis_ci(travis_ci)
+        categories.append(HealthCategory("travis_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

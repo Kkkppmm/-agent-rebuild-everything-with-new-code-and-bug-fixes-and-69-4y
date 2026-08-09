@@ -36,6 +36,7 @@ from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
 from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
+from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -438,6 +439,10 @@ class DevAI:
     def azure_pipelines(self, path: str | Path = ".", **kwargs: Any) -> AzurePipelinesAnalyzer:
         """Audit Azure Pipelines for hardcoded secrets, unsafe scripts, and weak defaults."""
         return AzurePipelinesAnalyzer(str(path), **kwargs)
+
+    def travis_ci(self, path: str | Path = ".", **kwargs: Any) -> TravisCIAnalyzer:
+        """Audit Travis CI configs for hardcoded secrets, unsafe scripts, and weak defaults."""
+        return TravisCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

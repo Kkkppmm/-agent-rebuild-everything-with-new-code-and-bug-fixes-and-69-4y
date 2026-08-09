@@ -131,6 +131,12 @@ from devai.azure_pipelines_analyzer import (
     AzurePipelinesInfo,
     AzurePipelinesStats,
 )
+from devai.travis_ci_analyzer import (
+    TravisCIAnalyzer,
+    TravisCIFinding,
+    TravisCIInfo,
+    TravisCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -419,7 +425,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.55.0"
+__version__ = "6.57.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -676,6 +682,10 @@ __all__ = [
     "AzurePipelinesFinding",
     "AzurePipelinesInfo",
     "AzurePipelinesStats",
+    "TravisCIAnalyzer",
+    "TravisCIFinding",
+    "TravisCIInfo",
+    "TravisCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
