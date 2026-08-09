@@ -168,7 +168,10 @@ class K8sAnalyzer:
         env_indent = 0
         in_capabilities = False
         cap_indent = 0
+        cap_mode = ""
         doc_has_resource_limits = False
+
+        pending_secret_env = False
 
         for lineno, raw in enumerate(raw_lines, start=1):
             line = raw.strip()
@@ -401,12 +404,35 @@ class K8sAnalyzer:
             if line == "env:" or line.startswith("env:"):
                 in_env = True
                 env_indent = indent
+                pending_secret_env = False
                 continue
 
             if in_env:
                 child_indent = len(raw) - len(raw.lstrip())
                 if child_indent <= env_indent and line.endswith(":"):
                     in_env = False
+                    pending_secret_env = False
+                elif re.match(r"^\s*-\s*name:\s*", line, re.IGNORECASE):
+                    if SECRET_LITERAL_PATTERN.match(line) or SECRET_ENV_PATTERN.search(line):
+                        pending_secret_env = True
+                    else:
+                        pending_secret_env = False
+                elif re.match(r"^\s*value:\s*", line, re.IGNORECASE) and pending_secret_env:
+                    findings.append(
+                        K8sFinding(
+                            kind="secret_in_env",
+                            severity="high",
+                            message=(
+                                "secret value in env literal — "
+                                "use Kubernetes Secrets with secretKeyRef"
+                            ),
+                            path=rel,
+                            lineno=lineno,
+                            resource=current_resource,
+                            line=raw.strip(),
+                        )
+                    )
+                    pending_secret_env = False
                 elif SECRET_ENV_PATTERN.search(line):
                     findings.append(
                         K8sFinding(
@@ -438,13 +464,19 @@ class K8sAnalyzer:
             if line == "capabilities:" or line.startswith("capabilities:"):
                 in_capabilities = True
                 cap_indent = indent
+                cap_mode = ""
                 continue
 
             if in_capabilities:
                 child_indent = len(raw) - len(raw.lstrip())
                 if child_indent <= cap_indent and line.endswith(":"):
                     in_capabilities = False
-                elif CAP_ADD_ALL_PATTERN.match(line):
+                    cap_mode = ""
+                elif re.match(r"^\s*add:\s*$", line, re.IGNORECASE):
+                    cap_mode = "add"
+                elif re.match(r"^\s*drop:\s*$", line, re.IGNORECASE):
+                    cap_mode = "drop"
+                elif cap_mode == "add" and CAP_ADD_ALL_PATTERN.match(line):
                     findings.append(
                         K8sFinding(
                             kind="cap_add_all",
