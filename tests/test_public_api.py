@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "6.50.0"
+        assert devai.__version__ == "6.51.0"
 
     def test_exports(self):
         expected = {
@@ -224,6 +224,10 @@ class TestPublicAPI:
             "NginxFinding",
             "NginxInfo",
             "NginxStats",
+            "HelmAnalyzer",
+            "HelmFinding",
+            "HelmChartInfo",
+            "HelmStats",
             "TokenBudget",
             "WatchEvent",
             "WatchResult",

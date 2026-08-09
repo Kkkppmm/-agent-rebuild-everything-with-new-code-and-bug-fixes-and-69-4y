@@ -89,6 +89,12 @@ from devai.nginx_analyzer import (
     NginxInfo,
     NginxStats,
 )
+from devai.helm_analyzer import (
+    HelmAnalyzer,
+    HelmFinding,
+    HelmChartInfo,
+    HelmStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -377,7 +383,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.50.0"
+__version__ = "6.51.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -606,6 +612,10 @@ __all__ = [
     "NginxFinding",
     "NginxInfo",
     "NginxStats",
+    "HelmAnalyzer",
+    "HelmFinding",
+    "HelmChartInfo",
+    "HelmStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
