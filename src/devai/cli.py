@@ -421,6 +421,54 @@ def cmd_precommit_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_kubernetes_audit(args: argparse.Namespace) -> None:
+    from devai.kubernetes_analyzer import KubernetesAnalyzer
+
+    analyzer = KubernetesAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_makefile_audit(args: argparse.Namespace) -> None:
+    from devai.makefile_analyzer import MakefileAnalyzer
+
+    analyzer = MakefileAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_terraform_audit(args: argparse.Namespace) -> None:
+    from devai.terraform_analyzer import TerraformAnalyzer
+
+    analyzer = TerraformAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_duplicates(args: argparse.Namespace) -> None:
     from devai.duplicate_code import DuplicateCodeDetector
 
@@ -1619,6 +1667,48 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened pre-commit configuration template",
     )
     p.set_defaults(func=cmd_precommit_audit)
+
+    p = sub.add_parser(
+        "kubernetes-audit",
+        help="Audit Kubernetes manifests for security and deployment best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Kubernetes Deployment template",
+    )
+    p.set_defaults(func=cmd_kubernetes_audit)
+
+    p = sub.add_parser(
+        "makefile-audit",
+        help="Audit Makefiles for security risks and build best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a safe Makefile template",
+    )
+    p.set_defaults(func=cmd_makefile_audit)
+
+    p = sub.add_parser(
+        "terraform-audit",
+        help="Audit Terraform files for security and infrastructure best practices",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Terraform S3 bucket template",
+    )
+    p.set_defaults(func=cmd_terraform_audit)
 
     p = sub.add_parser("duplicates", help="Find duplicate code blocks")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

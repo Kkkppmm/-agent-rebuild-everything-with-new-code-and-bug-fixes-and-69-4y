@@ -19,6 +19,9 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.kubernetes_analyzer import KubernetesAnalyzer
+from devai.makefile_analyzer import MakefileAnalyzer
+from devai.terraform_analyzer import TerraformAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -132,6 +135,9 @@ class ProjectHealth:
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
+        "kubernetes": 0.02,
+        "makefile": 0.02,
+        "terraform": 0.02,
     }
 
     def __init__(
@@ -342,6 +348,60 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_kubernetes(self, analyzer: KubernetesAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Kubernetes manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_makefile(self, analyzer: MakefileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.makefiles == 0:
+            return 100.0, "No Makefiles found", {"makefiles": 0, "findings": 0}
+        summary = (
+            f"{stats.makefiles} Makefile(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "makefiles": stats.makefiles,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_terraform(self, analyzer: TerraformAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.terraform_files == 0:
+            return 100.0, "No Terraform files found", {"terraform_files": 0, "findings": 0}
+        summary = (
+            f"{stats.terraform_files} Terraform file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "terraform_files": stats.terraform_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -445,6 +505,30 @@ class ProjectHealth:
             elif cat.name == "precommit" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
                 recs.append(
                     "Review pre-commit findings — pin repos to tags/SHAs and audit local hooks"
+                )
+            elif cat.name == "kubernetes" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kubernetes manifests — disable privileged mode, pin images, and use Secrets for credentials"
+                )
+            elif cat.name == "kubernetes" and cat.score < 70 and cat.details.get("manifests", 0) > 0:
+                recs.append(
+                    "Review K8s findings — set resource limits and run containers as non-root"
+                )
+            elif cat.name == "makefile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Makefiles — remove curl-pipe-to-shell, sudo, and hardcoded secrets"
+                )
+            elif cat.name == "makefile" and cat.score < 70 and cat.details.get("makefiles", 0) > 0:
+                recs.append(
+                    "Review Makefile findings — add .PHONY targets and avoid destructive rm patterns"
+                )
+            elif cat.name == "terraform" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Terraform — restrict security groups, enable encryption, and use secret managers"
+                )
+            elif cat.name == "terraform" and cat.score < 70 and cat.details.get("terraform_files", 0) > 0:
+                recs.append(
+                    "Review Terraform findings — avoid public S3 ACLs and overly permissive IAM policies"
                 )
         return recs
 
@@ -611,6 +695,18 @@ class ProjectHealth:
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
         categories.append(HealthCategory("precommit", score, summary, details))
+
+        kubernetes = KubernetesAnalyzer(root_str)
+        score, summary, details = self._score_kubernetes(kubernetes)
+        categories.append(HealthCategory("kubernetes", score, summary, details))
+
+        makefile = MakefileAnalyzer(root_str)
+        score, summary, details = self._score_makefile(makefile)
+        categories.append(HealthCategory("makefile", score, summary, details))
+
+        terraform = TerraformAnalyzer(root_str)
+        score, summary, details = self._score_terraform(terraform)
+        categories.append(HealthCategory("terraform", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
