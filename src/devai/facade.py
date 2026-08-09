@@ -24,6 +24,11 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
+from devai.kubernetes_analyzer import K8sAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
@@ -379,6 +384,28 @@ class DevAI:
     def compose(self, path: str | Path = ".", **kwargs: Any) -> ComposeAnalyzer:
         """Audit Docker Compose files for security risks and container best practices."""
         return ComposeAnalyzer(str(path), **kwargs)
+
+    def gitlab_ci(self, path: str | Path = ".", **kwargs: Any) -> GitLabCIAnalyzer:
+        """Audit GitLab CI/CD pipelines for security risks and best practices."""
+        return GitLabCIAnalyzer(str(path), **kwargs)
+
+    def circleci(self, path: str | Path = ".", **kwargs: Any) -> CircleCIAnalyzer:
+        """Audit CircleCI configurations for security risks and best practices."""
+        return CircleCIAnalyzer(str(path), **kwargs)
+
+    def jenkinsfile(self, path: str | Path = ".", **kwargs: Any) -> JenkinsfileAnalyzer:
+        """Audit Jenkins pipelines for security risks and best practices."""
+        return JenkinsfileAnalyzer(str(path), **kwargs)
+
+    def bitbucket_pipelines(
+        self, path: str | Path = ".", **kwargs: Any
+    ) -> BitbucketPipelinesAnalyzer:
+        """Audit Bitbucket Pipelines for security risks and best practices."""
+        return BitbucketPipelinesAnalyzer(str(path), **kwargs)
+
+    def kubernetes(self, path: str | Path = ".", **kwargs: Any) -> K8sAnalyzer:
+        """Audit Kubernetes manifests for security risks and deployment best practices."""
+        return K8sAnalyzer(str(path), **kwargs)
 
     def precommit(self, path: str | Path = ".", **kwargs: Any) -> PrecommitAnalyzer:
         """Audit pre-commit config files for unpinned hooks and unsafe entries."""

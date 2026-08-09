@@ -58,6 +58,36 @@ from devai.compose_analyzer import (
     ComposeInfo,
     ComposeStats,
 )
+from devai.gitlab_ci_analyzer import (
+    GitLabCIAnalyzer,
+    GitLabCIFinding,
+    GitLabCIInfo,
+    GitLabCIStats,
+)
+from devai.circleci_analyzer import (
+    CircleCIAnalyzer,
+    CircleCIFinding,
+    CircleCIInfo,
+    CircleCIStats,
+)
+from devai.jenkinsfile_analyzer import (
+    JenkinsfileAnalyzer,
+    JenkinsfileFinding,
+    JenkinsfileInfo,
+    JenkinsfileStats,
+)
+from devai.bitbucket_pipelines_analyzer import (
+    BitbucketPipelinesAnalyzer,
+    BitbucketPipelinesFinding,
+    BitbucketPipelinesInfo,
+    BitbucketPipelinesStats,
+)
+from devai.kubernetes_analyzer import (
+    K8sAnalyzer,
+    K8sFinding,
+    K8sInfo,
+    K8sStats,
+)
 from devai.precommit_analyzer import (
     PrecommitAnalyzer,
     PrecommitFinding,
@@ -353,7 +383,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.48.0"
+__version__ = "6.50.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -561,6 +591,26 @@ __all__ = [
     "ComposeFinding",
     "ComposeInfo",
     "ComposeStats",
+    "GitLabCIAnalyzer",
+    "GitLabCIFinding",
+    "GitLabCIInfo",
+    "GitLabCIStats",
+    "CircleCIAnalyzer",
+    "CircleCIFinding",
+    "CircleCIInfo",
+    "CircleCIStats",
+    "JenkinsfileAnalyzer",
+    "JenkinsfileFinding",
+    "JenkinsfileInfo",
+    "JenkinsfileStats",
+    "BitbucketPipelinesAnalyzer",
+    "BitbucketPipelinesFinding",
+    "BitbucketPipelinesInfo",
+    "BitbucketPipelinesStats",
+    "K8sAnalyzer",
+    "K8sFinding",
+    "K8sInfo",
+    "K8sStats",
     "PrecommitAnalyzer",
     "PrecommitFinding",
     "PrecommitHookInfo",

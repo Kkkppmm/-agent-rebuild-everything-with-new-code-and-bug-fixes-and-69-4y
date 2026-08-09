@@ -405,6 +405,49 @@ def cmd_compose_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def _run_ci_audit(analyzer: object, args: argparse.Namespace) -> None:
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())  # type: ignore[attr-defined]
+        return
+    if args.context:
+        print(analyzer.to_context())  # type: ignore[attr-defined]
+        return
+    print(analyzer.summary())  # type: ignore[attr-defined]
+    if args.verbose:
+        for finding in analyzer.analyze():  # type: ignore[attr-defined]
+            print(finding.format())
+
+
+def cmd_gitlab_ci_audit(args: argparse.Namespace) -> None:
+    from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+
+    _run_ci_audit(GitLabCIAnalyzer(args.directory), args)
+
+
+def cmd_circleci_audit(args: argparse.Namespace) -> None:
+    from devai.circleci_analyzer import CircleCIAnalyzer
+
+    _run_ci_audit(CircleCIAnalyzer(args.directory), args)
+
+
+def cmd_jenkinsfile_audit(args: argparse.Namespace) -> None:
+    from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+
+    _run_ci_audit(JenkinsfileAnalyzer(args.directory), args)
+
+
+def cmd_bitbucket_pipelines_audit(args: argparse.Namespace) -> None:
+    from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
+
+    _run_ci_audit(BitbucketPipelinesAnalyzer(args.directory), args)
+
+
+def cmd_kubernetes_audit(args: argparse.Namespace) -> None:
+    from devai.kubernetes_analyzer import K8sAnalyzer
+
+    _run_ci_audit(K8sAnalyzer(args.directory), args)
+
+
 def cmd_precommit_audit(args: argparse.Namespace) -> None:
     from devai.precommit_analyzer import PrecommitAnalyzer
 
@@ -1605,6 +1648,49 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Docker Compose template",
     )
     p.set_defaults(func=cmd_compose_audit)
+
+    for name, help_text, func, template_help in (
+        (
+            "gitlab-ci-audit",
+            "Audit GitLab CI/CD pipelines for security and best practices",
+            cmd_gitlab_ci_audit,
+            "Print a hardened GitLab CI template",
+        ),
+        (
+            "circleci-audit",
+            "Audit CircleCI configs for security and best practices",
+            cmd_circleci_audit,
+            "Print a hardened CircleCI config template",
+        ),
+        (
+            "jenkinsfile-audit",
+            "Audit Jenkins pipelines for security and best practices",
+            cmd_jenkinsfile_audit,
+            "Print a hardened Jenkinsfile template",
+        ),
+        (
+            "bitbucket-pipelines-audit",
+            "Audit Bitbucket Pipelines for security and best practices",
+            cmd_bitbucket_pipelines_audit,
+            "Print a hardened Bitbucket Pipelines template",
+        ),
+        (
+            "kubernetes-audit",
+            "Audit Kubernetes manifests for security and best practices",
+            cmd_kubernetes_audit,
+            "Print a hardened Kubernetes Deployment template",
+        ),
+    ):
+        p = sub.add_parser(name, help=help_text)
+        p.add_argument("directory", nargs="?", default=".", help="Project directory")
+        p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+        p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+        p.add_argument(
+            "--generate-template",
+            action="store_true",
+            help=template_help,
+        )
+        p.set_defaults(func=func)
 
     p = sub.add_parser(
         "precommit-audit",

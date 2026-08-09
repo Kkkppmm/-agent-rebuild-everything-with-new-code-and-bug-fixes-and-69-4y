@@ -18,6 +18,11 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
+from devai.kubernetes_analyzer import K8sAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
@@ -131,6 +136,11 @@ class ProjectHealth:
         "dockerfile": 0.03,
         "workflows": 0.03,
         "compose": 0.03,
+        "gitlab_ci": 0.02,
+        "circleci": 0.02,
+        "jenkins": 0.02,
+        "bitbucket": 0.02,
+        "kubernetes": 0.02,
         "precommit": 0.03,
     }
 
@@ -336,6 +346,96 @@ class ProjectHealth:
         )
         return score, summary, {
             "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_gitlab_ci(self, analyzer: GitLabCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No GitLab CI config found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} GitLab CI config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_circleci(self, analyzer: CircleCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No CircleCI config found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} CircleCI config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_jenkins(self, analyzer: JenkinsfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.jenkinsfiles == 0:
+            return 100.0, "No Jenkinsfile found", {"jenkinsfiles": 0, "findings": 0}
+        summary = (
+            f"{stats.jenkinsfiles} Jenkinsfile(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "jenkinsfiles": stats.jenkinsfiles,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_bitbucket(self, analyzer: BitbucketPipelinesAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Bitbucket Pipelines config found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Bitbucket Pipelines config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_kubernetes(self, analyzer: K8sAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Kubernetes manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} Kubernetes manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
             "findings": stats.findings,
             "high_severity": stats.high_severity,
             "medium_severity": stats.medium_severity,
@@ -607,6 +707,26 @@ class ProjectHealth:
         compose = ComposeAnalyzer(root_str)
         score, summary, details = self._score_compose(compose)
         categories.append(HealthCategory("compose", score, summary, details))
+
+        gitlab_ci = GitLabCIAnalyzer(root_str)
+        score, summary, details = self._score_gitlab_ci(gitlab_ci)
+        categories.append(HealthCategory("gitlab_ci", score, summary, details))
+
+        circleci = CircleCIAnalyzer(root_str)
+        score, summary, details = self._score_circleci(circleci)
+        categories.append(HealthCategory("circleci", score, summary, details))
+
+        jenkins = JenkinsfileAnalyzer(root_str)
+        score, summary, details = self._score_jenkins(jenkins)
+        categories.append(HealthCategory("jenkins", score, summary, details))
+
+        bitbucket = BitbucketPipelinesAnalyzer(root_str)
+        score, summary, details = self._score_bitbucket(bitbucket)
+        categories.append(HealthCategory("bitbucket", score, summary, details))
+
+        kubernetes = K8sAnalyzer(root_str)
+        score, summary, details = self._score_kubernetes(kubernetes)
+        categories.append(HealthCategory("kubernetes", score, summary, details))
 
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
