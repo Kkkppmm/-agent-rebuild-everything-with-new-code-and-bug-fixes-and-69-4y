@@ -25,6 +25,8 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -383,6 +385,14 @@ class DevAI:
     def precommit(self, path: str | Path = ".", **kwargs: Any) -> PrecommitAnalyzer:
         """Audit pre-commit config files for unpinned hooks and unsafe entries."""
         return PrecommitAnalyzer(str(path), **kwargs)
+
+    def jenkinsfile(self, path: str | Path = ".", **kwargs: Any) -> JenkinsfileAnalyzer:
+        """Audit Jenkinsfiles for pipeline security risks and CI best practices."""
+        return JenkinsfileAnalyzer(str(path), **kwargs)
+
+    def travis_ci(self, path: str | Path = ".", **kwargs: Any) -> TravisCIAnalyzer:
+        """Audit Travis CI configs for security risks and CI best practices."""
+        return TravisCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

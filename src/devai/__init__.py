@@ -65,6 +65,18 @@ from devai.precommit_analyzer import (
     PrecommitInfo,
     PrecommitStats,
 )
+from devai.jenkinsfile_analyzer import (
+    JenkinsfileAnalyzer,
+    JenkinsfileFinding,
+    JenkinsfileInfo,
+    JenkinsfileStats,
+)
+from devai.travis_ci_analyzer import (
+    TravisCIAnalyzer,
+    TravisCIFinding,
+    TravisCIInfo,
+    TravisCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -566,6 +578,14 @@ __all__ = [
     "PrecommitHookInfo",
     "PrecommitInfo",
     "PrecommitStats",
+    "JenkinsfileAnalyzer",
+    "JenkinsfileFinding",
+    "JenkinsfileInfo",
+    "JenkinsfileStats",
+    "TravisCIAnalyzer",
+    "TravisCIFinding",
+    "TravisCIInfo",
+    "TravisCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
