@@ -19,6 +19,8 @@ from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
+from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -132,6 +134,8 @@ class ProjectHealth:
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
+        "jenkins": 0.02,
+        "travis": 0.02,
     }
 
     def __init__(
@@ -330,6 +334,42 @@ class ProjectHealth:
         stats = analyzer.stats
         if stats.config_files == 0:
             return 100.0, "No pre-commit config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_jenkins(self, analyzer: JenkinsfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Jenkins pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_travis(self, analyzer: TravisCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Travis CI config found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
@@ -611,6 +651,14 @@ class ProjectHealth:
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
         categories.append(HealthCategory("precommit", score, summary, details))
+
+        jenkins = JenkinsfileAnalyzer(root_str)
+        score, summary, details = self._score_jenkins(jenkins)
+        categories.append(HealthCategory("jenkins", score, summary, details))
+
+        travis = TravisCIAnalyzer(root_str)
+        score, summary, details = self._score_travis(travis)
+        categories.append(HealthCategory("travis", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
