@@ -47,6 +47,7 @@ from devai.teamcity_analyzer import TeamCityAnalyzer
 from devai.cloud_build_analyzer import CloudBuildAnalyzer
 from devai.argo_workflows_analyzer import ArgoWorkflowsAnalyzer
 from devai.tekton_analyzer import TektonAnalyzer
+from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -493,6 +494,10 @@ class DevAI:
     def argo_workflows(self, path: str | Path = ".", **kwargs: Any) -> ArgoWorkflowsAnalyzer:
         """Audit Argo Workflows for hardcoded secrets, hostPath mounts, and unsafe scripts."""
         return ArgoWorkflowsAnalyzer(str(path), **kwargs)
+
+    def flux_cd(self, path: str | Path = ".", **kwargs: Any) -> FluxCDAnalyzer:
+        """Audit Flux CD GitOps configs for insecure sources, force apply, and hardcoded secrets."""
+        return FluxCDAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

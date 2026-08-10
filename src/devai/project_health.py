@@ -41,6 +41,7 @@ from devai.teamcity_analyzer import TeamCityAnalyzer
 from devai.cloud_build_analyzer import CloudBuildAnalyzer
 from devai.argo_workflows_analyzer import ArgoWorkflowsAnalyzer
 from devai.tekton_analyzer import TektonAnalyzer
+from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -176,6 +177,7 @@ class ProjectHealth:
         "cloud_build": 0.02,
         "tekton": 0.02,
         "argo_workflows": 0.02,
+        "flux_cd": 0.02,
     }
 
     def __init__(
@@ -806,6 +808,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_flux_cd(self, analyzer: FluxCDAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Flux CD manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} Flux CD manifest(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -997,6 +1018,10 @@ class ProjectHealth:
             elif cat.name == "argo_workflows" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Argo Workflows — use Kubernetes secrets, runAsNonRoot, and avoid hostNetwork/hostPID"
+                )
+            elif cat.name == "flux_cd" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Flux CD — use HTTPS git sources, enable prune/wait, and avoid force apply or cluster-admin RBAC"
                 )
         return recs
 
@@ -1251,6 +1276,10 @@ class ProjectHealth:
         argo_workflows = ArgoWorkflowsAnalyzer(root_str)
         score, summary, details = self._score_argo_workflows(argo_workflows)
         categories.append(HealthCategory("argo_workflows", score, summary, details))
+
+        flux_cd = FluxCDAnalyzer(root_str)
+        score, summary, details = self._score_flux_cd(flux_cd)
+        categories.append(HealthCategory("flux_cd", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
