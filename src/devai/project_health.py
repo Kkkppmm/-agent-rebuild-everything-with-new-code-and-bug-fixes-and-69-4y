@@ -20,6 +20,7 @@ from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
+from devai.jenkins_analyzer import JenkinsAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -136,6 +137,7 @@ class ProjectHealth:
         "circleci": 0.02,
         "gitlab_ci": 0.02,
         "travis_ci": 0.02,
+        "jenkins": 0.02,
         "compose": 0.02,
         "precommit": 0.02,
     }
@@ -366,6 +368,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_jenkins(self, analyzer: JenkinsAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Jenkinsfiles found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_compose(self, analyzer: ComposeAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -513,6 +533,14 @@ class ProjectHealth:
             elif cat.name == "travis_ci" and cat.score < 70 and cat.details.get("configs", 0) > 0:
                 recs.append(
                     "Review Travis CI findings — pin language versions and audit deploy scripts"
+                )
+            elif cat.name == "jenkins" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Jenkinsfiles — use ephemeral agents, credentials store, and avoid master node"
+                )
+            elif cat.name == "jenkins" and cat.score < 70 and cat.details.get("configs", 0) > 0:
+                recs.append(
+                    "Review Jenkins findings — pin agent images and avoid privileged Docker containers"
                 )
             elif cat.name == "compose" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -699,6 +727,10 @@ class ProjectHealth:
         travis_ci = TravisCIAnalyzer(root_str)
         score, summary, details = self._score_travis_ci(travis_ci)
         categories.append(HealthCategory("travis_ci", score, summary, details))
+
+        jenkins = JenkinsAnalyzer(root_str)
+        score, summary, details = self._score_jenkins(jenkins)
+        categories.append(HealthCategory("jenkins", score, summary, details))
 
         compose = ComposeAnalyzer(root_str)
         score, summary, details = self._score_compose(compose)
