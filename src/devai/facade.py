@@ -42,6 +42,7 @@ from devai.drone_ci_analyzer import DroneCIAnalyzer
 from devai.woodpecker_ci_analyzer import WoodpeckerCIAnalyzer
 from devai.codefresh_analyzer import CodefreshAnalyzer
 from devai.semaphore_ci_analyzer import SemaphoreCIAnalyzer
+from devai.concourse_ci_analyzer import ConcourseCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -468,6 +469,10 @@ class DevAI:
     def semaphore_ci(self, path: str | Path = ".", **kwargs: Any) -> SemaphoreCIAnalyzer:
         """Audit Semaphore CI pipelines for hardcoded secrets, auto-promote rules, and unsafe scripts."""
         return SemaphoreCIAnalyzer(str(path), **kwargs)
+
+    def concourse_ci(self, path: str | Path = ".", **kwargs: Any) -> ConcourseCIAnalyzer:
+        """Audit Concourse CI pipelines for hardcoded secrets, privileged tasks, and unsafe scripts."""
+        return ConcourseCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

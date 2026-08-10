@@ -167,6 +167,12 @@ from devai.semaphore_ci_analyzer import (
     SemaphoreCIInfo,
     SemaphoreCIStats,
 )
+from devai.concourse_ci_analyzer import (
+    ConcourseCIAnalyzer,
+    ConcourseCIFinding,
+    ConcourseCIInfo,
+    ConcourseCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -736,6 +742,10 @@ __all__ = [
     "SemaphoreCIFinding",
     "SemaphoreCIInfo",
     "SemaphoreCIStats",
+    "ConcourseCIAnalyzer",
+    "ConcourseCIFinding",
+    "ConcourseCIInfo",
+    "ConcourseCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
