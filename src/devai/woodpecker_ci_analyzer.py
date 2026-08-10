@@ -71,7 +71,8 @@ ROOT_USER_PATTERN = re.compile(
     re.IGNORECASE,
 )
 UNSAFE_WHEN_PATTERN = re.compile(
-    r"^\s*when\s*:\s*.*\$\{?\s*WOODPECKER_(?:PULL_REQUEST|COMMIT|BRANCH)",
+    r"^\s*(?:when\s*:.*\$\{?\s*WOODPECKER_(?:PULL_REQUEST|COMMIT|BRANCH)|"
+    r"(?:branch|tag)\s*:\s*\$?\{?\s*WOODPECKER_(?:PULL_REQUEST|COMMIT|BRANCH|TAG))",
     re.IGNORECASE,
 )
 
