@@ -89,6 +89,12 @@ from devai.gitlab_ci_analyzer import (
     GitLabInfo,
     GitLabStats,
 )
+from devai.azure_pipelines_analyzer import (
+    AzurePipelinesAnalyzer,
+    AzureFinding,
+    AzureInfo,
+    AzureStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -377,7 +383,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.52.0"
+__version__ = "6.53.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -606,6 +612,10 @@ __all__ = [
     "GitLabFinding",
     "GitLabInfo",
     "GitLabStats",
+    "AzurePipelinesAnalyzer",
+    "AzureFinding",
+    "AzureInfo",
+    "AzureStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

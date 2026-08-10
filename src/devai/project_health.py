@@ -23,6 +23,7 @@ from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -140,6 +141,7 @@ class ProjectHealth:
         "travis": 0.02,
         "circleci": 0.02,
         "gitlab": 0.02,
+        "azure": 0.02,
     }
 
     def __init__(
@@ -410,6 +412,24 @@ class ProjectHealth:
         stats = analyzer.stats
         if stats.config_files == 0:
             return 100.0, "No GitLab CI config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_azure(self, analyzer: AzurePipelinesAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Azure Pipelines config found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
@@ -707,6 +727,10 @@ class ProjectHealth:
         gitlab = GitLabCIAnalyzer(root_str)
         score, summary, details = self._score_gitlab(gitlab)
         categories.append(HealthCategory("gitlab", score, summary, details))
+
+        azure = AzurePipelinesAnalyzer(root_str)
+        score, summary, details = self._score_azure(azure)
+        categories.append(HealthCategory("azure", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

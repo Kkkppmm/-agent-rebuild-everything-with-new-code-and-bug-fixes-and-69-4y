@@ -76,6 +76,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **TravisCIAnalyzer** — Audit Travis CI configs for secrets in env, curl-pipe-to-shell scripts, sudo usage, and unsafe deploy settings
 - **CircleCIAnalyzer** — Audit CircleCI configs for unpinned orbs/images, secrets in environment, privileged containers, and unsafe run steps
 - **GitLabCIAnalyzer** — Audit GitLab CI configs for secrets in variables, docker:dind without TLS, privileged containers, and untrusted CI variables in scripts
+- **AzurePipelinesAnalyzer** — Audit Azure Pipelines configs for secrets in variables, persistCredentials, privileged containers, and untrusted pipeline variables in scripts
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets

@@ -29,6 +29,7 @@ from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
+from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -403,6 +404,10 @@ class DevAI:
     def gitlab_ci(self, path: str | Path = ".", **kwargs: Any) -> GitLabCIAnalyzer:
         """Audit GitLab CI configs for security risks and CI best practices."""
         return GitLabCIAnalyzer(str(path), **kwargs)
+
+    def azure_pipelines(self, path: str | Path = ".", **kwargs: Any) -> AzurePipelinesAnalyzer:
+        """Audit Azure Pipelines configs for security risks and CI best practices."""
+        return AzurePipelinesAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
