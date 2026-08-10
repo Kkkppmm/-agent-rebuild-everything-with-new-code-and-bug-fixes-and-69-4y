@@ -143,6 +143,12 @@ from devai.buildkite_analyzer import (
     BuildkiteInfo,
     BuildkiteStats,
 )
+from devai.drone_ci_analyzer import (
+    DroneCIAnalyzer,
+    DroneCIFinding,
+    DroneCIInfo,
+    DroneCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -431,7 +437,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.58.0"
+__version__ = "6.59.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -696,6 +702,10 @@ __all__ = [
     "BuildkiteFinding",
     "BuildkiteInfo",
     "BuildkiteStats",
+    "DroneCIAnalyzer",
+    "DroneCIFinding",
+    "DroneCIInfo",
+    "DroneCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

@@ -32,6 +32,7 @@ from devai.bitbucket_pipelines_analyzer import BitbucketPipelinesAnalyzer
 from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.buildkite_analyzer import BuildkiteAnalyzer
+from devai.drone_ci_analyzer import DroneCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -158,6 +159,7 @@ class ProjectHealth:
         "azure_pipelines": 0.02,
         "travis_ci": 0.02,
         "buildkite": 0.02,
+        "drone_ci": 0.02,
     }
 
     def __init__(
@@ -615,6 +617,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_drone_ci(self, analyzer: DroneCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Drone CI pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Drone CI pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -770,6 +791,10 @@ class ProjectHealth:
             elif cat.name == "buildkite" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Buildkite — use secrets, pin plugins, and restrict propagate_environment"
+                )
+            elif cat.name == "drone_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Drone CI — use secrets, avoid trusted mode, and restrict privileged containers"
                 )
         return recs
 
@@ -988,6 +1013,10 @@ class ProjectHealth:
         buildkite = BuildkiteAnalyzer(root_str)
         score, summary, details = self._score_buildkite(buildkite)
         categories.append(HealthCategory("buildkite", score, summary, details))
+
+        drone_ci = DroneCIAnalyzer(root_str)
+        score, summary, details = self._score_drone_ci(drone_ci)
+        categories.append(HealthCategory("drone_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
