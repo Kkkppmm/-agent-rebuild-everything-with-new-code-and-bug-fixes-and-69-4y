@@ -21,6 +21,7 @@ from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.jenkins_analyzer import JenkinsAnalyzer
+from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.docstring_coverage import DocstringCoverage
@@ -138,6 +139,7 @@ class ProjectHealth:
         "gitlab_ci": 0.02,
         "travis_ci": 0.02,
         "jenkins": 0.02,
+        "azure_pipelines": 0.02,
         "compose": 0.02,
         "precommit": 0.02,
     }
@@ -386,6 +388,26 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_azure_pipelines(
+        self, analyzer: AzurePipelinesAnalyzer
+    ) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Azure Pipelines configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_compose(self, analyzer: ComposeAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -541,6 +563,14 @@ class ProjectHealth:
             elif cat.name == "jenkins" and cat.score < 70 and cat.details.get("configs", 0) > 0:
                 recs.append(
                     "Review Jenkins findings — pin agent images and avoid privileged Docker containers"
+                )
+            elif cat.name == "azure_pipelines" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Azure Pipelines — use Key Vault for secrets and avoid privileged containers"
+                )
+            elif cat.name == "azure_pipelines" and cat.score < 70 and cat.details.get("configs", 0) > 0:
+                recs.append(
+                    "Review Azure Pipelines findings — pin VM images and avoid curl-pipe-to-shell"
                 )
             elif cat.name == "compose" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -731,6 +761,10 @@ class ProjectHealth:
         jenkins = JenkinsAnalyzer(root_str)
         score, summary, details = self._score_jenkins(jenkins)
         categories.append(HealthCategory("jenkins", score, summary, details))
+
+        azure_pipelines = AzurePipelinesAnalyzer(root_str)
+        score, summary, details = self._score_azure_pipelines(azure_pipelines)
+        categories.append(HealthCategory("azure_pipelines", score, summary, details))
 
         compose = ComposeAnalyzer(root_str)
         score, summary, details = self._score_compose(compose)

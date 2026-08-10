@@ -137,6 +137,7 @@ class ProjectDetector:
             _exists(root, ".github", "workflows")
             or _exists(root, ".gitlab-ci.yml")
             or _exists(root, "Jenkinsfile")
+            or _exists(root, "azure-pipelines.yml")
         )
 
         return ProjectProfile(

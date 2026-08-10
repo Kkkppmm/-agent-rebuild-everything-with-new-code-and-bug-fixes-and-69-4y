@@ -79,6 +79,13 @@ from devai.jenkins_analyzer import (
     JenkinsStageInfo,
     JenkinsStats,
 )
+from devai.azure_pipelines_analyzer import (
+    AzurePipelinesAnalyzer,
+    AzurePipelinesFinding,
+    AzurePipelinesInfo,
+    AzurePipelinesStageInfo,
+    AzurePipelinesStats,
+)
 from devai.compose_analyzer import (
     ComposeAnalyzer,
     ComposeFinding,
@@ -603,6 +610,11 @@ __all__ = [
     "JenkinsInfo",
     "JenkinsStageInfo",
     "JenkinsStats",
+    "AzurePipelinesAnalyzer",
+    "AzurePipelinesFinding",
+    "AzurePipelinesInfo",
+    "AzurePipelinesStageInfo",
+    "AzurePipelinesStats",
     "ComposeAnalyzer",
     "ComposeFinding",
     "ComposeInfo",

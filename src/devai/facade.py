@@ -27,6 +27,7 @@ from devai.circleci_analyzer import CircleCIAnalyzer
 from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
 from devai.jenkins_analyzer import JenkinsAnalyzer
+from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
@@ -395,6 +396,10 @@ class DevAI:
     def jenkins(self, path: str | Path = ".", **kwargs: Any) -> JenkinsAnalyzer:
         """Audit Jenkinsfiles for security risks and CI best practices."""
         return JenkinsAnalyzer(str(path), **kwargs)
+
+    def azure_pipelines(self, path: str | Path = ".", **kwargs: Any) -> AzurePipelinesAnalyzer:
+        """Audit Azure Pipelines YAML for security risks and CI best practices."""
+        return AzurePipelinesAnalyzer(str(path), **kwargs)
 
     def compose(self, path: str | Path = ".", **kwargs: Any) -> ComposeAnalyzer:
         """Audit Docker Compose files for security risks and container best practices."""
