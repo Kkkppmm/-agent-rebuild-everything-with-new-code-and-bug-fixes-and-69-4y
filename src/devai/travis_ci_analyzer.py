@@ -13,7 +13,7 @@ SECRET_ENV_PATTERN = re.compile(
     re.IGNORECASE,
 )
 PLAIN_SECRET_PATTERN = re.compile(
-    r"^\s*-\s*[A-Z0-9_]*(PASSWORD|SECRET|TOKEN|API_KEY)[A-Z0-9_]*\s*=\s*['\"][^'\"]{4,}['\"]",
+    r"^\s*-\s*[A-Z0-9_]*(PASSWORD|SECRET|TOKEN|API_KEY)[A-Z0-9_]*\s*=\s*(?:['\"][^'\"]{4,}['\"]|[^\s#]+)",
     re.IGNORECASE,
 )
 CURL_PIPE_SHELL_PATTERN = re.compile(
@@ -127,6 +127,7 @@ class TravisCIAnalyzer:
         content = "\n".join(raw_lines)
         in_env = False
         in_deploy = False
+        deploy_indent = 0
         deploy_has_all_branches = False
         deploy_start_line = 0
 
@@ -164,8 +165,28 @@ class TravisCIAnalyzer:
                 in_deploy = True
                 info.has_deploy = True
                 deploy_start_line = lineno
+                deploy_indent = len(raw) - len(raw.lstrip())
                 deploy_has_all_branches = False
                 continue
+
+            if in_deploy:
+                current_indent = len(raw) - len(raw.lstrip())
+                if current_indent <= deploy_indent and line and not line.startswith("#"):
+                    if deploy_has_all_branches:
+                        findings.append(
+                            TravisCIFinding(
+                                kind="deploy_all_branches",
+                                severity="high",
+                                message=(
+                                    "deploy.all_branches: true can deploy untrusted PR branches"
+                                ),
+                                path=rel,
+                                lineno=deploy_start_line,
+                                line="deploy:",
+                            )
+                        )
+                    in_deploy = False
+                    deploy_has_all_branches = False
 
             if in_deploy and DEPLOY_ALL_BRANCHES_PATTERN.match(line):
                 deploy_has_all_branches = True
@@ -181,27 +202,6 @@ class TravisCIAnalyzer:
                         line=raw.strip(),
                     )
                 )
-
-            if in_deploy and line.startswith("- ") and DEPLOY_PROVIDER_PATTERN.match(
-                line[2:]
-            ):
-                pass
-            elif in_deploy and re.match(r"^[a-zA-Z]", line) and not line.startswith("-"):
-                if deploy_has_all_branches:
-                    findings.append(
-                        TravisCIFinding(
-                            kind="deploy_all_branches",
-                            severity="high",
-                            message=(
-                                "deploy.all_branches: true can deploy untrusted PR branches"
-                            ),
-                            path=rel,
-                            lineno=deploy_start_line,
-                            line="deploy:",
-                        )
-                    )
-                in_deploy = False
-                deploy_has_all_branches = False
 
             if in_env and SECRET_ENV_PATTERN.search(line):
                 findings.append(
@@ -298,6 +298,18 @@ class TravisCIAnalyzer:
                 branch_match = re.match(r"^\s*-\s*['\"]?([a-zA-Z0-9_./-]+)['\"]?\s*$", line)
                 if branch_match and "branches" in raw_lines[max(0, lineno - 3) : lineno]:
                     info.branches.append(branch_match.group(1))
+
+        if in_deploy and deploy_has_all_branches:
+            findings.append(
+                TravisCIFinding(
+                    kind="deploy_all_branches",
+                    severity="high",
+                    message="deploy.all_branches: true can deploy untrusted PR branches",
+                    path=rel,
+                    lineno=deploy_start_line,
+                    line="deploy:",
+                )
+            )
 
         return findings, info
 

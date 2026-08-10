@@ -16,7 +16,10 @@ CURL_PIPE_SHELL_PATTERN = re.compile(
     r"(curl|wget)\s+[^\n|]*\|\s*(sh|bash|zsh)\b",
     re.IGNORECASE,
 )
-LATEST_TAG_PATTERN = re.compile(r"image:\s*['\"]?[^\s'\"]+:latest\b", re.IGNORECASE)
+LATEST_TAG_PATTERN = re.compile(
+    r"image\s*[:=]?\s*['\"]?[^\s'\"]+:latest\b",
+    re.IGNORECASE,
+)
 DOCKER_SOCK_PATTERN = re.compile(r"/var/run/docker\.sock", re.IGNORECASE)
 PRIVILEGED_PATTERN = re.compile(r"privileged:\s*true\b", re.IGNORECASE)
 EVAL_PATTERN = re.compile(r"\b(eval|execute)\s*\(", re.IGNORECASE)
