@@ -39,7 +39,7 @@ DISABLE_TLS_PATTERN = re.compile(
     re.IGNORECASE,
 )
 SCRIPT_INJECTION_PATTERN = re.compile(
-    r"(?:commands?|script)\s*:\s*.*\$\{?\s*DRONE_(?:PULL_REQUEST|COMMIT|BRANCH|REPO|SOURCE_BRANCH)",
+    r"\$\{?\s*DRONE_(?:PULL_REQUEST|COMMIT|BRANCH|REPO|SOURCE_BRANCH)",
     re.IGNORECASE,
 )
 INSECURE_HTTP_PATTERN = re.compile(
