@@ -58,6 +58,12 @@ from devai.travis_ci_analyzer import (
     TravisCIInfo,
     TravisCIStats,
 )
+from devai.jenkinsfile_analyzer import (
+    JenkinsfileAnalyzer,
+    JenkinsfileFinding,
+    JenkinsfileInfo,
+    JenkinsfileStats,
+)
 from devai.compose_analyzer import (
     ComposeAnalyzer,
     ComposeFinding,
@@ -567,6 +573,10 @@ __all__ = [
     "TravisCIFinding",
     "TravisCIInfo",
     "TravisCIStats",
+    "JenkinsfileAnalyzer",
+    "JenkinsfileFinding",
+    "JenkinsfileInfo",
+    "JenkinsfileStats",
     "ComposeAnalyzer",
     "ComposeFinding",
     "ComposeInfo",

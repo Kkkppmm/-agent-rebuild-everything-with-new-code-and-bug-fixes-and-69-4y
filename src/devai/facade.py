@@ -24,6 +24,7 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
@@ -380,6 +381,10 @@ class DevAI:
     def travis_ci(self, path: str | Path = ".", **kwargs: Any) -> TravisCIAnalyzer:
         """Audit Travis CI configs for security risks and CI best practices."""
         return TravisCIAnalyzer(str(path), **kwargs)
+
+    def jenkinsfile(self, path: str | Path = ".", **kwargs: Any) -> JenkinsfileAnalyzer:
+        """Audit Jenkins pipeline files for security risks and CI best practices."""
+        return JenkinsfileAnalyzer(str(path), **kwargs)
 
     def compose(self, path: str | Path = ".", **kwargs: Any) -> ComposeAnalyzer:
         """Audit Docker Compose files for security risks and container best practices."""
