@@ -26,6 +26,7 @@ from devai.nginx_analyzer import NginxAnalyzer
 from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
 from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -146,6 +147,7 @@ class ProjectHealth:
         "helm": 0.02,
         "ansible": 0.02,
         "azure_pipelines": 0.02,
+        "jenkinsfile": 0.02,
     }
 
     def __init__(
@@ -486,6 +488,26 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_jenkinsfile(
+        self, analyzer: JenkinsfileAnalyzer
+    ) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.jenkinsfiles == 0:
+            return 100.0, "No Jenkinsfiles found", {"jenkinsfiles": 0, "findings": 0}
+        summary = (
+            f"{stats.jenkinsfiles} Jenkinsfile(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "jenkinsfiles": stats.jenkinsfiles,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -617,6 +639,10 @@ class ProjectHealth:
             elif cat.name == "azure_pipelines" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Azure Pipelines — pin task versions, use Key Vault for secrets, and avoid System.AccessToken in scripts"
+                )
+            elif cat.name == "jenkinsfile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Jenkinsfiles — use credentials binding, pin shared libraries, and avoid privileged Docker or curl-pipe-to-shell"
                 )
         return recs
 
@@ -811,6 +837,10 @@ class ProjectHealth:
         azure_pipelines = AzurePipelinesAnalyzer(root_str)
         score, summary, details = self._score_azure_pipelines(azure_pipelines)
         categories.append(HealthCategory("azure_pipelines", score, summary, details))
+
+        jenkinsfile = JenkinsfileAnalyzer(root_str)
+        score, summary, details = self._score_jenkinsfile(jenkinsfile)
+        categories.append(HealthCategory("jenkinsfile", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

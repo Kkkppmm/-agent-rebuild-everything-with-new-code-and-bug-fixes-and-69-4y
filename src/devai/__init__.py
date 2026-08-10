@@ -107,6 +107,12 @@ from devai.azure_pipelines_analyzer import (
     AzurePipelineInfo,
     AzurePipelinesStats,
 )
+from devai.jenkinsfile_analyzer import (
+    JenkinsfileAnalyzer,
+    JenkinsfileFinding,
+    JenkinsfileInfo,
+    JenkinsfileStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -636,6 +642,10 @@ __all__ = [
     "AzurePipelinesFinding",
     "AzurePipelineInfo",
     "AzurePipelinesStats",
+    "JenkinsfileAnalyzer",
+    "JenkinsfileFinding",
+    "JenkinsfileInfo",
+    "JenkinsfileStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

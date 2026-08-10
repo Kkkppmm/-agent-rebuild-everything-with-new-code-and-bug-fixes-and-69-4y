@@ -32,6 +32,7 @@ from devai.nginx_analyzer import NginxAnalyzer
 from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
 from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
+from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -418,6 +419,10 @@ class DevAI:
     def azure_pipelines(self, path: str | Path = ".", **kwargs: Any) -> AzurePipelinesAnalyzer:
         """Audit Azure Pipelines YAML for unpinned tasks, secrets in env, and unsafe scripts."""
         return AzurePipelinesAnalyzer(str(path), **kwargs)
+
+    def jenkinsfile(self, path: str | Path = ".", **kwargs: Any) -> JenkinsfileAnalyzer:
+        """Audit Jenkinsfiles for hardcoded secrets, unsafe shell steps, and privileged Docker."""
+        return JenkinsfileAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
