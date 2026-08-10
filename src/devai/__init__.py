@@ -101,6 +101,12 @@ from devai.ansible_analyzer import (
     AnsiblePlaybookInfo,
     AnsibleStats,
 )
+from devai.azure_pipelines_analyzer import (
+    AzurePipelinesAnalyzer,
+    AzurePipelinesFinding,
+    AzurePipelineInfo,
+    AzurePipelinesStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -626,6 +632,10 @@ __all__ = [
     "AnsibleFinding",
     "AnsiblePlaybookInfo",
     "AnsibleStats",
+    "AzurePipelinesAnalyzer",
+    "AzurePipelinesFinding",
+    "AzurePipelineInfo",
+    "AzurePipelinesStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

@@ -25,6 +25,7 @@ from devai.terraform_analyzer import TerraformAnalyzer
 from devai.nginx_analyzer import NginxAnalyzer
 from devai.helm_analyzer import HelmAnalyzer
 from devai.ansible_analyzer import AnsibleAnalyzer
+from devai.azure_pipelines_analyzer import AzurePipelinesAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -144,6 +145,7 @@ class ProjectHealth:
         "nginx": 0.02,
         "helm": 0.02,
         "ansible": 0.02,
+        "azure_pipelines": 0.02,
     }
 
     def __init__(
@@ -464,6 +466,26 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_azure_pipelines(
+        self, analyzer: AzurePipelinesAnalyzer
+    ) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Azure Pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -591,6 +613,10 @@ class ProjectHealth:
             elif cat.name == "ansible" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Ansible playbooks — use Vault for secrets, avoid raw/shell pipes, and set restrictive file modes"
+                )
+            elif cat.name == "azure_pipelines" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Azure Pipelines — pin task versions, use Key Vault for secrets, and avoid System.AccessToken in scripts"
                 )
         return recs
 
@@ -781,6 +807,10 @@ class ProjectHealth:
         ansible = AnsibleAnalyzer(root_str)
         score, summary, details = self._score_ansible(ansible)
         categories.append(HealthCategory("ansible", score, summary, details))
+
+        azure_pipelines = AzurePipelinesAnalyzer(root_str)
+        score, summary, details = self._score_azure_pipelines(azure_pipelines)
+        categories.append(HealthCategory("azure_pipelines", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
