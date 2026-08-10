@@ -179,6 +179,12 @@ from devai.teamcity_analyzer import (
     TeamCityInfo,
     TeamCityStats,
 )
+from devai.cloud_build_analyzer import (
+    CloudBuildAnalyzer,
+    CloudBuildFinding,
+    CloudBuildInfo,
+    CloudBuildStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -756,6 +762,10 @@ __all__ = [
     "TeamCityFinding",
     "TeamCityInfo",
     "TeamCityStats",
+    "CloudBuildAnalyzer",
+    "CloudBuildFinding",
+    "CloudBuildInfo",
+    "CloudBuildStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

@@ -38,6 +38,7 @@ from devai.codefresh_analyzer import CodefreshAnalyzer
 from devai.semaphore_ci_analyzer import SemaphoreCIAnalyzer
 from devai.concourse_ci_analyzer import ConcourseCIAnalyzer
 from devai.teamcity_analyzer import TeamCityAnalyzer
+from devai.cloud_build_analyzer import CloudBuildAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -170,6 +171,7 @@ class ProjectHealth:
         "semaphore_ci": 0.02,
         "concourse_ci": 0.02,
         "teamcity": 0.02,
+        "cloud_build": 0.02,
     }
 
     def __init__(
@@ -741,6 +743,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_cloud_build(self, analyzer: CloudBuildAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Cloud Build configs found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Cloud Build config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -920,6 +941,10 @@ class ProjectHealth:
             elif cat.name == "teamcity" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden TeamCity — use credentials manager, restrict VCS triggers, and avoid privileged containers"
+                )
+            elif cat.name == "cloud_build" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Cloud Build — use Secret Manager, dedicated service accounts, and avoid privileged containers"
                 )
         return recs
 
@@ -1162,6 +1187,10 @@ class ProjectHealth:
         teamcity = TeamCityAnalyzer(root_str)
         score, summary, details = self._score_teamcity(teamcity)
         categories.append(HealthCategory("teamcity", score, summary, details))
+
+        cloud_build = CloudBuildAnalyzer(root_str)
+        score, summary, details = self._score_cloud_build(cloud_build)
+        categories.append(HealthCategory("cloud_build", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

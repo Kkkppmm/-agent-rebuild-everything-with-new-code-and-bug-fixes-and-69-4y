@@ -44,6 +44,7 @@ from devai.codefresh_analyzer import CodefreshAnalyzer
 from devai.semaphore_ci_analyzer import SemaphoreCIAnalyzer
 from devai.concourse_ci_analyzer import ConcourseCIAnalyzer
 from devai.teamcity_analyzer import TeamCityAnalyzer
+from devai.cloud_build_analyzer import CloudBuildAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -478,6 +479,10 @@ class DevAI:
     def teamcity(self, path: str | Path = ".", **kwargs: Any) -> TeamCityAnalyzer:
         """Audit TeamCity pipelines for hardcoded secrets, VCS triggers, and unsafe scripts."""
         return TeamCityAnalyzer(str(path), **kwargs)
+
+    def cloud_build(self, path: str | Path = ".", **kwargs: Any) -> CloudBuildAnalyzer:
+        """Audit Google Cloud Build pipelines for hardcoded secrets, substitution injection, and unsafe scripts."""
+        return CloudBuildAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
