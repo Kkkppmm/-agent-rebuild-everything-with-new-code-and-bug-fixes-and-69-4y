@@ -17,7 +17,7 @@ CURL_PIPE_SHELL_PATTERN = re.compile(
     r"(curl|wget)\s+[^\n|]*\|\s*(sh|bash|zsh)\b",
     re.IGNORECASE,
 )
-PRIVILEGED_DOCKER_PATTERN = re.compile(r"privileged\s*[:=]\s*true\b", re.IGNORECASE)
+PRIVILEGED_DOCKER_PATTERN = re.compile(r"privileged\s*[:=]?\s*true\b", re.IGNORECASE)
 RUN_AS_ROOT_PATTERN = re.compile(
     r"(runAsUser\s*[:=]\s*['\"]?0['\"]?|args\s+['\"]-u\s+root['\"]|user\s+['\"]root['\"])",
     re.IGNORECASE,

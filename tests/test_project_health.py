@@ -81,7 +81,7 @@ class TestProjectHealth:
         (tmp_path / "app.py").write_text("x = 1\n", encoding="utf-8")
         health = ProjectHealth(str(tmp_path), scan_secrets=False)
         report = health.analyze()
-        assert len(report.categories) == 18
+        assert len(report.categories) == 19
         assert not any(c.name == "secrets" for c in report.categories)
         assert any(c.name == "smells" for c in report.categories)
         assert any(c.name == "tech_debt" for c in report.categories)
