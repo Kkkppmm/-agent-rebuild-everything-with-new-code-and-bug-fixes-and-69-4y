@@ -137,6 +137,12 @@ from devai.travis_ci_analyzer import (
     TravisCIInfo,
     TravisCIStats,
 )
+from devai.buildkite_analyzer import (
+    BuildkiteAnalyzer,
+    BuildkiteFinding,
+    BuildkiteInfo,
+    BuildkiteStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -425,7 +431,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.57.0"
+__version__ = "6.58.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -686,6 +692,10 @@ __all__ = [
     "TravisCIFinding",
     "TravisCIInfo",
     "TravisCIStats",
+    "BuildkiteAnalyzer",
+    "BuildkiteFinding",
+    "BuildkiteInfo",
+    "BuildkiteStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

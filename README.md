@@ -72,6 +72,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **WorkflowAnalyzer** — Audit GitHub Actions workflows for unpinned actions, pull_request_target misuse, broad permissions, and script injection
 - **AzurePipelinesAnalyzer** — Audit Azure Pipelines for hardcoded secrets, unpinned tasks, privileged containers, and unsafe PR checkout patterns
 - **TravisCIAnalyzer** — Audit Travis CI configs for hardcoded secrets, curl-pipe-to-shell, cleartext deploy keys, and unpinned language versions
+- **BuildkiteAnalyzer** — Audit Buildkite pipelines for hardcoded secrets, unpinned plugins, privileged Docker, and environment propagation
 - **ComposeAnalyzer** — Audit Docker Compose files for privileged mode, host mounts, :latest tags, secrets in environment, and missing resource limits
 - **PrecommitAnalyzer** — Audit `.pre-commit-config.yaml` for unpinned hook revisions, local hooks with unsafe entries, and secrets in config
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
