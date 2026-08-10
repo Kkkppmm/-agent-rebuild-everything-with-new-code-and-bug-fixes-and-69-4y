@@ -76,6 +76,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **CodefreshAnalyzer** — Audit Codefresh pipelines for hardcoded secrets, CF_* injection, privileged containers, and unencrypted exports
 - **SemaphoreCIAnalyzer** — Audit Semaphore CI pipelines for hardcoded secrets, auto-promote rules, SEMAPHORE_* injection, and privileged containers
 - **ConcourseCIAnalyzer** — Audit Concourse CI pipelines for hardcoded secrets, privileged tasks, insecure_skip_verify, and variable injection in run scripts
+- **TektonAnalyzer** — Audit Tekton Pipeline/Task YAML for hardcoded secrets, hostPath mounts, privileged securityContext, and parameter injection in scripts
 - **ComposeAnalyzer** — Audit Docker Compose files for privileged mode, host mounts, :latest tags, secrets in environment, and missing resource limits
 - **PrecommitAnalyzer** — Audit `.pre-commit-config.yaml` for unpinned hook revisions, local hooks with unsafe entries, and secrets in config
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps

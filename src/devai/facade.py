@@ -45,6 +45,7 @@ from devai.semaphore_ci_analyzer import SemaphoreCIAnalyzer
 from devai.concourse_ci_analyzer import ConcourseCIAnalyzer
 from devai.teamcity_analyzer import TeamCityAnalyzer
 from devai.cloud_build_analyzer import CloudBuildAnalyzer
+from devai.tekton_analyzer import TektonAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -483,6 +484,10 @@ class DevAI:
     def cloud_build(self, path: str | Path = ".", **kwargs: Any) -> CloudBuildAnalyzer:
         """Audit Google Cloud Build pipelines for hardcoded secrets, substitution injection, and unsafe scripts."""
         return CloudBuildAnalyzer(str(path), **kwargs)
+
+    def tekton(self, path: str | Path = ".", **kwargs: Any) -> TektonAnalyzer:
+        """Audit Tekton pipelines for hardcoded secrets, hostPath mounts, and unsafe scripts."""
+        return TektonAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

@@ -39,6 +39,7 @@ from devai.semaphore_ci_analyzer import SemaphoreCIAnalyzer
 from devai.concourse_ci_analyzer import ConcourseCIAnalyzer
 from devai.teamcity_analyzer import TeamCityAnalyzer
 from devai.cloud_build_analyzer import CloudBuildAnalyzer
+from devai.tekton_analyzer import TektonAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -172,6 +173,7 @@ class ProjectHealth:
         "concourse_ci": 0.02,
         "teamcity": 0.02,
         "cloud_build": 0.02,
+        "tekton": 0.02,
     }
 
     def __init__(
@@ -762,6 +764,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_tekton(self, analyzer: TektonAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Tekton configs found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Tekton config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -945,6 +966,10 @@ class ProjectHealth:
             elif cat.name == "cloud_build" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Cloud Build — use Secret Manager, dedicated service accounts, and avoid privileged containers"
+                )
+            elif cat.name == "tekton" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Tekton — use Kubernetes secrets, runAsNonRoot, and avoid hostPath/docker socket mounts"
                 )
         return recs
 
@@ -1191,6 +1216,10 @@ class ProjectHealth:
         cloud_build = CloudBuildAnalyzer(root_str)
         score, summary, details = self._score_cloud_build(cloud_build)
         categories.append(HealthCategory("cloud_build", score, summary, details))
+
+        tekton = TektonAnalyzer(root_str)
+        score, summary, details = self._score_tekton(tekton)
+        categories.append(HealthCategory("tekton", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

@@ -185,6 +185,12 @@ from devai.cloud_build_analyzer import (
     CloudBuildInfo,
     CloudBuildStats,
 )
+from devai.tekton_analyzer import (
+    TektonAnalyzer,
+    TektonFinding,
+    TektonInfo,
+    TektonStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -766,6 +772,10 @@ __all__ = [
     "CloudBuildFinding",
     "CloudBuildInfo",
     "CloudBuildStats",
+    "TektonAnalyzer",
+    "TektonFinding",
+    "TektonInfo",
+    "TektonStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
