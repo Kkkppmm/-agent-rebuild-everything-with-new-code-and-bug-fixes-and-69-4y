@@ -27,6 +27,8 @@ from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -393,6 +395,14 @@ class DevAI:
     def travis_ci(self, path: str | Path = ".", **kwargs: Any) -> TravisCIAnalyzer:
         """Audit Travis CI configs for security risks and CI best practices."""
         return TravisCIAnalyzer(str(path), **kwargs)
+
+    def circleci(self, path: str | Path = ".", **kwargs: Any) -> CircleCIAnalyzer:
+        """Audit CircleCI configs for security risks and CI best practices."""
+        return CircleCIAnalyzer(str(path), **kwargs)
+
+    def gitlab_ci(self, path: str | Path = ".", **kwargs: Any) -> GitLabCIAnalyzer:
+        """Audit GitLab CI configs for security risks and CI best practices."""
+        return GitLabCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

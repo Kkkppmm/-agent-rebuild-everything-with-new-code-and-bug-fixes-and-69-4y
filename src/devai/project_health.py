@@ -21,6 +21,8 @@ from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.jenkinsfile_analyzer import JenkinsfileAnalyzer
 from devai.travis_ci_analyzer import TravisCIAnalyzer
+from devai.circleci_analyzer import CircleCIAnalyzer
+from devai.gitlab_ci_analyzer import GitLabCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -136,6 +138,8 @@ class ProjectHealth:
         "precommit": 0.03,
         "jenkins": 0.02,
         "travis": 0.02,
+        "circleci": 0.02,
+        "gitlab": 0.02,
     }
 
     def __init__(
@@ -370,6 +374,42 @@ class ProjectHealth:
         stats = analyzer.stats
         if stats.config_files == 0:
             return 100.0, "No Travis CI config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_circleci(self, analyzer: CircleCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No CircleCI config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_gitlab(self, analyzer: GitLabCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No GitLab CI config found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
@@ -659,6 +699,14 @@ class ProjectHealth:
         travis = TravisCIAnalyzer(root_str)
         score, summary, details = self._score_travis(travis)
         categories.append(HealthCategory("travis", score, summary, details))
+
+        circleci = CircleCIAnalyzer(root_str)
+        score, summary, details = self._score_circleci(circleci)
+        categories.append(HealthCategory("circleci", score, summary, details))
+
+        gitlab = GitLabCIAnalyzer(root_str)
+        score, summary, details = self._score_gitlab(gitlab)
+        categories.append(HealthCategory("gitlab", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

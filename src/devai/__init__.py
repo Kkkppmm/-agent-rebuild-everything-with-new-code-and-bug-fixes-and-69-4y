@@ -77,6 +77,18 @@ from devai.travis_ci_analyzer import (
     TravisInfo,
     TravisStats,
 )
+from devai.circleci_analyzer import (
+    CircleCIAnalyzer,
+    CircleFinding,
+    CircleInfo,
+    CircleStats,
+)
+from devai.gitlab_ci_analyzer import (
+    GitLabCIAnalyzer,
+    GitLabFinding,
+    GitLabInfo,
+    GitLabStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -365,7 +377,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.48.0"
+__version__ = "6.52.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -586,6 +598,14 @@ __all__ = [
     "TravisFinding",
     "TravisInfo",
     "TravisStats",
+    "CircleCIAnalyzer",
+    "CircleFinding",
+    "CircleInfo",
+    "CircleStats",
+    "GitLabCIAnalyzer",
+    "GitLabFinding",
+    "GitLabInfo",
+    "GitLabStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
