@@ -173,6 +173,12 @@ from devai.concourse_ci_analyzer import (
     ConcourseCIInfo,
     ConcourseCIStats,
 )
+from devai.teamcity_analyzer import (
+    TeamCityAnalyzer,
+    TeamCityFinding,
+    TeamCityInfo,
+    TeamCityStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -746,6 +752,10 @@ __all__ = [
     "ConcourseCIFinding",
     "ConcourseCIInfo",
     "ConcourseCIStats",
+    "TeamCityAnalyzer",
+    "TeamCityFinding",
+    "TeamCityInfo",
+    "TeamCityStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

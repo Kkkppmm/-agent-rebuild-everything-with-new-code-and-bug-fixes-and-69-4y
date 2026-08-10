@@ -43,6 +43,7 @@ from devai.woodpecker_ci_analyzer import WoodpeckerCIAnalyzer
 from devai.codefresh_analyzer import CodefreshAnalyzer
 from devai.semaphore_ci_analyzer import SemaphoreCIAnalyzer
 from devai.concourse_ci_analyzer import ConcourseCIAnalyzer
+from devai.teamcity_analyzer import TeamCityAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -473,6 +474,10 @@ class DevAI:
     def concourse_ci(self, path: str | Path = ".", **kwargs: Any) -> ConcourseCIAnalyzer:
         """Audit Concourse CI pipelines for hardcoded secrets, privileged tasks, and unsafe scripts."""
         return ConcourseCIAnalyzer(str(path), **kwargs)
+
+    def teamcity(self, path: str | Path = ".", **kwargs: Any) -> TeamCityAnalyzer:
+        """Audit TeamCity pipelines for hardcoded secrets, VCS triggers, and unsafe scripts."""
+        return TeamCityAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

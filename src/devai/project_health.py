@@ -37,6 +37,7 @@ from devai.woodpecker_ci_analyzer import WoodpeckerCIAnalyzer
 from devai.codefresh_analyzer import CodefreshAnalyzer
 from devai.semaphore_ci_analyzer import SemaphoreCIAnalyzer
 from devai.concourse_ci_analyzer import ConcourseCIAnalyzer
+from devai.teamcity_analyzer import TeamCityAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -168,6 +169,7 @@ class ProjectHealth:
         "codefresh": 0.02,
         "semaphore_ci": 0.02,
         "concourse_ci": 0.02,
+        "teamcity": 0.02,
     }
 
     def __init__(
@@ -720,6 +722,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_teamcity(self, analyzer: TeamCityAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No TeamCity configs found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} TeamCity config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -895,6 +916,10 @@ class ProjectHealth:
             elif cat.name == "concourse_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Concourse CI — use credentials manager, avoid privileged tasks, and pin image tags"
+                )
+            elif cat.name == "teamcity" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden TeamCity — use credentials manager, restrict VCS triggers, and avoid privileged containers"
                 )
         return recs
 
@@ -1133,6 +1158,10 @@ class ProjectHealth:
         concourse_ci = ConcourseCIAnalyzer(root_str)
         score, summary, details = self._score_concourse_ci(concourse_ci)
         categories.append(HealthCategory("concourse_ci", score, summary, details))
+
+        teamcity = TeamCityAnalyzer(root_str)
+        score, summary, details = self._score_teamcity(teamcity)
+        categories.append(HealthCategory("teamcity", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
