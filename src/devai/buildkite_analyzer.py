@@ -147,11 +147,45 @@ class BuildkiteAnalyzer:
         info = BuildkiteInfo(path=rel, lines=len(raw_lines))
         in_security_step = False
         current_step = ""
+        in_artifact_paths = False
+        artifact_indent = 0
 
         for lineno, raw in enumerate(raw_lines, start=1):
             line = raw.strip()
             if not line or line.startswith("#"):
                 continue
+
+            if re.match(r"^\s*artifact_paths\s*:", raw, re.IGNORECASE):
+                in_artifact_paths = True
+                artifact_indent = len(raw) - len(raw.lstrip())
+                if SENSITIVE_ARTIFACT_PATTERN.search(line):
+                    findings.append(
+                        BuildkiteFinding(
+                            kind="sensitive_artifact",
+                            severity="high",
+                            message="artifact_paths includes .env — may leak secrets in build artifacts",
+                            path=rel,
+                            lineno=lineno,
+                            line=raw.strip(),
+                        )
+                    )
+                continue
+
+            if in_artifact_paths:
+                current_indent = len(raw) - len(raw.lstrip())
+                if current_indent <= artifact_indent and not line.startswith("-"):
+                    in_artifact_paths = False
+                elif re.search(r"\.env\b", line):
+                    findings.append(
+                        BuildkiteFinding(
+                            kind="sensitive_artifact",
+                            severity="high",
+                            message="artifact_paths includes .env — may leak secrets in build artifacts",
+                            path=rel,
+                            lineno=lineno,
+                            line=raw.strip(),
+                        )
+                    )
 
             label_match = re.match(r"^\s*-\s*label\s*:\s*[\"']?([^\"']+)", raw, re.IGNORECASE)
             if label_match:
@@ -269,18 +303,6 @@ class BuildkiteAnalyzer:
                         kind="propagate_environment",
                         severity="medium",
                         message="propagate_environment leaks parent env to child steps — restrict sensitive vars",
-                        path=rel,
-                        lineno=lineno,
-                        line=raw.strip(),
-                    )
-                )
-
-            if SENSITIVE_ARTIFACT_PATTERN.search(line):
-                findings.append(
-                    BuildkiteFinding(
-                        kind="sensitive_artifact",
-                        severity="high",
-                        message="artifact_paths includes .env — may leak secrets in build artifacts",
                         path=rel,
                         lineno=lineno,
                         line=raw.strip(),
