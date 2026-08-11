@@ -36,7 +36,7 @@ HIGH_PR_LIMIT_PATTERN = re.compile(
 )
 MISSING_VERSION_PATTERN = re.compile(r"^\s*version\s*:\s*2\s*$", re.IGNORECASE)
 ECOSYSTEM_PATTERN = re.compile(
-    r"^\s*package-ecosystem\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$",
+    r"^\s*(?:-\s+)?package-ecosystem\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$",
     re.IGNORECASE,
 )
 GROUPS_PATTERN = re.compile(r"^\s*groups\s*:", re.IGNORECASE)
@@ -127,7 +127,6 @@ class DependabotAnalyzer:
         in_updates_block = False
         update_blocks = 0
         blocks_with_daily = 0
-        blocks_without_groups = 0
 
         for lineno, raw in enumerate(raw_lines, start=1):
             line = raw.strip()
@@ -228,7 +227,6 @@ class DependabotAnalyzer:
             )
 
         if update_blocks > 0 and not info.has_groups:
-            blocks_without_groups = update_blocks
             findings.append(
                 DependabotFinding(
                     kind="missing_groups",
