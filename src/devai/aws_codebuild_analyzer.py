@@ -19,7 +19,8 @@ HARDCODED_SECRET_PATTERN = re.compile(
     re.IGNORECASE,
 )
 HARDCODED_ENV_VALUE_PATTERN = re.compile(
-    r"^\s*(?:[A-Z][A-Z0-9_]*)\s*:\s*[\"'][^\"'{}\s][^\"']+[\"']",
+    r"^\s*(?:API[_-]?KEY|SECRET|TOKEN|PASSWORD|CREDENTIAL|PRIVATE[_-]?KEY|AWS_[A-Z0-9_]+)\s*:\s*"
+    r"[\"'][^\"'{}\s][^\"']+[\"']",
     re.IGNORECASE,
 )
 CURL_PIPE_SHELL_PATTERN = re.compile(
@@ -27,7 +28,7 @@ CURL_PIPE_SHELL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 LATEST_TAG_PATTERN = re.compile(
-    r"(?:image|docker|FROM)\s*[:=]?\s*[^\s:]+:latest\b",
+    r":latest\b",
     re.IGNORECASE,
 )
 DOCKER_SOCKET_MOUNT_PATTERN = re.compile(
