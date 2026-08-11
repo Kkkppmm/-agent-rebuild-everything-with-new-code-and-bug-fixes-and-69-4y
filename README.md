@@ -86,6 +86,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **ComposeAnalyzer** — Audit Docker Compose files for privileged mode, host mounts, :latest tags, secrets in environment, and missing resource limits
 - **PrecommitAnalyzer** — Audit `.pre-commit-config.yaml` for unpinned hook revisions, local hooks with unsafe entries, and secrets in config
+- **DevContainerAnalyzer** — Audit `devcontainer.json` for privileged mode, docker.sock mounts, hardcoded secrets, and unsafe lifecycle commands
 - **DependencyParser** — Parse requirements.txt and pyproject.toml, detect unpinned and duplicate deps
 - **StreamCollector** — Collect streaming LLM output with callbacks, timing, and chunk storage
 - **DevHooks** — Install git pre-commit, pre-push, commit-msg, and post-commit hooks powered by DevAI presets

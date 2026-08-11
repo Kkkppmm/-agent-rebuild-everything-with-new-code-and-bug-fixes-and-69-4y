@@ -24,6 +24,7 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
+from devai.devcontainer_analyzer import DevContainerAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.makefile_analyzer import MakefileAnalyzer
 from devai.kubernetes_analyzer import KubernetesAnalyzer
@@ -411,6 +412,10 @@ class DevAI:
     def precommit(self, path: str | Path = ".", **kwargs: Any) -> PrecommitAnalyzer:
         """Audit pre-commit config files for unpinned hooks and unsafe entries."""
         return PrecommitAnalyzer(str(path), **kwargs)
+
+    def devcontainer(self, path: str | Path = ".", **kwargs: Any) -> DevContainerAnalyzer:
+        """Audit dev container configs for privileged mode, secrets, and unsafe mounts."""
+        return DevContainerAnalyzer(str(path), **kwargs)
 
     def makefile(self, path: str | Path = ".", **kwargs: Any) -> MakefileAnalyzer:
         """Audit Makefiles for security risks and build best practices."""

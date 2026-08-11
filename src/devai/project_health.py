@@ -18,6 +18,7 @@ from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
+from devai.devcontainer_analyzer import DevContainerAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
 from devai.makefile_analyzer import MakefileAnalyzer
 from devai.kubernetes_analyzer import KubernetesAnalyzer
@@ -160,6 +161,7 @@ class ProjectHealth:
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
+        "devcontainer": 0.02,
         "makefile": 0.02,
         "kubernetes": 0.02,
         "terraform": 0.02,
@@ -386,6 +388,24 @@ class ProjectHealth:
         stats = analyzer.stats
         if stats.config_files == 0:
             return 100.0, "No pre-commit config found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_devcontainer(self, analyzer: DevContainerAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No dev container config found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
@@ -1036,6 +1056,14 @@ class ProjectHealth:
                 recs.append(
                     "Review pre-commit findings — pin repos to tags/SHAs and audit local hooks"
                 )
+            elif cat.name == "devcontainer" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden dev containers — avoid privileged mode, docker.sock mounts, and secrets in remoteEnv"
+                )
+            elif cat.name == "devcontainer" and cat.score < 70 and cat.details.get("config_files", 0) > 0:
+                recs.append(
+                    "Review dev container findings — pin images, set remoteUser, and audit lifecycle commands"
+                )
             elif cat.name == "makefile" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Makefiles — avoid curl-pipe-to-shell, chmod 777, and secrets in variables"
@@ -1313,6 +1341,10 @@ class ProjectHealth:
         precommit = PrecommitAnalyzer(root_str)
         score, summary, details = self._score_precommit(precommit)
         categories.append(HealthCategory("precommit", score, summary, details))
+
+        devcontainer = DevContainerAnalyzer(root_str)
+        score, summary, details = self._score_devcontainer(devcontainer)
+        categories.append(HealthCategory("devcontainer", score, summary, details))
 
         makefile = MakefileAnalyzer(root_str)
         score, summary, details = self._score_makefile(makefile)

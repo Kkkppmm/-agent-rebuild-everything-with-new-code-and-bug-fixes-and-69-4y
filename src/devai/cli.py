@@ -421,6 +421,22 @@ def cmd_precommit_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_devcontainer_audit(args: argparse.Namespace) -> None:
+    from devai.devcontainer_analyzer import DevContainerAnalyzer
+
+    analyzer = DevContainerAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_makefile_audit(args: argparse.Namespace) -> None:
     from devai.makefile_analyzer import MakefileAnalyzer
 
@@ -2035,6 +2051,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened pre-commit configuration template",
     )
     p.set_defaults(func=cmd_precommit_audit)
+
+    p = sub.add_parser(
+        "devcontainer-audit",
+        help="Audit dev container configs for privileged mode and unsafe mounts",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened devcontainer.json template",
+    )
+    p.set_defaults(func=cmd_devcontainer_audit)
 
     p = sub.add_parser("makefile-audit", help="Audit Makefiles for security and build best practices")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

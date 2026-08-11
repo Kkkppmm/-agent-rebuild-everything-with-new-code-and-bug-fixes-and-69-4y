@@ -58,6 +58,12 @@ from devai.compose_analyzer import (
     ComposeInfo,
     ComposeStats,
 )
+from devai.devcontainer_analyzer import (
+    DevContainerAnalyzer,
+    DevContainerFinding,
+    DevContainerInfo,
+    DevContainerStats,
+)
 from devai.precommit_analyzer import (
     PrecommitAnalyzer,
     PrecommitFinding,
@@ -729,6 +735,10 @@ __all__ = [
     "ComposeFinding",
     "ComposeInfo",
     "ComposeStats",
+    "DevContainerAnalyzer",
+    "DevContainerFinding",
+    "DevContainerInfo",
+    "DevContainerStats",
     "PrecommitAnalyzer",
     "PrecommitFinding",
     "PrecommitHookInfo",
