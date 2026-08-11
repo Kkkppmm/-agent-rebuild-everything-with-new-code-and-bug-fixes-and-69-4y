@@ -85,6 +85,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **AWSCodePipelineAnalyzer** — Audit AWS CodePipeline configs for hardcoded secrets, disabled encryption, wildcard IAM, and missing production approvals
 - **HarnessCIAnalyzer** — Audit Harness CI pipeline YAML for hardcoded secrets, privileged containers, automountServiceAccountToken, and Harness expression injection
 - **BuddyCIAnalyzer** — Audit Buddy CI pipeline YAML for hardcoded secrets, docker_privileged_mode, unpinned image tags, and Buddy variable injection
+- **DependabotAnalyzer** — Audit `.github/dependabot.yml` for hardcoded registry credentials, insecure external code execution, daily update floods, and missing security groups
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

@@ -54,6 +54,7 @@ from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.aws_codepipeline_analyzer import AWSCodePipelineAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
+from devai.dependabot_analyzer import DependabotAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -531,6 +532,10 @@ class DevAI:
     def buddy_ci(self, path: str | Path = ".", **kwargs: Any) -> BuddyCIAnalyzer:
         """Audit Buddy CI pipelines for hardcoded secrets, privileged Docker mode, and variable injection."""
         return BuddyCIAnalyzer(str(path), **kwargs)
+
+    def dependabot(self, path: str | Path = ".", **kwargs: Any) -> DependabotAnalyzer:
+        """Audit Dependabot configs for hardcoded registry credentials, unsafe settings, and weak defaults."""
+        return DependabotAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

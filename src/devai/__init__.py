@@ -239,6 +239,12 @@ from devai.buddy_ci_analyzer import (
     BuddyCIInfo,
     BuddyCIStats,
 )
+from devai.dependabot_analyzer import (
+    DependabotAnalyzer,
+    DependabotFinding,
+    DependabotInfo,
+    DependabotStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -874,6 +880,10 @@ __all__ = [
     "BuddyCIFinding",
     "BuddyCIInfo",
     "BuddyCIStats",
+    "DependabotAnalyzer",
+    "DependabotFinding",
+    "DependabotInfo",
+    "DependabotStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

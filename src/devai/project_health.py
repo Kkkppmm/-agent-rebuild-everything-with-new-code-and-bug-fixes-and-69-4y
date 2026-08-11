@@ -48,6 +48,7 @@ from devai.devcontainer_analyzer import DevContainerAnalyzer
 from devai.aws_codepipeline_analyzer import AWSCodePipelineAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
+from devai.dependabot_analyzer import DependabotAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -193,6 +194,7 @@ class ProjectHealth:
         "aws_codepipeline": 0.02,
         "harness_ci": 0.02,
         "buddy_ci": 0.02,
+        "dependabot": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -959,6 +961,26 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_dependabot(self, analyzer: DependabotAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Dependabot configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Dependabot config(s), {stats.ecosystems} ecosystem(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "ecosystems": stats.ecosystems,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1235,6 +1257,10 @@ class ProjectHealth:
             elif cat.name == "buddy_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Buddy CI — use encrypted variables/vault, pin Docker image tags, disable docker_privileged_mode, and sanitize Buddy variables in scripts"
+                )
+            elif cat.name == "dependabot" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Dependabot — use GitHub secrets for registry credentials, disable insecure-external-code-execution, and group security updates"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1529,6 +1555,10 @@ class ProjectHealth:
         buddy_ci = BuddyCIAnalyzer(root_str)
         score, summary, details = self._score_buddy_ci(buddy_ci)
         categories.append(HealthCategory("buddy_ci", score, summary, details))
+
+        dependabot = DependabotAnalyzer(root_str)
+        score, summary, details = self._score_dependabot(dependabot)
+        categories.append(HealthCategory("dependabot", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

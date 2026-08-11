@@ -821,6 +821,22 @@ def cmd_buddy_ci_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_dependabot_audit(args: argparse.Namespace) -> None:
+    from devai.dependabot_analyzer import DependabotAnalyzer
+
+    analyzer = DependabotAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_gocd_ci_audit(args: argparse.Namespace) -> None:
     from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 
@@ -2446,6 +2462,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Buddy CI pipeline skeleton",
     )
     p.set_defaults(func=cmd_buddy_ci_audit)
+
+    p = sub.add_parser(
+        "dependabot-audit",
+        help="Audit Dependabot configs for hardcoded credentials and unsafe settings",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Dependabot config skeleton",
+    )
+    p.set_defaults(func=cmd_dependabot_audit)
 
     p = sub.add_parser(
         "appveyor-ci-audit",
