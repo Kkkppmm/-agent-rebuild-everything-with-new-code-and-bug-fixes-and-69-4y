@@ -51,6 +51,7 @@ from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.aws_codepipeline_analyzer import AWSCodePipelineAnalyzer
+from devai.devcontainer_analyzer import DevContainerAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
@@ -514,6 +515,10 @@ class DevAI:
     def aws_codepipeline(self, path: str | Path = ".", **kwargs: Any) -> AWSCodePipelineAnalyzer:
         """Audit AWS CodePipeline configs for hardcoded secrets, weak IAM, and missing approvals."""
         return AWSCodePipelineAnalyzer(str(path), **kwargs)
+
+    def devcontainer(self, path: str | Path = ".", **kwargs: Any) -> DevContainerAnalyzer:
+        """Audit dev container configs for privileged mode, root user, and unsafe mounts."""
+        return DevContainerAnalyzer(str(path), **kwargs)
 
     def aws_codebuild(self, path: str | Path = ".", **kwargs: Any) -> AWSCodeBuildAnalyzer:
         """Audit AWS CodeBuild buildspec files for hardcoded secrets, unencrypted artifacts, and unsafe scripts."""

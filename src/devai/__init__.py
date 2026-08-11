@@ -221,6 +221,12 @@ from devai.aws_codepipeline_analyzer import (
     AWSCodePipelineInfo,
     AWSCodePipelineStats,
 )
+from devai.devcontainer_analyzer import (
+    DevContainerAnalyzer,
+    DevContainerFinding,
+    DevContainerInfo,
+    DevContainerStats,
+)
 from devai.harness_ci_analyzer import (
     HarnessCIAnalyzer,
     HarnessCIFinding,
@@ -856,6 +862,10 @@ __all__ = [
     "AWSCodePipelineFinding",
     "AWSCodePipelineInfo",
     "AWSCodePipelineStats",
+    "DevContainerAnalyzer",
+    "DevContainerFinding",
+    "DevContainerInfo",
+    "DevContainerStats",
     "HarnessCIAnalyzer",
     "HarnessCIFinding",
     "HarnessCIInfo",

@@ -41,7 +41,7 @@ class TestProjectHealth:
         report = health.analyze()
         assert isinstance(report, ProjectHealthReport)
         assert report.overall_score >= 60.0
-        assert len(report.categories) == 49
+        assert len(report.categories) == 50
 
     def test_analyze_detects_issues(self, tmp_path: Path):
         (tmp_path / "bad.py").write_text(BAD_MODULE, encoding="utf-8")
@@ -81,7 +81,7 @@ class TestProjectHealth:
         (tmp_path / "app.py").write_text("x = 1\n", encoding="utf-8")
         health = ProjectHealth(str(tmp_path), scan_secrets=False)
         report = health.analyze()
-        assert len(report.categories) == 48
+        assert len(report.categories) == 49
         assert not any(c.name == "secrets" for c in report.categories)
         assert any(c.name == "smells" for c in report.categories)
         assert any(c.name == "tech_debt" for c in report.categories)

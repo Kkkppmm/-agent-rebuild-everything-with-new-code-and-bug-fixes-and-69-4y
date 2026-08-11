@@ -82,6 +82,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **ArgoCDAnalyzer** — Audit Argo CD Application/ApplicationSet manifests for insecure sources, wildcard destinations, weak sync policies, and hardcoded credentials
 - **AWSCodeBuildAnalyzer** — Audit AWS CodeBuild buildspec files for hardcoded secrets, unencrypted artifacts, privileged Docker, and CODEBUILD_* injection
 - **AWSCodePipelineAnalyzer** — Audit AWS CodePipeline configs for hardcoded secrets, disabled encryption, wildcard IAM, and missing production approvals
+- **DevContainerAnalyzer** — Audit dev container configs for privileged mode, root user, Docker socket mounts, and hardcoded secrets
 - **HarnessCIAnalyzer** — Audit Harness CI pipeline YAML for hardcoded secrets, privileged containers, automountServiceAccountToken, and Harness expression injection
 - **BuddyCIAnalyzer** — Audit Buddy CI pipeline YAML for hardcoded secrets, docker_privileged_mode, unpinned image tags, and Buddy variable injection
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection

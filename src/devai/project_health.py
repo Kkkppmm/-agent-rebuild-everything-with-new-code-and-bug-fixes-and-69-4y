@@ -45,6 +45,7 @@ from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.aws_codepipeline_analyzer import AWSCodePipelineAnalyzer
+from devai.devcontainer_analyzer import DevContainerAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
@@ -194,6 +195,7 @@ class ProjectHealth:
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
+        "devcontainer": 0.02,
     }
 
     def __init__(
@@ -881,6 +883,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_devcontainer(self, analyzer: DevContainerAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.containers == 0:
+            return 100.0, "No dev container configs found", {"containers": 0, "findings": 0}
+        summary = (
+            f"{stats.containers} dev container config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "containers": stats.containers,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_aws_codepipeline(self, analyzer: AWSCodePipelineAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1223,6 +1244,10 @@ class ProjectHealth:
                 recs.append(
                     "Harden Cirrus CI — use encrypted variables, pin image tags, disable privileged/host network, and sanitize CIRRUS_* variables in scripts"
                 )
+            elif cat.name == "devcontainer" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden dev containers — avoid privileged mode and Docker socket mounts, use a non-root user, and store secrets outside devcontainer.json"
+                )
         return recs
 
     def analyze(self) -> ProjectHealthReport:
@@ -1512,6 +1537,10 @@ class ProjectHealth:
         cirrus_ci = CirrusCIAnalyzer(root_str)
         score, summary, details = self._score_cirrus_ci(cirrus_ci)
         categories.append(HealthCategory("cirrus_ci", score, summary, details))
+
+        devcontainer = DevContainerAnalyzer(root_str)
+        score, summary, details = self._score_devcontainer(devcontainer)
+        categories.append(HealthCategory("devcontainer", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
