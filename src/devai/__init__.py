@@ -227,6 +227,12 @@ from devai.buddy_ci_analyzer import (
     BuddyCIInfo,
     BuddyCIStats,
 )
+from devai.appveyor_ci_analyzer import (
+    AppVeyorCIAnalyzer,
+    AppVeyorCIFinding,
+    AppVeyorCIInfo,
+    AppVeyorCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -836,6 +842,10 @@ __all__ = [
     "BuddyCIFinding",
     "BuddyCIInfo",
     "BuddyCIStats",
+    "AppVeyorCIAnalyzer",
+    "AppVeyorCIFinding",
+    "AppVeyorCIInfo",
+    "AppVeyorCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

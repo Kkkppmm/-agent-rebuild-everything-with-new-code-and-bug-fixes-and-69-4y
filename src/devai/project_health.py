@@ -46,6 +46,7 @@ from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
+from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -186,6 +187,7 @@ class ProjectHealth:
         "aws_codebuild": 0.02,
         "harness_ci": 0.02,
         "buddy_ci": 0.02,
+        "appveyor_ci": 0.02,
     }
 
     def __init__(
@@ -911,6 +913,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_appveyor_ci(self, analyzer: AppVeyorCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No AppVeyor CI configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} AppVeyor CI config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1122,6 +1143,10 @@ class ProjectHealth:
             elif cat.name == "buddy_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Buddy CI — use encrypted variables/vault, pin Docker image tags, disable docker_privileged_mode, and sanitize Buddy variables in scripts"
+                )
+            elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden AppVeyor CI — use encrypted variables, disable enable_rdp, pin version/stack, and sanitize APPVEYOR_* variables in scripts"
                 )
         return recs
 
@@ -1396,6 +1421,10 @@ class ProjectHealth:
         buddy_ci = BuddyCIAnalyzer(root_str)
         score, summary, details = self._score_buddy_ci(buddy_ci)
         categories.append(HealthCategory("buddy_ci", score, summary, details))
+
+        appveyor_ci = AppVeyorCIAnalyzer(root_str)
+        score, summary, details = self._score_appveyor_ci(appveyor_ci)
+        categories.append(HealthCategory("appveyor_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0
