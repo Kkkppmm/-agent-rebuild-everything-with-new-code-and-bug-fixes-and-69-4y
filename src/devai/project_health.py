@@ -45,6 +45,7 @@ from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
+from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -184,6 +185,7 @@ class ProjectHealth:
         "argocd": 0.02,
         "aws_codebuild": 0.02,
         "harness_ci": 0.02,
+        "buddy_ci": 0.02,
     }
 
     def __init__(
@@ -890,6 +892,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_buddy_ci(self, analyzer: BuddyCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Buddy CI pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Buddy CI pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1097,6 +1118,10 @@ class ProjectHealth:
             elif cat.name == "harness_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Harness CI — use Secret Manager references, runAsNonRoot, disable automountServiceAccountToken, and avoid privileged containers"
+                )
+            elif cat.name == "buddy_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Buddy CI — use encrypted variables/vault, pin Docker image tags, disable docker_privileged_mode, and sanitize Buddy variables in scripts"
                 )
         return recs
 
@@ -1367,6 +1392,10 @@ class ProjectHealth:
         harness_ci = HarnessCIAnalyzer(root_str)
         score, summary, details = self._score_harness_ci(harness_ci)
         categories.append(HealthCategory("harness_ci", score, summary, details))
+
+        buddy_ci = BuddyCIAnalyzer(root_str)
+        score, summary, details = self._score_buddy_ci(buddy_ci)
+        categories.append(HealthCategory("buddy_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

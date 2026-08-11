@@ -51,6 +51,7 @@ from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
+from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -513,6 +514,10 @@ class DevAI:
     def harness_ci(self, path: str | Path = ".", **kwargs: Any) -> HarnessCIAnalyzer:
         """Audit Harness CI pipelines for hardcoded secrets, privileged containers, and expression injection."""
         return HarnessCIAnalyzer(str(path), **kwargs)
+
+    def buddy_ci(self, path: str | Path = ".", **kwargs: Any) -> BuddyCIAnalyzer:
+        """Audit Buddy CI pipelines for hardcoded secrets, privileged Docker mode, and variable injection."""
+        return BuddyCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

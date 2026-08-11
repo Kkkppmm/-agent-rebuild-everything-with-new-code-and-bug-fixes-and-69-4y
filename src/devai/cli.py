@@ -773,6 +773,22 @@ def cmd_harness_ci_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_buddy_ci_audit(args: argparse.Namespace) -> None:
+    from devai.buddy_ci_analyzer import BuddyCIAnalyzer
+
+    analyzer = BuddyCIAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_tekton_audit(args: argparse.Namespace) -> None:
     from devai.tekton_analyzer import TektonAnalyzer
 
@@ -2308,6 +2324,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Harness CI pipeline skeleton",
     )
     p.set_defaults(func=cmd_harness_ci_audit)
+
+    p = sub.add_parser(
+        "buddy-ci-audit",
+        help="Audit Buddy CI pipelines for hardcoded secrets and unsafe scripts",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Buddy CI pipeline skeleton",
+    )
+    p.set_defaults(func=cmd_buddy_ci_audit)
 
     p = sub.add_parser(
         "tekton-audit",
