@@ -48,6 +48,7 @@ from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
+from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -190,6 +191,7 @@ class ProjectHealth:
         "buddy_ci": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
+        "cirrus_ci": 0.02,
     }
 
     def __init__(
@@ -934,6 +936,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_cirrus_ci(self, analyzer: CirrusCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Cirrus CI pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Cirrus CI pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_appveyor_ci(self, analyzer: AppVeyorCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1172,6 +1193,10 @@ class ProjectHealth:
             elif cat.name == "gocd_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden GoCD CI — use secure_variables, pin container image tags, disable privileged/host network, and sanitize GO_* variables in tasks"
+                )
+            elif cat.name == "cirrus_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Cirrus CI — use encrypted variables, pin image tags, disable privileged/host network, and sanitize CIRRUS_* variables in scripts"
                 )
         return recs
 
@@ -1454,6 +1479,10 @@ class ProjectHealth:
         gocd_ci = GoCDCIAnalyzer(root_str)
         score, summary, details = self._score_gocd_ci(gocd_ci)
         categories.append(HealthCategory("gocd_ci", score, summary, details))
+
+        cirrus_ci = CirrusCIAnalyzer(root_str)
+        score, summary, details = self._score_cirrus_ci(cirrus_ci)
+        categories.append(HealthCategory("cirrus_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

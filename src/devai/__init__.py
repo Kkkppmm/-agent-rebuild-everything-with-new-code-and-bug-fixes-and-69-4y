@@ -239,6 +239,12 @@ from devai.gocd_ci_analyzer import (
     GoCDCIInfo,
     GoCDCIStats,
 )
+from devai.cirrus_ci_analyzer import (
+    CirrusCIAnalyzer,
+    CirrusCIFinding,
+    CirrusCIInfo,
+    CirrusCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -856,6 +862,10 @@ __all__ = [
     "GoCDCIFinding",
     "GoCDCIInfo",
     "GoCDCIStats",
+    "CirrusCIAnalyzer",
+    "CirrusCIFinding",
+    "CirrusCIInfo",
+    "CirrusCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

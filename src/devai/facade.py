@@ -54,6 +54,7 @@ from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
+from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -528,6 +529,10 @@ class DevAI:
     def gocd_ci(self, path: str | Path = ".", **kwargs: Any) -> GoCDCIAnalyzer:
         """Audit GoCD pipelines for hardcoded secrets, privileged containers, and GO_* variable injection."""
         return GoCDCIAnalyzer(str(path), **kwargs)
+
+    def cirrus_ci(self, path: str | Path = ".", **kwargs: Any) -> CirrusCIAnalyzer:
+        """Audit Cirrus CI pipelines for hardcoded secrets, privileged containers, and CIRRUS_* variable injection."""
+        return CirrusCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
