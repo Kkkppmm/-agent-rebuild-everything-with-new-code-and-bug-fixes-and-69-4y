@@ -79,7 +79,7 @@ MANUAL_APPROVAL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 DEPLOY_STAGE_PATTERN = re.compile(
-    r"^\s*Name\s*:\s*[\"']?(?:Deploy|Production|Release|Prod)[\"']?",
+    r"^\s*-?\s*Name\s*:\s*[\"']?(?:Deploy|Production|Release|Prod)[\"']?",
     re.IGNORECASE,
 )
 INSECURE_S3_LOCATION_PATTERN = re.compile(
@@ -181,32 +181,30 @@ class AWSCodePipelineAnalyzer:
         info = AWSCodePipelineInfo(path=rel, lines=len(raw_lines))
         in_artifact_store = False
         has_encryption_key = False
-        in_deploy_stage = False
-        deploy_stage_has_approval = False
-        deploy_stages_found = 0
+        has_deploy_stage = False
+        has_manual_approval = False
 
         for lineno, raw in enumerate(raw_lines, start=1):
             line = raw.strip()
             if not line or line.startswith("#"):
                 continue
 
-            stage_match = re.match(r"^\s*-?\s*Name\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$", line, re.IGNORECASE)
-            if stage_match and re.search(r"^\s*Stages\s*:", "\n".join(raw_lines[max(0, lineno - 5):lineno]), re.IGNORECASE):
-                stage_name = stage_match.group(1).strip()
-                info.stages.append(stage_name)
-                in_deploy_stage = bool(DEPLOY_STAGE_PATTERN.match(line))
-                if in_deploy_stage:
-                    deploy_stages_found += 1
-                    deploy_stage_has_approval = False
-                continue
+            if MANUAL_APPROVAL_PATTERN.search(line):
+                has_manual_approval = True
 
-            action_match = re.match(
-                r"^\s*-?\s*Name\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$",
-                line,
-                re.IGNORECASE,
-            )
-            if action_match and re.search(r"Actions\s*:", "\n".join(raw_lines[max(0, lineno - 3):lineno]), re.IGNORECASE):
-                info.actions.append(action_match.group(1).strip())
+            stage_match = re.match(r"^\s*-?\s*Name\s*:\s*[\"']?([^\"'\n]+)[\"']?\s*$", line, re.IGNORECASE)
+            if stage_match:
+                name = stage_match.group(1).strip()
+                if name not in info.stages and name not in info.actions:
+                    if DEPLOY_STAGE_PATTERN.match(line):
+                        has_deploy_stage = True
+                        info.stages.append(name)
+                    elif re.search(r"ActionTypeId|Provider", "\n".join(raw_lines[lineno:lineno + 3]), re.IGNORECASE):
+                        info.actions.append(name)
+                    elif re.search(r"Stages\s*:", "\n".join(raw_lines[max(0, lineno - 8):lineno]), re.IGNORECASE):
+                        info.stages.append(name)
+                        if DEPLOY_STAGE_PATTERN.match(line):
+                            has_deploy_stage = True
 
             if re.match(r"^\s*ArtifactStore\s*:", line, re.IGNORECASE):
                 in_artifact_store = True
@@ -229,9 +227,6 @@ class AWSCodePipelineAnalyzer:
                         )
                     )
                 in_artifact_store = False
-
-            if MANUAL_APPROVAL_PATTERN.search(line):
-                deploy_stage_has_approval = True
 
             if HARDCODED_CONFIG_VALUE_PATTERN.match(line):
                 findings.append(
@@ -391,7 +386,7 @@ class AWSCodePipelineAnalyzer:
                 )
             )
 
-        if deploy_stages_found > 0 and not deploy_stage_has_approval:
+        if has_deploy_stage and not has_manual_approval:
             findings.append(
                 AWSCodePipelineFinding(
                     kind="missing_manual_approval",
