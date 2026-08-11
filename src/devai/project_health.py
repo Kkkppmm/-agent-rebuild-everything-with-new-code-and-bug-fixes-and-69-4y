@@ -44,6 +44,7 @@ from devai.tekton_analyzer import TektonAnalyzer
 from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
+from devai.devcontainer_analyzer import DevContainerAnalyzer
 from devai.aws_codepipeline_analyzer import AWSCodePipelineAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
@@ -160,6 +161,7 @@ class ProjectHealth:
         "env": 0.04,
         "gitignore": 0.04,
         "dockerfile": 0.03,
+        "devcontainer": 0.02,
         "workflows": 0.03,
         "compose": 0.03,
         "precommit": 0.03,
@@ -862,6 +864,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_devcontainer(self, analyzer: DevContainerAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No dev container configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} dev container config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_aws_codebuild(self, analyzer: AWSCodeBuildAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1195,6 +1216,10 @@ class ProjectHealth:
                 recs.append(
                     "Harden Argo CD — pin targetRevision, restrict destination namespaces, enable prune/selfHeal, and avoid wildcard destinations"
                 )
+            elif cat.name == "devcontainer" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden dev containers — use non-root remoteUser, avoid docker.sock mounts, and reference secrets via ${localEnv:VAR}"
+                )
             elif cat.name == "aws_codebuild" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden AWS CodeBuild — use Secrets Manager/SSM, enable artifact encryption, and avoid privileged Docker"
@@ -1376,6 +1401,10 @@ class ProjectHealth:
         dockerfile = DockerfileAnalyzer(root_str)
         score, summary, details = self._score_dockerfile(dockerfile)
         categories.append(HealthCategory("dockerfile", score, summary, details))
+
+        devcontainer = DevContainerAnalyzer(root_str)
+        score, summary, details = self._score_devcontainer(devcontainer)
+        categories.append(HealthCategory("devcontainer", score, summary, details))
 
         workflows = WorkflowAnalyzer(root_str)
         score, summary, details = self._score_workflows(workflows)

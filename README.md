@@ -81,6 +81,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **FluxCDAnalyzer** — Audit Flux CD GitOps manifests for insecure HTTP sources, disabled TLS verification, force apply, cluster-admin RBAC, and hardcoded secrets
 - **ArgoCDAnalyzer** — Audit Argo CD Application/ApplicationSet manifests for insecure sources, wildcard destinations, weak sync policies, and hardcoded credentials
 - **AWSCodeBuildAnalyzer** — Audit AWS CodeBuild buildspec files for hardcoded secrets, unencrypted artifacts, privileged Docker, and CODEBUILD_* injection
+- **DevContainerAnalyzer** — Audit dev container configs for hardcoded secrets, privileged mode, docker.sock mounts, and unsafe lifecycle commands
 - **AWSCodePipelineAnalyzer** — Audit AWS CodePipeline configs for hardcoded secrets, disabled encryption, wildcard IAM, and missing production approvals
 - **HarnessCIAnalyzer** — Audit Harness CI pipeline YAML for hardcoded secrets, privileged containers, automountServiceAccountToken, and Harness expression injection
 - **BuddyCIAnalyzer** — Audit Buddy CI pipeline YAML for hardcoded secrets, docker_privileged_mode, unpinned image tags, and Buddy variable injection

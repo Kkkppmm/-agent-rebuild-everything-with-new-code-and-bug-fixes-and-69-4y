@@ -215,6 +215,12 @@ from devai.aws_codebuild_analyzer import (
     AWSCodeBuildInfo,
     AWSCodeBuildStats,
 )
+from devai.devcontainer_analyzer import (
+    DevContainerAnalyzer,
+    DevContainerFinding,
+    DevContainerInfo,
+    DevContainerStats,
+)
 from devai.aws_codepipeline_analyzer import (
     AWSCodePipelineAnalyzer,
     AWSCodePipelineFinding,
@@ -852,6 +858,10 @@ __all__ = [
     "AWSCodeBuildFinding",
     "AWSCodeBuildInfo",
     "AWSCodeBuildStats",
+    "DevContainerAnalyzer",
+    "DevContainerFinding",
+    "DevContainerInfo",
+    "DevContainerStats",
     "AWSCodePipelineAnalyzer",
     "AWSCodePipelineFinding",
     "AWSCodePipelineInfo",

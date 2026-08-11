@@ -22,6 +22,7 @@ from devai.magic_numbers import MagicNumberDetector
 from devai.env_vars import EnvVarAnalyzer
 from devai.gitignore_analyzer import GitignoreAnalyzer
 from devai.dockerfile_analyzer import DockerfileAnalyzer
+from devai.devcontainer_analyzer import DevContainerAnalyzer
 from devai.workflow_analyzer import WorkflowAnalyzer
 from devai.compose_analyzer import ComposeAnalyzer
 from devai.precommit_analyzer import PrecommitAnalyzer
@@ -402,6 +403,10 @@ class DevAI:
     def dockerfile(self, path: str | Path = ".", **kwargs: Any) -> DockerfileAnalyzer:
         """Audit Dockerfiles for security risks and container best practices."""
         return DockerfileAnalyzer(str(path), **kwargs)
+
+    def devcontainer(self, path: str | Path = ".", **kwargs: Any) -> DevContainerAnalyzer:
+        """Audit dev container configs for hardcoded secrets, privileged mode, and unsafe mounts."""
+        return DevContainerAnalyzer(str(path), **kwargs)
 
     def workflows(self, path: str | Path = ".", **kwargs: Any) -> WorkflowAnalyzer:
         """Audit GitHub Actions workflows for security risks and CI best practices."""
