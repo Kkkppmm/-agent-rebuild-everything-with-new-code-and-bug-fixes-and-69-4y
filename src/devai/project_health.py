@@ -43,6 +43,7 @@ from devai.argo_workflows_analyzer import ArgoWorkflowsAnalyzer
 from devai.tekton_analyzer import TektonAnalyzer
 from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
+from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -180,6 +181,7 @@ class ProjectHealth:
         "argo_workflows": 0.02,
         "flux_cd": 0.02,
         "argocd": 0.02,
+        "aws_codebuild": 0.02,
     }
 
     def __init__(
@@ -848,6 +850,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_aws_codebuild(self, analyzer: AWSCodeBuildAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.buildspecs == 0:
+            return 100.0, "No AWS CodeBuild buildspecs found", {"buildspecs": 0, "findings": 0}
+        summary = (
+            f"{stats.buildspecs} AWS CodeBuild buildspec(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "buildspecs": stats.buildspecs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1047,6 +1068,10 @@ class ProjectHealth:
             elif cat.name == "argocd" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Argo CD — pin targetRevision, restrict destination namespaces, enable prune/selfHeal, and avoid wildcard destinations"
+                )
+            elif cat.name == "aws_codebuild" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden AWS CodeBuild — use Secrets Manager/SSM, enable artifact encryption, and avoid privileged Docker"
                 )
         return recs
 
@@ -1309,6 +1334,10 @@ class ProjectHealth:
         argocd = ArgoCDAnalyzer(root_str)
         score, summary, details = self._score_argocd(argocd)
         categories.append(HealthCategory("argocd", score, summary, details))
+
+        aws_codebuild = AWSCodeBuildAnalyzer(root_str)
+        score, summary, details = self._score_aws_codebuild(aws_codebuild)
+        categories.append(HealthCategory("aws_codebuild", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

@@ -209,6 +209,12 @@ from devai.argocd_analyzer import (
     ArgoCDInfo,
     ArgoCDStats,
 )
+from devai.aws_codebuild_analyzer import (
+    AWSCodeBuildAnalyzer,
+    AWSCodeBuildFinding,
+    AWSCodeBuildInfo,
+    AWSCodeBuildStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -497,7 +503,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.68.0"
+__version__ = "6.70.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -806,6 +812,10 @@ __all__ = [
     "ArgoCDFinding",
     "ArgoCDInfo",
     "ArgoCDStats",
+    "AWSCodeBuildAnalyzer",
+    "AWSCodeBuildFinding",
+    "AWSCodeBuildInfo",
+    "AWSCodeBuildStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

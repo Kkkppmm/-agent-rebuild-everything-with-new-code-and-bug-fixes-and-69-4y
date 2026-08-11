@@ -49,6 +49,7 @@ from devai.argo_workflows_analyzer import ArgoWorkflowsAnalyzer
 from devai.tekton_analyzer import TektonAnalyzer
 from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
+from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -503,6 +504,10 @@ class DevAI:
     def argocd(self, path: str | Path = ".", **kwargs: Any) -> ArgoCDAnalyzer:
         """Audit Argo CD Applications for insecure sources, wildcard destinations, and weak sync policies."""
         return ArgoCDAnalyzer(str(path), **kwargs)
+
+    def aws_codebuild(self, path: str | Path = ".", **kwargs: Any) -> AWSCodeBuildAnalyzer:
+        """Audit AWS CodeBuild buildspec files for hardcoded secrets, unencrypted artifacts, and unsafe scripts."""
+        return AWSCodeBuildAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""

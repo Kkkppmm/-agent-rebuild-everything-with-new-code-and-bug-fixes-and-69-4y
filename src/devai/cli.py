@@ -741,6 +741,22 @@ def cmd_cloud_build_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_aws_codebuild_audit(args: argparse.Namespace) -> None:
+    from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
+
+    analyzer = AWSCodeBuildAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_tekton_audit(args: argparse.Namespace) -> None:
     from devai.tekton_analyzer import TektonAnalyzer
 
@@ -2248,6 +2264,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Google Cloud Build pipeline skeleton",
     )
     p.set_defaults(func=cmd_cloud_build_audit)
+
+    p = sub.add_parser(
+        "aws-codebuild-audit",
+        help="Audit AWS CodeBuild buildspec files for hardcoded secrets and unsafe scripts",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened AWS CodeBuild buildspec skeleton",
+    )
+    p.set_defaults(func=cmd_aws_codebuild_audit)
 
     p = sub.add_parser(
         "tekton-audit",
