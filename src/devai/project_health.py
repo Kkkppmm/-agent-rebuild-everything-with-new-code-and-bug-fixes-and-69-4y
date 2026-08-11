@@ -44,6 +44,7 @@ from devai.tekton_analyzer import TektonAnalyzer
 from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
+from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -182,6 +183,7 @@ class ProjectHealth:
         "flux_cd": 0.02,
         "argocd": 0.02,
         "aws_codebuild": 0.02,
+        "harness_ci": 0.02,
     }
 
     def __init__(
@@ -869,6 +871,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_harness_ci(self, analyzer: HarnessCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No Harness CI pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} Harness CI pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1072,6 +1093,10 @@ class ProjectHealth:
             elif cat.name == "aws_codebuild" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden AWS CodeBuild — use Secrets Manager/SSM, enable artifact encryption, and avoid privileged Docker"
+                )
+            elif cat.name == "harness_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Harness CI — use Secret Manager references, runAsNonRoot, disable automountServiceAccountToken, and avoid privileged containers"
                 )
         return recs
 
@@ -1338,6 +1363,10 @@ class ProjectHealth:
         aws_codebuild = AWSCodeBuildAnalyzer(root_str)
         score, summary, details = self._score_aws_codebuild(aws_codebuild)
         categories.append(HealthCategory("aws_codebuild", score, summary, details))
+
+        harness_ci = HarnessCIAnalyzer(root_str)
+        score, summary, details = self._score_harness_ci(harness_ci)
+        categories.append(HealthCategory("harness_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

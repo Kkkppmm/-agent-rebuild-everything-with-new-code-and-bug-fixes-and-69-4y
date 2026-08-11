@@ -215,6 +215,12 @@ from devai.aws_codebuild_analyzer import (
     AWSCodeBuildInfo,
     AWSCodeBuildStats,
 )
+from devai.harness_ci_analyzer import (
+    HarnessCIAnalyzer,
+    HarnessCIFinding,
+    HarnessCIInfo,
+    HarnessCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -816,6 +822,10 @@ __all__ = [
     "AWSCodeBuildFinding",
     "AWSCodeBuildInfo",
     "AWSCodeBuildStats",
+    "HarnessCIAnalyzer",
+    "HarnessCIFinding",
+    "HarnessCIInfo",
+    "HarnessCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

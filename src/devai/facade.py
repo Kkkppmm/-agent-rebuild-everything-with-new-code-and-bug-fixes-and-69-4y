@@ -50,6 +50,7 @@ from devai.tekton_analyzer import TektonAnalyzer
 from devai.flux_cd_analyzer import FluxCDAnalyzer
 from devai.argocd_analyzer import ArgoCDAnalyzer
 from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
+from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -508,6 +509,10 @@ class DevAI:
     def aws_codebuild(self, path: str | Path = ".", **kwargs: Any) -> AWSCodeBuildAnalyzer:
         """Audit AWS CodeBuild buildspec files for hardcoded secrets, unencrypted artifacts, and unsafe scripts."""
         return AWSCodeBuildAnalyzer(str(path), **kwargs)
+
+    def harness_ci(self, path: str | Path = ".", **kwargs: Any) -> HarnessCIAnalyzer:
+        """Audit Harness CI pipelines for hardcoded secrets, privileged containers, and expression injection."""
+        return HarnessCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
