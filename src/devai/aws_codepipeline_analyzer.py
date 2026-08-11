@@ -56,6 +56,10 @@ NO_ENCRYPTION_KEY_PATTERN = re.compile(
     r"(?:EncryptionKey|KmsKeyId)\s*:\s*(?:\"\"|''|none|null)\s*$",
     re.IGNORECASE,
 )
+KMS_KEY_ID_NONE_PATTERN = re.compile(
+    r"^\s*Id\s*:\s*[\"']?none[\"']?\s*$",
+    re.IGNORECASE,
+)
 PUBLIC_S3_ACL_PATTERN = re.compile(
     r"(?:public-read|public-read-write|authenticated-read)",
     re.IGNORECASE,
@@ -87,8 +91,15 @@ SECURITY_STEP_PATTERN = re.compile(
     r"(security|audit|snyk|bandit|safety|trivy|semgrep|gitleaks)",
     re.IGNORECASE,
 )
-PLAINTEXT_ENV_VAR_PATTERN = re.compile(
-    r"^\s*EnvironmentVariables\s*:\s*$",
+ENV_VAR_NAME_PATTERN = re.compile(
+    r"^\s*(?:-\s*)?Name\s*:\s*[\"']?"
+    r"(?:API[_-]?KEY|SECRET|TOKEN|PASSWORD|CREDENTIAL|PRIVATE[_-]?KEY|AWS_[A-Z0-9_]+|"
+    r"api[_-]?token|password|passwd|secret|credential)"
+    r"[\"']?\s*$",
+    re.IGNORECASE,
+)
+ENV_VAR_VALUE_PATTERN = re.compile(
+    r"^\s*(?:-\s*)?Value\s*:\s*[\"']([^\"'{}\s][^\"']*)[\"']\s*$",
     re.IGNORECASE,
 )
 UNENCRYPTED_ARTIFACT_STORE_PATTERN = re.compile(
@@ -199,6 +210,8 @@ class AWSCodePipelineAnalyzer:
         info = AWSCodePipelineInfo(path=rel, lines=len(raw_lines))
         in_env_variables = False
         has_security_stage = False
+        pending_sensitive_env_name = False
+        in_encryption_key_block = False
 
         for lineno, raw in enumerate(raw_lines, start=1):
             line = raw.strip()
@@ -223,12 +236,47 @@ class AWSCodePipelineAnalyzer:
             if SECURITY_STEP_PATTERN.search(line):
                 has_security_stage = True
 
-            if PLAINTEXT_ENV_VAR_PATTERN.match(line):
+            if re.match(r"^\s*EnvironmentVariables\s*:\s*$", line, re.IGNORECASE):
                 in_env_variables = True
+                pending_sensitive_env_name = False
+                continue
+
+            if in_env_variables and ENV_VAR_NAME_PATTERN.match(line):
+                pending_sensitive_env_name = True
+                continue
+
+            if in_env_variables and pending_sensitive_env_name:
+                value_match = ENV_VAR_VALUE_PATTERN.match(line)
+                if value_match:
+                    value = value_match.group(1)
+                    if AWS_ACCESS_KEY_PATTERN.search(value):
+                        findings.append(
+                            AWSCodePipelineFinding(
+                                kind="plaintext_aws_key",
+                                severity="high",
+                                message="plaintext AWS access key — use IAM roles or Secrets Manager",
+                                path=rel,
+                                lineno=lineno,
+                                line=raw.strip(),
+                            )
+                        )
+                    elif not re.search(r"(?:true|false|null|\$\{)", value, re.IGNORECASE):
+                        findings.append(
+                            AWSCodePipelineFinding(
+                                kind="hardcoded_secret",
+                                severity="high",
+                                message="hardcoded value in EnvironmentVariables — use Secrets Manager or SSM",
+                                path=rel,
+                                lineno=lineno,
+                                line=raw.strip(),
+                            )
+                        )
+                pending_sensitive_env_name = False
                 continue
 
             if re.match(r"^\s*(?:Stages|ArtifactStore|RoleArn|Pipeline)\s*:", line, re.IGNORECASE):
                 in_env_variables = False
+                pending_sensitive_env_name = False
 
             if in_env_variables and HARDCODED_ENV_VALUE_PATTERN.match(line):
                 if not re.search(r"(?:true|false|null|\$\{)", line, re.IGNORECASE):
@@ -290,6 +338,27 @@ class AWSCodePipelineAnalyzer:
                         line=raw.strip(),
                     )
                 )
+
+            if re.match(r"^\s*EncryptionKey\s*:\s*$", line, re.IGNORECASE):
+                in_encryption_key_block = True
+                continue
+
+            if in_encryption_key_block and KMS_KEY_ID_NONE_PATTERN.match(line):
+                findings.append(
+                    AWSCodePipelineFinding(
+                        kind="missing_encryption_key",
+                        severity="medium",
+                        message="no KMS encryption key configured for artifacts — specify a customer-managed KMS key",
+                        path=rel,
+                        lineno=lineno,
+                        line=raw.strip(),
+                    )
+                )
+                in_encryption_key_block = False
+                continue
+
+            if in_encryption_key_block and re.match(r"^\s*Type\s*:", line, re.IGNORECASE):
+                in_encryption_key_block = False
 
             if NO_ENCRYPTION_KEY_PATTERN.search(line):
                 findings.append(
