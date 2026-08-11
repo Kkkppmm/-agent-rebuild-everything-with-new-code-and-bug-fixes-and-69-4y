@@ -50,6 +50,7 @@ from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.dependabot_analyzer import DependabotAnalyzer
 from devai.renovate_analyzer import RenovateAnalyzer
+from devai.snyk_analyzer import SnykAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -197,6 +198,7 @@ class ProjectHealth:
         "buddy_ci": 0.02,
         "dependabot": 0.02,
         "renovate": 0.02,
+        "snyk": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1003,6 +1005,27 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_snyk(self, analyzer: SnykAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Snyk configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Snyk config(s) ({stats.policy_files} policy, {stats.cli_files} cli), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "policy_files": stats.policy_files,
+            "cli_files": stats.cli_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1287,6 +1310,10 @@ class ProjectHealth:
             elif cat.name == "renovate" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Renovate — use encrypted hostRules tokens, keep vulnerabilityAlerts enabled, and restrict postUpgradeTasks shell commands"
+                )
+            elif cat.name == "snyk" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Snyk — store SNYK_TOKEN in CI secrets, avoid wildcard ignores, and set expires dates on suppressions"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1589,6 +1616,10 @@ class ProjectHealth:
         renovate = RenovateAnalyzer(root_str)
         score, summary, details = self._score_renovate(renovate)
         categories.append(HealthCategory("renovate", score, summary, details))
+
+        snyk = SnykAnalyzer(root_str)
+        score, summary, details = self._score_snyk(snyk)
+        categories.append(HealthCategory("snyk", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

@@ -56,6 +56,7 @@ from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.dependabot_analyzer import DependabotAnalyzer
 from devai.renovate_analyzer import RenovateAnalyzer
+from devai.snyk_analyzer import SnykAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -541,6 +542,10 @@ class DevAI:
     def renovate(self, path: str | Path = ".", **kwargs: Any) -> RenovateAnalyzer:
         """Audit Renovate configs for hardcoded host rule credentials, unsafe automerge, and weak defaults."""
         return RenovateAnalyzer(str(path), **kwargs)
+
+    def snyk(self, path: str | Path = ".", **kwargs: Any) -> SnykAnalyzer:
+        """Audit Snyk policy and CLI configs for hardcoded tokens, broad ignores, and weak defaults."""
+        return SnykAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

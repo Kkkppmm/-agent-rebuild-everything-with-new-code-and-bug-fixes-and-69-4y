@@ -251,6 +251,12 @@ from devai.renovate_analyzer import (
     RenovateInfo,
     RenovateStats,
 )
+from devai.snyk_analyzer import (
+    SnykAnalyzer,
+    SnykFinding,
+    SnykInfo,
+    SnykStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -894,6 +900,10 @@ __all__ = [
     "RenovateFinding",
     "RenovateInfo",
     "RenovateStats",
+    "SnykAnalyzer",
+    "SnykFinding",
+    "SnykInfo",
+    "SnykStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

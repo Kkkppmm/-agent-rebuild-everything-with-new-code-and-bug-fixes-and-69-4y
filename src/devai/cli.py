@@ -853,6 +853,22 @@ def cmd_renovate_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_snyk_audit(args: argparse.Namespace) -> None:
+    from devai.snyk_analyzer import SnykAnalyzer
+
+    analyzer = SnykAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_gocd_ci_audit(args: argparse.Namespace) -> None:
     from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 
@@ -2506,6 +2522,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Renovate config skeleton",
     )
     p.set_defaults(func=cmd_renovate_audit)
+
+    p = sub.add_parser(
+        "snyk-audit",
+        help="Audit Snyk policy and CLI configs for hardcoded tokens and broad ignores",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Snyk policy skeleton",
+    )
+    p.set_defaults(func=cmd_snyk_audit)
 
     p = sub.add_parser(
         "appveyor-ci-audit",
