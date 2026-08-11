@@ -233,6 +233,12 @@ from devai.appveyor_ci_analyzer import (
     AppVeyorCIInfo,
     AppVeyorCIStats,
 )
+from devai.gocd_ci_analyzer import (
+    GoCDCIAnalyzer,
+    GoCDCIFinding,
+    GoCDCIInfo,
+    GoCDCIStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -846,6 +852,10 @@ __all__ = [
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",
     "AppVeyorCIStats",
+    "GoCDCIAnalyzer",
+    "GoCDCIFinding",
+    "GoCDCIInfo",
+    "GoCDCIStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",

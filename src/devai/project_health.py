@@ -47,6 +47,7 @@ from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
+from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.docstring_coverage import DocstringCoverage
 from devai.project import DEFAULT_IGNORE_DIRS
 from devai.secrets import SecretsScanner
@@ -188,6 +189,7 @@ class ProjectHealth:
         "harness_ci": 0.02,
         "buddy_ci": 0.02,
         "appveyor_ci": 0.02,
+        "gocd_ci": 0.02,
     }
 
     def __init__(
@@ -932,6 +934,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.pipelines == 0:
+            return 100.0, "No GoCD CI pipelines found", {"pipelines": 0, "findings": 0}
+        summary = (
+            f"{stats.pipelines} GoCD CI pipeline(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "pipelines": stats.pipelines,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_env(self, analyzer: EnvVarAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1147,6 +1168,10 @@ class ProjectHealth:
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden AppVeyor CI — use encrypted variables, disable enable_rdp, pin version/stack, and sanitize APPVEYOR_* variables in scripts"
+                )
+            elif cat.name == "gocd_ci" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden GoCD CI — use encrypted environment variables, pin image tags, disable privileged mode, and sanitize GO_* variables in scripts"
                 )
         return recs
 
@@ -1425,6 +1450,10 @@ class ProjectHealth:
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
         categories.append(HealthCategory("appveyor_ci", score, summary, details))
+
+        gocd_ci = GoCDCIAnalyzer(root_str)
+        score, summary, details = self._score_gocd_ci(gocd_ci)
+        categories.append(HealthCategory("gocd_ci", score, summary, details))
 
         overall = 0.0
         weight_sum = 0.0

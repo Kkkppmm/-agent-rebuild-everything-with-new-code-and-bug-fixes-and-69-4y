@@ -53,6 +53,7 @@ from devai.aws_codebuild_analyzer import AWSCodeBuildAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
+from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.hardcoded_config import HardcodedConfigAnalyzer
 from devai.insecure_random import InsecureRandomAnalyzer
 from devai.log_injection import LogInjectionAnalyzer
@@ -523,6 +524,10 @@ class DevAI:
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
         return AppVeyorCIAnalyzer(str(path), **kwargs)
+
+    def gocd_ci(self, path: str | Path = ".", **kwargs: Any) -> GoCDCIAnalyzer:
+        """Audit GoCD pipeline YAML for hardcoded secrets, privileged tasks, and GO_* variable injection."""
+        return GoCDCIAnalyzer(str(path), **kwargs)
 
     def hardcoded_config(self, path: str | Path = ".", **kwargs: Any) -> HardcodedConfigAnalyzer:
         """Detect hardcoded URLs, IPs, DB URLs, and secret env defaults."""
