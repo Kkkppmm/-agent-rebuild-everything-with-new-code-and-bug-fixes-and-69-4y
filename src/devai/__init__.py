@@ -203,6 +203,12 @@ from devai.flux_cd_analyzer import (
     FluxCDInfo,
     FluxCDStats,
 )
+from devai.argocd_analyzer import (
+    ArgoCDAnalyzer,
+    ArgoCDFinding,
+    ArgoCDInfo,
+    ArgoCDStats,
+)
 from devai.git_context import GitContext
 from devai.hooks import DevHooks, SUPPORTED_HOOKS
 from devai.doctor import DevDoctor, DoctorResult, run_doctor
@@ -796,6 +802,10 @@ __all__ = [
     "FluxCDFinding",
     "FluxCDInfo",
     "FluxCDStats",
+    "ArgoCDAnalyzer",
+    "ArgoCDFinding",
+    "ArgoCDInfo",
+    "ArgoCDStats",
     "GitChangelog",
     "GitContext",
     "GitignoreAnalyzer",
