@@ -101,9 +101,12 @@ class TestGoCDCIAnalyzer:
         insecure = GoCDCIAnalyzer(str(tmp_path))
         insecure.analyze()
 
-        hardened_path = tmp_path / "gocd.yaml"
-        hardened_path.write_text(HARDENED_CONFIG, encoding="utf-8")
-        hardened = GoCDCIAnalyzer(str(tmp_path))
+        hardened_root = tmp_path / "hardened"
+        hardened_root.mkdir()
+        gocd_dir = hardened_root / ".gocd"
+        gocd_dir.mkdir()
+        (gocd_dir / "pipelines.yaml").write_text(HARDENED_CONFIG, encoding="utf-8")
+        hardened = GoCDCIAnalyzer(str(hardened_root))
         hardened.analyze()
         assert hardened.stats.findings < insecure.stats.findings
 
