@@ -55,6 +55,7 @@ from devai.aws_codepipeline_analyzer import AWSCodePipelineAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.dependabot_analyzer import DependabotAnalyzer
+from devai.renovate_analyzer import RenovateAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -536,6 +537,10 @@ class DevAI:
     def dependabot(self, path: str | Path = ".", **kwargs: Any) -> DependabotAnalyzer:
         """Audit Dependabot configs for hardcoded registry credentials, unsafe settings, and weak defaults."""
         return DependabotAnalyzer(str(path), **kwargs)
+
+    def renovate(self, path: str | Path = ".", **kwargs: Any) -> RenovateAnalyzer:
+        """Audit Renovate configs for hardcoded host rule credentials, unsafe automerge, and weak defaults."""
+        return RenovateAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

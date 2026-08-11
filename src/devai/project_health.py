@@ -49,6 +49,7 @@ from devai.aws_codepipeline_analyzer import AWSCodePipelineAnalyzer
 from devai.harness_ci_analyzer import HarnessCIAnalyzer
 from devai.buddy_ci_analyzer import BuddyCIAnalyzer
 from devai.dependabot_analyzer import DependabotAnalyzer
+from devai.renovate_analyzer import RenovateAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -195,6 +196,7 @@ class ProjectHealth:
         "harness_ci": 0.02,
         "buddy_ci": 0.02,
         "dependabot": 0.02,
+        "renovate": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -981,6 +983,26 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_renovate(self, analyzer: RenovateAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Renovate configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Renovate config(s), {stats.managers} manager(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "managers": stats.managers,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1261,6 +1283,10 @@ class ProjectHealth:
             elif cat.name == "dependabot" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Dependabot — use GitHub secrets for registry credentials, disable insecure-external-code-execution, and group security updates"
+                )
+            elif cat.name == "renovate" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Renovate — use encrypted hostRules tokens, keep vulnerabilityAlerts enabled, and restrict postUpgradeTasks shell commands"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1559,6 +1585,10 @@ class ProjectHealth:
         dependabot = DependabotAnalyzer(root_str)
         score, summary, details = self._score_dependabot(dependabot)
         categories.append(HealthCategory("dependabot", score, summary, details))
+
+        renovate = RenovateAnalyzer(root_str)
+        score, summary, details = self._score_renovate(renovate)
+        categories.append(HealthCategory("renovate", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

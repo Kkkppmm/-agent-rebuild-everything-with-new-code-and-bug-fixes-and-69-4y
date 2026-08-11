@@ -245,6 +245,12 @@ from devai.dependabot_analyzer import (
     DependabotInfo,
     DependabotStats,
 )
+from devai.renovate_analyzer import (
+    RenovateAnalyzer,
+    RenovateFinding,
+    RenovateInfo,
+    RenovateStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -551,7 +557,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.70.0"
+__version__ = "6.79.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -884,6 +890,10 @@ __all__ = [
     "DependabotFinding",
     "DependabotInfo",
     "DependabotStats",
+    "RenovateAnalyzer",
+    "RenovateFinding",
+    "RenovateInfo",
+    "RenovateStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",
