@@ -69,6 +69,7 @@ from devai.vagrant_analyzer import VagrantAnalyzer
 from devai.terragrunt_analyzer import TerragruntAnalyzer
 from devai.pulumi_analyzer import PulumiAnalyzer
 from devai.cloudformation_analyzer import CloudFormationAnalyzer
+from devai.crossplane_analyzer import CrossplaneAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -235,6 +236,7 @@ class ProjectHealth:
         "terragrunt": 0.02,
         "pulumi": 0.02,
         "cloudformation": 0.02,
+        "crossplane": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1407,6 +1409,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_crossplane(self, analyzer: CrossplaneAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.manifests == 0:
+            return 100.0, "No Crossplane manifests found", {"manifests": 0, "findings": 0}
+        summary = (
+            f"{stats.manifests} Crossplane manifest(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "manifests": stats.manifests,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1767,6 +1787,10 @@ class ProjectHealth:
             elif cat.name == "cloudformation" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden CloudFormation — use NoEcho parameters and Secrets Manager, enable BlockPublicAccess and encryption, restrict IAM to least privilege, and set DeletionPolicy: Retain on data resources"
+                )
+            elif cat.name == "crossplane" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Crossplane — pin provider package versions, use IRSA or secretRef for credentials, enable TLS verification, apply least-privilege IAM, and set deletionPolicy: Orphan on production resources"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2145,6 +2169,10 @@ class ProjectHealth:
         cloudformation = CloudFormationAnalyzer(root_str)
         score, summary, details = self._score_cloudformation(cloudformation)
         categories.append(HealthCategory("cloudformation", score, summary, details))
+
+        crossplane = CrossplaneAnalyzer(root_str)
+        score, summary, details = self._score_crossplane(crossplane)
+        categories.append(HealthCategory("crossplane", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

@@ -365,6 +365,12 @@ from devai.cloudformation_analyzer import (
     CloudFormationInfo,
     CloudFormationStats,
 )
+from devai.crossplane_analyzer import (
+    CrossplaneAnalyzer,
+    CrossplaneFinding,
+    CrossplaneInfo,
+    CrossplaneStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -671,7 +677,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.98.0"
+__version__ = "6.99.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1082,6 +1088,10 @@ __all__ = [
     "CloudFormationFinding",
     "CloudFormationInfo",
     "CloudFormationStats",
+    "CrossplaneAnalyzer",
+    "CrossplaneFinding",
+    "CrossplaneInfo",
+    "CrossplaneStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
