@@ -13,7 +13,7 @@ TERRAGRUNT_FILENAMES = (
 )
 TERRAGRUNT_SUFFIXES = (".hcl",)
 TERRAGRUNT_BLOCK_PATTERN = re.compile(
-    r"\b(?:remote_state|terraform\s*\{|include\s*\{|dependency\s+\w+|inputs\s*=\s*\{)\b",
+    r"\b(?:remote_state|terraform\s*\{|include\s*\{|dependency\s+\w+|inputs\s*=\s*\{)",
     re.IGNORECASE,
 )
 REMOTE_STATE_PATTERN = re.compile(r"\bremote_state\s*\{", re.IGNORECASE)
