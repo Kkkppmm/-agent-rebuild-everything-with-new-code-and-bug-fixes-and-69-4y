@@ -37,7 +37,7 @@ SOFT_FAIL_PATTERN = re.compile(
 )
 SOFT_FAIL_CLI_PATTERN = re.compile(r"--soft-fail\b", re.IGNORECASE)
 SKIP_ALL_CHECKS_PATTERN = re.compile(
-    r"^\s*(?:-\s*)?(?:\*\*?|\*|CKV_\*|all)\s*(?:#.*)?$",
+    r"^\s*(?:-\s*)?(?:[\"']?\*[\"']?|\*\*?|CKV_\*|all)\s*(?:#.*)?$",
     re.IGNORECASE,
 )
 BROAD_SKIP_CHECK_PATTERN = re.compile(
@@ -86,7 +86,7 @@ SKIP_SUPPRESSION_PATTERN = re.compile(
     re.IGNORECASE,
 )
 CHECKOV_CLI_SKIP_PATTERN = re.compile(
-    r"--skip-(?:check|framework)\s+(?:\*\*?|\*|CKV_\*|all)\b",
+    r"--skip-(?:check|framework)\s+(?:\*\*?|\*|CKV_\*|all)(?:\s|$|#)",
     re.IGNORECASE,
 )
 

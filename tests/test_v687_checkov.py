@@ -35,7 +35,7 @@ skip-path:
 var-file: secrets.tfvars
 evaluate-variables: true
 skip-suppression: true
-# checkov -d . --soft-fail --skip-check *
+checkov_command: checkov -d . --soft-fail --skip-check *
 """
 
 
