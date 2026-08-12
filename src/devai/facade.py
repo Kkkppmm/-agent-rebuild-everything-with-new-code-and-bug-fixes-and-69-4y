@@ -73,6 +73,7 @@ from devai.nomad_analyzer import NomadAnalyzer
 from devai.packer_analyzer import PackerAnalyzer
 from devai.vagrant_analyzer import VagrantAnalyzer
 from devai.terragrunt_analyzer import TerragruntAnalyzer
+from devai.pulumi_analyzer import PulumiAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -626,6 +627,10 @@ class DevAI:
     def terragrunt(self, path: str | Path = ".", **kwargs: Any) -> TerragruntAnalyzer:
         """Audit Terragrunt HCL for hardcoded secrets, insecure remote state, and risky dependencies."""
         return TerragruntAnalyzer(str(path), **kwargs)
+
+    def pulumi(self, path: str | Path = ".", **kwargs: Any) -> PulumiAnalyzer:
+        """Audit Pulumi IaC for hardcoded secrets, insecure backends, and risky stack configs."""
+        return PulumiAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

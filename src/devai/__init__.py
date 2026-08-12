@@ -353,6 +353,12 @@ from devai.terragrunt_analyzer import (
     TerragruntInfo,
     TerragruntStats,
 )
+from devai.pulumi_analyzer import (
+    PulumiAnalyzer,
+    PulumiFinding,
+    PulumiInfo,
+    PulumiStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -659,7 +665,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.96.0"
+__version__ = "6.97.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1062,6 +1068,10 @@ __all__ = [
     "VagrantStats",
     "TerragruntAnalyzer",
     "TerragruntFinding",
+    "PulumiAnalyzer",
+    "PulumiFinding",
+    "PulumiInfo",
+    "PulumiStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
