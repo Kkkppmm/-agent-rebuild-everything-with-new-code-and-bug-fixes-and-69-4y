@@ -76,7 +76,8 @@ DELETION_POLICY_DELETE_PATTERN = re.compile(
     re.IGNORECASE,
 )
 PLAINTEXT_CREDENTIALS_PATTERN = re.compile(
-    r"(?:credentials|awsSecretAccessKey|secretAccessKey)\s*:\s*[\"'][^\"'{}\s][^\"']+[\"']",
+    r"(?:credentials|awsSecretAccessKey|secretAccessKey)\s*:\s*"
+    r"(?:[\"'][^\"'{}\s][^\"']+[\"']|(?!\!|\{)[^\s#]+)",
     re.IGNORECASE,
 )
 LATEST_TAG_PATTERN = re.compile(

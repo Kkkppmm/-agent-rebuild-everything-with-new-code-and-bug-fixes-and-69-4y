@@ -22,7 +22,7 @@ class TestCrossplaneIntegration:
         crossplane_dir.mkdir()
         (crossplane_dir / "provider.yaml").write_text(INSECURE_PROVIDER, encoding="utf-8")
 
-        devai = DevAI()
+        devai = DevAI.mock()
         analyzer = devai.crossplane(str(tmp_path))
         assert isinstance(analyzer, CrossplaneAnalyzer)
         findings = analyzer.analyze()
