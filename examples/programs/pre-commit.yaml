@@ -1,0 +1,8 @@
+name: pre-commit
+tasks:
+  - name: review
+    action: review
+  - name: security
+    action: security
+  - name: docstrings
+    action: docstring
