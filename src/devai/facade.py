@@ -74,6 +74,7 @@ from devai.packer_analyzer import PackerAnalyzer
 from devai.vagrant_analyzer import VagrantAnalyzer
 from devai.terragrunt_analyzer import TerragruntAnalyzer
 from devai.pulumi_analyzer import PulumiAnalyzer
+from devai.cloudformation_analyzer import CloudFormationAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -631,6 +632,10 @@ class DevAI:
     def pulumi(self, path: str | Path = ".", **kwargs: Any) -> PulumiAnalyzer:
         """Audit Pulumi IaC for hardcoded secrets, insecure backends, and risky stack configs."""
         return PulumiAnalyzer(str(path), **kwargs)
+
+    def cloudformation(self, path: str | Path = ".", **kwargs: Any) -> CloudFormationAnalyzer:
+        """Audit CloudFormation templates for hardcoded secrets, open SGs, and risky IAM policies."""
+        return CloudFormationAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

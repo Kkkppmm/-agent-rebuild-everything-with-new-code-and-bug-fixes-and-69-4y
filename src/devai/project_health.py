@@ -68,6 +68,7 @@ from devai.packer_analyzer import PackerAnalyzer
 from devai.vagrant_analyzer import VagrantAnalyzer
 from devai.terragrunt_analyzer import TerragruntAnalyzer
 from devai.pulumi_analyzer import PulumiAnalyzer
+from devai.cloudformation_analyzer import CloudFormationAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -233,6 +234,7 @@ class ProjectHealth:
         "vagrant": 0.02,
         "terragrunt": 0.02,
         "pulumi": 0.02,
+        "cloudformation": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1387,6 +1389,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_cloudformation(self, analyzer: CloudFormationAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.templates == 0:
+            return 100.0, "No CloudFormation templates found", {"templates": 0, "findings": 0}
+        summary = (
+            f"{stats.templates} CloudFormation template(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "templates": stats.templates,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1743,6 +1763,10 @@ class ProjectHealth:
             elif cat.name == "pulumi" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Pulumi — use 'pulumi config set --secret' for credentials, enable encrypted cloud backends, pin plugin versions, and protect production resources"
+                )
+            elif cat.name == "cloudformation" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden CloudFormation — use NoEcho parameters and Secrets Manager, enable BlockPublicAccess and encryption, restrict IAM to least privilege, and set DeletionPolicy: Retain on data resources"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2117,6 +2141,10 @@ class ProjectHealth:
         pulumi = PulumiAnalyzer(root_str)
         score, summary, details = self._score_pulumi(pulumi)
         categories.append(HealthCategory("pulumi", score, summary, details))
+
+        cloudformation = CloudFormationAnalyzer(root_str)
+        score, summary, details = self._score_cloudformation(cloudformation)
+        categories.append(HealthCategory("cloudformation", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

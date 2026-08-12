@@ -359,6 +359,12 @@ from devai.pulumi_analyzer import (
     PulumiInfo,
     PulumiStats,
 )
+from devai.cloudformation_analyzer import (
+    CloudFormationAnalyzer,
+    CloudFormationFinding,
+    CloudFormationInfo,
+    CloudFormationStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -665,7 +671,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.97.0"
+__version__ = "6.98.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1072,6 +1078,10 @@ __all__ = [
     "PulumiFinding",
     "PulumiInfo",
     "PulumiStats",
+    "CloudFormationAnalyzer",
+    "CloudFormationFinding",
+    "CloudFormationInfo",
+    "CloudFormationStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
