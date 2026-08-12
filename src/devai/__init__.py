@@ -317,6 +317,12 @@ from devai.opa_analyzer import (
     OPAInfo,
     OPAStats,
 )
+from devai.vault_analyzer import (
+    VaultAnalyzer,
+    VaultFinding,
+    VaultInfo,
+    VaultStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -1004,6 +1010,10 @@ __all__ = [
     "OPAFinding",
     "OPAInfo",
     "OPAStats",
+    "VaultAnalyzer",
+    "VaultFinding",
+    "VaultInfo",
+    "VaultStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

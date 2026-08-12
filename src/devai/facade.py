@@ -67,6 +67,7 @@ from devai.checkov_analyzer import CheckovAnalyzer
 from devai.kyverno_analyzer import KyvernoAnalyzer
 from devai.falco_analyzer import FalcoAnalyzer
 from devai.opa_analyzer import OPAAnalyzer
+from devai.vault_analyzer import VaultAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -596,6 +597,10 @@ class DevAI:
     def opa(self, path: str | Path = ".", **kwargs: Any) -> OPAAnalyzer:
         """Audit OPA Rego policies for permissive defaults, insecure http.send, and wildcard matches."""
         return OPAAnalyzer(str(path), **kwargs)
+
+    def vault(self, path: str | Path = ".", **kwargs: Any) -> VaultAnalyzer:
+        """Audit HashiCorp Vault configs for disabled TLS, dev mode, hardcoded tokens, and weak defaults."""
+        return VaultAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
