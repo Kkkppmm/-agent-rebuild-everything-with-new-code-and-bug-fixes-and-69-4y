@@ -62,6 +62,7 @@ from devai.grype_analyzer import GrypeAnalyzer
 from devai.syft_analyzer import SyftAnalyzer
 from devai.cosign_analyzer import CosignAnalyzer
 from devai.semgrep_analyzer import SemgrepAnalyzer
+from devai.bandit_analyzer import BanditAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -571,6 +572,10 @@ class DevAI:
     def semgrep(self, path: str | Path = ".", **kwargs: Any) -> SemgrepAnalyzer:
         """Audit Semgrep rule configs for hardcoded tokens, disabled rules, and broad path exclusions."""
         return SemgrepAnalyzer(str(path), **kwargs)
+
+    def bandit(self, path: str | Path = ".", **kwargs: Any) -> BanditAnalyzer:
+        """Audit Bandit configs for hardcoded tokens, broad skips, and disabled security tests."""
+        return BanditAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

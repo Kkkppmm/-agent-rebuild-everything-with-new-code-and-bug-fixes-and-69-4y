@@ -287,6 +287,12 @@ from devai.semgrep_analyzer import (
     SemgrepInfo,
     SemgrepStats,
 )
+from devai.bandit_analyzer import (
+    BanditAnalyzer,
+    BanditFinding,
+    BanditInfo,
+    BanditStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -954,6 +960,10 @@ __all__ = [
     "SemgrepFinding",
     "SemgrepInfo",
     "SemgrepStats",
+    "BanditAnalyzer",
+    "BanditFinding",
+    "BanditInfo",
+    "BanditStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

@@ -949,6 +949,22 @@ def cmd_semgrep_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_bandit_audit(args: argparse.Namespace) -> None:
+    from devai.bandit_analyzer import BanditAnalyzer
+
+    analyzer = BanditAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_gocd_ci_audit(args: argparse.Namespace) -> None:
     from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 
@@ -2686,6 +2702,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Semgrep config skeleton",
     )
     p.set_defaults(func=cmd_semgrep_audit)
+
+    p = sub.add_parser(
+        "bandit-audit",
+        help="Audit Bandit configs for hardcoded tokens and broad security test skips",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Bandit config skeleton",
+    )
+    p.set_defaults(func=cmd_bandit_audit)
 
     p = sub.add_parser(
         "appveyor-ci-audit",
