@@ -311,6 +311,12 @@ from devai.falco_analyzer import (
     FalcoInfo,
     FalcoStats,
 )
+from devai.opa_analyzer import (
+    OPAAnalyzer,
+    OPAFinding,
+    OPAInfo,
+    OPAStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -617,7 +623,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.84.0"
+__version__ = "6.90.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -994,6 +1000,10 @@ __all__ = [
     "FalcoFinding",
     "FalcoInfo",
     "FalcoStats",
+    "OPAAnalyzer",
+    "OPAFinding",
+    "OPAInfo",
+    "OPAStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

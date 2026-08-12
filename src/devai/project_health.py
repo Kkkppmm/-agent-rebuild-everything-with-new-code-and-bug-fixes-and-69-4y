@@ -60,6 +60,7 @@ from devai.bandit_analyzer import BanditAnalyzer
 from devai.checkov_analyzer import CheckovAnalyzer
 from devai.kyverno_analyzer import KyvernoAnalyzer
 from devai.falco_analyzer import FalcoAnalyzer
+from devai.opa_analyzer import OPAAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -217,6 +218,7 @@ class ProjectHealth:
         "checkov": 0.02,
         "kyverno": 0.02,
         "falco": 0.02,
+        "opa": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1219,6 +1221,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_opa(self, analyzer: OPAAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.policies == 0:
+            return 100.0, "No OPA policies found", {"policies": 0, "findings": 0}
+        summary = (
+            f"{stats.policies} OPA policy file(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "policies": stats.policies,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1543,6 +1564,10 @@ class ProjectHealth:
             elif cat.name == "falco" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Falco — avoid enabled: false, tighten wildcard conditions, scope suppress/exception blocks, and use WARNING+ priority for runtime threats"
+                )
+            elif cat.name == "opa" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden OPA — set default allow = false, avoid unconditional allow rules, disable TLS bypass, and scope glob patterns"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1885,6 +1910,10 @@ class ProjectHealth:
         falco = FalcoAnalyzer(root_str)
         score, summary, details = self._score_falco(falco)
         categories.append(HealthCategory("falco", score, summary, details))
+
+        opa = OPAAnalyzer(root_str)
+        score, summary, details = self._score_opa(opa)
+        categories.append(HealthCategory("opa", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
