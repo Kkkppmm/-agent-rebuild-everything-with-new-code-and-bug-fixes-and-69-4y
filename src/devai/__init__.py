@@ -347,6 +347,12 @@ from devai.vagrant_analyzer import (
     VagrantInfo,
     VagrantStats,
 )
+from devai.terragrunt_analyzer import (
+    TerragruntAnalyzer,
+    TerragruntFinding,
+    TerragruntInfo,
+    TerragruntStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -653,7 +659,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.95.0"
+__version__ = "6.96.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1054,6 +1060,10 @@ __all__ = [
     "VagrantFinding",
     "VagrantInfo",
     "VagrantStats",
+    "TerragruntAnalyzer",
+    "TerragruntFinding",
+    "TerragruntInfo",
+    "TerragruntStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

@@ -103,6 +103,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **NomadAnalyzer** — Audit HashiCorp Nomad configs for disabled ACLs/TLS, dev mode, privileged docker plugins, raw_exec drivers, and hardcoded tokens
 - **PackerAnalyzer** — Audit HashiCorp Packer configs for hardcoded AWS keys, plaintext SSH/WinRM passwords, :latest tags, curl-pipe-to-shell provisioners, and unencrypted EBS volumes
 - **VagrantAnalyzer** — Audit Vagrantfiles for plaintext SSH passwords, unbound port forwards, missing box version pins, SSH agent forwarding, and curl-pipe-to-shell provisioners
+- **TerragruntAnalyzer** — Audit Terragrunt HCL for hardcoded secrets, HTTP remote state, missing DynamoDB locking, disabled S3 encryption, wildcard IAM roles, and unrestricted mock outputs
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

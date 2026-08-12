@@ -66,6 +66,7 @@ from devai.consul_analyzer import ConsulAnalyzer
 from devai.nomad_analyzer import NomadAnalyzer
 from devai.packer_analyzer import PackerAnalyzer
 from devai.vagrant_analyzer import VagrantAnalyzer
+from devai.terragrunt_analyzer import TerragruntAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -229,6 +230,7 @@ class ProjectHealth:
         "nomad": 0.02,
         "packer": 0.02,
         "vagrant": 0.02,
+        "terragrunt": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1345,6 +1347,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_terragrunt(self, analyzer: TerragruntAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Terragrunt configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Terragrunt config file(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1693,6 +1714,10 @@ class ProjectHealth:
             elif cat.name == "vagrant" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Vagrant — pin box_version, bind forwarded ports to 127.0.0.1, use SSH keys instead of passwords, and avoid curl-pipe-to-shell provisioners"
+                )
+            elif cat.name == "terragrunt" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Terragrunt — enable S3 encryption and DynamoDB state locking, remove hardcoded secrets, pin module sources, and restrict mock_outputs"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2059,6 +2084,10 @@ class ProjectHealth:
         vagrant = VagrantAnalyzer(root_str)
         score, summary, details = self._score_vagrant(vagrant)
         categories.append(HealthCategory("vagrant", score, summary, details))
+
+        terragrunt = TerragruntAnalyzer(root_str)
+        score, summary, details = self._score_terragrunt(terragrunt)
+        categories.append(HealthCategory("terragrunt", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
