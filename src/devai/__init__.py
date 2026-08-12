@@ -299,6 +299,12 @@ from devai.checkov_analyzer import (
     CheckovInfo,
     CheckovStats,
 )
+from devai.kyverno_analyzer import (
+    KyvernoAnalyzer,
+    KyvernoFinding,
+    KyvernoInfo,
+    KyvernoStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -974,6 +980,10 @@ __all__ = [
     "CheckovFinding",
     "CheckovInfo",
     "CheckovStats",
+    "KyvernoAnalyzer",
+    "KyvernoFinding",
+    "KyvernoInfo",
+    "KyvernoStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

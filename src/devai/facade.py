@@ -64,6 +64,7 @@ from devai.cosign_analyzer import CosignAnalyzer
 from devai.semgrep_analyzer import SemgrepAnalyzer
 from devai.bandit_analyzer import BanditAnalyzer
 from devai.checkov_analyzer import CheckovAnalyzer
+from devai.kyverno_analyzer import KyvernoAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -581,6 +582,10 @@ class DevAI:
     def checkov(self, path: str | Path = ".", **kwargs: Any) -> CheckovAnalyzer:
         """Audit Checkov configs for hardcoded tokens, soft-fail, and wildcard skip-check patterns."""
         return CheckovAnalyzer(str(path), **kwargs)
+
+    def kyverno(self, path: str | Path = ".", **kwargs: Any) -> KyvernoAnalyzer:
+        """Audit Kyverno policy manifests for audit-only enforcement, broad excludes, and unsafe mutations."""
+        return KyvernoAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
