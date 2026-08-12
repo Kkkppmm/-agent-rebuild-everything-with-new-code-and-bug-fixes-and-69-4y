@@ -275,6 +275,12 @@ from devai.syft_analyzer import (
     SyftInfo,
     SyftStats,
 )
+from devai.cosign_analyzer import (
+    CosignAnalyzer,
+    CosignFinding,
+    CosignInfo,
+    CosignStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -581,7 +587,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.79.0"
+__version__ = "6.84.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -934,6 +940,10 @@ __all__ = [
     "SyftFinding",
     "SyftInfo",
     "SyftStats",
+    "CosignAnalyzer",
+    "CosignFinding",
+    "CosignInfo",
+    "CosignStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

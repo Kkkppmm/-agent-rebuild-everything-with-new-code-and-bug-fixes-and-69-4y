@@ -91,6 +91,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **TrivyAnalyzer** — Audit `.trivyignore` and `trivy.yaml` for hardcoded registry credentials, wildcard suppressions, fail-open exit codes, and insecure DB/registry URLs
 - **GrypeAnalyzer** — Audit `.grypeignore` and `.grype.yaml` for hardcoded registry credentials, wildcard suppressions, fail-open severity thresholds, and insecure DB/registry URLs
 - **SyftAnalyzer** — Audit `.syft.yaml` and Syft configs for hardcoded registry credentials, wildcard SBOM exclusions, disabled attestation, and insecure registry URLs
+- **CosignAnalyzer** — Audit `.cosign.yaml` and Cosign policy configs for hardcoded private keys, disabled Rekor/tlog verification, permissive signing policies, and insecure registry URLs
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
