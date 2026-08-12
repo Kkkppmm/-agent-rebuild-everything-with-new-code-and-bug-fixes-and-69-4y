@@ -70,6 +70,7 @@ from devai.opa_analyzer import OPAAnalyzer
 from devai.vault_analyzer import VaultAnalyzer
 from devai.consul_analyzer import ConsulAnalyzer
 from devai.nomad_analyzer import NomadAnalyzer
+from devai.packer_analyzer import PackerAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -611,6 +612,10 @@ class DevAI:
     def nomad(self, path: str | Path = ".", **kwargs: Any) -> NomadAnalyzer:
         """Audit HashiCorp Nomad configs for disabled ACLs/TLS, dev mode, privileged plugins, and hardcoded tokens."""
         return NomadAnalyzer(str(path), **kwargs)
+
+    def packer(self, path: str | Path = ".", **kwargs: Any) -> PackerAnalyzer:
+        """Audit HashiCorp Packer configs for hardcoded secrets, :latest tags, and unsafe provisioners."""
+        return PackerAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

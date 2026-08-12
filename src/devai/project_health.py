@@ -64,6 +64,7 @@ from devai.opa_analyzer import OPAAnalyzer
 from devai.vault_analyzer import VaultAnalyzer
 from devai.consul_analyzer import ConsulAnalyzer
 from devai.nomad_analyzer import NomadAnalyzer
+from devai.packer_analyzer import PackerAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -225,6 +226,7 @@ class ProjectHealth:
         "vault": 0.02,
         "consul": 0.02,
         "nomad": 0.02,
+        "packer": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1303,6 +1305,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_packer(self, analyzer: PackerAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Packer configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Packer config file(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1643,6 +1664,10 @@ class ProjectHealth:
             elif cat.name == "nomad" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Nomad — enable ACLs with default deny, configure TLS on HTTP/RPC, disable raw_exec and allow_privileged, and remove hardcoded tokens"
+                )
+            elif cat.name == "packer" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Packer — use variables for secrets, pin AMI/image tags, enable EBS encryption, and avoid curl-pipe-to-shell provisioners"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2001,6 +2026,10 @@ class ProjectHealth:
         nomad = NomadAnalyzer(root_str)
         score, summary, details = self._score_nomad(nomad)
         categories.append(HealthCategory("nomad", score, summary, details))
+
+        packer = PackerAnalyzer(root_str)
+        score, summary, details = self._score_packer(packer)
+        categories.append(HealthCategory("packer", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

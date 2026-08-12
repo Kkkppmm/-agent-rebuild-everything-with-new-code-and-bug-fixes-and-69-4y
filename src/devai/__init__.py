@@ -335,6 +335,12 @@ from devai.nomad_analyzer import (
     NomadInfo,
     NomadStats,
 )
+from devai.packer_analyzer import (
+    PackerAnalyzer,
+    PackerFinding,
+    PackerInfo,
+    PackerStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -1034,6 +1040,10 @@ __all__ = [
     "NomadFinding",
     "NomadInfo",
     "NomadStats",
+    "PackerAnalyzer",
+    "PackerFinding",
+    "PackerInfo",
+    "PackerStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",
