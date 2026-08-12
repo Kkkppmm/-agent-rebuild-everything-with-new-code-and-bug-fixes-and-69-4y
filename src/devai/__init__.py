@@ -269,6 +269,12 @@ from devai.grype_analyzer import (
     GrypeInfo,
     GrypeStats,
 )
+from devai.syft_analyzer import (
+    SyftAnalyzer,
+    SyftFinding,
+    SyftInfo,
+    SyftStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -924,6 +930,10 @@ __all__ = [
     "GrypeFinding",
     "GrypeInfo",
     "GrypeStats",
+    "SyftAnalyzer",
+    "SyftFinding",
+    "SyftInfo",
+    "SyftStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

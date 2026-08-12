@@ -901,6 +901,22 @@ def cmd_grype_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_syft_audit(args: argparse.Namespace) -> None:
+    from devai.syft_analyzer import SyftAnalyzer
+
+    analyzer = SyftAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_gocd_ci_audit(args: argparse.Namespace) -> None:
     from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 
@@ -2596,6 +2612,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Grype config skeleton",
     )
     p.set_defaults(func=cmd_grype_audit)
+
+    p = sub.add_parser(
+        "syft-audit",
+        help="Audit Syft SBOM configs for hardcoded tokens and broad exclusions",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Syft config skeleton",
+    )
+    p.set_defaults(func=cmd_syft_audit)
 
     p = sub.add_parser(
         "appveyor-ci-audit",

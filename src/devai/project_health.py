@@ -53,6 +53,7 @@ from devai.renovate_analyzer import RenovateAnalyzer
 from devai.snyk_analyzer import SnykAnalyzer
 from devai.trivy_analyzer import TrivyAnalyzer
 from devai.grype_analyzer import GrypeAnalyzer
+from devai.syft_analyzer import SyftAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -203,6 +204,7 @@ class ProjectHealth:
         "snyk": 0.02,
         "trivy": 0.02,
         "grype": 0.02,
+        "syft": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1072,6 +1074,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_syft(self, analyzer: SyftAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Syft configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Syft config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1368,6 +1389,10 @@ class ProjectHealth:
             elif cat.name == "grype" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Grype — set fail-on-severity to high, avoid wildcard .grypeignore entries, and store registry credentials in secrets"
+                )
+            elif cat.name == "syft" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Syft — use cyclonedx-json or spdx-json output, avoid wildcard excludes, and store registry credentials in secrets"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1682,6 +1707,10 @@ class ProjectHealth:
         grype = GrypeAnalyzer(root_str)
         score, summary, details = self._score_grype(grype)
         categories.append(HealthCategory("grype", score, summary, details))
+
+        syft = SyftAnalyzer(root_str)
+        score, summary, details = self._score_syft(syft)
+        categories.append(HealthCategory("syft", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
