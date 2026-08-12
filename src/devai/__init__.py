@@ -545,7 +545,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.70.0"
+__version__ = "6.77.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
