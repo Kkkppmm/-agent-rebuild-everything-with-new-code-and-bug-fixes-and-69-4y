@@ -171,7 +171,13 @@ class NomadAnalyzer:
                 continue
 
             block_match = re.match(r'^\s*(\w+)\s*\{', line, re.IGNORECASE)
-            if block_match:
+            plugin_match = re.match(r'^\s*plugin\s+"([^"]+)"\s*\{', line, re.IGNORECASE)
+            host_volume_match = re.match(r'^\s*host_volume\s+"([^"]+)"\s*\{', line, re.IGNORECASE)
+            if plugin_match:
+                block_stack.append(f"plugin:{plugin_match.group(1).lower()}")
+            elif host_volume_match:
+                block_stack.append("host_volume")
+            elif block_match:
                 block_stack.append(block_match.group(1).lower())
 
             if line == "}":
@@ -187,8 +193,9 @@ class NomadAnalyzer:
             in_client = "client" in current_blocks
             in_ui = "ui" in current_blocks
             in_tokens = "tokens" in current_blocks
-            in_plugin = "plugin" in current_blocks or "docker" in current_blocks
-            in_raw_exec = "raw_exec" in current_blocks
+            in_plugin = any(b.startswith("plugin:") for b in block_stack)
+            in_docker_plugin = "plugin:docker" in current_blocks
+            in_raw_exec = "plugin:raw_exec" in current_blocks
             in_host_volume = "host_volume" in current_blocks
 
             if DATACENTER_PATTERN.match(line):
@@ -318,7 +325,7 @@ class NomadAnalyzer:
                     )
                 )
 
-            if in_plugin and ALLOW_PRIVILEGED_PATTERN.match(line):
+            if in_docker_plugin and ALLOW_PRIVILEGED_PATTERN.match(line):
                 findings.append(
                     NomadFinding(
                         kind="allow_privileged",
