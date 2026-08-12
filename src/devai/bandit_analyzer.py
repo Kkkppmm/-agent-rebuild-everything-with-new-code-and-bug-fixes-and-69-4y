@@ -17,7 +17,7 @@ BANDIT_SECTION_MARKERS = ("[tool.bandit]", "[bandit]")
 
 HARDCODED_SECRET_PATTERN = re.compile(
     r"(?:password|passwd|secret|api[_-]?key|token|credential|auth)\s*[:=]\s*"
-    r"[\"'][^\"'{}\s][^\"']*[\"']",
+    r"(?:[\"'][^\"'{}\s][^\"']*[\"']|[^\s#]+)",
     re.IGNORECASE,
 )
 HARDCODED_TOKEN_PATTERN = re.compile(
@@ -28,7 +28,7 @@ BROAD_EXCLUDE_PATTERN = re.compile(
     r"^\s*(?:-\s*)?(?:\*\*?|/\*\*?|\*\*/\*|/\*\*/\*|/|\.)\s*(?:#.*)?$",
 )
 WILDCARD_SKIP_PATTERN = re.compile(
-    r"^\s*(?:-\s*)?(?:\*|B\*|all)\s*(?:#.*)?$",
+    r"^\s*(?:-\s*)?(?:[\"']?\*[\"']?|B\*|all)\s*(?:#.*)?$",
     re.IGNORECASE,
 )
 SKIP_SECURITY_TEST_PATTERN = re.compile(
@@ -36,7 +36,7 @@ SKIP_SECURITY_TEST_PATTERN = re.compile(
     re.IGNORECASE,
 )
 DISABLED_ASSERT_CHECK_PATTERN = re.compile(
-    r"^\s*(?:assert_used|skips)\s*:\s*(?:\[\s*\]|none|null)\s*$",
+    r"^\s*skips\s*:\s*(?:\[\s*\]|none|null)\s*$",
     re.IGNORECASE,
 )
 BROAD_ASSERT_SKIP_PATTERN = re.compile(
@@ -64,7 +64,7 @@ INLINE_API_KEY_PATTERN = re.compile(
     re.IGNORECASE,
 )
 SHELL_INJECTION_SKIP_PATTERN = re.compile(
-    r"^\s*(?:-\s*)?B60[0-8]\s*(?:#.*)?$",
+    r"^\s*(?:-\s*)?B60[0-7]\s*(?:#.*)?$",
     re.IGNORECASE,
 )
 SQL_INJECTION_SKIP_PATTERN = re.compile(
@@ -176,6 +176,7 @@ class BanditAnalyzer:
         info = BanditInfo(path=rel, lines=len(raw_lines))
         in_skips_block = False
         in_exclude_block = False
+        in_assert_used_block = False
         in_assert_skips_block = False
 
         for lineno, line in enumerate(raw_lines, start=1):
@@ -183,25 +184,32 @@ class BanditAnalyzer:
             if not stripped or stripped.startswith("#"):
                 continue
 
-            if re.search(r"^\s*(?:skips|skip)\s*:", line, re.IGNORECASE):
-                in_skips_block = True
-                in_exclude_block = False
+            if re.search(r"^\s*assert_used\s*:", line, re.IGNORECASE):
+                in_assert_used_block = True
                 in_assert_skips_block = False
+                in_skips_block = False
+                in_exclude_block = False
+            elif re.search(r"^\s*(?:skips|skip)\s*:", line, re.IGNORECASE):
+                if in_assert_used_block:
+                    in_assert_skips_block = True
+                    in_skips_block = False
+                else:
+                    in_skips_block = True
+                in_exclude_block = False
             elif re.search(r"^\s*(?:exclude_dirs|exclude)\s*:", line, re.IGNORECASE):
                 in_exclude_block = True
                 in_skips_block = False
                 in_assert_skips_block = False
-            elif re.search(r"^\s*assert_used\s*:", line, re.IGNORECASE):
-                in_assert_skips_block = False
             elif re.search(r"^\s*profiles\s*:", line, re.IGNORECASE):
                 info.has_profiles = True
-            elif in_skips_block and re.match(r"^\s*\w", line) and not re.match(r"^\s*-\s*", line):
-                in_skips_block = False
-            elif in_exclude_block and re.match(r"^\s*\w", line) and not re.match(r"^\s*-\s*", line):
-                in_exclude_block = False
-
-            if re.search(r"^\s*skips\s*:", line, re.IGNORECASE) and "assert" in line.lower():
-                in_assert_skips_block = True
+            elif re.match(r"^\s*\w", line) and not re.match(r"^\s*-\s*", line):
+                if in_assert_used_block and not re.match(r"^\s{2,}", line):
+                    in_assert_used_block = False
+                    in_assert_skips_block = False
+                if in_skips_block:
+                    in_skips_block = False
+                if in_exclude_block:
+                    in_exclude_block = False
 
             if in_skips_block and re.match(r"^\s*-\s*", line):
                 info.skip_count += 1
@@ -334,7 +342,7 @@ class BanditAnalyzer:
                     )
                 )
 
-            if DISABLED_ASSERT_CHECK_PATTERN.search(line):
+            if DISABLED_ASSERT_CHECK_PATTERN.search(line) and in_assert_used_block:
                 findings.append(
                     BanditFinding(
                         kind="disabled_assert_check",
