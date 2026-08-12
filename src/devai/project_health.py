@@ -63,6 +63,7 @@ from devai.falco_analyzer import FalcoAnalyzer
 from devai.opa_analyzer import OPAAnalyzer
 from devai.vault_analyzer import VaultAnalyzer
 from devai.consul_analyzer import ConsulAnalyzer
+from devai.nomad_analyzer import NomadAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -223,6 +224,7 @@ class ProjectHealth:
         "opa": 0.02,
         "vault": 0.02,
         "consul": 0.02,
+        "nomad": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1282,6 +1284,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_nomad(self, analyzer: NomadAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Nomad configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Nomad config file(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1618,6 +1639,10 @@ class ProjectHealth:
             elif cat.name == "consul" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Consul — enable ACLs with default deny, configure gossip encrypt, enable TLS verification, and remove hardcoded tokens"
+                )
+            elif cat.name == "nomad" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Nomad — enable ACLs with default deny, configure TLS on HTTP/RPC, disable raw_exec and allow_privileged, and remove hardcoded tokens"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1972,6 +1997,10 @@ class ProjectHealth:
         consul = ConsulAnalyzer(root_str)
         score, summary, details = self._score_consul(consul)
         categories.append(HealthCategory("consul", score, summary, details))
+
+        nomad = NomadAnalyzer(root_str)
+        score, summary, details = self._score_nomad(nomad)
+        categories.append(HealthCategory("nomad", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

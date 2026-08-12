@@ -69,6 +69,7 @@ from devai.falco_analyzer import FalcoAnalyzer
 from devai.opa_analyzer import OPAAnalyzer
 from devai.vault_analyzer import VaultAnalyzer
 from devai.consul_analyzer import ConsulAnalyzer
+from devai.nomad_analyzer import NomadAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -606,6 +607,10 @@ class DevAI:
     def consul(self, path: str | Path = ".", **kwargs: Any) -> ConsulAnalyzer:
         """Audit HashiCorp Consul configs for disabled ACLs/TLS, dev mode, and hardcoded tokens."""
         return ConsulAnalyzer(str(path), **kwargs)
+
+    def nomad(self, path: str | Path = ".", **kwargs: Any) -> NomadAnalyzer:
+        """Audit HashiCorp Nomad configs for disabled ACLs/TLS, dev mode, privileged plugins, and hardcoded tokens."""
+        return NomadAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

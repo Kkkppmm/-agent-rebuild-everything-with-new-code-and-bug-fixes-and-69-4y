@@ -329,6 +329,12 @@ from devai.consul_analyzer import (
     ConsulInfo,
     ConsulStats,
 )
+from devai.nomad_analyzer import (
+    NomadAnalyzer,
+    NomadFinding,
+    NomadInfo,
+    NomadStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -635,7 +641,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.92.0"
+__version__ = "6.93.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1024,6 +1030,10 @@ __all__ = [
     "ConsulFinding",
     "ConsulInfo",
     "ConsulStats",
+    "NomadAnalyzer",
+    "NomadFinding",
+    "NomadInfo",
+    "NomadStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

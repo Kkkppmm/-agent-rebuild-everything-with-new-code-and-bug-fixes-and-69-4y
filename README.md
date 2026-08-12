@@ -100,6 +100,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **OPAAnalyzer** — Audit OPA Rego policies for permissive defaults, unconditional allow rules, TLS bypass, http.send SSRF risks, and wildcard glob patterns
 - **VaultAnalyzer** — Audit HashiCorp Vault configs for disabled TLS, dev mode, hardcoded tokens, missing auto-unseal seal, and cleartext api_addr
 - **ConsulAnalyzer** — Audit HashiCorp Consul configs for disabled ACLs/TLS, dev mode, missing gossip encrypt, hardcoded tokens, and cleartext cluster addresses
+- **NomadAnalyzer** — Audit HashiCorp Nomad configs for disabled ACLs/TLS, dev mode, privileged docker plugins, raw_exec drivers, and hardcoded tokens
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
