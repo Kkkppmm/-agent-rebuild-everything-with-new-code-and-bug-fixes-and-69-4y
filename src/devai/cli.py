@@ -869,6 +869,22 @@ def cmd_snyk_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_trivy_audit(args: argparse.Namespace) -> None:
+    from devai.trivy_analyzer import TrivyAnalyzer
+
+    analyzer = TrivyAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_gocd_ci_audit(args: argparse.Namespace) -> None:
     from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 
@@ -2536,6 +2552,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Snyk policy skeleton",
     )
     p.set_defaults(func=cmd_snyk_audit)
+
+    p = sub.add_parser(
+        "trivy-audit",
+        help="Audit Trivy ignore files and CLI configs for hardcoded tokens and fail-open settings",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--verbose", "-v", action="store_true", help="Show all findings")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Trivy config skeleton",
+    )
+    p.set_defaults(func=cmd_trivy_audit)
 
     p = sub.add_parser(
         "appveyor-ci-audit",

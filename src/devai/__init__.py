@@ -257,6 +257,12 @@ from devai.snyk_analyzer import (
     SnykInfo,
     SnykStats,
 )
+from devai.trivy_analyzer import (
+    TrivyAnalyzer,
+    TrivyFinding,
+    TrivyInfo,
+    TrivyStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -904,6 +910,10 @@ __all__ = [
     "SnykFinding",
     "SnykInfo",
     "SnykStats",
+    "TrivyAnalyzer",
+    "TrivyFinding",
+    "TrivyInfo",
+    "TrivyStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

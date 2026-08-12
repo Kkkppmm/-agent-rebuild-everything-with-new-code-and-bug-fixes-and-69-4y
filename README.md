@@ -88,6 +88,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DependabotAnalyzer** — Audit `.github/dependabot.yml` for hardcoded registry credentials, insecure external code execution, daily update floods, and missing security groups
 - **RenovateAnalyzer** — Audit `renovate.json` for hardcoded host rule tokens, disabled vulnerability alerts, unsafe automerge, and post-upgrade shell tasks
 - **SnykAnalyzer** — Audit `.snyk` and `snyk.yaml` for hardcoded tokens, wildcard vulnerability ignores, missing expiry dates, and lowered severity thresholds
+- **TrivyAnalyzer** — Audit `.trivyignore` and `trivy.yaml` for hardcoded registry credentials, wildcard suppressions, fail-open exit codes, and insecure DB/registry URLs
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
