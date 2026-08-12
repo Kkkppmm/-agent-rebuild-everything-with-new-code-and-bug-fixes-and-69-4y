@@ -58,6 +58,7 @@ from devai.dependabot_analyzer import DependabotAnalyzer
 from devai.renovate_analyzer import RenovateAnalyzer
 from devai.snyk_analyzer import SnykAnalyzer
 from devai.trivy_analyzer import TrivyAnalyzer
+from devai.grype_analyzer import GrypeAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -551,6 +552,10 @@ class DevAI:
     def trivy(self, path: str | Path = ".", **kwargs: Any) -> TrivyAnalyzer:
         """Audit Trivy ignore files and CLI configs for hardcoded tokens, broad ignores, and fail-open settings."""
         return TrivyAnalyzer(str(path), **kwargs)
+
+    def grype(self, path: str | Path = ".", **kwargs: Any) -> GrypeAnalyzer:
+        """Audit Grype ignore files and CLI configs for hardcoded tokens, broad ignores, and fail-open settings."""
+        return GrypeAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

@@ -52,6 +52,7 @@ from devai.dependabot_analyzer import DependabotAnalyzer
 from devai.renovate_analyzer import RenovateAnalyzer
 from devai.snyk_analyzer import SnykAnalyzer
 from devai.trivy_analyzer import TrivyAnalyzer
+from devai.grype_analyzer import GrypeAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -201,6 +202,7 @@ class ProjectHealth:
         "renovate": 0.02,
         "snyk": 0.02,
         "trivy": 0.02,
+        "grype": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1049,6 +1051,27 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_grype(self, analyzer: GrypeAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Grype configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Grype config(s) ({stats.ignore_files} ignore, {stats.cli_files} cli), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "ignore_files": stats.ignore_files,
+            "cli_files": stats.cli_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1341,6 +1364,10 @@ class ProjectHealth:
             elif cat.name == "trivy" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Trivy — use exit-code 1 in CI, avoid wildcard .trivyignore entries, and store registry credentials in secrets"
+                )
+            elif cat.name == "grype" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Grype — set fail-on-severity to high, avoid wildcard .grypeignore entries, and store registry credentials in secrets"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1651,6 +1678,10 @@ class ProjectHealth:
         trivy = TrivyAnalyzer(root_str)
         score, summary, details = self._score_trivy(trivy)
         categories.append(HealthCategory("trivy", score, summary, details))
+
+        grype = GrypeAnalyzer(root_str)
+        score, summary, details = self._score_grype(grype)
+        categories.append(HealthCategory("grype", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

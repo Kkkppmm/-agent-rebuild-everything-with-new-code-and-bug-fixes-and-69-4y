@@ -263,6 +263,12 @@ from devai.trivy_analyzer import (
     TrivyInfo,
     TrivyStats,
 )
+from devai.grype_analyzer import (
+    GrypeAnalyzer,
+    GrypeFinding,
+    GrypeInfo,
+    GrypeStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -914,6 +920,10 @@ __all__ = [
     "TrivyFinding",
     "TrivyInfo",
     "TrivyStats",
+    "GrypeAnalyzer",
+    "GrypeFinding",
+    "GrypeInfo",
+    "GrypeStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",
