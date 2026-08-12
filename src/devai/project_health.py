@@ -57,6 +57,7 @@ from devai.syft_analyzer import SyftAnalyzer
 from devai.cosign_analyzer import CosignAnalyzer
 from devai.semgrep_analyzer import SemgrepAnalyzer
 from devai.bandit_analyzer import BanditAnalyzer
+from devai.checkov_analyzer import CheckovAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -211,6 +212,7 @@ class ProjectHealth:
         "cosign": 0.02,
         "semgrep": 0.02,
         "bandit": 0.02,
+        "checkov": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1156,6 +1158,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_checkov(self, analyzer: CheckovAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Checkov configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Checkov config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1468,6 +1489,10 @@ class ProjectHealth:
             elif cat.name == "bandit" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Bandit — avoid wildcard skips/excludes, do not disable shell injection tests, and scope assert_used skips to test files"
+                )
+            elif cat.name == "checkov" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Checkov — disable soft-fail, avoid wildcard skip-check/path patterns, and use BC_API_KEY env var for Bridgecrew tokens"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1798,6 +1823,10 @@ class ProjectHealth:
         bandit = BanditAnalyzer(root_str)
         score, summary, details = self._score_bandit(bandit)
         categories.append(HealthCategory("bandit", score, summary, details))
+
+        checkov = CheckovAnalyzer(root_str)
+        score, summary, details = self._score_checkov(checkov)
+        categories.append(HealthCategory("checkov", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

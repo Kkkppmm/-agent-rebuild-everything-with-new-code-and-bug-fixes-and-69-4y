@@ -293,6 +293,12 @@ from devai.bandit_analyzer import (
     BanditInfo,
     BanditStats,
 )
+from devai.checkov_analyzer import (
+    CheckovAnalyzer,
+    CheckovFinding,
+    CheckovInfo,
+    CheckovStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -964,6 +970,10 @@ __all__ = [
     "BanditFinding",
     "BanditInfo",
     "BanditStats",
+    "CheckovAnalyzer",
+    "CheckovFinding",
+    "CheckovInfo",
+    "CheckovStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",
