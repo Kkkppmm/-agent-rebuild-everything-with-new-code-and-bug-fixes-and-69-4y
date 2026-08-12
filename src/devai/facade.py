@@ -71,6 +71,7 @@ from devai.vault_analyzer import VaultAnalyzer
 from devai.consul_analyzer import ConsulAnalyzer
 from devai.nomad_analyzer import NomadAnalyzer
 from devai.packer_analyzer import PackerAnalyzer
+from devai.vagrant_analyzer import VagrantAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -616,6 +617,10 @@ class DevAI:
     def packer(self, path: str | Path = ".", **kwargs: Any) -> PackerAnalyzer:
         """Audit HashiCorp Packer configs for hardcoded secrets, :latest tags, and unsafe provisioners."""
         return PackerAnalyzer(str(path), **kwargs)
+
+    def vagrant(self, path: str | Path = ".", **kwargs: Any) -> VagrantAnalyzer:
+        """Audit Vagrant configs for plaintext SSH passwords, unbound port forwards, and unsafe provisioners."""
+        return VagrantAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

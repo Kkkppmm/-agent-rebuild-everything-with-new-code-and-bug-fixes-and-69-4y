@@ -341,6 +341,12 @@ from devai.packer_analyzer import (
     PackerInfo,
     PackerStats,
 )
+from devai.vagrant_analyzer import (
+    VagrantAnalyzer,
+    VagrantFinding,
+    VagrantInfo,
+    VagrantStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -647,7 +653,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.93.0"
+__version__ = "6.95.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1044,6 +1050,10 @@ __all__ = [
     "PackerFinding",
     "PackerInfo",
     "PackerStats",
+    "VagrantAnalyzer",
+    "VagrantFinding",
+    "VagrantInfo",
+    "VagrantStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",
