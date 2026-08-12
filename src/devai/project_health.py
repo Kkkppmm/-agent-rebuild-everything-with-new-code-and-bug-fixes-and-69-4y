@@ -70,6 +70,7 @@ from devai.terragrunt_analyzer import TerragruntAnalyzer
 from devai.pulumi_analyzer import PulumiAnalyzer
 from devai.cloudformation_analyzer import CloudFormationAnalyzer
 from devai.crossplane_analyzer import CrossplaneAnalyzer
+from devai.kustomize_analyzer import KustomizeAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -237,6 +238,7 @@ class ProjectHealth:
         "pulumi": 0.02,
         "cloudformation": 0.02,
         "crossplane": 0.02,
+        "kustomize": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1427,6 +1429,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_kustomize(self, analyzer: KustomizeAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.overlays == 0:
+            return 100.0, "No Kustomize overlays found", {"overlays": 0, "findings": 0}
+        summary = (
+            f"{stats.overlays} Kustomize overlay(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "overlays": stats.overlays,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1791,6 +1811,10 @@ class ProjectHealth:
             elif cat.name == "crossplane" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Crossplane — pin provider package versions, use IRSA or secretRef for credentials, enable TLS verification, apply least-privilege IAM, and set deletionPolicy: Orphan on production resources"
+                )
+            elif cat.name == "kustomize" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Kustomize — use HTTPS remote bases, pin git refs, avoid exec plugins, store secrets in ExternalSecrets, pin image tags, and keep loadRestrictor enabled"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2173,6 +2197,10 @@ class ProjectHealth:
         crossplane = CrossplaneAnalyzer(root_str)
         score, summary, details = self._score_crossplane(crossplane)
         categories.append(HealthCategory("crossplane", score, summary, details))
+
+        kustomize = KustomizeAnalyzer(root_str)
+        score, summary, details = self._score_kustomize(kustomize)
+        categories.append(HealthCategory("kustomize", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

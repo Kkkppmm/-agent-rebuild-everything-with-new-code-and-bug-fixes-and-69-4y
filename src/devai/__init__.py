@@ -371,6 +371,12 @@ from devai.crossplane_analyzer import (
     CrossplaneInfo,
     CrossplaneStats,
 )
+from devai.kustomize_analyzer import (
+    KustomizeAnalyzer,
+    KustomizeFinding,
+    KustomizeInfo,
+    KustomizeStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -677,7 +683,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "6.99.0"
+__version__ = "7.0.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1092,6 +1098,10 @@ __all__ = [
     "CrossplaneFinding",
     "CrossplaneInfo",
     "CrossplaneStats",
+    "KustomizeAnalyzer",
+    "KustomizeFinding",
+    "KustomizeInfo",
+    "KustomizeStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",

@@ -76,6 +76,7 @@ from devai.terragrunt_analyzer import TerragruntAnalyzer
 from devai.pulumi_analyzer import PulumiAnalyzer
 from devai.cloudformation_analyzer import CloudFormationAnalyzer
 from devai.crossplane_analyzer import CrossplaneAnalyzer
+from devai.kustomize_analyzer import KustomizeAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -641,6 +642,10 @@ class DevAI:
     def crossplane(self, path: str | Path = ".", **kwargs: Any) -> CrossplaneAnalyzer:
         """Audit Crossplane manifests for hardcoded secrets, unversioned providers, and insecure configs."""
         return CrossplaneAnalyzer(str(path), **kwargs)
+
+    def kustomize(self, path: str | Path = ".", **kwargs: Any) -> KustomizeAnalyzer:
+        """Audit Kustomize overlays for hardcoded secrets, insecure remote bases, and risky patches."""
+        return KustomizeAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
