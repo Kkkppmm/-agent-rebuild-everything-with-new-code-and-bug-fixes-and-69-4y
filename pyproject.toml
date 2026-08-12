@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "devai"
+version = "6.95.0"
+description = "A Python AI library for developers and programmers"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [{ name = "DevAI Contributors" }]
+keywords = ["ai", "llm", "developer-tools", "code-assistant", "agents"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "httpx>=0.27.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.4.0",
+]
+openai = ["openai>=1.0.0"]
+yaml = ["pyyaml>=6.0.0"]
+
+[project.scripts]
+devai = "devai.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/Kkkppmm/-agent-rebuild-everything-with-new-code-and-bug-fixes-and-69-4y"
+Documentation = "https://github.com/Kkkppmm/-agent-rebuild-everything-with-new-code-and-bug-fixes-and-69-4y#readme"
+Repository = "https://github.com/Kkkppmm/-agent-rebuild-everything-with-new-code-and-bug-fixes-and-69-4y"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/devai"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
