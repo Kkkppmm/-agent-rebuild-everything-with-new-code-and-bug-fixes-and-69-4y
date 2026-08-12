@@ -62,6 +62,7 @@ from devai.kyverno_analyzer import KyvernoAnalyzer
 from devai.falco_analyzer import FalcoAnalyzer
 from devai.opa_analyzer import OPAAnalyzer
 from devai.vault_analyzer import VaultAnalyzer
+from devai.consul_analyzer import ConsulAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -221,6 +222,7 @@ class ProjectHealth:
         "falco": 0.02,
         "opa": 0.02,
         "vault": 0.02,
+        "consul": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1261,6 +1263,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_consul(self, analyzer: ConsulAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Consul configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Consul config file(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1593,6 +1614,10 @@ class ProjectHealth:
             elif cat.name == "vault" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Vault — enable TLS on listeners, remove dev mode, configure auto-unseal seal, and avoid hardcoded tokens"
+                )
+            elif cat.name == "consul" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Consul — enable ACLs with default deny, configure gossip encrypt, enable TLS verification, and remove hardcoded tokens"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1943,6 +1968,10 @@ class ProjectHealth:
         vault = VaultAnalyzer(root_str)
         score, summary, details = self._score_vault(vault)
         categories.append(HealthCategory("vault", score, summary, details))
+
+        consul = ConsulAnalyzer(root_str)
+        score, summary, details = self._score_consul(consul)
+        categories.append(HealthCategory("consul", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
