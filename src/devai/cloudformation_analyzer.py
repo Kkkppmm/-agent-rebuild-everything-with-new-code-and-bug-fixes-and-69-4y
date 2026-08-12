@@ -31,7 +31,8 @@ ENCRYPTION_DISABLED_PATTERN = re.compile(
 )
 HARDCODED_SECRET_PATTERN = re.compile(
     r"(?:Password|Secret|ApiKey|AccessKey|PrivateKey|MasterUserPassword|"
-    r"SecretString|ClientSecret|AuthToken)\s*:\s*[\"'][^\"'{}\s][^\"']*[\"']",
+    r"SecretString|ClientSecret|AuthToken)\s*:\s*"
+    r"(?:[\"'][^\"'{}\s][^\"']*[\"']|(?!\!|\{|Fn::)\S{8,})",
     re.IGNORECASE,
 )
 AWS_ACCESS_KEY_PATTERN = re.compile(r"[\"']?AKIA[0-9A-Z]{16}[\"']?", re.IGNORECASE)
