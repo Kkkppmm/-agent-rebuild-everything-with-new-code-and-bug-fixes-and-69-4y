@@ -305,6 +305,12 @@ from devai.kyverno_analyzer import (
     KyvernoInfo,
     KyvernoStats,
 )
+from devai.falco_analyzer import (
+    FalcoAnalyzer,
+    FalcoFinding,
+    FalcoInfo,
+    FalcoStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -984,6 +990,10 @@ __all__ = [
     "KyvernoFinding",
     "KyvernoInfo",
     "KyvernoStats",
+    "FalcoAnalyzer",
+    "FalcoFinding",
+    "FalcoInfo",
+    "FalcoStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",

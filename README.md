@@ -96,6 +96,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **BanditAnalyzer** — Audit `.bandit`, `bandit.yaml`, and `[tool.bandit]` configs for hardcoded tokens, wildcard skips/excludes, disabled shell injection tests, and nosec bypasses
 - **CheckovAnalyzer** — Audit `.checkov.yml` and Checkov configs for hardcoded Bridgecrew tokens, soft-fail, wildcard skip-check/path patterns, and empty framework lists
 - **KyvernoAnalyzer** — Audit Kyverno policy manifests for audit-only enforcement, failurePolicy: Ignore, wildcard excludes, privileged mutations, and PolicyExceptions
+- **FalcoAnalyzer** — Audit Falco runtime security rules for disabled rules, wildcard conditions, broad suppressions, low priorities, and hardcoded secrets
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

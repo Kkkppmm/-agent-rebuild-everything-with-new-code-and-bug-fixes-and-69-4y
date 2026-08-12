@@ -59,6 +59,7 @@ from devai.semgrep_analyzer import SemgrepAnalyzer
 from devai.bandit_analyzer import BanditAnalyzer
 from devai.checkov_analyzer import CheckovAnalyzer
 from devai.kyverno_analyzer import KyvernoAnalyzer
+from devai.falco_analyzer import FalcoAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -215,6 +216,7 @@ class ProjectHealth:
         "bandit": 0.02,
         "checkov": 0.02,
         "kyverno": 0.02,
+        "falco": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1198,6 +1200,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_falco(self, analyzer: FalcoAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.rules_files == 0:
+            return 100.0, "No Falco rules found", {"rules_files": 0, "findings": 0}
+        summary = (
+            f"{stats.rules_files} Falco rules file(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "rules_files": stats.rules_files,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1518,6 +1539,10 @@ class ProjectHealth:
             elif cat.name == "kyverno" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Kyverno — set validationFailureAction to Enforce, use failurePolicy: Fail, and avoid wildcard namespace excludes or PolicyExceptions"
+                )
+            elif cat.name == "falco" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Falco — avoid enabled: false, tighten wildcard conditions, scope suppress/exception blocks, and use WARNING+ priority for runtime threats"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1856,6 +1881,10 @@ class ProjectHealth:
         kyverno = KyvernoAnalyzer(root_str)
         score, summary, details = self._score_kyverno(kyverno)
         categories.append(HealthCategory("kyverno", score, summary, details))
+
+        falco = FalcoAnalyzer(root_str)
+        score, summary, details = self._score_falco(falco)
+        categories.append(HealthCategory("falco", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
