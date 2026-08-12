@@ -61,6 +61,7 @@ from devai.trivy_analyzer import TrivyAnalyzer
 from devai.grype_analyzer import GrypeAnalyzer
 from devai.syft_analyzer import SyftAnalyzer
 from devai.cosign_analyzer import CosignAnalyzer
+from devai.semgrep_analyzer import SemgrepAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -566,6 +567,10 @@ class DevAI:
     def cosign(self, path: str | Path = ".", **kwargs: Any) -> CosignAnalyzer:
         """Audit Cosign signing configs for hardcoded keys, disabled tlog verification, and permissive policies."""
         return CosignAnalyzer(str(path), **kwargs)
+
+    def semgrep(self, path: str | Path = ".", **kwargs: Any) -> SemgrepAnalyzer:
+        """Audit Semgrep rule configs for hardcoded tokens, disabled rules, and broad path exclusions."""
+        return SemgrepAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

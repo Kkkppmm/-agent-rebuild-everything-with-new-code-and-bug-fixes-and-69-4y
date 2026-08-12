@@ -55,6 +55,7 @@ from devai.trivy_analyzer import TrivyAnalyzer
 from devai.grype_analyzer import GrypeAnalyzer
 from devai.syft_analyzer import SyftAnalyzer
 from devai.cosign_analyzer import CosignAnalyzer
+from devai.semgrep_analyzer import SemgrepAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -207,6 +208,7 @@ class ProjectHealth:
         "grype": 0.02,
         "syft": 0.02,
         "cosign": 0.02,
+        "semgrep": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1114,6 +1116,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_semgrep(self, analyzer: SemgrepAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Semgrep configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Semgrep config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "files": stats.files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1418,6 +1439,10 @@ class ProjectHealth:
             elif cat.name == "cosign" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Cosign — enable Rekor/tlog verification, use KMS for keys, and enforce deny-by-default signing policies"
+                )
+            elif cat.name == "semgrep" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Semgrep — use SEMGREP_APP_TOKEN env var, avoid wildcard path excludes, and keep security rules at ERROR severity"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -1740,6 +1765,10 @@ class ProjectHealth:
         cosign = CosignAnalyzer(root_str)
         score, summary, details = self._score_cosign(cosign)
         categories.append(HealthCategory("cosign", score, summary, details))
+
+        semgrep = SemgrepAnalyzer(root_str)
+        score, summary, details = self._score_semgrep(semgrep)
+        categories.append(HealthCategory("semgrep", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

@@ -281,6 +281,12 @@ from devai.cosign_analyzer import (
     CosignInfo,
     CosignStats,
 )
+from devai.semgrep_analyzer import (
+    SemgrepAnalyzer,
+    SemgrepFinding,
+    SemgrepInfo,
+    SemgrepStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -944,6 +950,10 @@ __all__ = [
     "CosignFinding",
     "CosignInfo",
     "CosignStats",
+    "SemgrepAnalyzer",
+    "SemgrepFinding",
+    "SemgrepInfo",
+    "SemgrepStats",
     "AppVeyorCIAnalyzer",
     "AppVeyorCIFinding",
     "AppVeyorCIInfo",
