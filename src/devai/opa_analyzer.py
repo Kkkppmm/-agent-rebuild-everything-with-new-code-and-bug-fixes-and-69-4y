@@ -25,7 +25,7 @@ HARDCODED_TOKEN_PATTERN = re.compile(
     re.IGNORECASE,
 )
 INSECURE_TLS_PATTERN = re.compile(
-    r"(?:tls_insecure_skip_verify|insecure_skip_verify|skip_tls_verify)\s*:\s*true",
+    r"(?:[\"']?(?:tls_insecure_skip_verify|insecure_skip_verify|skip_tls_verify)[\"']?\s*:\s*true)",
     re.IGNORECASE,
 )
 HTTP_SEND_PATTERN = re.compile(r"\bhttp\.send\s*\(", re.IGNORECASE)
