@@ -461,6 +461,12 @@ from devai.npm_analyzer import (
     NpmInfo,
     NpmStats,
 )
+from devai.cargo_analyzer import (
+    CargoAnalyzer,
+    CargoFinding,
+    CargoInfo,
+    CargoStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -773,7 +779,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.15.0"
+__version__ = "7.16.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1248,6 +1254,10 @@ __all__ = [
     "NpmFinding",
     "NpmInfo",
     "NpmStats",
+    "CargoAnalyzer",
+    "CargoFinding",
+    "CargoInfo",
+    "CargoStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
