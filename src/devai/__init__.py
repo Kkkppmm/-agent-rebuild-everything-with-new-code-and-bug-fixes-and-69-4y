@@ -425,6 +425,12 @@ from devai.buck_analyzer import (
     BuckInfo,
     BuckStats,
 )
+from devai.gradle_analyzer import (
+    GradleAnalyzer,
+    GradleFinding,
+    GradleInfo,
+    GradleStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -737,7 +743,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.9.0"
+__version__ = "7.10.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1188,6 +1194,10 @@ __all__ = [
     "BuckFinding",
     "BuckInfo",
     "BuckStats",
+    "GradleAnalyzer",
+    "GradleFinding",
+    "GradleInfo",
+    "GradleStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

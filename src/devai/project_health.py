@@ -79,6 +79,7 @@ from devai.telepresence_analyzer import TelepresenceAnalyzer
 from devai.earthly_analyzer import EarthlyAnalyzer
 from devai.bazel_analyzer import BazelAnalyzer
 from devai.buck_analyzer import BuckAnalyzer
+from devai.gradle_analyzer import GradleAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -257,6 +258,7 @@ class ProjectHealth:
         "bazel": 0.02,
         "pants": 0.02,
         "buck": 0.02,
+        "gradle": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1627,6 +1629,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_gradle(self, analyzer: GradleAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Gradle configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Gradle config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2031,6 +2051,10 @@ class ProjectHealth:
             elif cat.name == "buck" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Buck — pin remote_file with sha256, keep TLS verification enabled, use HTTPS Maven repos, avoid curl-pipe-to-shell in genrules, and never hardcode secrets in BUCK or .buckconfig files"
+                )
+            elif cat.name == "gradle" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Gradle — disable allowInsecureProtocol, pin dependency versions, use HTTPS Maven repos, avoid curl-pipe-to-shell in exec tasks, and never hardcode signing passwords or secrets in build.gradle or gradle.properties"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2453,6 +2477,10 @@ class ProjectHealth:
         buck = BuckAnalyzer(root_str)
         score, summary, details = self._score_buck(buck)
         categories.append(HealthCategory("buck", score, summary, details))
+
+        gradle = GradleAnalyzer(root_str)
+        score, summary, details = self._score_gradle(gradle)
+        categories.append(HealthCategory("gradle", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
