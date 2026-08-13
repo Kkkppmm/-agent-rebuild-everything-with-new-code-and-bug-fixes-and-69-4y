@@ -32,7 +32,8 @@ ALLOW_INSECURE_PROTOCOL_PATTERN = re.compile(
     re.IGNORECASE,
 )
 DYNAMIC_VERSION_PATTERN = re.compile(
-    r"(?:version|classpath)\s*[=:]\s*[\"'](?:\+|latest|LATEST|RELEASE|\d+\.\+)[\"']",
+    r"(?:version|classpath)\s*[=:]\s*[\"'](?:\+|latest|LATEST|RELEASE|\d+\.\+)[\"']|"
+    r"[\"'][\w.-]+:[\w.-]+:(?:\+|latest|LATEST|RELEASE)[\"']",
     re.IGNORECASE,
 )
 LOOSE_VERSION_PATTERN = re.compile(
