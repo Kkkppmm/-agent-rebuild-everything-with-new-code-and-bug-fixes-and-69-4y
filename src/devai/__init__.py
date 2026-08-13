@@ -455,6 +455,12 @@ from devai.uv_analyzer import (
     UvInfo,
     UvStats,
 )
+from devai.npm_analyzer import (
+    NpmAnalyzer,
+    NpmFinding,
+    NpmInfo,
+    NpmStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -767,7 +773,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.14.0"
+__version__ = "7.15.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1238,6 +1244,10 @@ __all__ = [
     "UvFinding",
     "UvInfo",
     "UvStats",
+    "NpmAnalyzer",
+    "NpmFinding",
+    "NpmInfo",
+    "NpmStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

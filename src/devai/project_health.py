@@ -84,6 +84,7 @@ from devai.maven_analyzer import MavenAnalyzer
 from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
+from devai.npm_analyzer import NpmAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -1727,6 +1728,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_npm(self, analyzer: NpmAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No npm configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} npm config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2593,6 +2612,10 @@ class ProjectHealth:
         uv = UvAnalyzer(root_str)
         score, summary, details = self._score_uv(uv)
         categories.append(HealthCategory("uv", score, summary, details))
+
+        npm = NpmAnalyzer(root_str)
+        score, summary, details = self._score_npm(npm)
+        categories.append(HealthCategory("npm", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
