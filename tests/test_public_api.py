@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.10.0"
+        assert devai.__version__ == "7.11.0"
 
     def test_exports(self):
         expected = {
@@ -449,6 +449,10 @@ class TestPublicAPI:
             "GradleFinding",
             "GradleInfo",
             "GradleStats",
+            "MavenAnalyzer",
+            "MavenFinding",
+            "MavenInfo",
+            "MavenStats",
             "PantsAnalyzer",
             "PantsFinding",
             "PantsInfo",
