@@ -111,6 +111,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **TiltAnalyzer** — Audit Tiltfiles for hardcoded secrets, insecure registries, docker.sock mounts, production kube contexts, disabled secret scrubbing, and risky live_update sync paths
 - **DevSpaceAnalyzer** — Audit DevSpace configs for hardcoded vars/secrets, insecure registries, SSH into pods, force deploy, and sensitive sync paths
 - **GardenAnalyzer** — Audit Garden.io project configs for hardcoded environment variables, insecure registries, inline kubeconfig, docker.sock mounts, and sensitive sync paths
+- **TelepresenceAnalyzer** — Audit Telepresence configs for hardcoded env vars, production namespace intercepts, docker.sock mounts, privileged traffic-agent settings, and sensitive envFile paths
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

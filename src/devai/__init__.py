@@ -401,6 +401,12 @@ from devai.garden_analyzer import (
     GardenInfo,
     GardenStats,
 )
+from devai.telepresence_analyzer import (
+    TelepresenceAnalyzer,
+    TelepresenceFinding,
+    TelepresenceInfo,
+    TelepresenceStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -707,7 +713,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.4.0"
+__version__ = "7.5.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1142,6 +1148,10 @@ __all__ = [
     "GardenFinding",
     "GardenInfo",
     "GardenStats",
+    "TelepresenceAnalyzer",
+    "TelepresenceFinding",
+    "TelepresenceInfo",
+    "TelepresenceStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
