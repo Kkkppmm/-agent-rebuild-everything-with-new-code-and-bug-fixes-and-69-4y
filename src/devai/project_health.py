@@ -78,6 +78,7 @@ from devai.garden_analyzer import GardenAnalyzer
 from devai.telepresence_analyzer import TelepresenceAnalyzer
 from devai.earthly_analyzer import EarthlyAnalyzer
 from devai.bazel_analyzer import BazelAnalyzer
+from devai.buck_analyzer import BuckAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -255,6 +256,7 @@ class ProjectHealth:
         "earthly": 0.02,
         "bazel": 0.02,
         "pants": 0.02,
+        "buck": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1607,6 +1609,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_buck(self, analyzer: BuckAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Buck configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Buck config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2007,6 +2027,10 @@ class ProjectHealth:
             elif cat.name == "pants" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Pants — pin pants_version exactly, use HTTPS registries, avoid privileged docker_image targets, never hardcode secrets in pants.toml or BUILD files, and use Pants secrets for environment variables"
+                )
+            elif cat.name == "buck" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Buck — pin remote_file with sha256, keep TLS verification enabled, use HTTPS Maven repos, avoid curl-pipe-to-shell in genrules, and never hardcode secrets in BUCK or .buckconfig files"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2425,6 +2449,10 @@ class ProjectHealth:
         pants = PantsAnalyzer(root_str)
         score, summary, details = self._score_pants(pants)
         categories.append(HealthCategory("pants", score, summary, details))
+
+        buck = BuckAnalyzer(root_str)
+        score, summary, details = self._score_buck(buck)
+        categories.append(HealthCategory("buck", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

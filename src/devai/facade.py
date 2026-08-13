@@ -84,6 +84,7 @@ from devai.garden_analyzer import GardenAnalyzer
 from devai.telepresence_analyzer import TelepresenceAnalyzer
 from devai.earthly_analyzer import EarthlyAnalyzer
 from devai.bazel_analyzer import BazelAnalyzer
+from devai.buck_analyzer import BuckAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -686,6 +687,10 @@ class DevAI:
     def pants(self, path: str | Path = ".", **kwargs: Any) -> PantsAnalyzer:
         """Audit Pants BUILD files and pants.toml for secrets, unpinned deps, and registry issues."""
         return PantsAnalyzer(str(path), **kwargs)
+
+    def buck(self, path: str | Path = ".", **kwargs: Any) -> BuckAnalyzer:
+        """Audit Buck BUCK files and .buckconfig for secrets, unpinned deps, and download issues."""
+        return BuckAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
