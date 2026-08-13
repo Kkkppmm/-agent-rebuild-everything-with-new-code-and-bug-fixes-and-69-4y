@@ -86,6 +86,7 @@ from devai.earthly_analyzer import EarthlyAnalyzer
 from devai.bazel_analyzer import BazelAnalyzer
 from devai.buck_analyzer import BuckAnalyzer
 from devai.gradle_analyzer import GradleAnalyzer
+from devai.maven_analyzer import MavenAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -696,6 +697,10 @@ class DevAI:
     def gradle(self, path: str | Path = ".", **kwargs: Any) -> GradleAnalyzer:
         """Audit Gradle build files for secrets, insecure repos, and unpinned dependencies."""
         return GradleAnalyzer(str(path), **kwargs)
+
+    def maven(self, path: str | Path = ".", **kwargs: Any) -> MavenAnalyzer:
+        """Audit Maven pom.xml and settings.xml for secrets, insecure repos, and unpinned dependencies."""
+        return MavenAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
