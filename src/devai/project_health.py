@@ -74,6 +74,7 @@ from devai.kustomize_analyzer import KustomizeAnalyzer
 from devai.skaffold_analyzer import SkaffoldAnalyzer
 from devai.tilt_analyzer import TiltAnalyzer
 from devai.devspace_analyzer import DevSpaceAnalyzer
+from devai.garden_analyzer import GardenAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -245,6 +246,7 @@ class ProjectHealth:
         "skaffold": 0.02,
         "tilt": 0.02,
         "devspace": 0.02,
+        "garden": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1507,6 +1509,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_garden(self, analyzer: GardenAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Garden configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Garden config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1887,6 +1907,10 @@ class ProjectHealth:
             elif cat.name == "devspace" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden DevSpace — pin image tags, use TLS registries, disable SSH into pods, exclude sensitive sync paths, avoid force deploy, and never hardcode vars or secret values"
+                )
+            elif cat.name == "garden" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Garden — pin image tags, use TLS registries, prefer cluster-build, exclude sensitive sync paths, avoid inline kubeconfig, and never hardcode environment variables"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2285,6 +2309,10 @@ class ProjectHealth:
         devspace = DevSpaceAnalyzer(root_str)
         score, summary, details = self._score_devspace(devspace)
         categories.append(HealthCategory("devspace", score, summary, details))
+
+        garden = GardenAnalyzer(root_str)
+        score, summary, details = self._score_garden(garden)
+        categories.append(HealthCategory("garden", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

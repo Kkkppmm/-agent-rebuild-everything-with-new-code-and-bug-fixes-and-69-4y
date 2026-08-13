@@ -395,6 +395,12 @@ from devai.devspace_analyzer import (
     DevSpaceInfo,
     DevSpaceStats,
 )
+from devai.garden_analyzer import (
+    GardenAnalyzer,
+    GardenFinding,
+    GardenInfo,
+    GardenStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -701,7 +707,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.3.0"
+__version__ = "7.4.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1132,6 +1138,10 @@ __all__ = [
     "DevSpaceFinding",
     "DevSpaceInfo",
     "DevSpaceStats",
+    "GardenAnalyzer",
+    "GardenFinding",
+    "GardenInfo",
+    "GardenStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
