@@ -19,13 +19,13 @@ DEVSPACE_MARKER_PATTERN = re.compile(
 HARDCODED_SECRET_PATTERN = re.compile(
     r"(?:password|passwd|secret|api[_-]?key|token|credential|access[_-]?key|"
     r"private[_-]?key|client[_-]?secret)\s*:\s*"
-    r"[\"'][^\"'{}\s][^\"']*[\"']",
+    r"(?:[\"'][^\"'{}\s][^\"']*[\"']|[^\s#{}\s][^\s#]*)",
     re.IGNORECASE,
 )
 HARDCODED_VAR_PATTERN = re.compile(
     r"^\s*(?:password|passwd|secret|api[_-]?key|token|credential|access[_-]?key|"
     r"private[_-]?key|client[_-]?secret)\s*:\s*"
-    r"[\"'][^\"'{}\s][^\"']*[\"']",
+    r"(?:[\"'][^\"'{}\s][^\"']*[\"']|[^\s#{}\s][^\s#]*)",
     re.IGNORECASE,
 )
 AWS_ACCESS_KEY_PATTERN = re.compile(r"[\"']?AKIA[0-9A-Z]{16}[\"']?", re.IGNORECASE)
@@ -103,7 +103,7 @@ HOST_PATH_PATTERN = re.compile(
     re.IGNORECASE,
 )
 PLAINTEXT_SECRET_VALUE_PATTERN = re.compile(
-    r"^\s*value\s*:\s*[\"'][^\"'{}\s][^\"']*[\"']",
+    r"^\s*value\s*:\s*(?:[\"'][^\"'{}\s][^\"']*[\"']|[^\s#{}\s][^\s#]*)",
     re.IGNORECASE,
 )
 
