@@ -413,6 +413,12 @@ from devai.earthly_analyzer import (
     EarthlyInfo,
     EarthlyStats,
 )
+from devai.bazel_analyzer import (
+    BazelAnalyzer,
+    BazelFinding,
+    BazelInfo,
+    BazelStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -719,7 +725,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.6.0"
+__version__ = "7.7.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1162,6 +1168,10 @@ __all__ = [
     "EarthlyFinding",
     "EarthlyInfo",
     "EarthlyStats",
+    "BazelAnalyzer",
+    "BazelFinding",
+    "BazelInfo",
+    "BazelStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",

@@ -77,6 +77,7 @@ from devai.devspace_analyzer import DevSpaceAnalyzer
 from devai.garden_analyzer import GardenAnalyzer
 from devai.telepresence_analyzer import TelepresenceAnalyzer
 from devai.earthly_analyzer import EarthlyAnalyzer
+from devai.bazel_analyzer import BazelAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -251,6 +252,7 @@ class ProjectHealth:
         "garden": 0.02,
         "telepresence": 0.02,
         "earthly": 0.02,
+        "bazel": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1567,6 +1569,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_bazel(self, analyzer: BazelAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Bazel configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Bazel config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1959,6 +1979,10 @@ class ProjectHealth:
             elif cat.name == "earthly" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Earthly — use ARG --secret for credentials, pin image tags, avoid docker.sock mounts, disable privileged WITH DOCKER, and never embed secrets in RUN commands"
+                )
+            elif cat.name == "bazel" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Bazel — pin http_archive with sha256, pin git_repository commits, keep sandbox enabled, avoid privileged containers, and never hardcode secrets in BUILD files"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2369,6 +2393,10 @@ class ProjectHealth:
         earthly = EarthlyAnalyzer(root_str)
         score, summary, details = self._score_earthly(earthly)
         categories.append(HealthCategory("earthly", score, summary, details))
+
+        bazel = BazelAnalyzer(root_str)
+        score, summary, details = self._score_bazel(bazel)
+        categories.append(HealthCategory("bazel", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

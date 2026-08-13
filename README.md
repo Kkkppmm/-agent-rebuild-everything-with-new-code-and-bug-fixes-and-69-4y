@@ -113,6 +113,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **GardenAnalyzer** — Audit Garden.io project configs for hardcoded environment variables, insecure registries, inline kubeconfig, docker.sock mounts, and sensitive sync paths
 - **TelepresenceAnalyzer** — Audit Telepresence configs for hardcoded env vars, production namespace intercepts, docker.sock mounts, privileged traffic-agent settings, and sensitive envFile paths
 - **EarthlyAnalyzer** — Audit Earthfiles for hardcoded ARG/ENV secrets, :latest tags, curl-pipe-to-shell, docker.sock mounts, privileged WITH DOCKER, and sensitive host path copies
+- **BazelAnalyzer** — Audit Bazel BUILD files, WORKSPACE/MODULE.bazel, and .bazelrc for hardcoded secrets, unpinned http_archive/git_repository, sandbox disabling, privileged containers, and deprecated bind() usage
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

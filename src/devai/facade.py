@@ -83,6 +83,7 @@ from devai.devspace_analyzer import DevSpaceAnalyzer
 from devai.garden_analyzer import GardenAnalyzer
 from devai.telepresence_analyzer import TelepresenceAnalyzer
 from devai.earthly_analyzer import EarthlyAnalyzer
+from devai.bazel_analyzer import BazelAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -676,6 +677,10 @@ class DevAI:
     def earthly(self, path: str | Path = ".", **kwargs: Any) -> EarthlyAnalyzer:
         """Audit Earthfiles for hardcoded secrets, insecure registries, and risky build settings."""
         return EarthlyAnalyzer(str(path), **kwargs)
+
+    def bazel(self, path: str | Path = ".", **kwargs: Any) -> BazelAnalyzer:
+        """Audit Bazel BUILD files and .bazelrc for secrets, unpinned deps, and sandbox issues."""
+        return BazelAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
