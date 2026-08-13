@@ -80,6 +80,7 @@ from devai.earthly_analyzer import EarthlyAnalyzer
 from devai.bazel_analyzer import BazelAnalyzer
 from devai.buck_analyzer import BuckAnalyzer
 from devai.gradle_analyzer import GradleAnalyzer
+from devai.maven_analyzer import MavenAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -1647,6 +1648,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_maven(self, analyzer: MavenAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Maven configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Maven config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2481,6 +2500,10 @@ class ProjectHealth:
         gradle = GradleAnalyzer(root_str)
         score, summary, details = self._score_gradle(gradle)
         categories.append(HealthCategory("gradle", score, summary, details))
+
+        maven = MavenAnalyzer(root_str)
+        score, summary, details = self._score_maven(maven)
+        categories.append(HealthCategory("maven", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

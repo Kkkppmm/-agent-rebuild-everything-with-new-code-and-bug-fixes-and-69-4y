@@ -431,6 +431,12 @@ from devai.gradle_analyzer import (
     GradleInfo,
     GradleStats,
 )
+from devai.maven_analyzer import (
+    MavenAnalyzer,
+    MavenFinding,
+    MavenInfo,
+    MavenStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -743,7 +749,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.10.0"
+__version__ = "7.11.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1198,6 +1204,10 @@ __all__ = [
     "GradleFinding",
     "GradleInfo",
     "GradleStats",
+    "MavenAnalyzer",
+    "MavenFinding",
+    "MavenInfo",
+    "MavenStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

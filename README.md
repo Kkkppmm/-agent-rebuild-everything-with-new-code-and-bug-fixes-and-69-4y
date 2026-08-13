@@ -117,6 +117,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PantsAnalyzer** — Audit Pants BUILD files and pants.toml for hardcoded secrets, unpinned pants_version, insecure PyPI/Docker registries, privileged docker_image targets, curl-pipe-to-shell in shell_command, and secrets in environment dicts
 - **BuckAnalyzer** — Audit Buck BUCK files and .buckconfig for hardcoded secrets, unpinned remote_file/http_archive, insecure Maven/download settings, curl-pipe-to-shell in genrules, and disabled build caches
 - **GradleAnalyzer** — Audit Gradle build.gradle(.kts), settings.gradle, gradle.properties, and libs.versions.toml for hardcoded secrets, allowInsecureProtocol, dynamic dependency versions, insecure Maven repos, signing keys in plain text, and curl-pipe-to-shell in exec tasks
+- **MavenAnalyzer** — Audit Maven pom.xml, settings.xml, and .mvn/* configs for hardcoded secrets, insecure HTTP repositories, dynamic dependency versions, server credentials, GPG signing keys in plain text, and curl-pipe-to-shell in exec plugins
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
