@@ -72,6 +72,7 @@ from devai.cloudformation_analyzer import CloudFormationAnalyzer
 from devai.crossplane_analyzer import CrossplaneAnalyzer
 from devai.kustomize_analyzer import KustomizeAnalyzer
 from devai.skaffold_analyzer import SkaffoldAnalyzer
+from devai.tilt_analyzer import TiltAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -241,6 +242,7 @@ class ProjectHealth:
         "crossplane": 0.02,
         "kustomize": 0.02,
         "skaffold": 0.02,
+        "tilt": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1467,6 +1469,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_tilt(self, analyzer: TiltAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Tilt configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Tilt config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1839,6 +1859,10 @@ class ProjectHealth:
             elif cat.name == "skaffold" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Skaffold — pin image tags, use TLS registries, avoid docker.sock mounts, enable statusCheck, restrict kubeContext to dev clusters, and never hardcode build secrets"
+                )
+            elif cat.name == "tilt" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Tilt — pin image tags, use TLS registries, avoid docker.sock mounts, enable secret scrubbing, restrict allow_k8s_contexts to dev clusters, and never hardcode env secrets"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2229,6 +2253,10 @@ class ProjectHealth:
         skaffold = SkaffoldAnalyzer(root_str)
         score, summary, details = self._score_skaffold(skaffold)
         categories.append(HealthCategory("skaffold", score, summary, details))
+
+        tilt = TiltAnalyzer(root_str)
+        score, summary, details = self._score_tilt(tilt)
+        categories.append(HealthCategory("tilt", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

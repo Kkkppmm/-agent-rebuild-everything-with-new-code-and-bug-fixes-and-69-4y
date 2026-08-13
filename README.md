@@ -108,6 +108,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **CrossplaneAnalyzer** — Audit Crossplane Kubernetes manifests for hardcoded secrets, unversioned providers, disabled TLS verification, wildcard IAM, open security groups, and privileged compositions
 - **KustomizeAnalyzer** — Audit Kustomize overlays for hardcoded secrets in generators, insecure HTTP remote bases, disabled load restrictors, exec plugins, unpinned git sources, and privileged patches
 - **SkaffoldAnalyzer** — Audit Skaffold configs for hardcoded build secrets, insecure registries, docker.sock mounts, kubectl force apply, production kubeContext, and disabled status checks
+- **TiltAnalyzer** — Audit Tiltfiles for hardcoded secrets, insecure registries, docker.sock mounts, production kube contexts, disabled secret scrubbing, and risky live_update sync paths
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

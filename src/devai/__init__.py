@@ -383,6 +383,12 @@ from devai.skaffold_analyzer import (
     SkaffoldInfo,
     SkaffoldStats,
 )
+from devai.tilt_analyzer import (
+    TiltAnalyzer,
+    TiltFinding,
+    TiltInfo,
+    TiltStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -689,7 +695,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.1.0"
+__version__ = "7.2.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1112,6 +1118,10 @@ __all__ = [
     "SkaffoldFinding",
     "SkaffoldInfo",
     "SkaffoldStats",
+    "TiltAnalyzer",
+    "TiltFinding",
+    "TiltInfo",
+    "TiltStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
