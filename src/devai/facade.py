@@ -77,6 +77,7 @@ from devai.pulumi_analyzer import PulumiAnalyzer
 from devai.cloudformation_analyzer import CloudFormationAnalyzer
 from devai.crossplane_analyzer import CrossplaneAnalyzer
 from devai.kustomize_analyzer import KustomizeAnalyzer
+from devai.skaffold_analyzer import SkaffoldAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -646,6 +647,10 @@ class DevAI:
     def kustomize(self, path: str | Path = ".", **kwargs: Any) -> KustomizeAnalyzer:
         """Audit Kustomize overlays for hardcoded secrets, insecure remote bases, and risky patches."""
         return KustomizeAnalyzer(str(path), **kwargs)
+
+    def skaffold(self, path: str | Path = ".", **kwargs: Any) -> SkaffoldAnalyzer:
+        """Audit Skaffold configs for hardcoded secrets, insecure registries, and risky deploy settings."""
+        return SkaffoldAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

@@ -377,6 +377,12 @@ from devai.kustomize_analyzer import (
     KustomizeInfo,
     KustomizeStats,
 )
+from devai.skaffold_analyzer import (
+    SkaffoldAnalyzer,
+    SkaffoldFinding,
+    SkaffoldInfo,
+    SkaffoldStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -683,7 +689,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.0.0"
+__version__ = "7.1.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1102,6 +1108,10 @@ __all__ = [
     "KustomizeFinding",
     "KustomizeInfo",
     "KustomizeStats",
+    "SkaffoldAnalyzer",
+    "SkaffoldFinding",
+    "SkaffoldInfo",
+    "SkaffoldStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",

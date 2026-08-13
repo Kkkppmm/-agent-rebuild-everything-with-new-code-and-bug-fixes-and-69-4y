@@ -71,6 +71,7 @@ from devai.pulumi_analyzer import PulumiAnalyzer
 from devai.cloudformation_analyzer import CloudFormationAnalyzer
 from devai.crossplane_analyzer import CrossplaneAnalyzer
 from devai.kustomize_analyzer import KustomizeAnalyzer
+from devai.skaffold_analyzer import SkaffoldAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -239,6 +240,7 @@ class ProjectHealth:
         "cloudformation": 0.02,
         "crossplane": 0.02,
         "kustomize": 0.02,
+        "skaffold": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1447,6 +1449,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_skaffold(self, analyzer: SkaffoldAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Skaffold configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Skaffold config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1815,6 +1835,10 @@ class ProjectHealth:
             elif cat.name == "kustomize" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Kustomize — use HTTPS remote bases, pin git refs, avoid exec plugins, store secrets in ExternalSecrets, pin image tags, and keep loadRestrictor enabled"
+                )
+            elif cat.name == "skaffold" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Skaffold — pin image tags, use TLS registries, avoid docker.sock mounts, enable statusCheck, restrict kubeContext to dev clusters, and never hardcode build secrets"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2201,6 +2225,10 @@ class ProjectHealth:
         kustomize = KustomizeAnalyzer(root_str)
         score, summary, details = self._score_kustomize(kustomize)
         categories.append(HealthCategory("kustomize", score, summary, details))
+
+        skaffold = SkaffoldAnalyzer(root_str)
+        score, summary, details = self._score_skaffold(skaffold)
+        categories.append(HealthCategory("skaffold", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
