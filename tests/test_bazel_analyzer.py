@@ -45,8 +45,9 @@ py_library(
     data = ["config.txt"],
 )
 
-# secret in string
-x = "api_key=sk-live-hardcoded-secret-value"
+# secret in assignment
+token = "hardcoded-token-value-for-tests"
+api_key = "sk-live-hardcoded-secret-value"
 """
 
 HARDENED_BAZEL = """\

@@ -294,17 +294,19 @@ class BazelAnalyzer:
                     )
                 )
 
-            if LOCAL_REPO_PATTERN.search(line) and SENSITIVE_PATH_PATTERN.search(line):
-                findings.append(
-                    BazelFinding(
-                        kind="sensitive_local_path",
-                        severity="high",
-                        message="local_repository points to sensitive host path — avoid bundling credentials",
-                        path=rel,
-                        lineno=lineno,
-                        line=line,
+            if LOCAL_REPO_PATTERN.search(line):
+                block = self._extract_rule_block(raw_lines, lineno - 1)
+                if SENSITIVE_PATH_PATTERN.search(block):
+                    findings.append(
+                        BazelFinding(
+                            kind="sensitive_local_path",
+                            severity="high",
+                            message="local_repository points to sensitive host path — avoid bundling credentials",
+                            path=rel,
+                            lineno=lineno,
+                            line=line,
+                        )
                     )
-                )
 
             if PRIVILEGED_PATTERN.search(line):
                 findings.append(
