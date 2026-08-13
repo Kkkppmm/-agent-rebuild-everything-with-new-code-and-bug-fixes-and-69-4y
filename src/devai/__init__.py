@@ -419,6 +419,12 @@ from devai.bazel_analyzer import (
     BazelInfo,
     BazelStats,
 )
+from devai.pants_analyzer import (
+    PantsAnalyzer,
+    PantsFinding,
+    PantsInfo,
+    PantsStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -725,7 +731,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.7.0"
+__version__ = "7.8.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1172,6 +1178,10 @@ __all__ = [
     "BazelFinding",
     "BazelInfo",
     "BazelStats",
+    "PantsAnalyzer",
+    "PantsFinding",
+    "PantsInfo",
+    "PantsStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
