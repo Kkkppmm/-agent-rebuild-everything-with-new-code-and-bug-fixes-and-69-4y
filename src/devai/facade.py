@@ -82,6 +82,7 @@ from devai.tilt_analyzer import TiltAnalyzer
 from devai.devspace_analyzer import DevSpaceAnalyzer
 from devai.garden_analyzer import GardenAnalyzer
 from devai.telepresence_analyzer import TelepresenceAnalyzer
+from devai.earthly_analyzer import EarthlyAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -671,6 +672,10 @@ class DevAI:
     def telepresence(self, path: str | Path = ".", **kwargs: Any) -> TelepresenceAnalyzer:
         """Audit Telepresence configs for hardcoded secrets, production intercepts, and risky dev settings."""
         return TelepresenceAnalyzer(str(path), **kwargs)
+
+    def earthly(self, path: str | Path = ".", **kwargs: Any) -> EarthlyAnalyzer:
+        """Audit Earthfiles for hardcoded secrets, insecure registries, and risky build settings."""
+        return EarthlyAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

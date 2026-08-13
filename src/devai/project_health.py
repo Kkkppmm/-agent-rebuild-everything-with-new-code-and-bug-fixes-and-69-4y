@@ -76,6 +76,7 @@ from devai.tilt_analyzer import TiltAnalyzer
 from devai.devspace_analyzer import DevSpaceAnalyzer
 from devai.garden_analyzer import GardenAnalyzer
 from devai.telepresence_analyzer import TelepresenceAnalyzer
+from devai.earthly_analyzer import EarthlyAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -249,6 +250,7 @@ class ProjectHealth:
         "devspace": 0.02,
         "garden": 0.02,
         "telepresence": 0.02,
+        "earthly": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1547,6 +1549,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_earthly(self, analyzer: EarthlyAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Earthly configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Earthly config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -1935,6 +1955,10 @@ class ProjectHealth:
             elif cat.name == "telepresence" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Telepresence — scope intercepts to dev namespaces, disable docker.sock mounts, use namespaced manager RBAC, avoid .env envFile sync, and never hardcode intercept env secrets"
+                )
+            elif cat.name == "earthly" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Earthly — use ARG --secret for credentials, pin image tags, avoid docker.sock mounts, disable privileged WITH DOCKER, and never embed secrets in RUN commands"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2341,6 +2365,10 @@ class ProjectHealth:
         telepresence = TelepresenceAnalyzer(root_str)
         score, summary, details = self._score_telepresence(telepresence)
         categories.append(HealthCategory("telepresence", score, summary, details))
+
+        earthly = EarthlyAnalyzer(root_str)
+        score, summary, details = self._score_earthly(earthly)
+        categories.append(HealthCategory("earthly", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

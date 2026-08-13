@@ -407,6 +407,12 @@ from devai.telepresence_analyzer import (
     TelepresenceInfo,
     TelepresenceStats,
 )
+from devai.earthly_analyzer import (
+    EarthlyAnalyzer,
+    EarthlyFinding,
+    EarthlyInfo,
+    EarthlyStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -713,7 +719,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.5.0"
+__version__ = "7.6.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1152,6 +1158,10 @@ __all__ = [
     "TelepresenceFinding",
     "TelepresenceInfo",
     "TelepresenceStats",
+    "EarthlyAnalyzer",
+    "EarthlyFinding",
+    "EarthlyInfo",
+    "EarthlyStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
