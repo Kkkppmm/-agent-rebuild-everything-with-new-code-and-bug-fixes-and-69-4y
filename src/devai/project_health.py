@@ -82,6 +82,7 @@ from devai.buck_analyzer import BuckAnalyzer
 from devai.gradle_analyzer import GradleAnalyzer
 from devai.maven_analyzer import MavenAnalyzer
 from devai.poetry_analyzer import PoetryAnalyzer
+from devai.pip_analyzer import PipAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -263,6 +264,7 @@ class ProjectHealth:
         "gradle": 0.02,
         "maven": 0.02,
         "poetry": 0.02,
+        "pip": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1687,6 +1689,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_pip(self, analyzer: PipAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No pip configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} pip config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2103,6 +2123,10 @@ class ProjectHealth:
             elif cat.name == "poetry" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Poetry — commit poetry.lock, use HTTPS PyPI sources, pin git dependencies to tags/commits, store PyPI tokens via poetry config or CI secrets, and avoid curl-pipe-to-shell in scripts"
+                )
+            elif cat.name == "pip" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden pip — pin dependencies with ==, maintain constraints.txt, use HTTPS index URLs, store PyPI tokens via env vars or CI secrets, avoid --trusted-host bypasses, and never embed credentials in requirements files"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2537,6 +2561,10 @@ class ProjectHealth:
         poetry = PoetryAnalyzer(root_str)
         score, summary, details = self._score_poetry(poetry)
         categories.append(HealthCategory("poetry", score, summary, details))
+
+        pip = PipAnalyzer(root_str)
+        score, summary, details = self._score_pip(pip)
+        categories.append(HealthCategory("pip", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

@@ -443,6 +443,12 @@ from devai.poetry_analyzer import (
     PoetryInfo,
     PoetryStats,
 )
+from devai.pip_analyzer import (
+    PipAnalyzer,
+    PipFinding,
+    PipInfo,
+    PipStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -755,7 +761,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.12.0"
+__version__ = "7.13.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1218,6 +1224,10 @@ __all__ = [
     "PoetryFinding",
     "PoetryInfo",
     "PoetryStats",
+    "PipAnalyzer",
+    "PipFinding",
+    "PipInfo",
+    "PipStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
