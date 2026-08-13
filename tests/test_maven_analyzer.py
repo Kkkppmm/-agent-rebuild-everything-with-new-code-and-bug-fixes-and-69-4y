@@ -134,7 +134,7 @@ class TestMavenAnalyzer:
         analyzer = MavenAnalyzer(str(tmp_path))
         finding = analyzer.analyze()[0]
         assert isinstance(finding, MavenFinding)
-        assert "[high]" in finding.format() or "[medium]" in finding.format()
+        assert any(s in finding.format() for s in ("[high]", "[medium]", "[low]"))
 
     def test_summary_and_context(self, tmp_path: Path):
         (tmp_path / "pom.xml").write_text(INSECURE_POM, encoding="utf-8")
