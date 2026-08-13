@@ -87,6 +87,7 @@ from devai.bazel_analyzer import BazelAnalyzer
 from devai.buck_analyzer import BuckAnalyzer
 from devai.gradle_analyzer import GradleAnalyzer
 from devai.maven_analyzer import MavenAnalyzer
+from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -701,6 +702,10 @@ class DevAI:
     def maven(self, path: str | Path = ".", **kwargs: Any) -> MavenAnalyzer:
         """Audit Maven pom.xml and settings.xml for secrets, insecure repos, and unpinned dependencies."""
         return MavenAnalyzer(str(path), **kwargs)
+
+    def poetry(self, path: str | Path = ".", **kwargs: Any) -> PoetryAnalyzer:
+        """Audit Poetry pyproject.toml and poetry.toml for secrets, insecure sources, and unpinned deps."""
+        return PoetryAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

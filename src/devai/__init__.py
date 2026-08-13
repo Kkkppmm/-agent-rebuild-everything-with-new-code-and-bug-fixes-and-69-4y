@@ -437,6 +437,12 @@ from devai.maven_analyzer import (
     MavenInfo,
     MavenStats,
 )
+from devai.poetry_analyzer import (
+    PoetryAnalyzer,
+    PoetryFinding,
+    PoetryInfo,
+    PoetryStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -749,7 +755,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.11.0"
+__version__ = "7.12.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1208,6 +1214,10 @@ __all__ = [
     "MavenFinding",
     "MavenInfo",
     "MavenStats",
+    "PoetryAnalyzer",
+    "PoetryFinding",
+    "PoetryInfo",
+    "PoetryStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

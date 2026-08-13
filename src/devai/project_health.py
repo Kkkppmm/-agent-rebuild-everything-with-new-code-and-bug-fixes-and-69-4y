@@ -81,6 +81,7 @@ from devai.bazel_analyzer import BazelAnalyzer
 from devai.buck_analyzer import BuckAnalyzer
 from devai.gradle_analyzer import GradleAnalyzer
 from devai.maven_analyzer import MavenAnalyzer
+from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -261,6 +262,7 @@ class ProjectHealth:
         "buck": 0.02,
         "gradle": 0.02,
         "maven": 0.02,
+        "poetry": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1667,6 +1669,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_poetry(self, analyzer: PoetryAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Poetry configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Poetry config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2079,6 +2099,10 @@ class ProjectHealth:
             elif cat.name == "maven" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Maven — pin dependency versions, use HTTPS repositories, avoid wildcard mirrorOf, never hardcode server passwords in settings.xml, and avoid curl-pipe-to-shell in exec-maven-plugin"
+                )
+            elif cat.name == "poetry" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Poetry — commit poetry.lock, use HTTPS PyPI sources, pin git dependencies to tags/commits, store PyPI tokens via poetry config or CI secrets, and avoid curl-pipe-to-shell in scripts"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2509,6 +2533,10 @@ class ProjectHealth:
         maven = MavenAnalyzer(root_str)
         score, summary, details = self._score_maven(maven)
         categories.append(HealthCategory("maven", score, summary, details))
+
+        poetry = PoetryAnalyzer(root_str)
+        score, summary, details = self._score_poetry(poetry)
+        categories.append(HealthCategory("poetry", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
