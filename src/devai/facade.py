@@ -79,6 +79,7 @@ from devai.crossplane_analyzer import CrossplaneAnalyzer
 from devai.kustomize_analyzer import KustomizeAnalyzer
 from devai.skaffold_analyzer import SkaffoldAnalyzer
 from devai.tilt_analyzer import TiltAnalyzer
+from devai.devspace_analyzer import DevSpaceAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
 from devai.cirrus_ci_analyzer import CirrusCIAnalyzer
@@ -656,6 +657,10 @@ class DevAI:
     def tilt(self, path: str | Path = ".", **kwargs: Any) -> TiltAnalyzer:
         """Audit Tiltfiles for hardcoded secrets, insecure registries, and risky dev settings."""
         return TiltAnalyzer(str(path), **kwargs)
+
+    def devspace(self, path: str | Path = ".", **kwargs: Any) -> DevSpaceAnalyzer:
+        """Audit DevSpace configs for hardcoded secrets, insecure registries, and risky dev settings."""
+        return DevSpaceAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

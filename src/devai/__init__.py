@@ -389,6 +389,12 @@ from devai.tilt_analyzer import (
     TiltInfo,
     TiltStats,
 )
+from devai.devspace_analyzer import (
+    DevSpaceAnalyzer,
+    DevSpaceFinding,
+    DevSpaceInfo,
+    DevSpaceStats,
+)
 from devai.appveyor_ci_analyzer import (
     AppVeyorCIAnalyzer,
     AppVeyorCIFinding,
@@ -695,7 +701,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.2.0"
+__version__ = "7.3.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1122,6 +1128,10 @@ __all__ = [
     "TiltFinding",
     "TiltInfo",
     "TiltStats",
+    "DevSpaceAnalyzer",
+    "DevSpaceFinding",
+    "DevSpaceInfo",
+    "DevSpaceStats",
     "TerragruntInfo",
     "TerragruntStats",
     "AppVeyorCIAnalyzer",
