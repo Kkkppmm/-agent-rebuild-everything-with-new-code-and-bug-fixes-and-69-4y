@@ -60,7 +60,7 @@ class TestBundlerAnalyzer:
         assert "loose_version" in kinds
         assert "curl_pipe_shell" in kinds
         assert "committed_bundle_config" in kinds
-        assert "hardcoded_secret" in kinds
+        assert "bundle_credential" in kinds
         assert "rubygems_token" in kinds
         assert "missing_lock" in kinds
         assert analyzer.health_score() < 50.0

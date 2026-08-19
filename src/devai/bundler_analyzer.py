@@ -55,8 +55,8 @@ DANGEROUS_HOOK_PATTERN = re.compile(
     r"(?:rm\s+-rf\s+/|chmod\s+777|eval\s*\(|nc\s+-|/dev/tcp|Kernel\.system)",
     re.IGNORECASE,
 )
-BUNDLE_CONFIG_CREDENTIAL_PATTERN = re.compile(
-    r"BUNDLE_[A-Z0-9_]*(?:TOKEN|PASSWORD|SECRET|KEY|CREDENTIAL)",
+BUNDLE_CONFIG_LITERAL_VALUE_PATTERN = re.compile(
+    r"BUNDLE_[A-Z0-9_]+\s*:\s*[\"'][^\"']+[\"']",
     re.IGNORECASE,
 )
 SOURCE_HTTP_PATTERN = re.compile(
@@ -300,7 +300,7 @@ class BundlerAnalyzer:
                 )
             )
 
-        if is_bundle_config and BUNDLE_CONFIG_CREDENTIAL_PATTERN.search(line):
+        if is_bundle_config and BUNDLE_CONFIG_LITERAL_VALUE_PATTERN.search(line):
             findings.append(
                 BundlerFinding(
                     kind="bundle_credential",
