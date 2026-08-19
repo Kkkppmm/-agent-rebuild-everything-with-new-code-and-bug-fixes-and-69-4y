@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.16.0"
+        assert devai.__version__ == "7.17.0"
 
     def test_exports(self):
         expected = {
@@ -477,6 +477,10 @@ class TestPublicAPI:
             "CargoFinding",
             "CargoInfo",
             "CargoStats",
+            "GoModAnalyzer",
+            "GoModFinding",
+            "GoModInfo",
+            "GoModStats",
             "SyftFinding",
             "SyftInfo",
             "SyftStats",

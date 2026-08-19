@@ -86,6 +86,7 @@ from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
+from devai.go_mod_analyzer import GoModAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -270,6 +271,7 @@ class ProjectHealth:
         "pip": 0.02,
         "uv": 0.02,
         "cargo": 0.02,
+        "go_mod": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1766,6 +1768,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_go_mod(self, analyzer: GoModAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Go module configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Go module(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2194,6 +2214,10 @@ class ProjectHealth:
             elif cat.name == "cargo" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Cargo — commit Cargo.lock for binaries, use HTTPS registry URLs, pin git dependencies to commits, store tokens via CARGO_REGISTRY_TOKEN or credentials.toml, disable git-fetch-with-cli, and keep TLS revocation checks enabled"
+                )
+            elif cat.name == "go_mod" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Go modules — commit go.sum, use HTTPS GOPROXY, keep GOSUMDB enabled, avoid broad GOINSECURE/GONOSUMDB, pin replace directives, store private module credentials via netrc or CI secrets, and review //go:generate commands"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2644,6 +2668,10 @@ class ProjectHealth:
         cargo = CargoAnalyzer(root_str)
         score, summary, details = self._score_cargo(cargo)
         categories.append(HealthCategory("cargo", score, summary, details))
+
+        go_mod = GoModAnalyzer(root_str)
+        score, summary, details = self._score_go_mod(go_mod)
+        categories.append(HealthCategory("go_mod", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

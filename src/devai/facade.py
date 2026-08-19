@@ -91,6 +91,8 @@ from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
+from devai.cargo_analyzer import CargoAnalyzer
+from devai.go_mod_analyzer import GoModAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -721,6 +723,14 @@ class DevAI:
     def npm(self, path: str | Path = ".", **kwargs: Any) -> NpmAnalyzer:
         """Audit package.json and .npmrc for secrets, insecure registries, and unpinned deps."""
         return NpmAnalyzer(str(path), **kwargs)
+
+    def cargo(self, path: str | Path = ".", **kwargs: Any) -> CargoAnalyzer:
+        """Audit Cargo.toml and .cargo/config.toml for secrets, insecure registries, and unpinned deps."""
+        return CargoAnalyzer(str(path), **kwargs)
+
+    def go_mod(self, path: str | Path = ".", **kwargs: Any) -> GoModAnalyzer:
+        """Audit go.mod, go.sum, and go.env for secrets, insecure proxies, and checksum bypasses."""
+        return GoModAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
