@@ -73,6 +73,11 @@ FIND_PACKAGE_PATTERN = re.compile(
     r"\bfind_package\s*\(\s*([A-Za-z0-9_+-]+)",
     re.IGNORECASE,
 )
+CMAKE_SET_SECRET_PATTERN = re.compile(
+    r"set\s*\(\s*[A-Z0-9_]*(?:PASSWORD|SECRET|TOKEN|API[_-]?KEY|CREDENTIAL)[A-Z0-9_]*\s+"
+    r"[\"'][^\"'\s${}][^\"']*[\"']",
+    re.IGNORECASE,
+)
 
 
 @dataclass
@@ -180,7 +185,7 @@ class CMakeAnalyzer:
         if FETCH_CONTENT_PATTERN.search(stripped):
             info.external_projects.append(f"FetchContent line {lineno}")
 
-        if HARDCODED_SECRET_PATTERN.search(line):
+        if HARDCODED_SECRET_PATTERN.search(line) or CMAKE_SET_SECRET_PATTERN.search(line):
             findings.append(
                 CMakeFinding(
                     kind="hardcoded_secret",
@@ -300,17 +305,27 @@ class CMakeAnalyzer:
                 )
             )
 
-        if FETCH_WITHOUT_HASH_PATTERN.search(line) and "EXPECTED_HASH" not in line.upper():
-            findings.append(
-                CMakeFinding(
-                    kind="download_without_hash",
-                    severity="medium",
-                    message="file(DOWNLOAD) without EXPECTED_HASH — verify download integrity",
-                    path=rel,
-                    lineno=lineno,
-                    line=line,
+    def _check_download_hashes(
+        self,
+        raw_lines: list[str],
+        rel: str,
+        findings: list[CMakeFinding],
+    ) -> None:
+        for lineno, line in enumerate(raw_lines, start=1):
+            if not FETCH_WITHOUT_HASH_PATTERN.search(line):
+                continue
+            window = "\n".join(raw_lines[lineno - 1 : lineno + 5]).upper()
+            if "EXPECTED_HASH" not in window:
+                findings.append(
+                    CMakeFinding(
+                        kind="download_without_hash",
+                        severity="medium",
+                        message="file(DOWNLOAD) without EXPECTED_HASH — verify download integrity",
+                        path=rel,
+                        lineno=lineno,
+                        line=line,
+                    )
                 )
-            )
 
     def _analyze_file(self, path: Path) -> tuple[list[CMakeFinding], CMakeInfo]:
         rel = str(path.relative_to(self.root))
@@ -325,6 +340,8 @@ class CMakeAnalyzer:
 
         for lineno, line in enumerate(raw_lines, start=1):
             self._scan_line(line, lineno, rel, findings, info)
+
+        self._check_download_hashes(raw_lines, rel, findings)
 
         return findings, info
 
