@@ -89,6 +89,7 @@ from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
 from devai.bundler_analyzer import BundlerAnalyzer
+from devai.mix_analyzer import MixAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -276,6 +277,7 @@ class ProjectHealth:
         "go_mod": 0.02,
         "composer": 0.02,
         "bundler": 0.02,
+        "mix": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1826,6 +1828,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_mix(self, analyzer: MixAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Mix configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Mix project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2266,6 +2286,10 @@ class ProjectHealth:
             elif cat.name == "bundler" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Bundler — commit Gemfile.lock, use HTTPS gem sources, gitignore .bundle/config, store credentials via BUNDLE_* env vars or CI secrets, pin git gems to tags/commits, and review install hooks"
+                )
+            elif cat.name == "mix" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Mix — commit mix.lock, use HTTPS Hex repos, store HEX_API_KEY via env vars, pin git deps to tags/commits, use runtime.exs for production secrets, and review mix aliases"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2728,6 +2752,10 @@ class ProjectHealth:
         bundler = BundlerAnalyzer(root_str)
         score, summary, details = self._score_bundler(bundler)
         categories.append(HealthCategory("bundler", score, summary, details))
+
+        mix = MixAnalyzer(root_str)
+        score, summary, details = self._score_mix(mix)
+        categories.append(HealthCategory("mix", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

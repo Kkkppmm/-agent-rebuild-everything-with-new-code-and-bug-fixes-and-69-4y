@@ -485,6 +485,12 @@ from devai.bundler_analyzer import (
     BundlerInfo,
     BundlerStats,
 )
+from devai.mix_analyzer import (
+    MixAnalyzer,
+    MixFinding,
+    MixInfo,
+    MixStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -797,7 +803,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.19.0"
+__version__ = "7.20.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1288,6 +1294,10 @@ __all__ = [
     "BundlerFinding",
     "BundlerInfo",
     "BundlerStats",
+    "MixAnalyzer",
+    "MixFinding",
+    "MixInfo",
+    "MixStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
