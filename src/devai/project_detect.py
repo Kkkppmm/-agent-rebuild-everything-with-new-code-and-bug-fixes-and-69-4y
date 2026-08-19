@@ -81,6 +81,8 @@ class ProjectDetector:
             languages.append("rust")
         if _has_glob(root, "**/*.java"):
             languages.append("java")
+        if _has_glob(root, "**/*.php"):
+            languages.append("php")
 
         if _exists(root, "pyproject.toml"):
             package_managers.append("pip/poetry")
@@ -99,6 +101,8 @@ class ProjectDetector:
             package_managers.append("go modules")
         if _exists(root, "Cargo.toml"):
             package_managers.append("cargo")
+        if _exists(root, "composer.json"):
+            package_managers.append("composer")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")

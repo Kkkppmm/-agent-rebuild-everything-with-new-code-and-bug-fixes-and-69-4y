@@ -87,6 +87,7 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
+from devai.composer_analyzer import ComposerAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -272,6 +273,7 @@ class ProjectHealth:
         "uv": 0.02,
         "cargo": 0.02,
         "go_mod": 0.02,
+        "composer": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1786,6 +1788,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_composer(self, analyzer: ComposerAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Composer configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Composer project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2218,6 +2238,10 @@ class ProjectHealth:
             elif cat.name == "go_mod" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Go modules — commit go.sum, use HTTPS GOPROXY, keep GOSUMDB enabled, avoid broad GOINSECURE/GONOSUMDB, pin replace directives, store private module credentials via netrc or CI secrets, and review //go:generate commands"
+                )
+            elif cat.name == "composer" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Composer — commit composer.lock, use HTTPS repositories, keep secure-http enabled, gitignore auth.json, store tokens via COMPOSER_AUTH or CI secrets, pin VCS dependencies to tags/commits, and explicitly allow only required plugins"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2672,6 +2696,10 @@ class ProjectHealth:
         go_mod = GoModAnalyzer(root_str)
         score, summary, details = self._score_go_mod(go_mod)
         categories.append(HealthCategory("go_mod", score, summary, details))
+
+        composer = ComposerAnalyzer(root_str)
+        score, summary, details = self._score_composer(composer)
+        categories.append(HealthCategory("composer", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

@@ -473,6 +473,12 @@ from devai.go_mod_analyzer import (
     GoModInfo,
     GoModStats,
 )
+from devai.composer_analyzer import (
+    ComposerAnalyzer,
+    ComposerFinding,
+    ComposerInfo,
+    ComposerStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -785,7 +791,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.17.0"
+__version__ = "7.18.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1268,6 +1274,10 @@ __all__ = [
     "GoModFinding",
     "GoModInfo",
     "GoModStats",
+    "ComposerAnalyzer",
+    "ComposerFinding",
+    "ComposerInfo",
+    "ComposerStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

@@ -93,6 +93,7 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
+from devai.composer_analyzer import ComposerAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -731,6 +732,10 @@ class DevAI:
     def go_mod(self, path: str | Path = ".", **kwargs: Any) -> GoModAnalyzer:
         """Audit go.mod, go.sum, and go.env for secrets, insecure proxies, and checksum bypasses."""
         return GoModAnalyzer(str(path), **kwargs)
+
+    def composer(self, path: str | Path = ".", **kwargs: Any) -> ComposerAnalyzer:
+        """Audit composer.json and auth.json for secrets, insecure repos, and unpinned deps."""
+        return ComposerAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
