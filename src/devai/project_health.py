@@ -92,6 +92,7 @@ from devai.bundler_analyzer import BundlerAnalyzer
 from devai.mix_analyzer import MixAnalyzer
 from devai.sbt_analyzer import SbtAnalyzer
 from devai.leiningen_analyzer import LeiningenAnalyzer
+from devai.cmake_analyzer import CMakeAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -282,6 +283,7 @@ class ProjectHealth:
         "mix": 0.02,
         "sbt": 0.02,
         "leiningen": 0.02,
+        "cmake": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1886,6 +1888,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_cmake(self, analyzer: CMakeAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No CMake configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} CMake project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2338,6 +2358,10 @@ class ProjectHealth:
             elif cat.name == "leiningen" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Leiningen — use HTTPS repositories, store deploy credentials in ~/.lein/credentials.clj (gitignored), pin git deps to tags/commits, and review shell aliases"
+                )
+            elif cat.name == "cmake" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden CMake — use HTTPS download URLs, pin FetchContent/ExternalProject to tags/commits, store secrets via env vars, keep CMAKE_TLS_VERIFY ON, add EXPECTED_HASH to file(DOWNLOAD), and review execute_process calls"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2812,6 +2836,10 @@ class ProjectHealth:
         leiningen = LeiningenAnalyzer(root_str)
         score, summary, details = self._score_leiningen(leiningen)
         categories.append(HealthCategory("leiningen", score, summary, details))
+
+        cmake = CMakeAnalyzer(root_str)
+        score, summary, details = self._score_cmake(cmake)
+        categories.append(HealthCategory("cmake", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

@@ -503,6 +503,12 @@ from devai.leiningen_analyzer import (
     LeiningenInfo,
     LeiningenStats,
 )
+from devai.cmake_analyzer import (
+    CMakeAnalyzer,
+    CMakeFinding,
+    CMakeInfo,
+    CMakeStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -815,7 +821,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.22.0"
+__version__ = "7.23.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1318,6 +1324,10 @@ __all__ = [
     "LeiningenFinding",
     "LeiningenInfo",
     "LeiningenStats",
+    "CMakeAnalyzer",
+    "CMakeFinding",
+    "CMakeInfo",
+    "CMakeStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

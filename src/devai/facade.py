@@ -98,6 +98,7 @@ from devai.bundler_analyzer import BundlerAnalyzer
 from devai.mix_analyzer import MixAnalyzer
 from devai.sbt_analyzer import SbtAnalyzer
 from devai.leiningen_analyzer import LeiningenAnalyzer
+from devai.cmake_analyzer import CMakeAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -756,6 +757,10 @@ class DevAI:
     def leiningen(self, path: str | Path = ".", **kwargs: Any) -> LeiningenAnalyzer:
         """Audit project.clj and profiles.clj for secrets, insecure repos, and unpinned deps."""
         return LeiningenAnalyzer(str(path), **kwargs)
+
+    def cmake(self, path: str | Path = ".", **kwargs: Any) -> CMakeAnalyzer:
+        """Audit CMakeLists.txt and cmake modules for secrets, insecure downloads, and unpinned deps."""
+        return CMakeAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
