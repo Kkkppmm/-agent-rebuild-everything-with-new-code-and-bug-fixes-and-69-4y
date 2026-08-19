@@ -96,6 +96,7 @@ from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
 from devai.bundler_analyzer import BundlerAnalyzer
 from devai.mix_analyzer import MixAnalyzer
+from devai.sbt_analyzer import SbtAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -746,6 +747,10 @@ class DevAI:
     def mix(self, path: str | Path = ".", **kwargs: Any) -> MixAnalyzer:
         """Audit mix.exs and config/*.exs for secrets, insecure Hex repos, and unpinned deps."""
         return MixAnalyzer(str(path), **kwargs)
+
+    def sbt(self, path: str | Path = ".", **kwargs: Any) -> SbtAnalyzer:
+        """Audit build.sbt and project/*.sbt for secrets, insecure resolvers, and unpinned deps."""
+        return SbtAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

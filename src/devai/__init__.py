@@ -491,6 +491,12 @@ from devai.mix_analyzer import (
     MixInfo,
     MixStats,
 )
+from devai.sbt_analyzer import (
+    SbtAnalyzer,
+    SbtFinding,
+    SbtInfo,
+    SbtStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -803,7 +809,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.20.0"
+__version__ = "7.21.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1298,6 +1304,10 @@ __all__ = [
     "MixFinding",
     "MixInfo",
     "MixStats",
+    "SbtAnalyzer",
+    "SbtFinding",
+    "SbtInfo",
+    "SbtStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
