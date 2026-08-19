@@ -479,6 +479,12 @@ from devai.composer_analyzer import (
     ComposerInfo,
     ComposerStats,
 )
+from devai.bundler_analyzer import (
+    BundlerAnalyzer,
+    BundlerFinding,
+    BundlerInfo,
+    BundlerStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -791,7 +797,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.18.0"
+__version__ = "7.19.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1278,6 +1284,10 @@ __all__ = [
     "ComposerFinding",
     "ComposerInfo",
     "ComposerStats",
+    "BundlerAnalyzer",
+    "BundlerFinding",
+    "BundlerInfo",
+    "BundlerStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

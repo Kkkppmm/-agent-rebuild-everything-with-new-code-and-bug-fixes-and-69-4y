@@ -88,6 +88,7 @@ from devai.npm_analyzer import NpmAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
+from devai.bundler_analyzer import BundlerAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -274,6 +275,7 @@ class ProjectHealth:
         "cargo": 0.02,
         "go_mod": 0.02,
         "composer": 0.02,
+        "bundler": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1806,6 +1808,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_bundler(self, analyzer: BundlerAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Bundler configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Bundler project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2242,6 +2262,10 @@ class ProjectHealth:
             elif cat.name == "composer" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Composer — commit composer.lock, use HTTPS repositories, keep secure-http enabled, gitignore auth.json, store tokens via COMPOSER_AUTH or CI secrets, pin VCS dependencies to tags/commits, and explicitly allow only required plugins"
+                )
+            elif cat.name == "bundler" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Bundler — commit Gemfile.lock, use HTTPS gem sources, gitignore .bundle/config, store credentials via BUNDLE_* env vars or CI secrets, pin git gems to tags/commits, and review install hooks"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2700,6 +2724,10 @@ class ProjectHealth:
         composer = ComposerAnalyzer(root_str)
         score, summary, details = self._score_composer(composer)
         categories.append(HealthCategory("composer", score, summary, details))
+
+        bundler = BundlerAnalyzer(root_str)
+        score, summary, details = self._score_bundler(bundler)
+        categories.append(HealthCategory("bundler", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
