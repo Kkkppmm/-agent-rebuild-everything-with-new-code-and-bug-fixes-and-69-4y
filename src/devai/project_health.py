@@ -91,6 +91,7 @@ from devai.composer_analyzer import ComposerAnalyzer
 from devai.bundler_analyzer import BundlerAnalyzer
 from devai.mix_analyzer import MixAnalyzer
 from devai.sbt_analyzer import SbtAnalyzer
+from devai.leiningen_analyzer import LeiningenAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -280,6 +281,7 @@ class ProjectHealth:
         "bundler": 0.02,
         "mix": 0.02,
         "sbt": 0.02,
+        "leiningen": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1866,6 +1868,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_leiningen(self, analyzer: LeiningenAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Leiningen configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Leiningen project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2314,6 +2334,10 @@ class ProjectHealth:
             elif cat.name == "sbt" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden sbt — use HTTPS resolvers and publishTo, store credentials in ~/.sbt/.credentials (gitignored), pin git deps to tags/commits, and review sys.process tasks"
+                )
+            elif cat.name == "leiningen" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Leiningen — use HTTPS repositories, store deploy credentials in ~/.lein/credentials.clj (gitignored), pin git deps to tags/commits, and review shell aliases"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2784,6 +2808,10 @@ class ProjectHealth:
         sbt = SbtAnalyzer(root_str)
         score, summary, details = self._score_sbt(sbt)
         categories.append(HealthCategory("sbt", score, summary, details))
+
+        leiningen = LeiningenAnalyzer(root_str)
+        score, summary, details = self._score_leiningen(leiningen)
+        categories.append(HealthCategory("leiningen", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

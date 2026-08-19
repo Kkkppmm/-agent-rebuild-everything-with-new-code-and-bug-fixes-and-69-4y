@@ -497,6 +497,12 @@ from devai.sbt_analyzer import (
     SbtInfo,
     SbtStats,
 )
+from devai.leiningen_analyzer import (
+    LeiningenAnalyzer,
+    LeiningenFinding,
+    LeiningenInfo,
+    LeiningenStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -809,7 +815,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.21.0"
+__version__ = "7.22.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1308,6 +1314,10 @@ __all__ = [
     "SbtFinding",
     "SbtInfo",
     "SbtStats",
+    "LeiningenAnalyzer",
+    "LeiningenFinding",
+    "LeiningenInfo",
+    "LeiningenStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

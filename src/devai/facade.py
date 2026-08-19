@@ -97,6 +97,7 @@ from devai.composer_analyzer import ComposerAnalyzer
 from devai.bundler_analyzer import BundlerAnalyzer
 from devai.mix_analyzer import MixAnalyzer
 from devai.sbt_analyzer import SbtAnalyzer
+from devai.leiningen_analyzer import LeiningenAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -751,6 +752,10 @@ class DevAI:
     def sbt(self, path: str | Path = ".", **kwargs: Any) -> SbtAnalyzer:
         """Audit build.sbt and project/*.sbt for secrets, insecure resolvers, and unpinned deps."""
         return SbtAnalyzer(str(path), **kwargs)
+
+    def leiningen(self, path: str | Path = ".", **kwargs: Any) -> LeiningenAnalyzer:
+        """Audit project.clj and profiles.clj for secrets, insecure repos, and unpinned deps."""
+        return LeiningenAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
