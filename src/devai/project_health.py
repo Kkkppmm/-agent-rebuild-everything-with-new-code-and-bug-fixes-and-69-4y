@@ -96,6 +96,7 @@ from devai.cmake_analyzer import CMakeAnalyzer
 from devai.meson_analyzer import MesonAnalyzer
 from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
+from devai.nix_analyzer import NixAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -290,6 +291,7 @@ class ProjectHealth:
         "meson": 0.02,
         "conan": 0.02,
         "vcpkg": 0.02,
+        "nix": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1966,6 +1968,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_nix(self, analyzer: NixAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Nix configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Nix project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2434,6 +2454,10 @@ class ProjectHealth:
             elif cat.name == "vcpkg" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Vcpkg — use HTTPS registry URLs, pin builtin-baseline and REF to commit SHAs, add SHA512 to vcpkg_download_distfile, store credentials via env vars, keep TLS verification enabled, and review vcpkg_execute_required_process calls"
+                )
+            elif cat.name == "nix" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Nix — use HTTPS substituters, pin flake inputs to commit SHAs in flake.lock, add sha256 to fetchTarball/fetchGit, store secrets via sops-nix or agenix, keep TLS verification enabled, and review runCommand/writeShellScript calls"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2924,6 +2948,10 @@ class ProjectHealth:
         vcpkg = VcpkgAnalyzer(root_str)
         score, summary, details = self._score_vcpkg(vcpkg)
         categories.append(HealthCategory("vcpkg", score, summary, details))
+
+        nix = NixAnalyzer(root_str)
+        score, summary, details = self._score_nix(nix)
+        categories.append(HealthCategory("nix", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

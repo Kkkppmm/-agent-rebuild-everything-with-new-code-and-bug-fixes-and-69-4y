@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.25.0"
+        assert devai.__version__ == "7.27.0"
 
     def test_exports(self):
         expected = {
@@ -517,6 +517,10 @@ class TestPublicAPI:
             "VcpkgFinding",
             "VcpkgInfo",
             "VcpkgStats",
+            "NixAnalyzer",
+            "NixFinding",
+            "NixInfo",
+            "NixStats",
             "SyftFinding",
             "SyftInfo",
             "SyftStats",

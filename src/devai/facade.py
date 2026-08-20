@@ -102,6 +102,7 @@ from devai.cmake_analyzer import CMakeAnalyzer
 from devai.meson_analyzer import MesonAnalyzer
 from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
+from devai.nix_analyzer import NixAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -776,6 +777,10 @@ class DevAI:
     def vcpkg(self, path: str | Path = ".", **kwargs: Any) -> VcpkgAnalyzer:
         """Audit vcpkg.json manifests, portfiles, and registry config for secrets, insecure downloads, and unpinned deps."""
         return VcpkgAnalyzer(str(path), **kwargs)
+
+    def nix(self, path: str | Path = ".", **kwargs: Any) -> NixAnalyzer:
+        """Audit flake.nix, shell.nix, and Nix configs for secrets, insecure substituters, and unpinned inputs."""
+        return NixAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

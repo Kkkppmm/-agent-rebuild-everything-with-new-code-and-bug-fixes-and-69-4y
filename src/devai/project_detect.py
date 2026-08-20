@@ -113,6 +113,8 @@ class ProjectDetector:
             package_managers.append("conan")
         if _exists(root, "vcpkg.json") or _exists(root, "vcpkg-configuration.json"):
             package_managers.append("vcpkg")
+        if _exists(root, "flake.nix") or _exists(root, "shell.nix") or _exists(root, "default.nix"):
+            package_managers.append("nix")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")

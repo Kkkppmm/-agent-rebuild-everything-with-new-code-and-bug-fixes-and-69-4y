@@ -527,6 +527,12 @@ from devai.vcpkg_analyzer import (
     VcpkgInfo,
     VcpkgStats,
 )
+from devai.nix_analyzer import (
+    NixAnalyzer,
+    NixFinding,
+    NixInfo,
+    NixStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -839,7 +845,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.25.0"
+__version__ = "7.27.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1358,6 +1364,10 @@ __all__ = [
     "VcpkgFinding",
     "VcpkgInfo",
     "VcpkgStats",
+    "NixAnalyzer",
+    "NixFinding",
+    "NixInfo",
+    "NixStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
