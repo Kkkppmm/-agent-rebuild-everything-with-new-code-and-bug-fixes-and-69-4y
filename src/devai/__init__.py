@@ -539,6 +539,12 @@ from devai.homebrew_analyzer import (
     HomebrewInfo,
     HomebrewStats,
 )
+from devai.mise_analyzer import (
+    MiseAnalyzer,
+    MiseFinding,
+    MiseInfo,
+    MiseStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1378,6 +1384,10 @@ __all__ = [
     "HomebrewFinding",
     "HomebrewInfo",
     "HomebrewStats",
+    "MiseAnalyzer",
+    "MiseFinding",
+    "MiseInfo",
+    "MiseStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

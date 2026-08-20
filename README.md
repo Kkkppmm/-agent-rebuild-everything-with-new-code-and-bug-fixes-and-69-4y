@@ -135,6 +135,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **VcpkgAnalyzer** — Audit vcpkg.json, vcpkg-configuration.json, and portfile.cmake for hardcoded secrets, insecure HTTP URLs, credentials in git URLs, unpinned git refs, disabled TLS verification, unverified downloads, and dangerous vcpkg_execute_required_process calls
 - **NixAnalyzer** — Audit flake.nix, shell.nix, default.nix, and nix.conf for hardcoded secrets, insecure HTTP substituters, credentials in git URLs, unpinned flake inputs, disabled TLS verification, unverified fetchTarball calls, and dangerous runCommand/writeShellScript invocations
 - **HomebrewAnalyzer** — Audit Brewfile, Formula, and Cask files for hardcoded secrets, insecure HTTP URLs, credentials in git URLs, unpinned git refs, disabled TLS verification, unverified downloads, and dangerous system() calls
+- **MiseAnalyzer** — Audit `.mise.toml`, `.tool-versions`, and `mise.lock` for hardcoded secrets, unpinned tool versions, insecure plugin URLs, credentials in git URLs, disabled TLS verification, and dangerous task/hook scripts
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

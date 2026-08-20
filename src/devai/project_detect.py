@@ -117,6 +117,14 @@ class ProjectDetector:
             package_managers.append("nix")
         if _exists(root, "Brewfile") or _has_glob(root, "Formula/*.rb"):
             package_managers.append("homebrew")
+        if (
+            _exists(root, ".mise.toml")
+            or _exists(root, "mise.toml")
+            or _exists(root, ".tool-versions")
+            or _exists(root, ".rtx.toml")
+            or _exists(root, "mise.lock")
+        ):
+            package_managers.append("mise")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")
