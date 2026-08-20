@@ -115,6 +115,8 @@ class ProjectDetector:
             package_managers.append("vcpkg")
         if _exists(root, "flake.nix") or _exists(root, "shell.nix") or _exists(root, "default.nix"):
             package_managers.append("nix")
+        if _exists(root, "Brewfile") or _has_glob(root, "Formula/*.rb"):
+            package_managers.append("homebrew")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")

@@ -97,6 +97,7 @@ from devai.meson_analyzer import MesonAnalyzer
 from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
+from devai.homebrew_analyzer import HomebrewAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -292,6 +293,7 @@ class ProjectHealth:
         "conan": 0.02,
         "vcpkg": 0.02,
         "nix": 0.02,
+        "homebrew": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1986,6 +1988,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_homebrew(self, analyzer: HomebrewAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Homebrew configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Homebrew project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2952,6 +2972,10 @@ class ProjectHealth:
         nix = NixAnalyzer(root_str)
         score, summary, details = self._score_nix(nix)
         categories.append(HealthCategory("nix", score, summary, details))
+
+        homebrew = HomebrewAnalyzer(root_str)
+        score, summary, details = self._score_homebrew(homebrew)
+        categories.append(HealthCategory("homebrew", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

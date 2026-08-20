@@ -103,6 +103,7 @@ from devai.meson_analyzer import MesonAnalyzer
 from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
+from devai.homebrew_analyzer import HomebrewAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -781,6 +782,10 @@ class DevAI:
     def nix(self, path: str | Path = ".", **kwargs: Any) -> NixAnalyzer:
         """Audit flake.nix, shell.nix, and Nix configs for secrets, insecure substituters, and unpinned inputs."""
         return NixAnalyzer(str(path), **kwargs)
+
+    def homebrew(self, path: str | Path = ".", **kwargs: Any) -> HomebrewAnalyzer:
+        """Audit Brewfile, Formula, and Cask files for secrets, insecure URLs, and unpinned git refs."""
+        return HomebrewAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

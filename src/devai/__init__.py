@@ -533,6 +533,12 @@ from devai.nix_analyzer import (
     NixInfo,
     NixStats,
 )
+from devai.homebrew_analyzer import (
+    HomebrewAnalyzer,
+    HomebrewFinding,
+    HomebrewInfo,
+    HomebrewStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1368,6 +1374,10 @@ __all__ = [
     "NixFinding",
     "NixInfo",
     "NixStats",
+    "HomebrewAnalyzer",
+    "HomebrewFinding",
+    "HomebrewInfo",
+    "HomebrewStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
