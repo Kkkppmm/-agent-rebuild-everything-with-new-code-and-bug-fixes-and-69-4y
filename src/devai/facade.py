@@ -104,6 +104,7 @@ from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
+from devai.turbo_analyzer import TurboAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -786,6 +787,10 @@ class DevAI:
     def mise(self, path: str | Path = ".", **kwargs: Any) -> MiseAnalyzer:
         """Audit mise.toml and .tool-versions for secrets, insecure plugin URLs, and dangerous tasks."""
         return MiseAnalyzer(str(path), **kwargs)
+
+    def turbo(self, path: str | Path = ".", **kwargs: Any) -> TurboAnalyzer:
+        """Audit turbo.json and turbo.jsonc for secrets, cache signature bypasses, and sensitive env vars."""
+        return TurboAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

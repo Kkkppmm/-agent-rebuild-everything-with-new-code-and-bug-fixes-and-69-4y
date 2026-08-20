@@ -539,6 +539,12 @@ from devai.mise_analyzer import (
     MiseInfo,
     MiseStats,
 )
+from devai.turbo_analyzer import (
+    TurboAnalyzer,
+    TurboFinding,
+    TurboInfo,
+    TurboStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -851,7 +857,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.27.0"
+__version__ = "7.29.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1378,6 +1384,10 @@ __all__ = [
     "MiseFinding",
     "MiseInfo",
     "MiseStats",
+    "TurboAnalyzer",
+    "TurboFinding",
+    "TurboInfo",
+    "TurboStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

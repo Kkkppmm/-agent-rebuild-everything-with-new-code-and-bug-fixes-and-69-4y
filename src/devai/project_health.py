@@ -98,6 +98,7 @@ from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
+from devai.turbo_analyzer import TurboAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -294,6 +295,7 @@ class ProjectHealth:
         "vcpkg": 0.02,
         "nix": 0.02,
         "mise": 0.02,
+        "turbo": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -2006,6 +2008,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_turbo(self, analyzer: TurboAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No turbo configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} turbo config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2482,6 +2502,10 @@ class ProjectHealth:
             elif cat.name == "mise" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden mise — pin tool versions explicitly, use HTTPS plugin URLs, store secrets via mise env files or CI secrets, keep TLS verification enabled, and review task run scripts for curl|sh and privilege escalation"
+                )
+            elif cat.name == "turbo" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Turborepo — enable remote cache signatures, avoid globalPassThroughEnv for secrets, exclude .env and credential files from inputs/globalDependencies, use HTTPS remote cache URLs, and keep sensitive env vars out of cache keys"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2980,6 +3004,10 @@ class ProjectHealth:
         mise = MiseAnalyzer(root_str)
         score, summary, details = self._score_mise(mise)
         categories.append(HealthCategory("mise", score, summary, details))
+
+        turbo = TurboAnalyzer(root_str)
+        score, summary, details = self._score_turbo(turbo)
+        categories.append(HealthCategory("turbo", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
