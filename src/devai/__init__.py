@@ -521,6 +521,12 @@ from devai.conan_analyzer import (
     ConanInfo,
     ConanStats,
 )
+from devai.vcpkg_analyzer import (
+    VcpkgAnalyzer,
+    VcpkgFinding,
+    VcpkgInfo,
+    VcpkgStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1348,6 +1354,10 @@ __all__ = [
     "ConanFinding",
     "ConanInfo",
     "ConanStats",
+    "VcpkgAnalyzer",
+    "VcpkgFinding",
+    "VcpkgInfo",
+    "VcpkgStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
