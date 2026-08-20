@@ -94,6 +94,7 @@ from devai.sbt_analyzer import SbtAnalyzer
 from devai.leiningen_analyzer import LeiningenAnalyzer
 from devai.cmake_analyzer import CMakeAnalyzer
 from devai.meson_analyzer import MesonAnalyzer
+from devai.conan_analyzer import ConanAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -286,6 +287,7 @@ class ProjectHealth:
         "leiningen": 0.02,
         "cmake": 0.02,
         "meson": 0.02,
+        "conan": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1926,6 +1928,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_conan(self, analyzer: ConanAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Conan configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Conan project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2386,6 +2406,10 @@ class ProjectHealth:
             elif cat.name == "meson" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Meson — use HTTPS source_url values, pin wrap-git revision to tags/commits, add source_hash to wrap-file downloads, store secrets via meson options or env vars, and review run_command calls"
+                )
+            elif cat.name == "conan" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Conan — use HTTPS remotes, pin git deps to tags/commits, add sha256 to tools.get downloads, store credentials via Conan secrets or env vars, keep verify_ssl enabled, and review self.run calls"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2868,6 +2892,10 @@ class ProjectHealth:
         meson = MesonAnalyzer(root_str)
         score, summary, details = self._score_meson(meson)
         categories.append(HealthCategory("meson", score, summary, details))
+
+        conan = ConanAnalyzer(root_str)
+        score, summary, details = self._score_conan(conan)
+        categories.append(HealthCategory("conan", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

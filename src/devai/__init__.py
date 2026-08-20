@@ -515,6 +515,12 @@ from devai.meson_analyzer import (
     MesonInfo,
     MesonStats,
 )
+from devai.conan_analyzer import (
+    ConanAnalyzer,
+    ConanFinding,
+    ConanInfo,
+    ConanStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -827,7 +833,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.24.0"
+__version__ = "7.25.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1338,6 +1344,10 @@ __all__ = [
     "MesonFinding",
     "MesonInfo",
     "MesonStats",
+    "ConanAnalyzer",
+    "ConanFinding",
+    "ConanInfo",
+    "ConanStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

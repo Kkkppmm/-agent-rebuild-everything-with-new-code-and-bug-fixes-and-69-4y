@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.24.0"
+        assert devai.__version__ == "7.25.0"
 
     def test_exports(self):
         expected = {
@@ -509,6 +509,10 @@ class TestPublicAPI:
             "MesonFinding",
             "MesonInfo",
             "MesonStats",
+            "ConanAnalyzer",
+            "ConanFinding",
+            "ConanInfo",
+            "ConanStats",
             "SyftFinding",
             "SyftInfo",
             "SyftStats",

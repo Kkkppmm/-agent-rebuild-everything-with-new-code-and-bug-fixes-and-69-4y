@@ -109,6 +109,8 @@ class ProjectDetector:
             package_managers.append("cmake")
         if _exists(root, "meson.build"):
             package_managers.append("meson")
+        if _exists(root, "conanfile.py") or _exists(root, "conanfile.txt"):
+            package_managers.append("conan")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")
