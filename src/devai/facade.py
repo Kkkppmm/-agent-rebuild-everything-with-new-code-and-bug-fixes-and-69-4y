@@ -99,6 +99,7 @@ from devai.mix_analyzer import MixAnalyzer
 from devai.sbt_analyzer import SbtAnalyzer
 from devai.leiningen_analyzer import LeiningenAnalyzer
 from devai.cmake_analyzer import CMakeAnalyzer
+from devai.meson_analyzer import MesonAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -761,6 +762,10 @@ class DevAI:
     def cmake(self, path: str | Path = ".", **kwargs: Any) -> CMakeAnalyzer:
         """Audit CMakeLists.txt and cmake modules for secrets, insecure downloads, and unpinned deps."""
         return CMakeAnalyzer(str(path), **kwargs)
+
+    def meson(self, path: str | Path = ".", **kwargs: Any) -> MesonAnalyzer:
+        """Audit meson.build, wrap files, and meson options for secrets, insecure downloads, and unpinned deps."""
+        return MesonAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

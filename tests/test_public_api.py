@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.23.0"
+        assert devai.__version__ == "7.24.0"
 
     def test_exports(self):
         expected = {
@@ -505,6 +505,10 @@ class TestPublicAPI:
             "CMakeFinding",
             "CMakeInfo",
             "CMakeStats",
+            "MesonAnalyzer",
+            "MesonFinding",
+            "MesonInfo",
+            "MesonStats",
             "SyftFinding",
             "SyftInfo",
             "SyftStats",

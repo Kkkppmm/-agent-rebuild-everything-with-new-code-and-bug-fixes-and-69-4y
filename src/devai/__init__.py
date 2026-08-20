@@ -509,6 +509,12 @@ from devai.cmake_analyzer import (
     CMakeInfo,
     CMakeStats,
 )
+from devai.meson_analyzer import (
+    MesonAnalyzer,
+    MesonFinding,
+    MesonInfo,
+    MesonStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -821,7 +827,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.23.0"
+__version__ = "7.24.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1328,6 +1334,10 @@ __all__ = [
     "CMakeFinding",
     "CMakeInfo",
     "CMakeStats",
+    "MesonAnalyzer",
+    "MesonFinding",
+    "MesonInfo",
+    "MesonStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

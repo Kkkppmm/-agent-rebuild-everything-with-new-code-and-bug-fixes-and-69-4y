@@ -93,6 +93,7 @@ from devai.mix_analyzer import MixAnalyzer
 from devai.sbt_analyzer import SbtAnalyzer
 from devai.leiningen_analyzer import LeiningenAnalyzer
 from devai.cmake_analyzer import CMakeAnalyzer
+from devai.meson_analyzer import MesonAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -284,6 +285,7 @@ class ProjectHealth:
         "sbt": 0.02,
         "leiningen": 0.02,
         "cmake": 0.02,
+        "meson": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1906,6 +1908,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_meson(self, analyzer: MesonAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Meson configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Meson project(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2362,6 +2382,10 @@ class ProjectHealth:
             elif cat.name == "cmake" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden CMake — use HTTPS download URLs, pin FetchContent/ExternalProject to tags/commits, store secrets via env vars, keep CMAKE_TLS_VERIFY ON, add EXPECTED_HASH to file(DOWNLOAD), and review execute_process calls"
+                )
+            elif cat.name == "meson" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Meson — use HTTPS source_url values, pin wrap-git revision to tags/commits, add source_hash to wrap-file downloads, store secrets via meson options or env vars, and review run_command calls"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2840,6 +2864,10 @@ class ProjectHealth:
         cmake = CMakeAnalyzer(root_str)
         score, summary, details = self._score_cmake(cmake)
         categories.append(HealthCategory("cmake", score, summary, details))
+
+        meson = MesonAnalyzer(root_str)
+        score, summary, details = self._score_meson(meson)
+        categories.append(HealthCategory("meson", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

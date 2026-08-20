@@ -107,6 +107,8 @@ class ProjectDetector:
             package_managers.append("composer")
         if _exists(root, "CMakeLists.txt"):
             package_managers.append("cmake")
+        if _exists(root, "meson.build"):
+            package_managers.append("meson")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")
