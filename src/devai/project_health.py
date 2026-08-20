@@ -97,6 +97,7 @@ from devai.meson_analyzer import MesonAnalyzer
 from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
+from devai.mise_analyzer import MiseAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -292,6 +293,7 @@ class ProjectHealth:
         "conan": 0.02,
         "vcpkg": 0.02,
         "nix": 0.02,
+        "mise": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -1986,6 +1988,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_mise(self, analyzer: MiseAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No mise configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} mise config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2458,6 +2478,10 @@ class ProjectHealth:
             elif cat.name == "nix" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Nix — use HTTPS substituters, pin flake inputs to commit SHAs in flake.lock, add sha256 to fetchTarball/fetchGit, store secrets via sops-nix or agenix, keep TLS verification enabled, and review runCommand/writeShellScript calls"
+                )
+            elif cat.name == "mise" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden mise — pin tool versions explicitly, use HTTPS plugin URLs, store secrets via mise env files or CI secrets, keep TLS verification enabled, and review task run scripts for curl|sh and privilege escalation"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -2952,6 +2976,10 @@ class ProjectHealth:
         nix = NixAnalyzer(root_str)
         score, summary, details = self._score_nix(nix)
         categories.append(HealthCategory("nix", score, summary, details))
+
+        mise = MiseAnalyzer(root_str)
+        score, summary, details = self._score_mise(mise)
+        categories.append(HealthCategory("mise", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

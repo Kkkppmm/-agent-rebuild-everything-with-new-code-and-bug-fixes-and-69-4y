@@ -115,6 +115,8 @@ class ProjectDetector:
             package_managers.append("vcpkg")
         if _exists(root, "flake.nix") or _exists(root, "shell.nix") or _exists(root, "default.nix"):
             package_managers.append("nix")
+        if _exists(root, ".mise.toml") or _exists(root, "mise.toml") or _exists(root, ".tool-versions"):
+            package_managers.append("mise")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")

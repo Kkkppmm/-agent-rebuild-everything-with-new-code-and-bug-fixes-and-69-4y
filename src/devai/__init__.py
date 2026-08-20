@@ -533,6 +533,12 @@ from devai.nix_analyzer import (
     NixInfo,
     NixStats,
 )
+from devai.mise_analyzer import (
+    MiseAnalyzer,
+    MiseFinding,
+    MiseInfo,
+    MiseStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1368,6 +1374,10 @@ __all__ = [
     "NixFinding",
     "NixInfo",
     "NixStats",
+    "MiseAnalyzer",
+    "MiseFinding",
+    "MiseInfo",
+    "MiseStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
