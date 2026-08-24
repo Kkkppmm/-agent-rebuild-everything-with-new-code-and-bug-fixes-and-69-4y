@@ -117,6 +117,8 @@ class ProjectDetector:
             package_managers.append("nix")
         if _exists(root, ".mise.toml") or _exists(root, "mise.toml") or _exists(root, ".tool-versions"):
             package_managers.append("mise")
+        if _exists(root, ".envrc") or _exists(root, "direnv.toml"):
+            package_managers.append("direnv")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")

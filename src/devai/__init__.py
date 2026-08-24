@@ -545,6 +545,12 @@ from devai.turbo_analyzer import (
     TurboInfo,
     TurboStats,
 )
+from devai.direnv_analyzer import (
+    DirenvAnalyzer,
+    DirenvFinding,
+    DirenvInfo,
+    DirenvStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1388,6 +1394,10 @@ __all__ = [
     "TurboFinding",
     "TurboInfo",
     "TurboStats",
+    "DirenvAnalyzer",
+    "DirenvFinding",
+    "DirenvInfo",
+    "DirenvStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

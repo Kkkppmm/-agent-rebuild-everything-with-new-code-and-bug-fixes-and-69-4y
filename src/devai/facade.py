@@ -105,6 +105,7 @@ from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
 from devai.turbo_analyzer import TurboAnalyzer
+from devai.direnv_analyzer import DirenvAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -791,6 +792,10 @@ class DevAI:
     def turbo(self, path: str | Path = ".", **kwargs: Any) -> TurboAnalyzer:
         """Audit turbo.json and turbo.jsonc for secrets, cache signature bypasses, and sensitive env vars."""
         return TurboAnalyzer(str(path), **kwargs)
+
+    def direnv(self, path: str | Path = ".", **kwargs: Any) -> DirenvAnalyzer:
+        """Audit .envrc and direnv.toml for secrets, disabled strict_env, and dangerous hooks."""
+        return DirenvAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
