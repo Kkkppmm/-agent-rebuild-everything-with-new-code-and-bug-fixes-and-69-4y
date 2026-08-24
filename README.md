@@ -137,6 +137,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **MiseAnalyzer** — Audit mise.toml, .mise.toml, and .tool-versions for hardcoded secrets in env blocks, insecure HTTP plugin URLs, credentials in git URLs, unpinned plugin refs, disabled TLS verification, dangerous task run scripts, and unpinned tool versions
 - **TurboAnalyzer** — Audit turbo.json and turbo.jsonc for hardcoded secrets, disabled remote cache signatures, sensitive env vars in globalPassThroughEnv, credential files in inputs/globalDependencies, insecure HTTP remote cache URLs, and cache-disabled tasks
 - **DirenvAnalyzer** — Audit .envrc and direnv.toml for hardcoded secrets, disabled strict_env, dotenv loading of credential files, watch_file on secrets, insecure source_env URLs, dangerous eval hooks, writable PATH_add paths, and unpinned use nix/flake refs
+- **JustAnalyzer** — Audit justfile, Justfile, and just/*.just for hardcoded secrets, curl|sh in recipes, sudo and chmod 777, git push --force, eval usage, insecure HTTP imports, [script] shebang recipes, and sensitive path references
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

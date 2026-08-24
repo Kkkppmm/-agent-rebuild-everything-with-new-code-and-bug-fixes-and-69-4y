@@ -551,6 +551,12 @@ from devai.direnv_analyzer import (
     DirenvInfo,
     DirenvStats,
 )
+from devai.just_analyzer import (
+    JustAnalyzer,
+    JustFinding,
+    JustInfo,
+    JustStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -863,7 +869,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.29.0"
+__version__ = "7.31.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1398,6 +1404,10 @@ __all__ = [
     "DirenvFinding",
     "DirenvInfo",
     "DirenvStats",
+    "JustAnalyzer",
+    "JustFinding",
+    "JustInfo",
+    "JustStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
