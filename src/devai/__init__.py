@@ -545,6 +545,12 @@ from devai.turbo_analyzer import (
     TurboInfo,
     TurboStats,
 )
+from devai.nx_analyzer import (
+    NxAnalyzer,
+    NxFinding,
+    NxInfo,
+    NxStats,
+)
 from devai.direnv_analyzer import (
     DirenvAnalyzer,
     DirenvFinding,
@@ -1413,6 +1419,10 @@ __all__ = [
     "TurboFinding",
     "TurboInfo",
     "TurboStats",
+    "NxAnalyzer",
+    "NxFinding",
+    "NxInfo",
+    "NxStats",
     "DirenvAnalyzer",
     "DirenvFinding",
     "DirenvInfo",
