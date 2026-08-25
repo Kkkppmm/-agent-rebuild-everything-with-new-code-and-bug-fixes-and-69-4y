@@ -100,6 +100,7 @@ from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
 from devai.turbo_analyzer import TurboAnalyzer
 from devai.taskfile_analyzer import TaskfileAnalyzer
+from devai.justfile_analyzer import JustfileAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -298,6 +299,7 @@ class ProjectHealth:
         "mise": 0.02,
         "turbo": 0.02,
         "taskfile": 0.02,
+        "justfile": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -2046,6 +2048,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_justfile(self, analyzer: JustfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Justfiles found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Justfile(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2530,6 +2550,10 @@ class ProjectHealth:
             elif cat.name == "taskfile" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Go Task Taskfiles — store secrets in environment/CI vars not vars/env blocks, exclude .env and credential paths from sources/dotenv, avoid curl|sh in cmds, use HTTPS URLs, and disable privileged Docker"
+                )
+            elif cat.name == "justfile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden just Justfiles — store secrets in environment/CI vars not := assignments, avoid dotenv-load for sensitive projects, exclude .env and credential paths, avoid curl|sh in recipes, use HTTPS URLs, and disable privileged Docker"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -3036,6 +3060,10 @@ class ProjectHealth:
         taskfile = TaskfileAnalyzer(root_str)
         score, summary, details = self._score_taskfile(taskfile)
         categories.append(HealthCategory("taskfile", score, summary, details))
+
+        justfile = JustfileAnalyzer(root_str)
+        score, summary, details = self._score_justfile(justfile)
+        categories.append(HealthCategory("justfile", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
