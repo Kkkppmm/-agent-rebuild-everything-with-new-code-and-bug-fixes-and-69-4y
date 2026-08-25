@@ -1,0 +1,9 @@
+{
+  "name": "release",
+  "tasks": [
+    {"name": "review", "action": "review"},
+    {"name": "security", "action": "security"},
+    {"name": "performance", "action": "performance"},
+    {"name": "architecture", "action": "architecture"}
+  ]
+}
