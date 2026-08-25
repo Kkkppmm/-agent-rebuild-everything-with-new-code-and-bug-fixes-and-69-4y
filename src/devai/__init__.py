@@ -467,6 +467,12 @@ from devai.pnpm_analyzer import (
     PnpmInfo,
     PnpmStats,
 )
+from devai.bun_analyzer import (
+    BunAnalyzer,
+    BunFinding,
+    BunInfo,
+    BunStats,
+)
 from devai.cargo_analyzer import (
     CargoAnalyzer,
     CargoFinding,
@@ -937,7 +943,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.39.0"
+__version__ = "7.40.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1416,6 +1422,10 @@ __all__ = [
     "PnpmFinding",
     "PnpmInfo",
     "PnpmStats",
+    "BunAnalyzer",
+    "BunFinding",
+    "BunInfo",
+    "BunStats",
     "CargoAnalyzer",
     "CargoFinding",
     "CargoInfo",
