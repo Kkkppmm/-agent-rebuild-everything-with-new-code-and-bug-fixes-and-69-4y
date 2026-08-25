@@ -93,6 +93,7 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
+from devai.deno_analyzer import DenoAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -757,6 +758,10 @@ class DevAI:
     def bun(self, path: str | Path = ".", **kwargs: Any) -> BunAnalyzer:
         """Audit bunfig.toml, bun.lock, and Bun package.json settings for security risks."""
         return BunAnalyzer(str(path), **kwargs)
+
+    def deno(self, path: str | Path = ".", **kwargs: Any) -> DenoAnalyzer:
+        """Audit deno.json, deno.jsonc, import maps, and deno.lock for security risks."""
+        return DenoAnalyzer(str(path), **kwargs)
 
     def cargo(self, path: str | Path = ".", **kwargs: Any) -> CargoAnalyzer:
         """Audit Cargo.toml and .cargo/config.toml for secrets, insecure registries, and unpinned deps."""

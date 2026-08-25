@@ -87,6 +87,7 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
+from devai.deno_analyzer import DenoAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -1838,6 +1839,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_deno(self, analyzer: DenoAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Deno configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Deno config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_cargo(self, analyzer: CargoAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3263,6 +3282,10 @@ class ProjectHealth:
         bun = BunAnalyzer(root_str)
         score, summary, details = self._score_bun(bun)
         categories.append(HealthCategory("bun", score, summary, details))
+
+        deno = DenoAnalyzer(root_str)
+        score, summary, details = self._score_deno(deno)
+        categories.append(HealthCategory("deno", score, summary, details))
 
         cargo = CargoAnalyzer(root_str)
         score, summary, details = self._score_cargo(cargo)

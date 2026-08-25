@@ -581,6 +581,22 @@ def cmd_bun_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_deno_audit(args: argparse.Namespace) -> None:
+    from devai.deno_analyzer import DenoAnalyzer
+
+    analyzer = DenoAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_config())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_commitlint_audit(args: argparse.Namespace) -> None:
     from devai.commitlint_analyzer import CommitlintAnalyzer
 
@@ -2557,6 +2573,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened bunfig.toml template",
     )
     p.set_defaults(func=cmd_bun_audit)
+
+    p = sub.add_parser(
+        "deno-audit",
+        help="Audit deno.json, deno.jsonc, import maps, and deno.lock settings",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened deno.json template",
+    )
+    p.set_defaults(func=cmd_deno_audit)
 
     p = sub.add_parser("makefile-audit", help="Audit Makefiles for security and build best practices")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

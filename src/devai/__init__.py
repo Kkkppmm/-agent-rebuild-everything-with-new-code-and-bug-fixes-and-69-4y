@@ -473,6 +473,12 @@ from devai.bun_analyzer import (
     BunInfo,
     BunStats,
 )
+from devai.deno_analyzer import (
+    DenoAnalyzer,
+    DenoFinding,
+    DenoInfo,
+    DenoStats,
+)
 from devai.cargo_analyzer import (
     CargoAnalyzer,
     CargoFinding,
@@ -1426,6 +1432,10 @@ __all__ = [
     "BunFinding",
     "BunInfo",
     "BunStats",
+    "DenoAnalyzer",
+    "DenoFinding",
+    "DenoInfo",
+    "DenoStats",
     "CargoAnalyzer",
     "CargoFinding",
     "CargoInfo",
