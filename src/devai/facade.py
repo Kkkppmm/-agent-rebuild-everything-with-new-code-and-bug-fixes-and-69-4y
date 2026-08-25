@@ -106,6 +106,7 @@ from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
 from devai.turbo_analyzer import TurboAnalyzer
 from devai.taskfile_analyzer import TaskfileAnalyzer
+from devai.justfile_analyzer import JustfileAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -796,6 +797,10 @@ class DevAI:
     def taskfile(self, path: str | Path = ".", **kwargs: Any) -> TaskfileAnalyzer:
         """Audit Taskfile.yml for hardcoded secrets, dangerous cmds, and sensitive sources/dotenv paths."""
         return TaskfileAnalyzer(str(path), **kwargs)
+
+    def justfile(self, path: str | Path = ".", **kwargs: Any) -> JustfileAnalyzer:
+        """Audit justfile and Justfile for hardcoded secrets, dangerous recipes, and dotenv-load risks."""
+        return JustfileAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
