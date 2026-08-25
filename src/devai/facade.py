@@ -110,6 +110,8 @@ from devai.direnv_analyzer import DirenvAnalyzer
 from devai.just_analyzer import JustAnalyzer
 from devai.taskfile_analyzer import TaskfileAnalyzer
 from devai.lefthook_analyzer import LefthookAnalyzer
+from devai.eslint_analyzer import ESLintAnalyzer
+from devai.husky_analyzer import HuskyAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -816,6 +818,14 @@ class DevAI:
     def lefthook(self, path: str | Path = ".", **kwargs: Any) -> LefthookAnalyzer:
         """Audit lefthook.yml and .lefthook/*.yml for secrets, remote extends, and dangerous hook commands."""
         return LefthookAnalyzer(str(path), **kwargs)
+
+    def eslint(self, path: str | Path = ".", **kwargs: Any) -> ESLintAnalyzer:
+        """Audit .eslintrc.* and eslint.config.js for secrets, disabled security rules, and insecure extends."""
+        return ESLintAnalyzer(str(path), **kwargs)
+
+    def husky(self, path: str | Path = ".", **kwargs: Any) -> HuskyAnalyzer:
+        """Audit .husky/* hook scripts for secrets, curl|sh, sudo, and unpinned npx commands."""
+        return HuskyAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

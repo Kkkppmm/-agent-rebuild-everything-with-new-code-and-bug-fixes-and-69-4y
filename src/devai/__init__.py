@@ -576,6 +576,19 @@ from devai.lefthook_analyzer import (
     LefthookInfo,
     LefthookStats,
 )
+from devai.eslint_analyzer import (
+    ESLintAnalyzer,
+    ESLintFinding,
+    ESLintInfo,
+    ESLintStats,
+)
+from devai.husky_analyzer import (
+    HuskyAnalyzer,
+    HuskyFinding,
+    HuskyHookInfo,
+    HuskyInfo,
+    HuskyStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1440,6 +1453,15 @@ __all__ = [
     "LefthookHookInfo",
     "LefthookInfo",
     "LefthookStats",
+    "ESLintAnalyzer",
+    "ESLintFinding",
+    "ESLintInfo",
+    "ESLintStats",
+    "HuskyAnalyzer",
+    "HuskyFinding",
+    "HuskyHookInfo",
+    "HuskyInfo",
+    "HuskyStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
