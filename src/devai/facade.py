@@ -112,6 +112,8 @@ from devai.taskfile_analyzer import TaskfileAnalyzer
 from devai.lefthook_analyzer import LefthookAnalyzer
 from devai.eslint_analyzer import ESLintAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
+from devai.biome_analyzer import BiomeAnalyzer
+from devai.prettier_analyzer import PrettierAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -826,6 +828,14 @@ class DevAI:
     def husky(self, path: str | Path = ".", **kwargs: Any) -> HuskyAnalyzer:
         """Audit .husky/* hook scripts for secrets, curl|sh, sudo, and unpinned npx commands."""
         return HuskyAnalyzer(str(path), **kwargs)
+
+    def biome(self, path: str | Path = ".", **kwargs: Any) -> BiomeAnalyzer:
+        """Audit biome.json for secrets, disabled security rules, and insecure schema URLs."""
+        return BiomeAnalyzer(str(path), **kwargs)
+
+    def prettier(self, path: str | Path = ".", **kwargs: Any) -> PrettierAnalyzer:
+        """Audit .prettierrc.* and prettier.config.js for secrets and insecure plugin URLs."""
+        return PrettierAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

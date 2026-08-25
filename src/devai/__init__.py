@@ -589,6 +589,18 @@ from devai.husky_analyzer import (
     HuskyInfo,
     HuskyStats,
 )
+from devai.biome_analyzer import (
+    BiomeAnalyzer,
+    BiomeFinding,
+    BiomeInfo,
+    BiomeStats,
+)
+from devai.prettier_analyzer import (
+    PrettierAnalyzer,
+    PrettierFinding,
+    PrettierInfo,
+    PrettierStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1462,6 +1474,14 @@ __all__ = [
     "HuskyHookInfo",
     "HuskyInfo",
     "HuskyStats",
+    "BiomeAnalyzer",
+    "BiomeFinding",
+    "BiomeInfo",
+    "BiomeStats",
+    "PrettierAnalyzer",
+    "PrettierFinding",
+    "PrettierInfo",
+    "PrettierStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

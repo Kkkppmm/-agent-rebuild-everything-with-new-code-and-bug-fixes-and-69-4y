@@ -485,6 +485,38 @@ def cmd_husky_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_biome_audit(args: argparse.Namespace) -> None:
+    from devai.biome_analyzer import BiomeAnalyzer
+
+    analyzer = BiomeAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_prettier_audit(args: argparse.Namespace) -> None:
+    from devai.prettier_analyzer import PrettierAnalyzer
+
+    analyzer = PrettierAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_makefile_audit(args: argparse.Namespace) -> None:
     from devai.makefile_analyzer import MakefileAnalyzer
 
@@ -2347,6 +2379,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print hardened Husky hook templates",
     )
     p.set_defaults(func=cmd_husky_audit)
+
+    p = sub.add_parser(
+        "biome-audit",
+        help="Audit Biome configs for disabled security rules and insecure schema URLs",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Biome configuration template",
+    )
+    p.set_defaults(func=cmd_biome_audit)
+
+    p = sub.add_parser(
+        "prettier-audit",
+        help="Audit Prettier configs for secrets and insecure plugin URLs",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Prettier configuration template",
+    )
+    p.set_defaults(func=cmd_prettier_audit)
 
     p = sub.add_parser("makefile-audit", help="Audit Makefiles for security and build best practices")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")
