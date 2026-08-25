@@ -108,6 +108,7 @@ from devai.turbo_analyzer import TurboAnalyzer
 from devai.direnv_analyzer import DirenvAnalyzer
 from devai.just_analyzer import JustAnalyzer
 from devai.taskfile_analyzer import TaskfileAnalyzer
+from devai.lefthook_analyzer import LefthookAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -806,6 +807,10 @@ class DevAI:
     def taskfile(self, path: str | Path = ".", **kwargs: Any) -> TaskfileAnalyzer:
         """Audit Taskfile.yml and taskfile.yaml for secrets, remote includes, and dangerous commands."""
         return TaskfileAnalyzer(str(path), **kwargs)
+
+    def lefthook(self, path: str | Path = ".", **kwargs: Any) -> LefthookAnalyzer:
+        """Audit lefthook.yml and lefthook.yaml for secrets, remote extends, skip bypass, and dangerous hook commands."""
+        return LefthookAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

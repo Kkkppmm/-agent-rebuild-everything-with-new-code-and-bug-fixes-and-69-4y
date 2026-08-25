@@ -102,6 +102,7 @@ from devai.turbo_analyzer import TurboAnalyzer
 from devai.direnv_analyzer import DirenvAnalyzer
 from devai.just_analyzer import JustAnalyzer
 from devai.taskfile_analyzer import TaskfileAnalyzer
+from devai.lefthook_analyzer import LefthookAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -302,6 +303,7 @@ class ProjectHealth:
         "direnv": 0.02,
         "just": 0.02,
         "taskfile": 0.02,
+        "lefthook": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -2086,6 +2088,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_lefthook(self, analyzer: LefthookAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Lefthook configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Lefthook config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2574,6 +2594,10 @@ class ProjectHealth:
             elif cat.name == "just" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden justfile — use env_var for secrets, avoid curl|sh in recipes, do not sudo or chmod 777, avoid git push --force, use HTTPS for imports, and review [script] shebang recipes"
+                )
+            elif cat.name == "lefthook" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Lefthook — use env vars for secrets, avoid curl|sh in hook commands, do not sudo or chmod 777, avoid git push --force, pin remote extends, and use targeted skip rules instead of skip: true"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -3088,6 +3112,10 @@ class ProjectHealth:
         taskfile = TaskfileAnalyzer(root_str)
         score, summary, details = self._score_taskfile(taskfile)
         categories.append(HealthCategory("taskfile", score, summary, details))
+
+        lefthook = LefthookAnalyzer(root_str)
+        score, summary, details = self._score_lefthook(lefthook)
+        categories.append(HealthCategory("lefthook", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)

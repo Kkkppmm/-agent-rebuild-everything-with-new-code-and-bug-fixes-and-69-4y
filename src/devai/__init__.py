@@ -563,6 +563,12 @@ from devai.taskfile_analyzer import (
     TaskfileInfo,
     TaskfileStats,
 )
+from devai.lefthook_analyzer import (
+    LefthookAnalyzer,
+    LefthookFinding,
+    LefthookInfo,
+    LefthookStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1418,6 +1424,10 @@ __all__ = [
     "TaskfileFinding",
     "TaskfileInfo",
     "TaskfileStats",
+    "LefthookAnalyzer",
+    "LefthookFinding",
+    "LefthookInfo",
+    "LefthookStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
