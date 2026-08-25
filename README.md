@@ -140,6 +140,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PnpmAnalyzer** — Audit `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.npmrc`, and `.pnpmfile.*` for hardcoded tokens, insecure registries, unpinned git deps, hoist bypasses, and dangerous lifecycle hooks
 - **BunAnalyzer** — Audit `bunfig.toml` and `bun.lock` for hardcoded secrets, insecure registries, disabled TLS verification, broad trust settings, and unpinned git dependencies
 - **DenoAnalyzer** — Audit `deno.json`, `deno.jsonc`, and import maps for `--allow-all`, broad permissions, HTTP imports, unversioned remote imports, and unpinned npm/jsr dependencies
+- **TaskfileAnalyzer** — Audit `Taskfile.yml` and `Taskfile.yaml` for hardcoded secrets in vars/env blocks, dangerous cmds, sensitive sources/dotenv paths, curl-pipe-to-shell, and privileged Docker
+- **JustfileAnalyzer** — Audit `Justfile` and `justfile` for hardcoded variable secrets, dangerous recipe commands, sensitive paths, curl-pipe-to-shell, and privileged Docker
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

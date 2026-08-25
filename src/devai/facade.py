@@ -109,6 +109,8 @@ from devai.turbo_analyzer import TurboAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
 from devai.deno_analyzer import DenoAnalyzer
+from devai.taskfile_analyzer import TaskfileAnalyzer
+from devai.justfile_analyzer import JustfileAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -811,6 +813,14 @@ class DevAI:
     def deno(self, path: str | Path = ".", **kwargs: Any) -> DenoAnalyzer:
         """Audit deno.json and import maps for broad permissions, HTTP imports, and unpinned deps."""
         return DenoAnalyzer(str(path), **kwargs)
+
+    def taskfile(self, path: str | Path = ".", **kwargs: Any) -> TaskfileAnalyzer:
+        """Audit Taskfile.yml for hardcoded secrets, dangerous cmds, and sensitive sources/dotenv paths."""
+        return TaskfileAnalyzer(str(path), **kwargs)
+
+    def justfile(self, path: str | Path = ".", **kwargs: Any) -> JustfileAnalyzer:
+        """Audit Justfiles for hardcoded secrets, dangerous recipe commands, and sensitive paths."""
+        return JustfileAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
