@@ -563,6 +563,13 @@ from devai.taskfile_analyzer import (
     TaskfileInfo,
     TaskfileStats,
 )
+from devai.lefthook_analyzer import (
+    LefthookAnalyzer,
+    LefthookFinding,
+    LefthookHookInfo,
+    LefthookInfo,
+    LefthookStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -875,7 +882,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.32.0"
+__version__ = "7.33.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1418,6 +1425,11 @@ __all__ = [
     "TaskfileFinding",
     "TaskfileInfo",
     "TaskfileStats",
+    "LefthookAnalyzer",
+    "LefthookFinding",
+    "LefthookHookInfo",
+    "LefthookInfo",
+    "LefthookStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
