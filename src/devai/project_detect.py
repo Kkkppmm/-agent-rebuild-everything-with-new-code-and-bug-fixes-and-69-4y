@@ -125,6 +125,18 @@ class ProjectDetector:
             or _exists(root, "mise.lock")
         ):
             package_managers.append("mise")
+        if _exists(root, "turbo.json") or _exists(root, "turbo.jsonc"):
+            package_managers.append("turbo")
+        if (
+            _exists(root, "pnpm-workspace.yaml")
+            or _exists(root, "pnpm-lock.yaml")
+            or _has_glob(root, "**/pnpm-lock.yaml")
+        ):
+            package_managers.append("pnpm")
+        if _exists(root, "bunfig.toml") or _exists(root, "bun.lock") or _exists(root, "bun.lockb"):
+            package_managers.append("bun")
+        if _exists(root, "deno.json") or _exists(root, "deno.jsonc"):
+            package_managers.append("deno")
 
         if _exists(root, "manage.py"):
             frameworks.append("django")

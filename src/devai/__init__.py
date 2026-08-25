@@ -545,6 +545,30 @@ from devai.mise_analyzer import (
     MiseInfo,
     MiseStats,
 )
+from devai.turbo_analyzer import (
+    TurboAnalyzer,
+    TurboFinding,
+    TurboInfo,
+    TurboStats,
+)
+from devai.pnpm_analyzer import (
+    PnpmAnalyzer,
+    PnpmFinding,
+    PnpmInfo,
+    PnpmStats,
+)
+from devai.bun_analyzer import (
+    BunAnalyzer,
+    BunFinding,
+    BunInfo,
+    BunStats,
+)
+from devai.deno_analyzer import (
+    DenoAnalyzer,
+    DenoFinding,
+    DenoInfo,
+    DenoStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1388,6 +1412,22 @@ __all__ = [
     "MiseFinding",
     "MiseInfo",
     "MiseStats",
+    "TurboAnalyzer",
+    "TurboFinding",
+    "TurboInfo",
+    "TurboStats",
+    "PnpmAnalyzer",
+    "PnpmFinding",
+    "PnpmInfo",
+    "PnpmStats",
+    "BunAnalyzer",
+    "BunFinding",
+    "BunInfo",
+    "BunStats",
+    "DenoAnalyzer",
+    "DenoFinding",
+    "DenoInfo",
+    "DenoStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

@@ -136,6 +136,10 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **NixAnalyzer** — Audit flake.nix, shell.nix, default.nix, and nix.conf for hardcoded secrets, insecure HTTP substituters, credentials in git URLs, unpinned flake inputs, disabled TLS verification, unverified fetchTarball calls, and dangerous runCommand/writeShellScript invocations
 - **HomebrewAnalyzer** — Audit Brewfile, Formula, and Cask files for hardcoded secrets, insecure HTTP URLs, credentials in git URLs, unpinned git refs, disabled TLS verification, unverified downloads, and dangerous system() calls
 - **MiseAnalyzer** — Audit `.mise.toml`, `.tool-versions`, and `mise.lock` for hardcoded secrets, unpinned tool versions, insecure plugin URLs, credentials in git URLs, disabled TLS verification, and dangerous task/hook scripts
+- **TurboAnalyzer** — Audit `turbo.json` and `turbo.jsonc` for hardcoded secrets, disabled remote cache signatures, sensitive env vars in cache keys, credential files in inputs, and insecure remote cache URLs
+- **PnpmAnalyzer** — Audit `pnpm-workspace.yaml`, `pnpm-lock.yaml`, `.npmrc`, and `.pnpmfile.*` for hardcoded tokens, insecure registries, unpinned git deps, hoist bypasses, and dangerous lifecycle hooks
+- **BunAnalyzer** — Audit `bunfig.toml` and `bun.lock` for hardcoded secrets, insecure registries, disabled TLS verification, broad trust settings, and unpinned git dependencies
+- **DenoAnalyzer** — Audit `deno.json`, `deno.jsonc`, and import maps for `--allow-all`, broad permissions, HTTP imports, unversioned remote imports, and unpinned npm/jsr dependencies
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
