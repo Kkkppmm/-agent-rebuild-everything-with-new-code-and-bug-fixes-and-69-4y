@@ -85,6 +85,7 @@ from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
+from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -294,6 +295,7 @@ class ProjectHealth:
         "poetry": 0.02,
         "pip": 0.02,
         "uv": 0.02,
+        "pnpm": 0.02,
         "cargo": 0.02,
         "go_mod": 0.02,
         "composer": 0.02,
@@ -1798,6 +1800,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_pnpm(self, analyzer: PnpmAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No pnpm configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} pnpm config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_cargo(self, analyzer: CargoAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2750,6 +2770,10 @@ class ProjectHealth:
                 recs.append(
                     "Harden Turborepo — enable remote cache signatures, avoid globalPassThroughEnv for secrets, exclude .env and credential files from inputs/globalDependencies, use HTTPS remote cache URLs, and keep sensitive env vars out of cache keys"
                 )
+            elif cat.name == "pnpm" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden pnpm — keep verify-store-integrity and strict-ssl enabled, avoid shamefully-hoist, pin pnpm.overrides to exact versions, commit pnpm-lock.yaml, store tokens via env vars, and review .pnpmfile hooks for eval or remote require"
+                )
             elif cat.name == "nx" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Nx — store nxCloudAccessToken in NX_CLOUD_ACCESS_TOKEN env var, exclude .env and credential files from namedInputs/inputs, use HTTPS for Nx Cloud URLs, and keep secrets out of target options env blocks"
@@ -3207,6 +3231,10 @@ class ProjectHealth:
         npm = NpmAnalyzer(root_str)
         score, summary, details = self._score_npm(npm)
         categories.append(HealthCategory("npm", score, summary, details))
+
+        pnpm = PnpmAnalyzer(root_str)
+        score, summary, details = self._score_pnpm(pnpm)
+        categories.append(HealthCategory("pnpm", score, summary, details))
 
         cargo = CargoAnalyzer(root_str)
         score, summary, details = self._score_cargo(cargo)

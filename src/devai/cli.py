@@ -549,6 +549,22 @@ def cmd_editorconfig_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_pnpm_audit(args: argparse.Namespace) -> None:
+    from devai.pnpm_analyzer import PnpmAnalyzer
+
+    analyzer = PnpmAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_config())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_commitlint_audit(args: argparse.Namespace) -> None:
     from devai.commitlint_analyzer import CommitlintAnalyzer
 
@@ -2497,6 +2513,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened EditorConfig template",
     )
     p.set_defaults(func=cmd_editorconfig_audit)
+
+    p = sub.add_parser(
+        "pnpm-audit",
+        help="Audit pnpm workspace, lockfile, .pnpmfile hooks, and pnpm .npmrc settings",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened pnpm workspace and .npmrc template",
+    )
+    p.set_defaults(func=cmd_pnpm_audit)
 
     p = sub.add_parser("makefile-audit", help="Audit Makefiles for security and build best practices")
     p.add_argument("directory", nargs="?", default=".", help="Project directory")

@@ -91,6 +91,7 @@ from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
+from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -747,6 +748,10 @@ class DevAI:
     def npm(self, path: str | Path = ".", **kwargs: Any) -> NpmAnalyzer:
         """Audit package.json and .npmrc for secrets, insecure registries, and unpinned deps."""
         return NpmAnalyzer(str(path), **kwargs)
+
+    def pnpm(self, path: str | Path = ".", **kwargs: Any) -> PnpmAnalyzer:
+        """Audit pnpm-workspace.yaml, pnpm-lock.yaml, .pnpmfile hooks, and pnpm .npmrc settings."""
+        return PnpmAnalyzer(str(path), **kwargs)
 
     def cargo(self, path: str | Path = ".", **kwargs: Any) -> CargoAnalyzer:
         """Audit Cargo.toml and .cargo/config.toml for secrets, insecure registries, and unpinned deps."""
