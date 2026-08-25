@@ -545,6 +545,12 @@ from devai.turbo_analyzer import (
     TurboInfo,
     TurboStats,
 )
+from devai.taskfile_analyzer import (
+    TaskfileAnalyzer,
+    TaskfileFinding,
+    TaskfileInfo,
+    TaskfileStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1388,6 +1394,10 @@ __all__ = [
     "TurboFinding",
     "TurboInfo",
     "TurboStats",
+    "TaskfileAnalyzer",
+    "TaskfileFinding",
+    "TaskfileInfo",
+    "TaskfileStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

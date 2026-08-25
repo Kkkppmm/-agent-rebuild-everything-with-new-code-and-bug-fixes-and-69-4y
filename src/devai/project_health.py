@@ -99,6 +99,7 @@ from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
 from devai.turbo_analyzer import TurboAnalyzer
+from devai.taskfile_analyzer import TaskfileAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -296,6 +297,7 @@ class ProjectHealth:
         "nix": 0.02,
         "mise": 0.02,
         "turbo": 0.02,
+        "taskfile": 0.02,
         "appveyor_ci": 0.02,
         "gocd_ci": 0.02,
         "cirrus_ci": 0.02,
@@ -2026,6 +2028,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_taskfile(self, analyzer: TaskfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Taskfiles found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Taskfile(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_gocd_ci(self, analyzer: GoCDCIAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2506,6 +2526,10 @@ class ProjectHealth:
             elif cat.name == "turbo" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Turborepo — enable remote cache signatures, avoid globalPassThroughEnv for secrets, exclude .env and credential files from inputs/globalDependencies, use HTTPS remote cache URLs, and keep sensitive env vars out of cache keys"
+                )
+            elif cat.name == "taskfile" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Go Task Taskfiles — store secrets in environment/CI vars not vars/env blocks, exclude .env and credential paths from sources/dotenv, avoid curl|sh in cmds, use HTTPS URLs, and disable privileged Docker"
                 )
             elif cat.name == "appveyor_ci" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
@@ -3008,6 +3032,10 @@ class ProjectHealth:
         turbo = TurboAnalyzer(root_str)
         score, summary, details = self._score_turbo(turbo)
         categories.append(HealthCategory("turbo", score, summary, details))
+
+        taskfile = TaskfileAnalyzer(root_str)
+        score, summary, details = self._score_taskfile(taskfile)
+        categories.append(HealthCategory("taskfile", score, summary, details))
 
         appveyor_ci = AppVeyorCIAnalyzer(root_str)
         score, summary, details = self._score_appveyor_ci(appveyor_ci)
