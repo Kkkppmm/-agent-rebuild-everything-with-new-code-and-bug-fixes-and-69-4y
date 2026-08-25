@@ -545,6 +545,24 @@ from devai.turbo_analyzer import (
     TurboInfo,
     TurboStats,
 )
+from devai.taskfile_analyzer import (
+    TaskfileAnalyzer,
+    TaskfileFinding,
+    TaskfileInfo,
+    TaskfileStats,
+)
+from devai.direnv_analyzer import (
+    DirenvAnalyzer,
+    DirenvFinding,
+    DirenvInfo,
+    DirenvStats,
+)
+from devai.just_analyzer import (
+    JustAnalyzer,
+    JustFinding,
+    JustInfo,
+    JustStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -857,7 +875,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.29.0"
+__version__ = "7.30.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1388,6 +1406,18 @@ __all__ = [
     "TurboFinding",
     "TurboInfo",
     "TurboStats",
+    "TaskfileAnalyzer",
+    "TaskfileFinding",
+    "TaskfileInfo",
+    "TaskfileStats",
+    "DirenvAnalyzer",
+    "DirenvFinding",
+    "DirenvInfo",
+    "DirenvStats",
+    "JustAnalyzer",
+    "JustFinding",
+    "JustInfo",
+    "JustStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",

@@ -136,6 +136,9 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **NixAnalyzer** — Audit flake.nix, shell.nix, default.nix, and nix.conf for hardcoded secrets, insecure HTTP substituters, credentials in git URLs, unpinned flake inputs, disabled TLS verification, unverified fetchTarball calls, and dangerous runCommand/writeShellScript invocations
 - **MiseAnalyzer** — Audit mise.toml, .mise.toml, and .tool-versions for hardcoded secrets in env blocks, insecure HTTP plugin URLs, credentials in git URLs, unpinned plugin refs, disabled TLS verification, dangerous task run scripts, and unpinned tool versions
 - **TurboAnalyzer** — Audit turbo.json and turbo.jsonc for hardcoded secrets, disabled remote cache signatures, sensitive env vars in globalPassThroughEnv, credential files in inputs/globalDependencies, insecure HTTP remote cache URLs, and cache-disabled tasks
+- **TaskfileAnalyzer** — Audit Taskfile.yml/yaml for hardcoded secrets, curl piped to shell, dangerous shell commands, insecure HTTP URLs, and credentials in git URLs
+- **DirenvAnalyzer** — Audit .envrc and direnv.toml for hardcoded secrets, remote source_env URLs, dotenv loading of .env files, and disabled strict environment checks
+- **JustAnalyzer** — Audit justfile recipes for hardcoded secrets, curl piped to shell, dangerous shell commands, and sensitive file references
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
