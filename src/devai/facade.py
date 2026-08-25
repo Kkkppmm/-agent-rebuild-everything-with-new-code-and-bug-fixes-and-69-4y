@@ -105,6 +105,9 @@ from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
 from devai.turbo_analyzer import TurboAnalyzer
+from devai.pnpm_analyzer import PnpmAnalyzer
+from devai.bun_analyzer import BunAnalyzer
+from devai.deno_analyzer import DenoAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -791,6 +794,18 @@ class DevAI:
     def turbo(self, path: str | Path = ".", **kwargs: Any) -> TurboAnalyzer:
         """Audit turbo.json and turbo.jsonc for secrets, cache signature bypasses, and sensitive env vars."""
         return TurboAnalyzer(str(path), **kwargs)
+
+    def pnpm(self, path: str | Path = ".", **kwargs: Any) -> PnpmAnalyzer:
+        """Audit pnpm-workspace.yaml, .npmrc, and .pnpmfile.cjs for secrets and trust policy issues."""
+        return PnpmAnalyzer(str(path), **kwargs)
+
+    def bun(self, path: str | Path = ".", **kwargs: Any) -> BunAnalyzer:
+        """Audit bunfig.toml and bun.lock for secrets, insecure registries, and install script risks."""
+        return BunAnalyzer(str(path), **kwargs)
+
+    def deno(self, path: str | Path = ".", **kwargs: Any) -> DenoAnalyzer:
+        """Audit deno.json and deno.jsonc for secrets, --allow-all, and unpinned imports."""
+        return DenoAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""
