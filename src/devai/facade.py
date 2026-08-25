@@ -109,6 +109,7 @@ from devai.direnv_analyzer import DirenvAnalyzer
 from devai.just_analyzer import JustAnalyzer
 from devai.taskfile_analyzer import TaskfileAnalyzer
 from devai.lefthook_analyzer import LefthookAnalyzer
+from devai.husky_analyzer import HuskyAnalyzer
 from devai.pants_analyzer import PantsAnalyzer
 from devai.appveyor_ci_analyzer import AppVeyorCIAnalyzer
 from devai.gocd_ci_analyzer import GoCDCIAnalyzer
@@ -811,6 +812,10 @@ class DevAI:
     def lefthook(self, path: str | Path = ".", **kwargs: Any) -> LefthookAnalyzer:
         """Audit lefthook.yml and lefthook.yaml for secrets, remote extends, skip bypass, and dangerous hook commands."""
         return LefthookAnalyzer(str(path), **kwargs)
+
+    def husky(self, path: str | Path = ".", **kwargs: Any) -> HuskyAnalyzer:
+        """Audit .husky/ hook scripts and package.json husky config for secrets, curl|sh, and dangerous commands."""
+        return HuskyAnalyzer(str(path), **kwargs)
 
     def appveyor_ci(self, path: str | Path = ".", **kwargs: Any) -> AppVeyorCIAnalyzer:
         """Audit AppVeyor CI configs for hardcoded secrets, RDP exposure, and variable injection."""

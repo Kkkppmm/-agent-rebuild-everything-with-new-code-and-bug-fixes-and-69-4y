@@ -140,6 +140,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **JustAnalyzer** — Audit justfile, Justfile, and just/*.just for hardcoded secrets, curl|sh in recipes, sudo and chmod 777, git push --force, eval usage, insecure HTTP imports, [script] shebang recipes, and sensitive path references
 - **TaskfileAnalyzer** — Audit Taskfile.yml and taskfile.yaml for hardcoded secrets, remote includes, method: none checksum bypass, dotenv loading, curl|sh in cmds, sudo and chmod 777, git push --force, eval usage, and sensitive path references
 - **LefthookAnalyzer** — Audit lefthook.yml and lefthook.yaml for hardcoded secrets, remote extends, skip: true bypass, curl|sh in hook commands, sudo and chmod 777, git push --force, eval usage, and sensitive path references
+- **HuskyAnalyzer** — Audit .husky/ hook scripts and package.json husky config for hardcoded secrets, legacy inline hooks, curl|sh in scripts, sudo and chmod 777, git push --force, eval usage, HUSKY=0 bypass, unpinned npx, and sensitive path references
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

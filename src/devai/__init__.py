@@ -569,6 +569,13 @@ from devai.lefthook_analyzer import (
     LefthookInfo,
     LefthookStats,
 )
+from devai.husky_analyzer import (
+    HuskyAnalyzer,
+    HuskyFinding,
+    HuskyHookInfo,
+    HuskyInfo,
+    HuskyStats,
+)
 from devai.pants_analyzer import (
     PantsAnalyzer,
     PantsFinding,
@@ -1428,6 +1435,11 @@ __all__ = [
     "LefthookFinding",
     "LefthookInfo",
     "LefthookStats",
+    "HuskyAnalyzer",
+    "HuskyFinding",
+    "HuskyHookInfo",
+    "HuskyInfo",
+    "HuskyStats",
     "PantsAnalyzer",
     "PantsFinding",
     "PantsInfo",
