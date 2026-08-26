@@ -569,6 +569,12 @@ from devai.turbo_analyzer import (
     TurboInfo,
     TurboStats,
 )
+from devai.jest_analyzer import (
+    JestAnalyzer,
+    JestFinding,
+    JestInfo,
+    JestStats,
+)
 from devai.nx_analyzer import (
     NxAnalyzer,
     NxFinding,
@@ -1502,6 +1508,10 @@ __all__ = [
     "TurboFinding",
     "TurboInfo",
     "TurboStats",
+    "JestAnalyzer",
+    "JestFinding",
+    "JestInfo",
+    "JestStats",
     "NxAnalyzer",
     "NxFinding",
     "NxInfo",

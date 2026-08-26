@@ -109,6 +109,7 @@ from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
 from devai.turbo_analyzer import TurboAnalyzer
+from devai.jest_analyzer import JestAnalyzer
 from devai.nx_analyzer import NxAnalyzer
 from devai.direnv_analyzer import DirenvAnalyzer
 from devai.just_analyzer import JustAnalyzer
@@ -823,6 +824,10 @@ class DevAI:
     def turbo(self, path: str | Path = ".", **kwargs: Any) -> TurboAnalyzer:
         """Audit turbo.json and turbo.jsonc for secrets, cache signature bypasses, and sensitive env vars."""
         return TurboAnalyzer(str(path), **kwargs)
+
+    def jest(self, path: str | Path = ".", **kwargs: Any) -> JestAnalyzer:
+        """Audit jest.config.* and package.json jest blocks for secrets, remote setup URLs, and insecure testURL."""
+        return JestAnalyzer(str(path), **kwargs)
 
     def nx(self, path: str | Path = ".", **kwargs: Any) -> NxAnalyzer:
         """Audit nx.json and project.json for secrets, Nx Cloud tokens, and sensitive cache inputs."""
