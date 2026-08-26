@@ -515,6 +515,12 @@ from devai.pytest_analyzer import (
     PytestInfo,
     PytestStats,
 )
+from devai.tox_analyzer import (
+    ToxAnalyzer,
+    ToxFinding,
+    ToxInfo,
+    ToxStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -991,7 +997,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.45.0"
+__version__ = "7.46.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1502,6 +1508,10 @@ __all__ = [
     "PytestFinding",
     "PytestInfo",
     "PytestStats",
+    "ToxAnalyzer",
+    "ToxFinding",
+    "ToxInfo",
+    "ToxStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

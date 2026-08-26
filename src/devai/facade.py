@@ -120,6 +120,7 @@ from devai.playwright_analyzer import PlaywrightAnalyzer
 from devai.cypress_analyzer import CypressAnalyzer
 from devai.mocha_analyzer import MochaAnalyzer
 from devai.pytest_analyzer import PytestAnalyzer
+from devai.tox_analyzer import ToxAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -793,6 +794,10 @@ class DevAI:
     def pytest(self, path: str | Path = ".", **kwargs: Any) -> PytestAnalyzer:
         """Audit pytest.ini, pyproject.toml, and conftest.py for secrets, --pdb, and CI risks."""
         return PytestAnalyzer(str(path), **kwargs)
+
+    def tox(self, path: str | Path = ".", **kwargs: Any) -> ToxAnalyzer:
+        """Audit tox.ini for passenv=*, allowlist_externals=*, insecure indexes, and dangerous commands."""
+        return ToxAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
