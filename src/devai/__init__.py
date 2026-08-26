@@ -527,6 +527,12 @@ from devai.nox_analyzer import (
     NoxInfo,
     NoxStats,
 )
+from devai.ruff_analyzer import (
+    RuffAnalyzer,
+    RuffFinding,
+    RuffInfo,
+    RuffStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1003,7 +1009,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.47.0"
+__version__ = "7.48.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1522,6 +1528,10 @@ __all__ = [
     "NoxFinding",
     "NoxInfo",
     "NoxStats",
+    "RuffAnalyzer",
+    "RuffFinding",
+    "RuffInfo",
+    "RuffStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

@@ -122,6 +122,7 @@ from devai.mocha_analyzer import MochaAnalyzer
 from devai.pytest_analyzer import PytestAnalyzer
 from devai.tox_analyzer import ToxAnalyzer
 from devai.nox_analyzer import NoxAnalyzer
+from devai.ruff_analyzer import RuffAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -803,6 +804,10 @@ class DevAI:
     def nox(self, path: str | Path = ".", **kwargs: Any) -> NoxAnalyzer:
         """Audit noxfile.py for reuse_venv, venv_backend='none', insecure indexes, and dangerous commands."""
         return NoxAnalyzer(str(path), **kwargs)
+
+    def ruff(self, path: str | Path = ".", **kwargs: Any) -> RuffAnalyzer:
+        """Audit ruff.toml and pyproject.toml [tool.ruff] for unsafe-fixes, disabled S rules, and broad ignores."""
+        return RuffAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
