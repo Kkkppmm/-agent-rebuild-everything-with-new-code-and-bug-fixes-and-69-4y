@@ -110,6 +110,8 @@ from devai.lefthook_analyzer import LefthookAnalyzer
 from devai.eslint_analyzer import ESLintAnalyzer
 from devai.jest_analyzer import JestAnalyzer
 from devai.vitest_analyzer import VitestAnalyzer
+from devai.playwright_analyzer import PlaywrightAnalyzer
+from devai.cypress_analyzer import CypressAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
 from devai.prettier_analyzer import PrettierAnalyzer
@@ -2260,6 +2262,42 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_playwright(self, analyzer: PlaywrightAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Playwright configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Playwright config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_cypress(self, analyzer: CypressAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Cypress configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Cypress config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_husky(self, analyzer: HuskyAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3419,6 +3457,14 @@ class ProjectHealth:
         vitest = VitestAnalyzer(root_str)
         score, summary, details = self._score_vitest(vitest)
         categories.append(HealthCategory("vitest", score, summary, details))
+
+        playwright = PlaywrightAnalyzer(root_str)
+        score, summary, details = self._score_playwright(playwright)
+        categories.append(HealthCategory("playwright", score, summary, details))
+
+        cypress = CypressAnalyzer(root_str)
+        score, summary, details = self._score_cypress(cypress)
+        categories.append(HealthCategory("cypress", score, summary, details))
 
         husky = HuskyAnalyzer(root_str)
         score, summary, details = self._score_husky(husky)

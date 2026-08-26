@@ -116,6 +116,8 @@ from devai.lefthook_analyzer import LefthookAnalyzer
 from devai.eslint_analyzer import ESLintAnalyzer
 from devai.jest_analyzer import JestAnalyzer
 from devai.vitest_analyzer import VitestAnalyzer
+from devai.playwright_analyzer import PlaywrightAnalyzer
+from devai.cypress_analyzer import CypressAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
 from devai.prettier_analyzer import PrettierAnalyzer
@@ -852,6 +854,14 @@ class DevAI:
     def vitest(self, path: str | Path = ".", **kwargs: Any) -> VitestAnalyzer:
         """Audit vitest.config.*, vite.config.* test blocks, and package.json vitest for security and CI risks."""
         return VitestAnalyzer(str(path), **kwargs)
+
+    def playwright(self, path: str | Path = ".", **kwargs: Any) -> PlaywrightAnalyzer:
+        """Audit playwright.config.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
+        return PlaywrightAnalyzer(str(path), **kwargs)
+
+    def cypress(self, path: str | Path = ".", **kwargs: Any) -> CypressAnalyzer:
+        """Audit cypress.config.* and cypress.json for chromeWebSecurity, secrets in env, and insecure baseUrl."""
+        return CypressAnalyzer(str(path), **kwargs)
 
     def husky(self, path: str | Path = ".", **kwargs: Any) -> HuskyAnalyzer:
         """Audit .husky/* hook scripts for secrets, curl|sh, sudo, and unpinned npx commands."""

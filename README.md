@@ -153,6 +153,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **DenoAnalyzer** — Audit deno.json/jsonc and import maps for overly broad --allow-all permissions, hardcoded secrets, insecure import URLs, and dangerous task scripts
 - **JestAnalyzer** — Audit jest.config.* and package.json jest blocks for hardcoded secrets, dangerous globalSetup/setupFiles, testPathIgnorePatterns skipping security tests, symlink following, and moduleNameMapper redirects
 - **VitestAnalyzer** — Audit vitest.config.*, vite.config.* test blocks, and package.json vitest for dangerouslyIgnoreUnhandledErrors, allowOnly in CI, server.fs.allow parent traversal, remote inspect bindings, and disabled mock resets
+- **PlaywrightAnalyzer** — Audit playwright.config.* for TLS bypass (ignoreHTTPSErrors), disabled sandbox, remote debug bindings, artifact leaks, and storageState paths outside the project
+- **CypressAnalyzer** — Audit cypress.config.* and cypress.json for chromeWebSecurity disabled, secrets in env block, insecure baseUrl, modifyObstructiveCode, and fixtures paths outside the project
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
