@@ -551,6 +551,12 @@ from devai.black_analyzer import (
     BlackInfo,
     BlackStats,
 )
+from devai.isort_analyzer import (
+    IsortAnalyzer,
+    IsortFinding,
+    IsortInfo,
+    IsortStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1562,6 +1568,10 @@ __all__ = [
     "BlackFinding",
     "BlackInfo",
     "BlackStats",
+    "IsortAnalyzer",
+    "IsortFinding",
+    "IsortInfo",
+    "IsortStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

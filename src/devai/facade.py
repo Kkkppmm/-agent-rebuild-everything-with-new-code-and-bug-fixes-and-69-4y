@@ -126,6 +126,7 @@ from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
 from devai.black_analyzer import BlackAnalyzer
+from devai.isort_analyzer import IsortAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -823,6 +824,10 @@ class DevAI:
     def black(self, path: str | Path = ".", **kwargs: Any) -> BlackAnalyzer:
         """Audit pyproject.toml [tool.black] for skip-string-normalization, preview, and broad exclude patterns."""
         return BlackAnalyzer(str(path), **kwargs)
+
+    def isort(self, path: str | Path = ".", **kwargs: Any) -> IsortAnalyzer:
+        """Audit isort configs for skip patterns, honor_noqa=false, and Black profile conflicts."""
+        return IsortAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
