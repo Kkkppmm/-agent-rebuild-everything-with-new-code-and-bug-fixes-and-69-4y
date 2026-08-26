@@ -101,6 +101,7 @@ from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
 from devai.turbo_analyzer import TurboAnalyzer
 from devai.vitest_analyzer import VitestAnalyzer
+from devai.jest_analyzer import JestAnalyzer
 from devai.nx_analyzer import NxAnalyzer
 from devai.direnv_analyzer import DirenvAnalyzer
 from devai.just_analyzer import JustAnalyzer
@@ -2090,6 +2091,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_jest(self, analyzer: JestAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Jest configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Jest config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_nx(self, analyzer: NxAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3319,6 +3338,10 @@ class ProjectHealth:
         vitest = VitestAnalyzer(root_str)
         score, summary, details = self._score_vitest(vitest)
         categories.append(HealthCategory("vitest", score, summary, details))
+
+        jest = JestAnalyzer(root_str)
+        score, summary, details = self._score_jest(jest)
+        categories.append(HealthCategory("jest", score, summary, details))
 
         nx = NxAnalyzer(root_str)
         score, summary, details = self._score_nx(nx)

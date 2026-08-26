@@ -557,6 +557,12 @@ from devai.vitest_analyzer import (
     VitestInfo,
     VitestStats,
 )
+from devai.jest_analyzer import (
+    JestAnalyzer,
+    JestFinding,
+    JestInfo,
+    JestStats,
+)
 from devai.nx_analyzer import (
     NxAnalyzer,
     NxFinding,
@@ -1482,6 +1488,10 @@ __all__ = [
     "VitestFinding",
     "VitestInfo",
     "VitestStats",
+    "JestAnalyzer",
+    "JestFinding",
+    "JestInfo",
+    "JestStats",
     "NxAnalyzer",
     "NxFinding",
     "NxInfo",
