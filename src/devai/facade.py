@@ -119,6 +119,7 @@ from devai.vitest_analyzer import VitestAnalyzer
 from devai.playwright_analyzer import PlaywrightAnalyzer
 from devai.cypress_analyzer import CypressAnalyzer
 from devai.mocha_analyzer import MochaAnalyzer
+from devai.pytest_analyzer import PytestAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -788,6 +789,10 @@ class DevAI:
     def mocha(self, path: str | Path = ".", **kwargs: Any) -> MochaAnalyzer:
         """Audit .mocharc.* and mocha.opts for allowUncaught, require paths, and CI risks."""
         return MochaAnalyzer(str(path), **kwargs)
+
+    def pytest(self, path: str | Path = ".", **kwargs: Any) -> PytestAnalyzer:
+        """Audit pytest.ini, pyproject.toml, and conftest.py for secrets, --pdb, and CI risks."""
+        return PytestAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""

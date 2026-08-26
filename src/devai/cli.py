@@ -677,6 +677,22 @@ def cmd_mocha_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_pytest_audit(args: argparse.Namespace) -> None:
+    from devai.pytest_analyzer import PytestAnalyzer
+
+    analyzer = PytestAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_webdriverio_audit(args: argparse.Namespace) -> None:
     from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 
@@ -2613,6 +2629,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened .mocharc.json template",
     )
     p.set_defaults(func=cmd_mocha_audit)
+
+    p = sub.add_parser(
+        "pytest-audit",
+        help="Audit pytest.ini, pyproject.toml, and conftest.py for --pdb, secrets, and CI risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened pytest.ini template",
+    )
+    p.set_defaults(func=cmd_pytest_audit)
 
     p = sub.add_parser(
         "webdriverio-audit",

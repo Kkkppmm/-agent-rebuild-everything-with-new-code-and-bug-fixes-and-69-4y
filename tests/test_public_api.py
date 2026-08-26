@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.43.0"
+        assert devai.__version__ == "7.45.0"
 
     def test_exports(self):
         expected = {
@@ -505,6 +505,10 @@ class TestPublicAPI:
             "MochaFinding",
             "MochaInfo",
             "MochaStats",
+            "PytestAnalyzer",
+            "PytestFinding",
+            "PytestInfo",
+            "PytestStats",
             "WebdriverIOAnalyzer",
             "WebdriverIOFinding",
             "WebdriverIOInfo",

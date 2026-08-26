@@ -509,6 +509,12 @@ from devai.mocha_analyzer import (
     MochaInfo,
     MochaStats,
 )
+from devai.pytest_analyzer import (
+    PytestAnalyzer,
+    PytestFinding,
+    PytestInfo,
+    PytestStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -985,7 +991,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.43.0"
+__version__ = "7.45.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1492,6 +1498,10 @@ __all__ = [
     "MochaFinding",
     "MochaInfo",
     "MochaStats",
+    "PytestAnalyzer",
+    "PytestFinding",
+    "PytestInfo",
+    "PytestStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

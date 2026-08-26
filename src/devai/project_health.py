@@ -113,6 +113,7 @@ from devai.vitest_analyzer import VitestAnalyzer
 from devai.playwright_analyzer import PlaywrightAnalyzer
 from devai.cypress_analyzer import CypressAnalyzer
 from devai.mocha_analyzer import MochaAnalyzer
+from devai.pytest_analyzer import PytestAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -331,6 +332,7 @@ class ProjectHealth:
         "playwright": 0.02,
         "cypress": 0.02,
         "mocha": 0.02,
+        "pytest": 0.02,
         "webdriverio": 0.02,
         "husky": 0.02,
         "biome": 0.02,
@@ -1960,6 +1962,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_pytest(self, analyzer: PytestAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No pytest configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} pytest config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webdriverio(self, analyzer: WebdriverIOAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3507,6 +3527,10 @@ class ProjectHealth:
         mocha = MochaAnalyzer(root_str)
         score, summary, details = self._score_mocha(mocha)
         categories.append(HealthCategory("mocha", score, summary, details))
+
+        pytest = PytestAnalyzer(root_str)
+        score, summary, details = self._score_pytest(pytest)
+        categories.append(HealthCategory("pytest", score, summary, details))
 
         webdriverio = WebdriverIOAnalyzer(root_str)
         score, summary, details = self._score_webdriverio(webdriverio)
