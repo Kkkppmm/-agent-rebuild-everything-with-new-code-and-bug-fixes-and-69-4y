@@ -92,6 +92,7 @@ from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
+from devai.vitest_analyzer import VitestAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -752,6 +753,10 @@ class DevAI:
     def pnpm(self, path: str | Path = ".", **kwargs: Any) -> PnpmAnalyzer:
         """Audit pnpm-workspace.yaml, pnpm-lock.yaml, .pnpmfile hooks, and pnpm .npmrc settings."""
         return PnpmAnalyzer(str(path), **kwargs)
+
+    def vitest(self, path: str | Path = ".", **kwargs: Any) -> VitestAnalyzer:
+        """Audit vitest.config.*, setup files, and Vitest settings for security and CI risks."""
+        return VitestAnalyzer(str(path), **kwargs)
 
     def cargo(self, path: str | Path = ".", **kwargs: Any) -> CargoAnalyzer:
         """Audit Cargo.toml and .cargo/config.toml for secrets, insecure registries, and unpinned deps."""

@@ -149,6 +149,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **CommitlintAnalyzer** — Audit .commitlintrc.*, commitlint.config.js, and package.json commitlint config for hardcoded secrets, insecure HTTP extends URLs, eval in custom parsers, curl|sh patterns, and process.env secret references
 - **EditorConfigAnalyzer** — Audit .editorconfig files for hardcoded secrets, insecure URLs, missing root/baseline settings, nested root declarations, and charset/line-ending consistency
 - **PnpmAnalyzer** — Audit pnpm-workspace.yaml, pnpm-lock.yaml, .pnpmfile hooks, and pnpm .npmrc settings for hardcoded tokens, disabled integrity checks, shamefully-hoist, wildcard overrides, and dangerous hook scripts
+- **VitestAnalyzer** — Audit vitest.config.*, vitest.workspace.*, setup files, and Vitest settings for hardcoded secrets, disabled isolation, browser headless misconfiguration, coverage bypass, and dangerous setup scripts
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection

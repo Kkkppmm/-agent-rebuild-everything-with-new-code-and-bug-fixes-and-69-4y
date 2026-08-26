@@ -86,6 +86,7 @@ from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
+from devai.vitest_analyzer import VitestAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -296,6 +297,7 @@ class ProjectHealth:
         "pip": 0.02,
         "uv": 0.02,
         "pnpm": 0.02,
+        "vitest": 0.02,
         "cargo": 0.02,
         "go_mod": 0.02,
         "composer": 0.02,
@@ -1818,6 +1820,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_vitest(self, analyzer: VitestAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Vitest configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Vitest config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_cargo(self, analyzer: CargoAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2774,6 +2794,10 @@ class ProjectHealth:
                 recs.append(
                     "Harden pnpm — keep verify-store-integrity and strict-ssl enabled, avoid shamefully-hoist, pin pnpm.overrides to exact versions, commit pnpm-lock.yaml, store tokens via env vars, and review .pnpmfile hooks for eval or remote require"
                 )
+            elif cat.name == "vitest" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Vitest — keep test isolation enabled, avoid hardcoded env secrets, use headless browser mode in CI, set finite testTimeout, keep dangerouslyIgnoreUnhandledErrors false, restrict server.fs.allow, and review setupFiles for eval or curl|sh"
+                )
             elif cat.name == "nx" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Nx — store nxCloudAccessToken in NX_CLOUD_ACCESS_TOKEN env var, exclude .env and credential files from namedInputs/inputs, use HTTPS for Nx Cloud URLs, and keep secrets out of target options env blocks"
@@ -3235,6 +3259,10 @@ class ProjectHealth:
         pnpm = PnpmAnalyzer(root_str)
         score, summary, details = self._score_pnpm(pnpm)
         categories.append(HealthCategory("pnpm", score, summary, details))
+
+        vitest = VitestAnalyzer(root_str)
+        score, summary, details = self._score_vitest(vitest)
+        categories.append(HealthCategory("vitest", score, summary, details))
 
         cargo = CargoAnalyzer(root_str)
         score, summary, details = self._score_cargo(cargo)

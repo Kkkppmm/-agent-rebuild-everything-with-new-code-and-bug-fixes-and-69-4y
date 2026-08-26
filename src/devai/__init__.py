@@ -467,6 +467,12 @@ from devai.pnpm_analyzer import (
     PnpmInfo,
     PnpmStats,
 )
+from devai.vitest_analyzer import (
+    VitestAnalyzer,
+    VitestFinding,
+    VitestInfo,
+    VitestStats,
+)
 from devai.cargo_analyzer import (
     CargoAnalyzer,
     CargoFinding,
@@ -1416,6 +1422,10 @@ __all__ = [
     "PnpmFinding",
     "PnpmInfo",
     "PnpmStats",
+    "VitestAnalyzer",
+    "VitestFinding",
+    "VitestInfo",
+    "VitestStats",
     "CargoAnalyzer",
     "CargoFinding",
     "CargoInfo",
