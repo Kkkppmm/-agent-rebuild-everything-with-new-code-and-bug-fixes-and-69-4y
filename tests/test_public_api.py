@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.46.0"
+        assert devai.__version__ == "7.47.0"
 
     def test_exports(self):
         expected = {
@@ -513,6 +513,10 @@ class TestPublicAPI:
             "ToxFinding",
             "ToxInfo",
             "ToxStats",
+            "NoxAnalyzer",
+            "NoxFinding",
+            "NoxInfo",
+            "NoxStats",
             "WebdriverIOAnalyzer",
             "WebdriverIOFinding",
             "WebdriverIOInfo",

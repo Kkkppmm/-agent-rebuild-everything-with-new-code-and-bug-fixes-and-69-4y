@@ -521,6 +521,12 @@ from devai.tox_analyzer import (
     ToxInfo,
     ToxStats,
 )
+from devai.nox_analyzer import (
+    NoxAnalyzer,
+    NoxFinding,
+    NoxInfo,
+    NoxStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -997,7 +1003,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.46.0"
+__version__ = "7.47.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1512,6 +1518,10 @@ __all__ = [
     "ToxFinding",
     "ToxInfo",
     "ToxStats",
+    "NoxAnalyzer",
+    "NoxFinding",
+    "NoxInfo",
+    "NoxStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
