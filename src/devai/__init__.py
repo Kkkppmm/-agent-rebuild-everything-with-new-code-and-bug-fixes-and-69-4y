@@ -612,6 +612,12 @@ from devai.vitest_analyzer import (
     VitestInfo,
     VitestStats,
 )
+from devai.playwright_analyzer import (
+    PlaywrightAnalyzer,
+    PlaywrightFinding,
+    PlaywrightInfo,
+    PlaywrightStats,
+)
 from devai.husky_analyzer import (
     HuskyAnalyzer,
     HuskyFinding,
@@ -1537,6 +1543,10 @@ __all__ = [
     "VitestFinding",
     "VitestInfo",
     "VitestStats",
+    "PlaywrightAnalyzer",
+    "PlaywrightFinding",
+    "PlaywrightInfo",
+    "PlaywrightStats",
     "HuskyAnalyzer",
     "HuskyFinding",
     "HuskyHookInfo",
