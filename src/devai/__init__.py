@@ -479,11 +479,29 @@ from devai.deno_analyzer import (
     DenoInfo,
     DenoStats,
 )
+from devai.jest_analyzer import (
+    JestAnalyzer,
+    JestFinding,
+    JestInfo,
+    JestStats,
+)
 from devai.vitest_analyzer import (
     VitestAnalyzer,
     VitestFinding,
     VitestInfo,
     VitestStats,
+)
+from devai.playwright_analyzer import (
+    PlaywrightAnalyzer,
+    PlaywrightFinding,
+    PlaywrightInfo,
+    PlaywrightStats,
+)
+from devai.cypress_analyzer import (
+    CypressAnalyzer,
+    CypressFinding,
+    CypressInfo,
+    CypressStats,
 )
 from devai.cargo_analyzer import (
     CargoAnalyzer,
@@ -955,7 +973,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.42.0"
+__version__ = "7.43.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1442,10 +1460,22 @@ __all__ = [
     "DenoFinding",
     "DenoInfo",
     "DenoStats",
+    "JestAnalyzer",
+    "JestFinding",
+    "JestInfo",
+    "JestStats",
     "VitestAnalyzer",
     "VitestFinding",
     "VitestInfo",
     "VitestStats",
+    "PlaywrightAnalyzer",
+    "PlaywrightFinding",
+    "PlaywrightInfo",
+    "PlaywrightStats",
+    "CypressAnalyzer",
+    "CypressFinding",
+    "CypressInfo",
+    "CypressStats",
     "CargoAnalyzer",
     "CargoFinding",
     "CargoInfo",

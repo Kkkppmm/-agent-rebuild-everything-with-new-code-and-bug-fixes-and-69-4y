@@ -94,7 +94,6 @@ from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
 from devai.deno_analyzer import DenoAnalyzer
-from devai.vitest_analyzer import VitestAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -115,6 +114,10 @@ from devai.just_analyzer import JustAnalyzer
 from devai.taskfile_analyzer import TaskfileAnalyzer
 from devai.lefthook_analyzer import LefthookAnalyzer
 from devai.eslint_analyzer import ESLintAnalyzer
+from devai.jest_analyzer import JestAnalyzer
+from devai.vitest_analyzer import VitestAnalyzer
+from devai.playwright_analyzer import PlaywrightAnalyzer
+from devai.cypress_analyzer import CypressAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
 from devai.prettier_analyzer import PrettierAnalyzer
@@ -767,6 +770,18 @@ class DevAI:
     def vitest(self, path: str | Path = ".", **kwargs: Any) -> VitestAnalyzer:
         """Audit vitest.config.* and Vitest setup for security and CI reliability risks."""
         return VitestAnalyzer(str(path), **kwargs)
+
+    def jest(self, path: str | Path = ".", **kwargs: Any) -> JestAnalyzer:
+        """Audit jest.config.* and package.json jest blocks for secrets, dangerous setup, and CI risks."""
+        return JestAnalyzer(str(path), **kwargs)
+
+    def playwright(self, path: str | Path = ".", **kwargs: Any) -> PlaywrightAnalyzer:
+        """Audit playwright.config.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
+        return PlaywrightAnalyzer(str(path), **kwargs)
+
+    def cypress(self, path: str | Path = ".", **kwargs: Any) -> CypressAnalyzer:
+        """Audit cypress.config.* and cypress.json for chromeWebSecurity, secrets in env, and insecure baseUrl."""
+        return CypressAnalyzer(str(path), **kwargs)
 
     def cargo(self, path: str | Path = ".", **kwargs: Any) -> CargoAnalyzer:
         """Audit Cargo.toml and .cargo/config.toml for secrets, insecure registries, and unpinned deps."""
