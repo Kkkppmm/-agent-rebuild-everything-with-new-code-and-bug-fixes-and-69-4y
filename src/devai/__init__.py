@@ -503,6 +503,18 @@ from devai.cypress_analyzer import (
     CypressInfo,
     CypressStats,
 )
+from devai.mocha_analyzer import (
+    MochaAnalyzer,
+    MochaFinding,
+    MochaInfo,
+    MochaStats,
+)
+from devai.webdriverio_analyzer import (
+    WebdriverIOAnalyzer,
+    WebdriverIOFinding,
+    WebdriverIOInfo,
+    WebdriverIOStats,
+)
 from devai.cargo_analyzer import (
     CargoAnalyzer,
     CargoFinding,
@@ -1476,6 +1488,14 @@ __all__ = [
     "CypressFinding",
     "CypressInfo",
     "CypressStats",
+    "MochaAnalyzer",
+    "MochaFinding",
+    "MochaInfo",
+    "MochaStats",
+    "WebdriverIOAnalyzer",
+    "WebdriverIOFinding",
+    "WebdriverIOInfo",
+    "WebdriverIOStats",
     "CargoAnalyzer",
     "CargoFinding",
     "CargoInfo",

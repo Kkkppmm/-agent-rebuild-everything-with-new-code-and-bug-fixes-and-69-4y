@@ -661,6 +661,38 @@ def cmd_cypress_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_mocha_audit(args: argparse.Namespace) -> None:
+    from devai.mocha_analyzer import MochaAnalyzer
+
+    analyzer = MochaAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_webdriverio_audit(args: argparse.Namespace) -> None:
+    from devai.webdriverio_analyzer import WebdriverIOAnalyzer
+
+    analyzer = WebdriverIOAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_commitlint_audit(args: argparse.Namespace) -> None:
     from devai.commitlint_analyzer import CommitlintAnalyzer
 
@@ -2567,6 +2599,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Cypress config template",
     )
     p.set_defaults(func=cmd_cypress_audit)
+
+    p = sub.add_parser(
+        "mocha-audit",
+        help="Audit Mocha .mocharc.* configs for allowUncaught, require paths, and CI risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened .mocharc.json template",
+    )
+    p.set_defaults(func=cmd_mocha_audit)
+
+    p = sub.add_parser(
+        "webdriverio-audit",
+        help="Audit WebdriverIO wdio.conf.* for TLS bypass, sandbox disable, and artifact leaks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened wdio.conf.ts template",
+    )
+    p.set_defaults(func=cmd_webdriverio_audit)
 
     p = sub.add_parser(
         "husky-audit",

@@ -118,6 +118,8 @@ from devai.jest_analyzer import JestAnalyzer
 from devai.vitest_analyzer import VitestAnalyzer
 from devai.playwright_analyzer import PlaywrightAnalyzer
 from devai.cypress_analyzer import CypressAnalyzer
+from devai.mocha_analyzer import MochaAnalyzer
+from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
 from devai.prettier_analyzer import PrettierAnalyzer
@@ -782,6 +784,14 @@ class DevAI:
     def cypress(self, path: str | Path = ".", **kwargs: Any) -> CypressAnalyzer:
         """Audit cypress.config.* and cypress.json for chromeWebSecurity, secrets in env, and insecure baseUrl."""
         return CypressAnalyzer(str(path), **kwargs)
+
+    def mocha(self, path: str | Path = ".", **kwargs: Any) -> MochaAnalyzer:
+        """Audit .mocharc.* and mocha.opts for allowUncaught, require paths, and CI risks."""
+        return MochaAnalyzer(str(path), **kwargs)
+
+    def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
+        """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
+        return WebdriverIOAnalyzer(str(path), **kwargs)
 
     def cargo(self, path: str | Path = ".", **kwargs: Any) -> CargoAnalyzer:
         """Audit Cargo.toml and .cargo/config.toml for secrets, insecure registries, and unpinned deps."""

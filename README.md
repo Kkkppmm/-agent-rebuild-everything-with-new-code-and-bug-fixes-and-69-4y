@@ -151,6 +151,12 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PnpmAnalyzer** — Audit pnpm-workspace.yaml, pnpm-lock.yaml, .pnpmfile hooks, and pnpm .npmrc settings for hardcoded tokens, disabled integrity checks, shamefully-hoist, wildcard overrides, and dangerous hook scripts
 - **BunAnalyzer** — Audit bunfig.toml, bun.lock, and Bun package.json settings for hardcoded tokens, disabled lockfile enforcement, trusted-all dependencies, insecure registries, and dangerous lifecycle scripts
 - **DenoAnalyzer** — Audit deno.json, deno.jsonc, import maps, and deno.lock for hardcoded secrets, allow-all permissions, disabled lockfiles, unpinned JSR/npm imports, insecure remote URLs, and dangerous task scripts
+- **JestAnalyzer** — Audit jest.config.* and package.json jest blocks for hardcoded secrets, dangerous globalSetup/setupFiles, testPathIgnorePatterns skipping security tests, disabled mock resets, and moduleNameMapper redirects outside the project
+- **VitestAnalyzer** — Audit vitest.config.* and Vitest setup for hardcoded secrets, dangerous setup files, test exclusions, disabled mock resets, and insecure server/proxy settings
+- **PlaywrightAnalyzer** — Audit playwright.config.* for TLS bypass, sandbox disable, remote debug ports, insecure baseURL, and artifact leaks in outputDir
+- **CypressAnalyzer** — Audit cypress.config.* and cypress.json for chromeWebSecurity disabled, secrets in env, insecure baseUrl, modifyObstructiveCode, and artifact folder leaks
+- **MochaAnalyzer** — Audit .mocharc.* and mocha.opts for hardcoded secrets, require paths outside the project, allowUncaught, disabled forbidOnly, zero timeouts, and Node inspect flags
+- **WebdriverIOAnalyzer** — Audit wdio.conf.* for acceptInsecureCerts, --no-sandbox, remote debugging, insecure baseUrl/protocol, specs outside the project, and excessive maxInstances
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection
 - **CirrusCIAnalyzer** — Audit Cirrus CI `.cirrus.yml` for hardcoded secrets, privileged containers, skip_tls_verify, and CIRRUS_* variable injection
