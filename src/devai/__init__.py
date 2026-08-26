@@ -533,6 +533,12 @@ from devai.ruff_analyzer import (
     RuffInfo,
     RuffStats,
 )
+from devai.mypy_analyzer import (
+    MypyAnalyzer,
+    MypyFinding,
+    MypyInfo,
+    MypyStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1009,7 +1015,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.48.0"
+__version__ = "7.49.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1532,6 +1538,10 @@ __all__ = [
     "RuffFinding",
     "RuffInfo",
     "RuffStats",
+    "MypyAnalyzer",
+    "MypyFinding",
+    "MypyInfo",
+    "MypyStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

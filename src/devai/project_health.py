@@ -117,6 +117,7 @@ from devai.pytest_analyzer import PytestAnalyzer
 from devai.tox_analyzer import ToxAnalyzer
 from devai.nox_analyzer import NoxAnalyzer
 from devai.ruff_analyzer import RuffAnalyzer
+from devai.mypy_analyzer import MypyAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -339,6 +340,7 @@ class ProjectHealth:
         "tox": 0.02,
         "nox": 0.02,
         "ruff": 0.02,
+        "mypy": 0.02,
         "webdriverio": 0.02,
         "husky": 0.02,
         "biome": 0.02,
@@ -2040,6 +2042,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_mypy(self, analyzer: MypyAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No mypy configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} mypy config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webdriverio(self, analyzer: WebdriverIOAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3603,6 +3623,10 @@ class ProjectHealth:
         ruff = RuffAnalyzer(root_str)
         score, summary, details = self._score_ruff(ruff)
         categories.append(HealthCategory("ruff", score, summary, details))
+
+        mypy = MypyAnalyzer(root_str)
+        score, summary, details = self._score_mypy(mypy)
+        categories.append(HealthCategory("mypy", score, summary, details))
 
         webdriverio = WebdriverIOAnalyzer(root_str)
         score, summary, details = self._score_webdriverio(webdriverio)
