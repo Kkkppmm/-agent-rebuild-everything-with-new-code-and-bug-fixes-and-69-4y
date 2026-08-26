@@ -88,6 +88,7 @@ from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
 from devai.deno_analyzer import DenoAnalyzer
+from devai.vitest_analyzer import VitestAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -1857,6 +1858,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_vitest(self, analyzer: VitestAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Vitest configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Vitest config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_cargo(self, analyzer: CargoAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3286,6 +3305,10 @@ class ProjectHealth:
         deno = DenoAnalyzer(root_str)
         score, summary, details = self._score_deno(deno)
         categories.append(HealthCategory("deno", score, summary, details))
+
+        vitest = VitestAnalyzer(root_str)
+        score, summary, details = self._score_vitest(vitest)
+        categories.append(HealthCategory("vitest", score, summary, details))
 
         cargo = CargoAnalyzer(root_str)
         score, summary, details = self._score_cargo(cargo)

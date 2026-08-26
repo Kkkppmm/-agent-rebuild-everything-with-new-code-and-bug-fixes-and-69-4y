@@ -479,6 +479,12 @@ from devai.deno_analyzer import (
     DenoInfo,
     DenoStats,
 )
+from devai.vitest_analyzer import (
+    VitestAnalyzer,
+    VitestFinding,
+    VitestInfo,
+    VitestStats,
+)
 from devai.cargo_analyzer import (
     CargoAnalyzer,
     CargoFinding,
@@ -949,7 +955,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.40.0"
+__version__ = "7.42.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1436,6 +1442,10 @@ __all__ = [
     "DenoFinding",
     "DenoInfo",
     "DenoStats",
+    "VitestAnalyzer",
+    "VitestFinding",
+    "VitestInfo",
+    "VitestStats",
     "CargoAnalyzer",
     "CargoFinding",
     "CargoInfo",
