@@ -86,6 +86,7 @@ from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
+from devai.jest_analyzer import JestAnalyzer
 from devai.cargo_analyzer import CargoAnalyzer
 from devai.go_mod_analyzer import GoModAnalyzer
 from devai.composer_analyzer import ComposerAnalyzer
@@ -316,6 +317,7 @@ class ProjectHealth:
         "taskfile": 0.02,
         "lefthook": 0.02,
         "eslint": 0.02,
+        "jest": 0.02,
         "husky": 0.02,
         "biome": 0.02,
         "prettier": 0.02,
@@ -2180,6 +2182,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_jest(self, analyzer: JestAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Jest configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Jest config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_husky(self, analyzer: HuskyAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -2774,6 +2794,10 @@ class ProjectHealth:
                 recs.append(
                     "Harden pnpm — keep verify-store-integrity and strict-ssl enabled, avoid shamefully-hoist, pin pnpm.overrides to exact versions, commit pnpm-lock.yaml, store tokens via env vars, and review .pnpmfile hooks for eval or remote require"
                 )
+            elif cat.name == "jest" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Jest — avoid hardcoded secrets in globals/setupFiles, pin git presets to SHAs, use HTTPS testURL, keep moduleNameMapper inside project root, review testResultsProcessor endpoints, and avoid eval in transforms or setup hooks"
+                )
             elif cat.name == "nx" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Nx — store nxCloudAccessToken in NX_CLOUD_ACCESS_TOKEN env var, exclude .env and credential files from namedInputs/inputs, use HTTPS for Nx Cloud URLs, and keep secrets out of target options env blocks"
@@ -3315,6 +3339,10 @@ class ProjectHealth:
         eslint = ESLintAnalyzer(root_str)
         score, summary, details = self._score_eslint(eslint)
         categories.append(HealthCategory("eslint", score, summary, details))
+
+        jest = JestAnalyzer(root_str)
+        score, summary, details = self._score_jest(jest)
+        categories.append(HealthCategory("jest", score, summary, details))
 
         husky = HuskyAnalyzer(root_str)
         score, summary, details = self._score_husky(husky)

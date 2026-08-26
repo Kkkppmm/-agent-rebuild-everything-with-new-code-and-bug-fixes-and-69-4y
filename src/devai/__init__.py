@@ -467,6 +467,12 @@ from devai.pnpm_analyzer import (
     PnpmInfo,
     PnpmStats,
 )
+from devai.jest_analyzer import (
+    JestAnalyzer,
+    JestFinding,
+    JestInfo,
+    JestStats,
+)
 from devai.cargo_analyzer import (
     CargoAnalyzer,
     CargoFinding,
@@ -1416,6 +1422,10 @@ __all__ = [
     "PnpmFinding",
     "PnpmInfo",
     "PnpmStats",
+    "JestAnalyzer",
+    "JestFinding",
+    "JestInfo",
+    "JestStats",
     "CargoAnalyzer",
     "CargoFinding",
     "CargoInfo",
