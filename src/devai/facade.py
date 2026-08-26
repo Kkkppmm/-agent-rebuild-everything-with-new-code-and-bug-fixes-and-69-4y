@@ -124,6 +124,7 @@ from devai.tox_analyzer import ToxAnalyzer
 from devai.nox_analyzer import NoxAnalyzer
 from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
+from devai.coverage_analyzer import CoverageAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -813,6 +814,10 @@ class DevAI:
     def mypy(self, path: str | Path = ".", **kwargs: Any) -> MypyAnalyzer:
         """Audit mypy.ini and pyproject.toml [tool.mypy] for ignore_missing_imports, follow_imports=skip, and disabled strict mode."""
         return MypyAnalyzer(str(path), **kwargs)
+
+    def coverage(self, path: str | Path = ".", **kwargs: Any) -> CoverageAnalyzer:
+        """Audit .coveragerc and pyproject.toml [tool.coverage] for low fail_under, broad omit patterns, and skip_covered."""
+        return CoverageAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""

@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.49.0"
+        assert devai.__version__ == "7.50.0"
 
     def test_exports(self):
         expected = {
@@ -525,6 +525,10 @@ class TestPublicAPI:
             "MypyFinding",
             "MypyInfo",
             "MypyStats",
+            "CoverageAnalyzer",
+            "CoverageFinding",
+            "CoverageInfo",
+            "CoverageStats",
             "WebdriverIOAnalyzer",
             "WebdriverIOFinding",
             "WebdriverIOInfo",

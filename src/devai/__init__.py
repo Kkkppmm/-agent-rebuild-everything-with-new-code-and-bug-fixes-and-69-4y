@@ -539,6 +539,12 @@ from devai.mypy_analyzer import (
     MypyInfo,
     MypyStats,
 )
+from devai.coverage_analyzer import (
+    CoverageAnalyzer,
+    CoverageFinding,
+    CoverageInfo,
+    CoverageStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1015,7 +1021,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.49.0"
+__version__ = "7.50.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1542,6 +1548,10 @@ __all__ = [
     "MypyFinding",
     "MypyInfo",
     "MypyStats",
+    "CoverageAnalyzer",
+    "CoverageFinding",
+    "CoverageInfo",
+    "CoverageStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
