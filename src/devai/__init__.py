@@ -545,6 +545,12 @@ from devai.coverage_analyzer import (
     CoverageInfo,
     CoverageStats,
 )
+from devai.black_analyzer import (
+    BlackAnalyzer,
+    BlackFinding,
+    BlackInfo,
+    BlackStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1552,6 +1558,10 @@ __all__ = [
     "CoverageFinding",
     "CoverageInfo",
     "CoverageStats",
+    "BlackAnalyzer",
+    "BlackFinding",
+    "BlackInfo",
+    "BlackStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
