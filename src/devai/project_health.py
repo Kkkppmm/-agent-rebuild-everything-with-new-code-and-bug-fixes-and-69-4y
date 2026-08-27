@@ -120,6 +120,7 @@ from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
 from devai.black_analyzer import BlackAnalyzer
+from devai.yamllint_analyzer import YamllintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -2098,6 +2099,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_yamllint(self, analyzer: YamllintAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No yamllint configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} yamllint config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webdriverio(self, analyzer: WebdriverIOAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3673,6 +3692,10 @@ class ProjectHealth:
         black = BlackAnalyzer(root_str)
         score, summary, details = self._score_black(black)
         categories.append(HealthCategory("black", score, summary, details))
+
+        yamllint = YamllintAnalyzer(root_str)
+        score, summary, details = self._score_yamllint(yamllint)
+        categories.append(HealthCategory("yamllint", score, summary, details))
 
         webdriverio = WebdriverIOAnalyzer(root_str)
         score, summary, details = self._score_webdriverio(webdriverio)

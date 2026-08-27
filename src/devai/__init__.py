@@ -551,6 +551,12 @@ from devai.black_analyzer import (
     BlackInfo,
     BlackStats,
 )
+from devai.yamllint_analyzer import (
+    YamllintAnalyzer,
+    YamllintFinding,
+    YamllintInfo,
+    YamllintStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1027,7 +1033,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.50.0"
+__version__ = "7.52.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1562,6 +1568,10 @@ __all__ = [
     "BlackFinding",
     "BlackInfo",
     "BlackStats",
+    "YamllintAnalyzer",
+    "YamllintFinding",
+    "YamllintInfo",
+    "YamllintStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
