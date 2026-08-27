@@ -128,6 +128,8 @@ from devai.coverage_analyzer import CoverageAnalyzer
 from devai.black_analyzer import BlackAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.isort_analyzer import IsortAnalyzer
+from devai.flake8_analyzer import Flake8Analyzer
+from devai.pyright_analyzer import PyrightAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -833,6 +835,14 @@ class DevAI:
     def isort(self, path: str | Path = ".", **kwargs: Any) -> IsortAnalyzer:
         """Audit .isort.cfg and pyproject.toml [tool.isort] for honor_noqa=false, skip patterns, and Black conflicts."""
         return IsortAnalyzer(str(path), **kwargs)
+
+    def flake8(self, path: str | Path = ".", **kwargs: Any) -> Flake8Analyzer:
+        """Audit .flake8 and pyproject.toml [tool.flake8] for broad ignores, disabled S rules, and source exclusions."""
+        return Flake8Analyzer(str(path), **kwargs)
+
+    def pyright(self, path: str | Path = ".", **kwargs: Any) -> PyrightAnalyzer:
+        """Audit pyrightconfig.json and pyproject.toml [tool.pyright] for relaxed type checking and insecure paths."""
+        return PyrightAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""

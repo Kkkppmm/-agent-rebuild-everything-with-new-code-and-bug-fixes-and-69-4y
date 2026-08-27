@@ -563,6 +563,18 @@ from devai.isort_analyzer import (
     IsortInfo,
     IsortStats,
 )
+from devai.flake8_analyzer import (
+    Flake8Analyzer,
+    Flake8Finding,
+    Flake8Info,
+    Flake8Stats,
+)
+from devai.pyright_analyzer import (
+    PyrightAnalyzer,
+    PyrightFinding,
+    PyrightInfo,
+    PyrightStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1582,6 +1594,14 @@ __all__ = [
     "IsortFinding",
     "IsortInfo",
     "IsortStats",
+    "Flake8Analyzer",
+    "Flake8Finding",
+    "Flake8Info",
+    "Flake8Stats",
+    "PyrightAnalyzer",
+    "PyrightFinding",
+    "PyrightInfo",
+    "PyrightStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
