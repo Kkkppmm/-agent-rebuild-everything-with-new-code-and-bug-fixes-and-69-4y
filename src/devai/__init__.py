@@ -569,6 +569,12 @@ from devai.pyright_analyzer import (
     PyrightInfo,
     PyrightStats,
 )
+from devai.pylint_analyzer import (
+    PylintAnalyzer,
+    PylintFinding,
+    PylintInfo,
+    PylintStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1592,6 +1598,10 @@ __all__ = [
     "PyrightFinding",
     "PyrightInfo",
     "PyrightStats",
+    "PylintAnalyzer",
+    "PylintFinding",
+    "PylintInfo",
+    "PylintStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

@@ -129,6 +129,7 @@ from devai.black_analyzer import BlackAnalyzer
 from devai.isort_analyzer import IsortAnalyzer
 from devai.flake8_analyzer import Flake8Analyzer
 from devai.pyright_analyzer import PyrightAnalyzer
+from devai.pylint_analyzer import PylintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -838,6 +839,10 @@ class DevAI:
     def pyright(self, path: str | Path = ".", **kwargs: Any) -> PyrightAnalyzer:
         """Audit pyrightconfig.json and pyproject.toml [tool.pyright] for relaxed type checking."""
         return PyrightAnalyzer(str(path), **kwargs)
+
+    def pylint(self, path: str | Path = ".", **kwargs: Any) -> PylintAnalyzer:
+        """Audit Pylint configs for broad disables, unsafe init-hook, and security rule suppression."""
+        return PylintAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""

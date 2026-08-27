@@ -123,6 +123,7 @@ from devai.black_analyzer import BlackAnalyzer
 from devai.isort_analyzer import IsortAnalyzer
 from devai.flake8_analyzer import Flake8Analyzer
 from devai.pyright_analyzer import PyrightAnalyzer
+from devai.pylint_analyzer import PylintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -347,6 +348,7 @@ class ProjectHealth:
         "ruff": 0.02,
         "flake8": 0.02,
         "pyright": 0.02,
+        "pylint": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
         "husky": 0.02,
@@ -2157,6 +2159,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_pylint(self, analyzer: PylintAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No pylint configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} pylint config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webdriverio(self, analyzer: WebdriverIOAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3744,6 +3764,10 @@ class ProjectHealth:
         pyright = PyrightAnalyzer(root_str)
         score, summary, details = self._score_pyright(pyright)
         categories.append(HealthCategory("pyright", score, summary, details))
+
+        pylint = PylintAnalyzer(root_str)
+        score, summary, details = self._score_pylint(pylint)
+        categories.append(HealthCategory("pylint", score, summary, details))
 
         webdriverio = WebdriverIOAnalyzer(root_str)
         score, summary, details = self._score_webdriverio(webdriverio)
