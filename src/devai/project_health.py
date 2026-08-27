@@ -121,6 +121,7 @@ from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
 from devai.black_analyzer import BlackAnalyzer
 from devai.isort_analyzer import IsortAnalyzer
+from devai.flake8_analyzer import Flake8Analyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -343,6 +344,7 @@ class ProjectHealth:
         "tox": 0.02,
         "nox": 0.02,
         "ruff": 0.02,
+        "flake8": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
         "husky": 0.02,
@@ -2117,6 +2119,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_flake8(self, analyzer: Flake8Analyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No flake8 configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} flake8 config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webdriverio(self, analyzer: WebdriverIOAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3696,6 +3716,10 @@ class ProjectHealth:
         isort = IsortAnalyzer(root_str)
         score, summary, details = self._score_isort(isort)
         categories.append(HealthCategory("isort", score, summary, details))
+
+        flake8 = Flake8Analyzer(root_str)
+        score, summary, details = self._score_flake8(flake8)
+        categories.append(HealthCategory("flake8", score, summary, details))
 
         webdriverio = WebdriverIOAnalyzer(root_str)
         score, summary, details = self._score_webdriverio(webdriverio)
