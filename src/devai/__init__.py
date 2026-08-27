@@ -575,6 +575,12 @@ from devai.pylint_analyzer import (
     PylintInfo,
     PylintStats,
 )
+from devai.golangci_analyzer import (
+    GolangciLintAnalyzer,
+    GolangciFinding,
+    GolangciInfo,
+    GolangciStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1051,7 +1057,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.50.0"
+__version__ = "7.56.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1602,6 +1608,10 @@ __all__ = [
     "PylintFinding",
     "PylintInfo",
     "PylintStats",
+    "GolangciLintAnalyzer",
+    "GolangciFinding",
+    "GolangciInfo",
+    "GolangciStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
