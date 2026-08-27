@@ -157,6 +157,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **CypressAnalyzer** — Audit cypress.config.* and cypress.json for chromeWebSecurity disabled, secrets in env, insecure baseUrl, modifyObstructiveCode, and artifact folder leaks
 - **MochaAnalyzer** — Audit .mocharc.* and mocha.opts for hardcoded secrets, require paths outside the project, allowUncaught, disabled forbidOnly, zero timeouts, and Node inspect flags
 - **PytestAnalyzer** — Audit pytest.ini, pyproject.toml, and conftest.py for hardcoded secrets, eval/exec, --pdb in CI, security test exclusions, disabled coverage, and TLS bypass
+- **Flake8Analyzer** — Audit `.flake8`, setup.cfg, and pyproject.toml `[tool.flake8]` for broad ignores, disabled bandit (S) rules, per-file security ignores, and source exclusions
 - **ToxAnalyzer** — Audit tox.ini for passenv=*, allowlist_externals=*, insecure pip indexes, indexserver credentials, changedir outside project, and dangerous commands
 - **NoxAnalyzer** — Audit noxfile.py for reuse_venv, venv_backend='none', os.environ forwarding, insecure pip indexes, HTTP git deps, chdir outside project, and dangerous commands
 - **WebdriverIOAnalyzer** — Audit wdio.conf.* for acceptInsecureCerts, --no-sandbox, remote debugging, insecure baseUrl/protocol, specs outside the project, and excessive maxInstances
