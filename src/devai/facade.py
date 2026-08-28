@@ -135,6 +135,7 @@ from devai.rubocop_analyzer import RuboCopAnalyzer
 from devai.shellcheck_analyzer import ShellcheckAnalyzer
 from devai.yamllint_analyzer import YamllintAnalyzer
 from devai.hadolint_analyzer import HadolintAnalyzer
+from devai.tflint_analyzer import TflintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -868,6 +869,10 @@ class DevAI:
     def hadolint(self, path: str | Path = ".", **kwargs: Any) -> HadolintAnalyzer:
         """Audit Hadolint configs for ignored root-user/latest-tag/secret rules, permissive thresholds, and insecure registries."""
         return HadolintAnalyzer(str(path), **kwargs)
+
+    def tflint(self, path: str | Path = ".", **kwargs: Any) -> TflintAnalyzer:
+        """Audit TFLint configs for disabled security rules, unpinned plugins, disabled_by_default, and insecure sources."""
+        return TflintAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""

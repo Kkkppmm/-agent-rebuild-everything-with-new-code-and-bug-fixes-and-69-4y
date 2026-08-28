@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "devai"
-version = "7.60.0"
+version = "7.61.0"
 description = "A Python AI library for developers and programmers"
 readme = "README.md"
 license = "MIT"

@@ -605,6 +605,12 @@ from devai.hadolint_analyzer import (
     HadolintInfo,
     HadolintStats,
 )
+from devai.tflint_analyzer import (
+    TflintAnalyzer,
+    TflintFinding,
+    TflintInfo,
+    TflintStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1652,6 +1658,10 @@ __all__ = [
     "HadolintFinding",
     "HadolintInfo",
     "HadolintStats",
+    "TflintAnalyzer",
+    "TflintFinding",
+    "TflintInfo",
+    "TflintStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
