@@ -128,6 +128,7 @@ from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
 from devai.shellcheck_analyzer import ShellcheckAnalyzer
 from devai.yamllint_analyzer import YamllintAnalyzer
+from devai.actionlint_analyzer import ActionlintAnalyzer
 from devai.hadolint_analyzer import HadolintAnalyzer
 from devai.tflint_analyzer import TflintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
@@ -360,6 +361,7 @@ class ProjectHealth:
         "shellcheck": 0.02,
         "yamllint": 0.02,
         "hadolint": 0.02,
+        "actionlint": 0.02,
         "tflint": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
@@ -2279,6 +2281,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_actionlint(self, analyzer: ActionlintAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No actionlint configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} actionlint config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_tflint(self, analyzer: TflintAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3908,6 +3928,10 @@ class ProjectHealth:
         hadolint = HadolintAnalyzer(root_str)
         score, summary, details = self._score_hadolint(hadolint)
         categories.append(HealthCategory("hadolint", score, summary, details))
+
+        actionlint = ActionlintAnalyzer(root_str)
+        score, summary, details = self._score_actionlint(actionlint)
+        categories.append(HealthCategory("actionlint", score, summary, details))
 
         tflint = TflintAnalyzer(root_str)
         score, summary, details = self._score_tflint(tflint)

@@ -134,6 +134,7 @@ from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
 from devai.shellcheck_analyzer import ShellcheckAnalyzer
 from devai.yamllint_analyzer import YamllintAnalyzer
+from devai.actionlint_analyzer import ActionlintAnalyzer
 from devai.hadolint_analyzer import HadolintAnalyzer
 from devai.tflint_analyzer import TflintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
@@ -869,6 +870,10 @@ class DevAI:
     def hadolint(self, path: str | Path = ".", **kwargs: Any) -> HadolintAnalyzer:
         """Audit Hadolint configs for ignored root-user/latest-tag/secret rules, permissive thresholds, and insecure registries."""
         return HadolintAnalyzer(str(path), **kwargs)
+
+    def actionlint(self, path: str | Path = ".", **kwargs: Any) -> ActionlintAnalyzer:
+        """Audit actionlint configs for ignored security rules, self-hosted runner allowlists, and path ignores."""
+        return ActionlintAnalyzer(str(path), **kwargs)
 
     def tflint(self, path: str | Path = ".", **kwargs: Any) -> TflintAnalyzer:
         """Audit TFLint configs for disabled security rules, unpinned plugins, disabled_by_default, and insecure sources."""

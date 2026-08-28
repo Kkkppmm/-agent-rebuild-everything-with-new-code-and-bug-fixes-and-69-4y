@@ -599,6 +599,12 @@ from devai.yamllint_analyzer import (
     YamllintInfo,
     YamllintStats,
 )
+from devai.actionlint_analyzer import (
+    ActionlintAnalyzer,
+    ActionlintFinding,
+    ActionlintInfo,
+    ActionlintStats,
+)
 from devai.hadolint_analyzer import (
     HadolintAnalyzer,
     HadolintFinding,
@@ -1654,6 +1660,10 @@ __all__ = [
     "YamllintFinding",
     "YamllintInfo",
     "YamllintStats",
+    "ActionlintAnalyzer",
+    "ActionlintFinding",
+    "ActionlintInfo",
+    "ActionlintStats",
     "HadolintAnalyzer",
     "HadolintFinding",
     "HadolintInfo",
