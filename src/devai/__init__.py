@@ -635,6 +635,12 @@ from devai.next_analyzer import (
     NextInfo,
     NextStats,
 )
+from devai.astro_analyzer import (
+    AstroAnalyzer,
+    AstroFinding,
+    AstroInfo,
+    AstroStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1111,7 +1117,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.58.0"
+__version__ = "7.66.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1698,6 +1704,10 @@ __all__ = [
     "NextFinding",
     "NextInfo",
     "NextStats",
+    "AstroAnalyzer",
+    "AstroFinding",
+    "AstroInfo",
+    "AstroStats",
     "WebpackAnalyzer",
     "WebpackFinding",
     "WebpackInfo",

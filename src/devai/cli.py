@@ -997,6 +997,22 @@ def cmd_next_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_astro_audit(args: argparse.Namespace) -> None:
+    from devai.astro_analyzer import AstroAnalyzer
+
+    analyzer = AstroAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_webpack_audit(args: argparse.Namespace) -> None:
     from devai.webpack_analyzer import WebpackAnalyzer
 
@@ -3229,6 +3245,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened next.config.ts template",
     )
     p.set_defaults(func=cmd_next_audit)
+
+    p = sub.add_parser(
+        "astro-audit",
+        help="Audit astro.config.* for exposed dev servers, disabled origin checks, and SSRF redirects",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened astro.config.mjs template",
+    )
+    p.set_defaults(func=cmd_astro_audit)
 
     p = sub.add_parser(
         "webpack-audit",

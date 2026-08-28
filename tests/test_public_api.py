@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.58.0"
+        assert devai.__version__ == "7.66.0"
 
     def test_exports(self):
         expected = {
@@ -585,6 +585,10 @@ class TestPublicAPI:
             "NextFinding",
             "NextInfo",
             "NextStats",
+            "AstroAnalyzer",
+            "AstroFinding",
+            "AstroInfo",
+            "AstroStats",
             "WebpackAnalyzer",
             "WebpackFinding",
             "WebpackInfo",
