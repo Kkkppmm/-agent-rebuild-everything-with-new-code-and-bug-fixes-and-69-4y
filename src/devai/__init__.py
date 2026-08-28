@@ -617,6 +617,12 @@ from devai.tsconfig_analyzer import (
     TsconfigInfo,
     TsconfigStats,
 )
+from devai.webpack_analyzer import (
+    WebpackAnalyzer,
+    WebpackFinding,
+    WebpackInfo,
+    WebpackStats,
+)
 from devai.vite_analyzer import (
     ViteAnalyzer,
     ViteFinding,
@@ -1682,6 +1688,10 @@ __all__ = [
     "ViteFinding",
     "ViteInfo",
     "ViteStats",
+    "WebpackAnalyzer",
+    "WebpackFinding",
+    "WebpackInfo",
+    "WebpackStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
