@@ -129,6 +129,7 @@ from devai.rubocop_analyzer import RuboCopAnalyzer
 from devai.shellcheck_analyzer import ShellcheckAnalyzer
 from devai.yamllint_analyzer import YamllintAnalyzer
 from devai.hadolint_analyzer import HadolintAnalyzer
+from devai.markdownlint_analyzer import MarkdownlintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -359,6 +360,7 @@ class ProjectHealth:
         "shellcheck": 0.02,
         "yamllint": 0.02,
         "hadolint": 0.02,
+        "markdownlint": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
         "husky": 0.02,
@@ -2277,6 +2279,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_markdownlint(self, analyzer: MarkdownlintAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No markdownlint configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} markdownlint config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webdriverio(self, analyzer: WebdriverIOAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3888,6 +3908,10 @@ class ProjectHealth:
         hadolint = HadolintAnalyzer(root_str)
         score, summary, details = self._score_hadolint(hadolint)
         categories.append(HealthCategory("hadolint", score, summary, details))
+
+        markdownlint = MarkdownlintAnalyzer(root_str)
+        score, summary, details = self._score_markdownlint(markdownlint)
+        categories.append(HealthCategory("markdownlint", score, summary, details))
 
         webdriverio = WebdriverIOAnalyzer(root_str)
         score, summary, details = self._score_webdriverio(webdriverio)

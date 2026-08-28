@@ -135,6 +135,7 @@ from devai.rubocop_analyzer import RuboCopAnalyzer
 from devai.shellcheck_analyzer import ShellcheckAnalyzer
 from devai.yamllint_analyzer import YamllintAnalyzer
 from devai.hadolint_analyzer import HadolintAnalyzer
+from devai.markdownlint_analyzer import MarkdownlintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -868,6 +869,10 @@ class DevAI:
     def hadolint(self, path: str | Path = ".", **kwargs: Any) -> HadolintAnalyzer:
         """Audit Hadolint configs for ignored security rules, wildcard suppressions, and permissive thresholds."""
         return HadolintAnalyzer(str(path), **kwargs)
+
+    def markdownlint(self, path: str | Path = ".", **kwargs: Any) -> MarkdownlintAnalyzer:
+        """Audit markdownlint configs for disabled inline-HTML checks, wildcard suppressions, and broad ignores."""
+        return MarkdownlintAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
