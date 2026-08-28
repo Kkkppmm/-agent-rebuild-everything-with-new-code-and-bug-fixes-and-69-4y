@@ -141,6 +141,7 @@ from devai.vite_analyzer import ViteAnalyzer
 from devai.next_analyzer import NextAnalyzer
 from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
+from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -899,6 +900,10 @@ class DevAI:
     def nuxt(self, path: str | Path = ".", **kwargs: Any) -> NuxtAnalyzer:
         """Audit nuxt.config.* for runtimeConfig leaks, exposed dev servers, internal proxies, and production devtools."""
         return NuxtAnalyzer(str(path), **kwargs)
+
+    def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
+        """Audit svelte.config.* for disabled CSRF checks, CSP bypass, adapter secrets, and exposed dev servers."""
+        return SvelteKitAnalyzer(str(path), **kwargs)
 
     def webpack(self, path: str | Path = ".", **kwargs: Any) -> WebpackAnalyzer:
         """Audit webpack.config.* for exposed dev servers, secrets, allowedHosts: 'all', and production sourcemaps."""
