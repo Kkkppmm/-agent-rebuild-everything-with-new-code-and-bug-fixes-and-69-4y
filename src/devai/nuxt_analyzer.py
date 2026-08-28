@@ -88,8 +88,8 @@ RUNTIME_CONFIG_SECRET_PATTERN = re.compile(
     re.IGNORECASE,
 )
 PUBLIC_RUNTIME_HTTP_PATTERN = re.compile(
-    r"public\s*:\s*\{[^}]*(?:apiBase|baseURL|siteUrl)\s*:\s*['\"]http://(?!localhost|127\.0\.0\.1)",
-    re.IGNORECASE | re.DOTALL,
+    r"(?:apiBase|baseURL|siteUrl)\s*:\s*['\"]http://(?!localhost|127\.0\.0\.1)",
+    re.IGNORECASE,
 )
 SSR_DISABLED_PATTERN = re.compile(
     r"ssr\s*:\s*false",
@@ -100,8 +100,8 @@ TELEMETRY_ENABLED_PATTERN = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 ROUTE_RULE_PROXY_PATTERN = re.compile(
-    r"routeRules\s*:\s*\{[^}]*proxy\s*:\s*['\"]https?://",
-    re.IGNORECASE | re.DOTALL,
+    r"proxy\s*:\s*['\"]https?://",
+    re.IGNORECASE,
 )
 
 
