@@ -137,6 +137,7 @@ from devai.yamllint_analyzer import YamllintAnalyzer
 from devai.hadolint_analyzer import HadolintAnalyzer
 from devai.markdownlint_analyzer import MarkdownlintAnalyzer
 from devai.tsconfig_analyzer import TsconfigAnalyzer
+from devai.vite_analyzer import ViteAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -878,6 +879,10 @@ class DevAI:
     def tsconfig(self, path: str | Path = ".", **kwargs: Any) -> TsconfigAnalyzer:
         """Audit tsconfig/jsconfig files for disabled strict mode, secrets, and broad exclude patterns."""
         return TsconfigAnalyzer(str(path), **kwargs)
+
+    def vite(self, path: str | Path = ".", **kwargs: Any) -> ViteAnalyzer:
+        """Audit vite.config.* for exposed dev servers, secrets, permissive fs.allow, and production sourcemaps."""
+        return ViteAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""

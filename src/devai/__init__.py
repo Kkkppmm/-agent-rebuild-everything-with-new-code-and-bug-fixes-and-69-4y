@@ -617,6 +617,12 @@ from devai.tsconfig_analyzer import (
     TsconfigInfo,
     TsconfigStats,
 )
+from devai.vite_analyzer import (
+    ViteAnalyzer,
+    ViteFinding,
+    ViteInfo,
+    ViteStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1672,6 +1678,10 @@ __all__ = [
     "TsconfigFinding",
     "TsconfigInfo",
     "TsconfigStats",
+    "ViteAnalyzer",
+    "ViteFinding",
+    "ViteInfo",
+    "ViteStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

@@ -965,6 +965,22 @@ def cmd_tsconfig_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_vite_audit(args: argparse.Namespace) -> None:
+    from devai.vite_analyzer import ViteAnalyzer
+
+    analyzer = ViteAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_webdriverio_audit(args: argparse.Namespace) -> None:
     from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 
@@ -3153,6 +3169,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened tsconfig.json template",
     )
     p.set_defaults(func=cmd_tsconfig_audit)
+
+    p = sub.add_parser(
+        "vite-audit",
+        help="Audit vite.config.* for exposed dev servers, secrets, and production sourcemaps",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened vite.config.ts template",
+    )
+    p.set_defaults(func=cmd_vite_audit)
 
     p = sub.add_parser(
         "webdriverio-audit",
