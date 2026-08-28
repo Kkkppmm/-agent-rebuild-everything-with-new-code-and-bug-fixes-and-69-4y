@@ -134,6 +134,7 @@ from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
 from devai.shellcheck_analyzer import ShellcheckAnalyzer
 from devai.yamllint_analyzer import YamllintAnalyzer
+from devai.hadolint_analyzer import HadolintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -863,6 +864,10 @@ class DevAI:
     def yamllint(self, path: str | Path = ".", **kwargs: Any) -> YamllintAnalyzer:
         """Audit yamllint configs for disabled truthy/key-duplicates checks, relaxed extends, and broad ignores."""
         return YamllintAnalyzer(str(path), **kwargs)
+
+    def hadolint(self, path: str | Path = ".", **kwargs: Any) -> HadolintAnalyzer:
+        """Audit Hadolint configs for ignored security rules, permissive failure thresholds, and broad trusted registries."""
+        return HadolintAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
