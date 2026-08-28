@@ -647,6 +647,12 @@ from devai.nuxt_analyzer import (
     NuxtInfo,
     NuxtStats,
 )
+from devai.sveltekit_analyzer import (
+    SvelteKitAnalyzer,
+    SvelteKitFinding,
+    SvelteKitInfo,
+    SvelteKitStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1718,6 +1724,10 @@ __all__ = [
     "NuxtFinding",
     "NuxtInfo",
     "NuxtStats",
+    "SvelteKitAnalyzer",
+    "SvelteKitFinding",
+    "SvelteKitInfo",
+    "SvelteKitStats",
     "WebpackAnalyzer",
     "WebpackFinding",
     "WebpackInfo",

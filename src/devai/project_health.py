@@ -135,6 +135,7 @@ from devai.vite_analyzer import ViteAnalyzer
 from devai.next_analyzer import NextAnalyzer
 from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
+from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -372,6 +373,7 @@ class ProjectHealth:
         "next": 0.02,
         "astro": 0.02,
         "nuxt": 0.02,
+        "sveltekit": 0.02,
         "webpack": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
@@ -2399,6 +2401,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_sveltekit(self, analyzer: SvelteKitAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No SvelteKit configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} SvelteKit config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webpack(self, analyzer: WebpackAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4052,6 +4072,10 @@ class ProjectHealth:
         nuxt = NuxtAnalyzer(root_str)
         score, summary, details = self._score_nuxt(nuxt)
         categories.append(HealthCategory("nuxt", score, summary, details))
+
+        sveltekit = SvelteKitAnalyzer(root_str)
+        score, summary, details = self._score_sveltekit(sveltekit)
+        categories.append(HealthCategory("sveltekit", score, summary, details))
 
         webpack = WebpackAnalyzer(root_str)
         score, summary, details = self._score_webpack(webpack)
