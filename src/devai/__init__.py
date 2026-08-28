@@ -611,6 +611,12 @@ from devai.markdownlint_analyzer import (
     MarkdownlintInfo,
     MarkdownlintStats,
 )
+from devai.cspell_analyzer import (
+    CspellAnalyzer,
+    CspellFinding,
+    CspellInfo,
+    CspellStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1662,6 +1668,10 @@ __all__ = [
     "MarkdownlintFinding",
     "MarkdownlintInfo",
     "MarkdownlintStats",
+    "CspellAnalyzer",
+    "CspellFinding",
+    "CspellInfo",
+    "CspellStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",
