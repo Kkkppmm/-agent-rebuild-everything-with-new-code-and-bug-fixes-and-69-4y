@@ -599,6 +599,18 @@ from devai.yamllint_analyzer import (
     YamllintInfo,
     YamllintStats,
 )
+from devai.hadolint_analyzer import (
+    HadolintAnalyzer,
+    HadolintFinding,
+    HadolintInfo,
+    HadolintStats,
+)
+from devai.nuxt_analyzer import (
+    NuxtAnalyzer,
+    NuxtFinding,
+    NuxtInfo,
+    NuxtStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1075,7 +1087,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.58.0"
+__version__ = "7.61.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1642,6 +1654,14 @@ __all__ = [
     "YamllintFinding",
     "YamllintInfo",
     "YamllintStats",
+    "HadolintAnalyzer",
+    "HadolintFinding",
+    "HadolintInfo",
+    "HadolintStats",
+    "NuxtAnalyzer",
+    "NuxtFinding",
+    "NuxtInfo",
+    "NuxtStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

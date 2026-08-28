@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.58.0"
+        assert devai.__version__ == "7.61.0"
 
     def test_exports(self):
         expected = {
@@ -565,6 +565,14 @@ class TestPublicAPI:
             "YamllintFinding",
             "YamllintInfo",
             "YamllintStats",
+            "HadolintAnalyzer",
+            "HadolintFinding",
+            "HadolintInfo",
+            "HadolintStats",
+            "NuxtAnalyzer",
+            "NuxtFinding",
+            "NuxtInfo",
+            "NuxtStats",
             "WebdriverIOAnalyzer",
             "WebdriverIOFinding",
             "WebdriverIOInfo",
