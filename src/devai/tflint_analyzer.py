@@ -50,6 +50,10 @@ CALL_MODULE_TYPE_ALL_PATTERN = re.compile(
     r"^\s*call_module_type\s*=\s*[\"']?all[\"']?\s*(?:#.*)?$",
     re.IGNORECASE,
 )
+PLUGIN_PRESET_PATTERN = re.compile(
+    r"^\s*preset\s*=\s*[\"']([^\"']+)[\"']",
+    re.IGNORECASE,
+)
 PLUGIN_VERSION_PATTERN = re.compile(
     r"^\s*version\s*=\s*[\"']([^\"']+)[\"']",
     re.IGNORECASE,
@@ -211,6 +215,7 @@ class TflintAnalyzer:
         current_rule: str | None = None
         current_plugin: str | None = None
         plugin_has_version = False
+        plugin_has_preset = False
         plugin_has_source = False
         plugin_block_start = 0
         in_ignore_module = False
@@ -232,6 +237,7 @@ class TflintAnalyzer:
                 current_plugin = plugin_match.group(1)
                 info.plugins.append(current_plugin)
                 plugin_has_version = False
+                plugin_has_preset = False
                 plugin_has_source = False
                 plugin_block_start = lineno
                 current_rule = None
@@ -243,7 +249,7 @@ class TflintAnalyzer:
                 continue
 
             if stripped == "}":
-                if current_plugin and not plugin_has_version:
+                if current_plugin and not plugin_has_version and not plugin_has_preset:
                     findings.append(
                         TflintFinding(
                             kind="plugin_unpinned",
@@ -305,6 +311,9 @@ class TflintAnalyzer:
 
             if PLUGIN_VERSION_PATTERN.search(line) and current_plugin:
                 plugin_has_version = True
+
+            if PLUGIN_PRESET_PATTERN.search(line) and current_plugin:
+                plugin_has_preset = True
 
             source_match = PLUGIN_SOURCE_PATTERN.search(line)
             if source_match and current_plugin:
