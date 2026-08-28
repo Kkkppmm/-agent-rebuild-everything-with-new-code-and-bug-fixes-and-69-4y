@@ -132,6 +132,7 @@ from devai.hadolint_analyzer import HadolintAnalyzer
 from devai.markdownlint_analyzer import MarkdownlintAnalyzer
 from devai.tsconfig_analyzer import TsconfigAnalyzer
 from devai.vite_analyzer import ViteAnalyzer
+from devai.next_analyzer import NextAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -366,6 +367,7 @@ class ProjectHealth:
         "markdownlint": 0.02,
         "tsconfig": 0.02,
         "vite": 0.02,
+        "next": 0.02,
         "webpack": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
@@ -2339,6 +2341,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_next(self, analyzer: NextAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Next.js configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Next.js config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webpack(self, analyzer: WebpackAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -3980,6 +4000,10 @@ class ProjectHealth:
         vite = ViteAnalyzer(root_str)
         score, summary, details = self._score_vite(vite)
         categories.append(HealthCategory("vite", score, summary, details))
+
+        nextjs = NextAnalyzer(root_str)
+        score, summary, details = self._score_next(nextjs)
+        categories.append(HealthCategory("next", score, summary, details))
 
         webpack = WebpackAnalyzer(root_str)
         score, summary, details = self._score_webpack(webpack)

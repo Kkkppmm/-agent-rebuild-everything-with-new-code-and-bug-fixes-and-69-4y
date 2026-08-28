@@ -629,6 +629,12 @@ from devai.vite_analyzer import (
     ViteInfo,
     ViteStats,
 )
+from devai.next_analyzer import (
+    NextAnalyzer,
+    NextFinding,
+    NextInfo,
+    NextStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1688,6 +1694,10 @@ __all__ = [
     "ViteFinding",
     "ViteInfo",
     "ViteStats",
+    "NextAnalyzer",
+    "NextFinding",
+    "NextInfo",
+    "NextStats",
     "WebpackAnalyzer",
     "WebpackFinding",
     "WebpackInfo",
