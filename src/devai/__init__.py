@@ -611,6 +611,12 @@ from devai.tflint_analyzer import (
     TflintInfo,
     TflintStats,
 )
+from devai.actionlint_analyzer import (
+    ActionlintAnalyzer,
+    ActionlintFinding,
+    ActionlintInfo,
+    ActionlintStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1662,6 +1668,10 @@ __all__ = [
     "TflintFinding",
     "TflintInfo",
     "TflintStats",
+    "ActionlintAnalyzer",
+    "ActionlintFinding",
+    "ActionlintInfo",
+    "ActionlintStats",
     "WebdriverIOAnalyzer",
     "WebdriverIOFinding",
     "WebdriverIOInfo",

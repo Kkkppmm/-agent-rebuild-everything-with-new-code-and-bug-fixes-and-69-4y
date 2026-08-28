@@ -136,6 +136,7 @@ from devai.shellcheck_analyzer import ShellcheckAnalyzer
 from devai.yamllint_analyzer import YamllintAnalyzer
 from devai.hadolint_analyzer import HadolintAnalyzer
 from devai.tflint_analyzer import TflintAnalyzer
+from devai.actionlint_analyzer import ActionlintAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
 from devai.biome_analyzer import BiomeAnalyzer
@@ -873,6 +874,10 @@ class DevAI:
     def tflint(self, path: str | Path = ".", **kwargs: Any) -> TflintAnalyzer:
         """Audit TFLint configs for disabled security rules, unpinned plugins, disabled_by_default, and insecure sources."""
         return TflintAnalyzer(str(path), **kwargs)
+
+    def actionlint(self, path: str | Path = ".", **kwargs: Any) -> ActionlintAnalyzer:
+        """Audit actionlint configs for broad workflow ignores, shellcheck suppressions, and missing runner labels."""
+        return ActionlintAnalyzer(str(path), **kwargs)
 
     def webdriverio(self, path: str | Path = ".", **kwargs: Any) -> WebdriverIOAnalyzer:
         """Audit wdio.conf.* for TLS bypass, sandbox disable, remote debug, and artifact leaks."""
