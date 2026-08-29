@@ -683,6 +683,12 @@ from devai.nestjs_analyzer import (
     NestJSInfo,
     NestJSStats,
 )
+from devai.fastapi_analyzer import (
+    FastAPIAnalyzer,
+    FastAPIFinding,
+    FastAPIInfo,
+    FastAPIStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1796,6 +1802,10 @@ __all__ = [
     "NestJSFinding",
     "NestJSInfo",
     "NestJSStats",
+    "FastAPIAnalyzer",
+    "FastAPIFinding",
+    "FastAPIInfo",
+    "FastAPIStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",

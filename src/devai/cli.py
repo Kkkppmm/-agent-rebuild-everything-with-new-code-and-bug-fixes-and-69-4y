@@ -1109,6 +1109,22 @@ def cmd_nestjs_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_fastapi_audit(args: argparse.Namespace) -> None:
+    from devai.fastapi_analyzer import FastAPIAnalyzer
+
+    analyzer = FastAPIAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
     from devai.sveltekit_analyzer import SvelteKitAnalyzer
 
@@ -3503,6 +3519,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened NestJS main.ts entry template",
     )
     p.set_defaults(func=cmd_nestjs_audit)
+
+    p = sub.add_parser(
+        "fastapi-audit",
+        help="Audit FastAPI apps for hardcoded secrets, open CORS, exposed docs, debug mode, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened FastAPI main.py entry template",
+    )
+    p.set_defaults(func=cmd_fastapi_audit)
 
     p = sub.add_parser(
         "sveltekit-audit",

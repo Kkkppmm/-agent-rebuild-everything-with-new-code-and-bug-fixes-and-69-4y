@@ -147,6 +147,7 @@ from devai.hono_analyzer import HonoAnalyzer
 from devai.fastify_analyzer import FastifyAnalyzer
 from devai.express_analyzer import ExpressAnalyzer
 from devai.nestjs_analyzer import NestJSAnalyzer
+from devai.fastapi_analyzer import FastAPIAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -932,6 +933,10 @@ class DevAI:
     def nestjs(self, path: str | Path = ".", **kwargs: Any) -> NestJSAnalyzer:
         """Audit NestJS apps for hardcoded JWT secrets, open CORS, disabled validation, and SSRF risks."""
         return NestJSAnalyzer(str(path), **kwargs)
+
+    def fastapi(self, path: str | Path = ".", **kwargs: Any) -> FastAPIAnalyzer:
+        """Audit FastAPI apps for hardcoded secrets, open CORS, exposed docs, debug mode, and SSRF risks."""
+        return FastAPIAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""
