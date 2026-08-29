@@ -1029,6 +1029,70 @@ def cmd_nuxt_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_remix_audit(args: argparse.Namespace) -> None:
+    from devai.remix_analyzer import RemixAnalyzer
+
+    analyzer = RemixAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
+    from devai.sveltekit_analyzer import SvelteKitAnalyzer
+
+    analyzer = SvelteKitAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_gatsby_audit(args: argparse.Namespace) -> None:
+    from devai.gatsby_analyzer import GatsbyAnalyzer
+
+    analyzer = GatsbyAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_qwik_audit(args: argparse.Namespace) -> None:
+    from devai.qwik_analyzer import QwikAnalyzer
+
+    analyzer = QwikAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_webpack_audit(args: argparse.Namespace) -> None:
     from devai.webpack_analyzer import WebpackAnalyzer
 
@@ -3289,6 +3353,62 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened nuxt.config.ts template",
     )
     p.set_defaults(func=cmd_nuxt_audit)
+
+    p = sub.add_parser(
+        "remix-audit",
+        help="Audit remix.config.* for hardcoded secrets, exposed dev servers, and internal proxies",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened remix.config.js template",
+    )
+    p.set_defaults(func=cmd_remix_audit)
+
+    p = sub.add_parser(
+        "sveltekit-audit",
+        help="Audit svelte.config.* for disabled CSRF checks, exposed dev servers, and internal proxies",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened svelte.config.js template",
+    )
+    p.set_defaults(func=cmd_sveltekit_audit)
+
+    p = sub.add_parser(
+        "gatsby-audit",
+        help="Audit gatsby-config.* for hardcoded secrets, HTTP site URLs, and exposed GraphQL playground",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened gatsby-config.js template",
+    )
+    p.set_defaults(func=cmd_gatsby_audit)
+
+    p = sub.add_parser(
+        "qwik-audit",
+        help="Audit vite.config.* and qwik.config.* for exposed dev/preview servers and permissive filesystem access",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened vite.config.ts template for Qwik City",
+    )
+    p.set_defaults(func=cmd_qwik_audit)
 
     p = sub.add_parser(
         "webpack-audit",

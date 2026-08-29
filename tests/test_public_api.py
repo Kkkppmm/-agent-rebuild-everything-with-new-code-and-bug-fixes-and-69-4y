@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.66.0"
+        assert devai.__version__ == "7.68.0"
 
     def test_exports(self):
         expected = {
@@ -593,6 +593,22 @@ class TestPublicAPI:
             "NuxtFinding",
             "NuxtInfo",
             "NuxtStats",
+            "RemixAnalyzer",
+            "RemixFinding",
+            "RemixInfo",
+            "RemixStats",
+            "SvelteKitAnalyzer",
+            "SvelteKitFinding",
+            "SvelteKitInfo",
+            "SvelteKitStats",
+            "GatsbyAnalyzer",
+            "GatsbyFinding",
+            "GatsbyInfo",
+            "GatsbyStats",
+            "QwikAnalyzer",
+            "QwikFinding",
+            "QwikInfo",
+            "QwikStats",
             "WebpackAnalyzer",
             "WebpackFinding",
             "WebpackInfo",

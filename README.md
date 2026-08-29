@@ -134,6 +134,10 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **NextAnalyzer** — Audit `next.config.*` for production sourcemaps, disabled TypeScript/ESLint checks, permissive image remote patterns, SSRF rewrites, open CORS, disabled CSP, and dangerous SVG handling
 - **AstroAnalyzer** — Audit `astro.config.*` for exposed dev servers, disabled origin checks, permissive image domains, SSRF redirects, open CORS, and production dev toolbar exposure
 - **NuxtAnalyzer** — Audit `nuxt.config.*` for runtimeConfig secret leaks, exposed dev servers, internal proxy targets, disabled CSP, production sourcemaps, and enabled devtools
+- **RemixAnalyzer** — Audit `remix.config.*` for hardcoded secrets, exposed dev servers, internal proxy targets, and production sourcemaps
+- **SvelteKitAnalyzer** — Audit `svelte.config.*` for disabled CSRF checks, exposed dev servers, internal proxy targets, and permissive filesystem access
+- **GatsbyAnalyzer** — Audit `gatsby-config.*` for hardcoded secrets, HTTP site URLs, exposed GraphQL playground, and plugin credentials
+- **QwikAnalyzer** — Audit `vite.config.*` and `qwik.config.*` for exposed dev/preview servers, internal proxy targets, and permissive filesystem access
 - **ComposerAnalyzer** — Audit composer.json and auth.json for hardcoded tokens, insecure HTTP repositories, credentials in VCS URLs, dev/unpinned dependencies, disabled TLS verification, wildcard allow-plugins, committed auth.json, dangerous scripts, and missing composer.lock lockfiles
 - **BundlerAnalyzer** — Audit Gemfile, gems.rb, and .bundle/config for hardcoded tokens, insecure HTTP gem sources, credentials in git sources, unpinned git dependencies, loose version constraints, committed bundle credentials, dangerous install hooks, and missing Gemfile.lock lockfiles
 - **MixAnalyzer** — Audit mix.exs and config/*.exs for hardcoded tokens, insecure HTTP Hex repos, credentials in git sources, unpinned git dependencies, loose version constraints, config secrets, dangerous mix aliases, and missing mix.lock lockfiles

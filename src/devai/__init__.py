@@ -647,6 +647,30 @@ from devai.nuxt_analyzer import (
     NuxtInfo,
     NuxtStats,
 )
+from devai.remix_analyzer import (
+    RemixAnalyzer,
+    RemixFinding,
+    RemixInfo,
+    RemixStats,
+)
+from devai.sveltekit_analyzer import (
+    SvelteKitAnalyzer,
+    SvelteKitFinding,
+    SvelteKitInfo,
+    SvelteKitStats,
+)
+from devai.gatsby_analyzer import (
+    GatsbyAnalyzer,
+    GatsbyFinding,
+    GatsbyInfo,
+    GatsbyStats,
+)
+from devai.qwik_analyzer import (
+    QwikAnalyzer,
+    QwikFinding,
+    QwikInfo,
+    QwikStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1123,7 +1147,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.66.0"
+__version__ = "7.68.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1718,6 +1742,22 @@ __all__ = [
     "NuxtFinding",
     "NuxtInfo",
     "NuxtStats",
+    "RemixAnalyzer",
+    "RemixFinding",
+    "RemixInfo",
+    "RemixStats",
+    "SvelteKitAnalyzer",
+    "SvelteKitFinding",
+    "SvelteKitInfo",
+    "SvelteKitStats",
+    "GatsbyAnalyzer",
+    "GatsbyFinding",
+    "GatsbyInfo",
+    "GatsbyStats",
+    "QwikAnalyzer",
+    "QwikFinding",
+    "QwikInfo",
+    "QwikStats",
     "WebpackAnalyzer",
     "WebpackFinding",
     "WebpackInfo",

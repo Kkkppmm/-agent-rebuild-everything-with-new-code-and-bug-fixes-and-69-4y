@@ -141,6 +141,10 @@ from devai.vite_analyzer import ViteAnalyzer
 from devai.next_analyzer import NextAnalyzer
 from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
+from devai.remix_analyzer import RemixAnalyzer
+from devai.sveltekit_analyzer import SvelteKitAnalyzer
+from devai.gatsby_analyzer import GatsbyAnalyzer
+from devai.qwik_analyzer import QwikAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -899,6 +903,22 @@ class DevAI:
     def nuxt(self, path: str | Path = ".", **kwargs: Any) -> NuxtAnalyzer:
         """Audit nuxt.config.* for runtimeConfig leaks, exposed dev servers, internal proxies, and production devtools."""
         return NuxtAnalyzer(str(path), **kwargs)
+
+    def remix(self, path: str | Path = ".", **kwargs: Any) -> RemixAnalyzer:
+        """Audit remix.config.* for hardcoded secrets, exposed dev servers, internal proxies, and production sourcemaps."""
+        return RemixAnalyzer(str(path), **kwargs)
+
+    def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
+        """Audit svelte.config.* for disabled CSRF checks, exposed dev servers, and internal proxy targets."""
+        return SvelteKitAnalyzer(str(path), **kwargs)
+
+    def gatsby(self, path: str | Path = ".", **kwargs: Any) -> GatsbyAnalyzer:
+        """Audit gatsby-config.* for hardcoded secrets, HTTP site URLs, and exposed GraphQL playground."""
+        return GatsbyAnalyzer(str(path), **kwargs)
+
+    def qwik(self, path: str | Path = ".", **kwargs: Any) -> QwikAnalyzer:
+        """Audit vite.config.* and qwik.config.* for exposed dev/preview servers and permissive filesystem access."""
+        return QwikAnalyzer(str(path), **kwargs)
 
     def webpack(self, path: str | Path = ".", **kwargs: Any) -> WebpackAnalyzer:
         """Audit webpack.config.* for exposed dev servers, secrets, allowedHosts: 'all', and production sourcemaps."""

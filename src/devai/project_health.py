@@ -135,6 +135,10 @@ from devai.vite_analyzer import ViteAnalyzer
 from devai.next_analyzer import NextAnalyzer
 from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
+from devai.remix_analyzer import RemixAnalyzer
+from devai.sveltekit_analyzer import SvelteKitAnalyzer
+from devai.gatsby_analyzer import GatsbyAnalyzer
+from devai.qwik_analyzer import QwikAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -372,6 +376,10 @@ class ProjectHealth:
         "next": 0.02,
         "astro": 0.02,
         "nuxt": 0.02,
+        "remix": 0.02,
+        "sveltekit": 0.02,
+        "gatsby": 0.02,
+        "qwik": 0.02,
         "webpack": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
@@ -2399,6 +2407,78 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_remix(self, analyzer: RemixAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Remix configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Remix config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_sveltekit(self, analyzer: SvelteKitAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No SvelteKit configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} SvelteKit config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_gatsby(self, analyzer: GatsbyAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Gatsby configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Gatsby config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_qwik(self, analyzer: QwikAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Qwik configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Qwik config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webpack(self, analyzer: WebpackAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4052,6 +4132,22 @@ class ProjectHealth:
         nuxt = NuxtAnalyzer(root_str)
         score, summary, details = self._score_nuxt(nuxt)
         categories.append(HealthCategory("nuxt", score, summary, details))
+
+        remix = RemixAnalyzer(root_str)
+        score, summary, details = self._score_remix(remix)
+        categories.append(HealthCategory("remix", score, summary, details))
+
+        sveltekit = SvelteKitAnalyzer(root_str)
+        score, summary, details = self._score_sveltekit(sveltekit)
+        categories.append(HealthCategory("sveltekit", score, summary, details))
+
+        gatsby = GatsbyAnalyzer(root_str)
+        score, summary, details = self._score_gatsby(gatsby)
+        categories.append(HealthCategory("gatsby", score, summary, details))
+
+        qwik = QwikAnalyzer(root_str)
+        score, summary, details = self._score_qwik(qwik)
+        categories.append(HealthCategory("qwik", score, summary, details))
 
         webpack = WebpackAnalyzer(root_str)
         score, summary, details = self._score_webpack(webpack)
