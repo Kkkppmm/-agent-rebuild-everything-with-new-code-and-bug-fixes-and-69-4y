@@ -677,6 +677,12 @@ from devai.express_analyzer import (
     ExpressInfo,
     ExpressStats,
 )
+from devai.nestjs_analyzer import (
+    NestJSAnalyzer,
+    NestJSFinding,
+    NestJSInfo,
+    NestJSStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1786,6 +1792,10 @@ __all__ = [
     "ExpressFinding",
     "ExpressInfo",
     "ExpressStats",
+    "NestJSAnalyzer",
+    "NestJSFinding",
+    "NestJSInfo",
+    "NestJSStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",
