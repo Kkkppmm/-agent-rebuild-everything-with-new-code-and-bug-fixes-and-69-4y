@@ -1061,6 +1061,22 @@ def cmd_hono_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_fastify_audit(args: argparse.Namespace) -> None:
+    from devai.fastify_analyzer import FastifyAnalyzer
+
+    analyzer = FastifyAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
     from devai.sveltekit_analyzer import SvelteKitAnalyzer
 
@@ -3413,6 +3429,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Hono app entry template",
     )
     p.set_defaults(func=cmd_hono_audit)
+
+    p = sub.add_parser(
+        "fastify-audit",
+        help="Audit Fastify apps for hardcoded JWT secrets, open CORS, disabled body limits, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Fastify app entry template",
+    )
+    p.set_defaults(func=cmd_fastify_audit)
 
     p = sub.add_parser(
         "sveltekit-audit",

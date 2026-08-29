@@ -144,6 +144,7 @@ from devai.nuxt_analyzer import NuxtAnalyzer
 from devai.qwik_analyzer import QwikAnalyzer
 from devai.gatsby_analyzer import GatsbyAnalyzer
 from devai.hono_analyzer import HonoAnalyzer
+from devai.fastify_analyzer import FastifyAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -917,6 +918,10 @@ class DevAI:
     def hono(self, path: str | Path = ".", **kwargs: Any) -> HonoAnalyzer:
         """Audit Hono apps for hardcoded auth, open CORS, insecure cookies, and wrangler secret leaks."""
         return HonoAnalyzer(str(path), **kwargs)
+
+    def fastify(self, path: str | Path = ".", **kwargs: Any) -> FastifyAnalyzer:
+        """Audit Fastify apps for hardcoded JWT secrets, open CORS, disabled body limits, and SSRF risks."""
+        return FastifyAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""

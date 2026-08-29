@@ -665,6 +665,12 @@ from devai.hono_analyzer import (
     HonoInfo,
     HonoStats,
 )
+from devai.fastify_analyzer import (
+    FastifyAnalyzer,
+    FastifyFinding,
+    FastifyInfo,
+    FastifyStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1766,6 +1772,10 @@ __all__ = [
     "HonoFinding",
     "HonoInfo",
     "HonoStats",
+    "FastifyAnalyzer",
+    "FastifyFinding",
+    "FastifyInfo",
+    "FastifyStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",
