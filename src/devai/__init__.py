@@ -635,6 +635,12 @@ from devai.next_analyzer import (
     NextInfo,
     NextStats,
 )
+from devai.fastapi_analyzer import (
+    FastAPIAnalyzer,
+    FastAPIFinding,
+    FastAPIInfo,
+    FastAPIStats,
+)
 from devai.astro_analyzer import (
     AstroAnalyzer,
     AstroFinding,
@@ -1710,6 +1716,10 @@ __all__ = [
     "NextFinding",
     "NextInfo",
     "NextStats",
+    "FastAPIAnalyzer",
+    "FastAPIFinding",
+    "FastAPIInfo",
+    "FastAPIStats",
     "AstroAnalyzer",
     "AstroFinding",
     "AstroInfo",

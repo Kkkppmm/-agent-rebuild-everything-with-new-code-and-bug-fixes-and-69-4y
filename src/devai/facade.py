@@ -139,6 +139,7 @@ from devai.markdownlint_analyzer import MarkdownlintAnalyzer
 from devai.tsconfig_analyzer import TsconfigAnalyzer
 from devai.vite_analyzer import ViteAnalyzer
 from devai.next_analyzer import NextAnalyzer
+from devai.fastapi_analyzer import FastAPIAnalyzer
 from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
@@ -891,6 +892,10 @@ class DevAI:
     def next(self, path: str | Path = ".", **kwargs: Any) -> NextAnalyzer:
         """Audit next.config.* for production sourcemaps, disabled checks, permissive image origins, and SSRF rewrites."""
         return NextAnalyzer(str(path), **kwargs)
+
+    def fastapi(self, path: str | Path = ".", **kwargs: Any) -> FastAPIAnalyzer:
+        """Audit FastAPI apps for secrets, CORS, docs exposure, SSRF, and production risks."""
+        return FastAPIAnalyzer(str(path), **kwargs)
 
     def astro(self, path: str | Path = ".", **kwargs: Any) -> AstroAnalyzer:
         """Audit astro.config.* for exposed dev servers, disabled origin checks, permissive image domains, and SSRF redirects."""

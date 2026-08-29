@@ -132,6 +132,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **MarkdownlintAnalyzer** — Audit `.markdownlint.json` and `.markdownlintrc` configs for disabled inline-HTML checks, wildcard rule suppressions, broad ignores on security docs, and hardcoded secrets
 - **TsconfigAnalyzer** — Audit `tsconfig.json`, `tsconfig.*.json`, and `jsconfig.json` for disabled strict mode, relaxed null checks, hardcoded secrets, broad exclude patterns, and source-map exposure
 - **NextAnalyzer** — Audit `next.config.*` for production sourcemaps, disabled TypeScript/ESLint checks, permissive image remote patterns, SSRF rewrites, open CORS, disabled CSP, and dangerous SVG handling
+- **FastAPIAnalyzer** — Audit FastAPI apps for hardcoded secrets, wildcard CORS, exposed OpenAPI docs, debug mode, SSRF via httpx/requests, missing TrustedHostMiddleware, and uvicorn production misconfigurations
 - **AstroAnalyzer** — Audit `astro.config.*` for exposed dev servers, disabled origin checks, permissive image domains, SSRF redirects, open CORS, and production dev toolbar exposure
 - **NuxtAnalyzer** — Audit `nuxt.config.*` for runtimeConfig secret leaks, exposed dev servers, internal proxy targets, disabled CSP, production sourcemaps, and enabled devtools
 - **ComposerAnalyzer** — Audit composer.json and auth.json for hardcoded tokens, insecure HTTP repositories, credentials in VCS URLs, dev/unpinned dependencies, disabled TLS verification, wildcard allow-plugins, committed auth.json, dangerous scripts, and missing composer.lock lockfiles

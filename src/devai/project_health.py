@@ -133,6 +133,7 @@ from devai.markdownlint_analyzer import MarkdownlintAnalyzer
 from devai.tsconfig_analyzer import TsconfigAnalyzer
 from devai.vite_analyzer import ViteAnalyzer
 from devai.next_analyzer import NextAnalyzer
+from devai.fastapi_analyzer import FastAPIAnalyzer
 from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
@@ -370,6 +371,7 @@ class ProjectHealth:
         "tsconfig": 0.02,
         "vite": 0.02,
         "next": 0.02,
+        "fastapi": 0.02,
         "astro": 0.02,
         "nuxt": 0.02,
         "webpack": 0.02,
@@ -2363,6 +2365,25 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_fastapi(self, analyzer: FastAPIAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.fastapi_files == 0:
+            return 100.0, "No FastAPI modules found", {"fastapi_files": 0, "findings": 0}
+        summary = (
+            f"{stats.fastapi_files} FastAPI module(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "fastapi_files": stats.fastapi_files,
+            "routes": stats.routes,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_astro(self, analyzer: AstroAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4044,6 +4065,10 @@ class ProjectHealth:
         nextjs = NextAnalyzer(root_str)
         score, summary, details = self._score_next(nextjs)
         categories.append(HealthCategory("next", score, summary, details))
+
+        fastapi = FastAPIAnalyzer(root_str)
+        score, summary, details = self._score_fastapi(fastapi)
+        categories.append(HealthCategory("fastapi", score, summary, details))
 
         astro = AstroAnalyzer(root_str)
         score, summary, details = self._score_astro(astro)
