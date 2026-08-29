@@ -1061,6 +1061,22 @@ def cmd_remix_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_gatsby_audit(args: argparse.Namespace) -> None:
+    from devai.gatsby_analyzer import GatsbyAnalyzer
+
+    analyzer = GatsbyAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_webpack_audit(args: argparse.Namespace) -> None:
     from devai.webpack_analyzer import WebpackAnalyzer
 
@@ -3349,6 +3365,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened remix.config.js template",
     )
     p.set_defaults(func=cmd_remix_audit)
+
+    p = sub.add_parser(
+        "gatsby-audit",
+        help="Audit gatsby-config.* for disabled host checks, plugin credential leaks, exposed dev servers, and SSRF proxies",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened gatsby-config.js template",
+    )
+    p.set_defaults(func=cmd_gatsby_audit)
 
     p = sub.add_parser(
         "webpack-audit",

@@ -143,6 +143,7 @@ from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
+from devai.gatsby_analyzer import GatsbyAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -909,6 +910,10 @@ class DevAI:
     def remix(self, path: str | Path = ".", **kwargs: Any) -> RemixAnalyzer:
         """Audit remix.config.* for path traversal, hardcoded secrets, exposed dev servers, and SSRF proxies."""
         return RemixAnalyzer(str(path), **kwargs)
+
+    def gatsby(self, path: str | Path = ".", **kwargs: Any) -> GatsbyAnalyzer:
+        """Audit gatsby-config.* for disabled host checks, plugin credential leaks, exposed dev servers, and SSRF proxies."""
+        return GatsbyAnalyzer(str(path), **kwargs)
 
     def webpack(self, path: str | Path = ".", **kwargs: Any) -> WebpackAnalyzer:
         """Audit webpack.config.* for exposed dev servers, secrets, allowedHosts: 'all', and production sourcemaps."""

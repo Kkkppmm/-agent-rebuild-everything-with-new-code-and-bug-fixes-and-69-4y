@@ -137,6 +137,7 @@ from devai.astro_analyzer import AstroAnalyzer
 from devai.nuxt_analyzer import NuxtAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
+from devai.gatsby_analyzer import GatsbyAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -376,6 +377,7 @@ class ProjectHealth:
         "nuxt": 0.02,
         "sveltekit": 0.02,
         "remix": 0.02,
+        "gatsby": 0.02,
         "webpack": 0.02,
         "mypy": 0.02,
         "webdriverio": 0.02,
@@ -2439,6 +2441,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_gatsby(self, analyzer: GatsbyAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Gatsby configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Gatsby config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_webpack(self, analyzer: WebpackAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4100,6 +4120,10 @@ class ProjectHealth:
         remix = RemixAnalyzer(root_str)
         score, summary, details = self._score_remix(remix)
         categories.append(HealthCategory("remix", score, summary, details))
+
+        gatsby = GatsbyAnalyzer(root_str)
+        score, summary, details = self._score_gatsby(gatsby)
+        categories.append(HealthCategory("gatsby", score, summary, details))
 
         webpack = WebpackAnalyzer(root_str)
         score, summary, details = self._score_webpack(webpack)

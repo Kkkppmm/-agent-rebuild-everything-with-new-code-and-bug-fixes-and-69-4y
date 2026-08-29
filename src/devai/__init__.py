@@ -659,6 +659,12 @@ from devai.remix_analyzer import (
     RemixInfo,
     RemixStats,
 )
+from devai.gatsby_analyzer import (
+    GatsbyAnalyzer,
+    GatsbyFinding,
+    GatsbyInfo,
+    GatsbyStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1738,6 +1744,10 @@ __all__ = [
     "RemixFinding",
     "RemixInfo",
     "RemixStats",
+    "GatsbyAnalyzer",
+    "GatsbyFinding",
+    "GatsbyInfo",
+    "GatsbyStats",
     "WebpackAnalyzer",
     "WebpackFinding",
     "WebpackInfo",
