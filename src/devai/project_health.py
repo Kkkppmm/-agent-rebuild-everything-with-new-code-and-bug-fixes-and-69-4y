@@ -144,6 +144,7 @@ from devai.nestjs_analyzer import NestJSAnalyzer
 from devai.fastapi_analyzer import FastAPIAnalyzer
 from devai.flask_analyzer import FlaskAnalyzer
 from devai.starlette_analyzer import StarletteAnalyzer
+from devai.django_analyzer import DjangoAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -2555,6 +2556,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_django(self, analyzer: DjangoAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Django project files found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Django file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_sveltekit(self, analyzer: SvelteKitAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4312,6 +4331,10 @@ class ProjectHealth:
         starlette = StarletteAnalyzer(root_str)
         score, summary, details = self._score_starlette(starlette)
         categories.append(HealthCategory("starlette", score, summary, details))
+
+        django = DjangoAnalyzer(root_str)
+        score, summary, details = self._score_django(django)
+        categories.append(HealthCategory("django", score, summary, details))
 
         sveltekit = SvelteKitAnalyzer(root_str)
         score, summary, details = self._score_sveltekit(sveltekit)

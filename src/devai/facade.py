@@ -150,6 +150,7 @@ from devai.nestjs_analyzer import NestJSAnalyzer
 from devai.fastapi_analyzer import FastAPIAnalyzer
 from devai.flask_analyzer import FlaskAnalyzer
 from devai.starlette_analyzer import StarletteAnalyzer
+from devai.django_analyzer import DjangoAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -947,6 +948,10 @@ class DevAI:
     def starlette(self, path: str | Path = ".", **kwargs: Any) -> StarletteAnalyzer:
         """Audit Starlette apps for hardcoded session secrets, open CORS, unsafe StaticFiles, and SSRF risks."""
         return StarletteAnalyzer(str(path), **kwargs)
+
+    def django(self, path: str | Path = ".", **kwargs: Any) -> DjangoAnalyzer:
+        """Audit Django projects for hardcoded SECRET_KEY, DEBUG=True, open CORS/ALLOWED_HOSTS, and SSRF risks."""
+        return DjangoAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""

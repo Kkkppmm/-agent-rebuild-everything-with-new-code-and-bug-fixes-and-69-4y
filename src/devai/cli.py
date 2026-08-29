@@ -1157,6 +1157,22 @@ def cmd_starlette_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_django_audit(args: argparse.Namespace) -> None:
+    from devai.django_analyzer import DjangoAnalyzer
+
+    analyzer = DjangoAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
     from devai.sveltekit_analyzer import SvelteKitAnalyzer
 
@@ -3593,6 +3609,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Starlette main.py entry template",
     )
     p.set_defaults(func=cmd_starlette_audit)
+
+    p = sub.add_parser(
+        "django-audit",
+        help="Audit Django projects for hardcoded SECRET_KEY, DEBUG=True, open CORS/ALLOWED_HOSTS, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Django settings.py template",
+    )
+    p.set_defaults(func=cmd_django_audit)
 
     p = sub.add_parser(
         "sveltekit-audit",

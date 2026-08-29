@@ -701,6 +701,12 @@ from devai.starlette_analyzer import (
     StarletteInfo,
     StarletteStats,
 )
+from devai.django_analyzer import (
+    DjangoAnalyzer,
+    DjangoFinding,
+    DjangoInfo,
+    DjangoStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1826,6 +1832,10 @@ __all__ = [
     "StarletteFinding",
     "StarletteInfo",
     "StarletteStats",
+    "DjangoAnalyzer",
+    "DjangoFinding",
+    "DjangoInfo",
+    "DjangoStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",
