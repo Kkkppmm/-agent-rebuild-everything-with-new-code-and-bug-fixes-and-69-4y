@@ -138,6 +138,7 @@ from devai.nuxt_analyzer import NuxtAnalyzer
 from devai.qwik_analyzer import QwikAnalyzer
 from devai.gatsby_analyzer import GatsbyAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
+from devai.remix_analyzer import RemixAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -2438,6 +2439,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_remix(self, analyzer: RemixAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Remix configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Remix config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_nuxt(self, analyzer: NuxtAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4117,6 +4136,10 @@ class ProjectHealth:
         sveltekit = SvelteKitAnalyzer(root_str)
         score, summary, details = self._score_sveltekit(sveltekit)
         categories.append(HealthCategory("sveltekit", score, summary, details))
+
+        remix = RemixAnalyzer(root_str)
+        score, summary, details = self._score_remix(remix)
+        categories.append(HealthCategory("remix", score, summary, details))
 
         nuxt = NuxtAnalyzer(root_str)
         score, summary, details = self._score_nuxt(nuxt)

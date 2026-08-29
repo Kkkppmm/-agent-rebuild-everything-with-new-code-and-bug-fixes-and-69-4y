@@ -1061,6 +1061,22 @@ def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_remix_audit(args: argparse.Namespace) -> None:
+    from devai.remix_analyzer import RemixAnalyzer
+
+    analyzer = RemixAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_nuxt_audit(args: argparse.Namespace) -> None:
     from devai.nuxt_analyzer import NuxtAnalyzer
 
@@ -3365,6 +3381,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened svelte.config.js template",
     )
     p.set_defaults(func=cmd_sveltekit_audit)
+
+    p = sub.add_parser(
+        "remix-audit",
+        help="Audit remix.config.* and vite.config.* for session secret leaks, allowedHosts: 'all', and SSRF proxies",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened vite.config.ts template for Remix",
+    )
+    p.set_defaults(func=cmd_remix_audit)
 
     p = sub.add_parser(
         "nuxt-audit",

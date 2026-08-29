@@ -665,6 +665,12 @@ from devai.sveltekit_analyzer import (
     SvelteKitInfo,
     SvelteKitStats,
 )
+from devai.remix_analyzer import (
+    RemixAnalyzer,
+    RemixFinding,
+    RemixInfo,
+    RemixStats,
+)
 from devai.webdriverio_analyzer import (
     WebdriverIOAnalyzer,
     WebdriverIOFinding,
@@ -1748,6 +1754,10 @@ __all__ = [
     "SvelteKitFinding",
     "SvelteKitInfo",
     "SvelteKitStats",
+    "RemixAnalyzer",
+    "RemixFinding",
+    "RemixInfo",
+    "RemixStats",
     "WebpackAnalyzer",
     "WebpackFinding",
     "WebpackInfo",

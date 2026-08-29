@@ -144,6 +144,7 @@ from devai.nuxt_analyzer import NuxtAnalyzer
 from devai.qwik_analyzer import QwikAnalyzer
 from devai.gatsby_analyzer import GatsbyAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
+from devai.remix_analyzer import RemixAnalyzer
 from devai.webpack_analyzer import WebpackAnalyzer
 from devai.webdriverio_analyzer import WebdriverIOAnalyzer
 from devai.husky_analyzer import HuskyAnalyzer
@@ -914,6 +915,10 @@ class DevAI:
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""
         return SvelteKitAnalyzer(str(path), **kwargs)
+
+    def remix(self, path: str | Path = ".", **kwargs: Any) -> RemixAnalyzer:
+        """Audit remix.config.* and vite.config.* for session secret leaks, allowedHosts: 'all', and SSRF proxies."""
+        return RemixAnalyzer(str(path), **kwargs)
 
     def webpack(self, path: str | Path = ".", **kwargs: Any) -> WebpackAnalyzer:
         """Audit webpack.config.* for exposed dev servers, secrets, allowedHosts: 'all', and production sourcemaps."""
