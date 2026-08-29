@@ -671,6 +671,12 @@ from devai.fastify_analyzer import (
     FastifyInfo,
     FastifyStats,
 )
+from devai.express_analyzer import (
+    ExpressAnalyzer,
+    ExpressFinding,
+    ExpressInfo,
+    ExpressStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1776,6 +1782,10 @@ __all__ = [
     "FastifyFinding",
     "FastifyInfo",
     "FastifyStats",
+    "ExpressAnalyzer",
+    "ExpressFinding",
+    "ExpressInfo",
+    "ExpressStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",

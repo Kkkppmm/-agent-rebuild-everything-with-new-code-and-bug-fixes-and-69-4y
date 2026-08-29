@@ -139,6 +139,7 @@ from devai.qwik_analyzer import QwikAnalyzer
 from devai.gatsby_analyzer import GatsbyAnalyzer
 from devai.hono_analyzer import HonoAnalyzer
 from devai.fastify_analyzer import FastifyAnalyzer
+from devai.express_analyzer import ExpressAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -2460,6 +2461,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_express(self, analyzer: ExpressAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Express app files found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Express file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_sveltekit(self, analyzer: SvelteKitAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4197,6 +4216,10 @@ class ProjectHealth:
         fastify = FastifyAnalyzer(root_str)
         score, summary, details = self._score_fastify(fastify)
         categories.append(HealthCategory("fastify", score, summary, details))
+
+        express = ExpressAnalyzer(root_str)
+        score, summary, details = self._score_express(express)
+        categories.append(HealthCategory("express", score, summary, details))
 
         sveltekit = SvelteKitAnalyzer(root_str)
         score, summary, details = self._score_sveltekit(sveltekit)

@@ -1077,6 +1077,22 @@ def cmd_fastify_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_express_audit(args: argparse.Namespace) -> None:
+    from devai.express_analyzer import ExpressAnalyzer
+
+    analyzer = ExpressAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
     from devai.sveltekit_analyzer import SvelteKitAnalyzer
 
@@ -3443,6 +3459,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Fastify app entry template",
     )
     p.set_defaults(func=cmd_fastify_audit)
+
+    p = sub.add_parser(
+        "express-audit",
+        help="Audit Express apps for hardcoded session secrets, open CORS, insecure cookies, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Express app entry template",
+    )
+    p.set_defaults(func=cmd_express_audit)
 
     p = sub.add_parser(
         "sveltekit-audit",
