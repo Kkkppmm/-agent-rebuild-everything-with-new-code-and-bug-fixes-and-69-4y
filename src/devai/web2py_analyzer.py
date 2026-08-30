@@ -102,15 +102,15 @@ AUTH_WEAK_PATTERN = re.compile(
     re.IGNORECASE,
 )
 SSTI_PATTERN = re.compile(
-    r"(?:BEAUTIFY|XML)\s*\([^)]*(?:request\.vars|request\.get_vars|request\.post_vars)",
+    r"(?:BEAUTIFY|XML)\s*\([^)]*(?:current\.)?(?:request\.vars|request\.get_vars|request\.post_vars)",
     re.IGNORECASE,
 )
 OPEN_REDIRECT_PATTERN = re.compile(
-    r"redirect\s*\(\s*(?:request\.vars|request\.get_vars|request\.post_vars)",
+    r"redirect\s*\(\s*(?:current\.)?(?:request\.vars|request\.get_vars|request\.post_vars)",
     re.IGNORECASE,
 )
 MASS_ASSIGNMENT_PATTERN = re.compile(
-    r"(?:insert|update_record)\s*\(\s*\*\*(?:request\.vars|request\.get_vars|request\.post_vars)",
+    r"(?:insert|update_record)\s*\(\s*\*\*(?:current\.)?(?:request\.vars|request\.get_vars|request\.post_vars)",
     re.IGNORECASE,
 )
 AJAX_SERVER_PATTERN = re.compile(
