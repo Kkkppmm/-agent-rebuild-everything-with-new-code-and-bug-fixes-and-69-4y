@@ -701,6 +701,36 @@ from devai.django_analyzer import (
     DjangoInfo,
     DjangoStats,
 )
+from devai.starlette_analyzer import (
+    StarletteAnalyzer,
+    StarletteFinding,
+    StarletteInfo,
+    StarletteStats,
+)
+from devai.litestar_analyzer import (
+    LitestarAnalyzer,
+    LitestarFinding,
+    LitestarInfo,
+    LitestarStats,
+)
+from devai.aiohttp_analyzer import (
+    AiohttpAnalyzer,
+    AiohttpFinding,
+    AiohttpInfo,
+    AiohttpStats,
+)
+from devai.quart_analyzer import (
+    QuartAnalyzer,
+    QuartFinding,
+    QuartInfo,
+    QuartStats,
+)
+from devai.sanic_analyzer import (
+    SanicAnalyzer,
+    SanicFinding,
+    SanicInfo,
+    SanicStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1826,6 +1856,26 @@ __all__ = [
     "DjangoFinding",
     "DjangoInfo",
     "DjangoStats",
+    "StarletteAnalyzer",
+    "StarletteFinding",
+    "StarletteInfo",
+    "StarletteStats",
+    "LitestarAnalyzer",
+    "LitestarFinding",
+    "LitestarInfo",
+    "LitestarStats",
+    "AiohttpAnalyzer",
+    "AiohttpFinding",
+    "AiohttpInfo",
+    "AiohttpStats",
+    "QuartAnalyzer",
+    "QuartFinding",
+    "QuartInfo",
+    "QuartStats",
+    "SanicAnalyzer",
+    "SanicFinding",
+    "SanicInfo",
+    "SanicStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",
