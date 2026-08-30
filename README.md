@@ -144,6 +144,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **StarletteAnalyzer** — Audit Starlette apps for hardcoded secrets, open CORS with credentials, unsafe StaticFiles mounts, session secret leaks, and SSRF risks
 - **LitestarAnalyzer** — Audit Litestar apps for hardcoded secrets, open CORS, disabled CSRF, exposed OpenAPI docs, wildcard allowed_hosts, and SSRF risks
 - **AiohttpAnalyzer** — Audit aiohttp apps for hardcoded secrets, open CORS with credentials, debug mode, disabled TLS verification, shell commands, and SSRF risks
+- **QuartAnalyzer** — Audit Quart apps for hardcoded secrets, open CORS, debug mode, SSTI via render_template_string, shell commands, and SSRF risks
 - **SvelteKitAnalyzer** — Audit `svelte.config.*` for disabled CSRF origin checks, adapter credential leaks, internal fetch/proxy targets, permissive dev-server filesystem access, and production sourcemaps
 - **ComposerAnalyzer** — Audit composer.json and auth.json for hardcoded tokens, insecure HTTP repositories, credentials in VCS URLs, dev/unpinned dependencies, disabled TLS verification, wildcard allow-plugins, committed auth.json, dangerous scripts, and missing composer.lock lockfiles
 - **BundlerAnalyzer** — Audit Gemfile, gems.rb, and .bundle/config for hardcoded tokens, insecure HTTP gem sources, credentials in git sources, unpinned git dependencies, loose version constraints, committed bundle credentials, dangerous install hooks, and missing Gemfile.lock lockfiles

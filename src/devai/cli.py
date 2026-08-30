@@ -1205,6 +1205,22 @@ def cmd_aiohttp_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_quart_audit(args: argparse.Namespace) -> None:
+    from devai.quart_analyzer import QuartAnalyzer
+
+    analyzer = QuartAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
     from devai.sveltekit_analyzer import SvelteKitAnalyzer
 
@@ -3683,6 +3699,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened aiohttp main.py entry template",
     )
     p.set_defaults(func=cmd_aiohttp_audit)
+
+    p = sub.add_parser(
+        "quart-audit",
+        help="Audit Quart apps for hardcoded secrets, open CORS, debug mode, SSTI, shell commands, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Quart app.py entry template",
+    )
+    p.set_defaults(func=cmd_quart_audit)
 
     p = sub.add_parser(
         "sveltekit-audit",

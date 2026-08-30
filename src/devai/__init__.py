@@ -719,6 +719,12 @@ from devai.aiohttp_analyzer import (
     AiohttpInfo,
     AiohttpStats,
 )
+from devai.quart_analyzer import (
+    QuartAnalyzer,
+    QuartFinding,
+    QuartInfo,
+    QuartStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1856,6 +1862,10 @@ __all__ = [
     "AiohttpFinding",
     "AiohttpInfo",
     "AiohttpStats",
+    "QuartAnalyzer",
+    "QuartFinding",
+    "QuartInfo",
+    "QuartStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",
