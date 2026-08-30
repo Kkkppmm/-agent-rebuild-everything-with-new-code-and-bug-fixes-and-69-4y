@@ -58,8 +58,9 @@ REJECT_UNAUTHORIZED_FALSE_PATTERN = re.compile(
 PROXY_INTERNAL_PATTERN = re.compile(
     r"(?:url|target|proxy|destination)\s*=\s*['\"]https?://(?:10\.|192\.168\.|"
     r"172\.(?:1[6-9]|2\d|3[01])\.|169\.254\.)|"
-    r"(?:httpx|requests|aiohttp)\.(?:get|post|request|AsyncClient)\s*\([^)]*['\"]https?://(?:10\.|"
-    r"192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.|169\.254\.)",
+    r"(?:httpx|requests|aiohttp|client)\.(?:get|post|request|AsyncClient)\s*\([^)]*['\"]https?://(?:10\.|"
+    r"192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.|169\.254\.)|"
+    r"['\"]https?://(?:10\.|192\.168\.|172\.(?:1[6-9]|2\d|3[01])\.|169\.254\.)",
     re.IGNORECASE,
 )
 EVAL_PATTERN = re.compile(r"\b(?:eval|exec)\s*\(", re.IGNORECASE)
@@ -69,8 +70,8 @@ HOST_EXPOSED_PATTERN = re.compile(
     re.IGNORECASE,
 )
 DEBUG_MODE_PATTERN = re.compile(
-    r"Litestar\s*\([^)]*debug\s*=\s*True",
-    re.IGNORECASE | re.DOTALL,
+    r"debug\s*=\s*True",
+    re.IGNORECASE,
 )
 DANGEROUS_ROUTE_PATTERN = re.compile(
     r"@(?:get|post|put|delete|patch|route)\s*\(\s*['\"](?:/)?(?:admin|debug|internal)",
@@ -370,19 +371,6 @@ class LitestarAnalyzer:
                         kind="cors_wildcard",
                         severity="high",
                         message="CORS allow_origins includes '*' with credentials — restrict to trusted origins",
-                        path=rel,
-                        lineno=1,
-                        line="",
-                    )
-                )
-
-        if DEBUG_MODE_PATTERN.search(raw_text):
-            if not any(f.kind == "debug_mode" for f in findings):
-                findings.append(
-                    LitestarFinding(
-                        kind="debug_mode",
-                        severity="medium",
-                        message="Litestar debug=True — disable in production",
                         path=rel,
                         lineno=1,
                         line="",
