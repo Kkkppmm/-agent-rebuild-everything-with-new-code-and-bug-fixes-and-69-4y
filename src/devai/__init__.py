@@ -761,6 +761,12 @@ from devai.pyramid_analyzer import (
     PyramidInfo,
     PyramidStats,
 )
+from devai.web2py_analyzer import (
+    Web2pyAnalyzer,
+    Web2pyFinding,
+    Web2pyInfo,
+    Web2pyStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1926,6 +1932,10 @@ __all__ = [
     "PyramidFinding",
     "PyramidInfo",
     "PyramidStats",
+    "Web2pyAnalyzer",
+    "Web2pyFinding",
+    "Web2pyInfo",
+    "Web2pyStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",

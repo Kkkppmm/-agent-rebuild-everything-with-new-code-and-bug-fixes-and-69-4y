@@ -160,6 +160,7 @@ from devai.tornado_analyzer import TornadoAnalyzer
 from devai.cherrypy_analyzer import CherryPyAnalyzer
 from devai.bottle_analyzer import BottleAnalyzer
 from devai.pyramid_analyzer import PyramidAnalyzer
+from devai.web2py_analyzer import Web2pyAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -997,6 +998,10 @@ class DevAI:
     def pyramid(self, path: str | Path = ".", **kwargs: Any) -> PyramidAnalyzer:
         """Audit Pyramid apps for hardcoded secrets, debug toolbar, disabled CSRF, shell commands, and SSRF risks."""
         return PyramidAnalyzer(str(path), **kwargs)
+
+    def web2py(self, path: str | Path = ".", **kwargs: Any) -> Web2pyAnalyzer:
+        """Audit web2py apps for hardcoded secrets, DAL credentials, disabled CSRF, weak auth, and SSRF risks."""
+        return Web2pyAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""
