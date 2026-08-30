@@ -156,6 +156,7 @@ from devai.aiohttp_analyzer import AiohttpAnalyzer
 from devai.quart_analyzer import QuartAnalyzer
 from devai.sanic_analyzer import SanicAnalyzer
 from devai.falcon_analyzer import FalconAnalyzer
+from devai.tornado_analyzer import TornadoAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -977,6 +978,10 @@ class DevAI:
     def falcon(self, path: str | Path = ".", **kwargs: Any) -> FalconAnalyzer:
         """Audit Falcon apps for hardcoded secrets, open CORS, debug mode, shell commands, and SSRF risks."""
         return FalconAnalyzer(str(path), **kwargs)
+
+    def tornado(self, path: str | Path = ".", **kwargs: Any) -> TornadoAnalyzer:
+        """Audit Tornado apps for hardcoded secrets, disabled XSRF, debug mode, shell commands, and SSRF risks."""
+        return TornadoAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""

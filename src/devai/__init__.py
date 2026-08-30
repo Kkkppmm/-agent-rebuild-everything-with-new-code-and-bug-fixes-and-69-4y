@@ -737,6 +737,12 @@ from devai.falcon_analyzer import (
     FalconInfo,
     FalconStats,
 )
+from devai.tornado_analyzer import (
+    TornadoAnalyzer,
+    TornadoFinding,
+    TornadoInfo,
+    TornadoStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1886,6 +1892,10 @@ __all__ = [
     "FalconFinding",
     "FalconInfo",
     "FalconStats",
+    "TornadoAnalyzer",
+    "TornadoFinding",
+    "TornadoInfo",
+    "TornadoStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",
