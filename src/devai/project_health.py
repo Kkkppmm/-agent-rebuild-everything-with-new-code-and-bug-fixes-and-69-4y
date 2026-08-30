@@ -148,6 +148,7 @@ from devai.starlette_analyzer import StarletteAnalyzer
 from devai.litestar_analyzer import LitestarAnalyzer
 from devai.aiohttp_analyzer import AiohttpAnalyzer
 from devai.quart_analyzer import QuartAnalyzer
+from devai.sanic_analyzer import SanicAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -2631,6 +2632,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_sanic(self, analyzer: SanicAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Sanic app files found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Sanic file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_sveltekit(self, analyzer: SvelteKitAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4404,6 +4423,10 @@ class ProjectHealth:
         quart = QuartAnalyzer(root_str)
         score, summary, details = self._score_quart(quart)
         categories.append(HealthCategory("quart", score, summary, details))
+
+        sanic = SanicAnalyzer(root_str)
+        score, summary, details = self._score_sanic(sanic)
+        categories.append(HealthCategory("sanic", score, summary, details))
 
         sveltekit = SvelteKitAnalyzer(root_str)
         score, summary, details = self._score_sveltekit(sveltekit)

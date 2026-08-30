@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.66.0"
+        assert devai.__version__ == "7.84.0"
 
     def test_exports(self):
         expected = {
@@ -645,6 +645,10 @@ class TestPublicAPI:
             "QuartFinding",
             "QuartInfo",
             "QuartStats",
+            "SanicAnalyzer",
+            "SanicFinding",
+            "SanicInfo",
+            "SanicStats",
             "SvelteKitAnalyzer",
             "SvelteKitFinding",
             "SvelteKitInfo",

@@ -725,6 +725,12 @@ from devai.quart_analyzer import (
     QuartInfo,
     QuartStats,
 )
+from devai.sanic_analyzer import (
+    SanicAnalyzer,
+    SanicFinding,
+    SanicInfo,
+    SanicStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1219,7 +1225,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.66.0"
+__version__ = "7.84.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1866,6 +1872,10 @@ __all__ = [
     "QuartFinding",
     "QuartInfo",
     "QuartStats",
+    "SanicAnalyzer",
+    "SanicFinding",
+    "SanicInfo",
+    "SanicStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",
