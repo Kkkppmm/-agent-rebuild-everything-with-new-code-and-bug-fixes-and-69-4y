@@ -1157,6 +1157,54 @@ def cmd_django_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_starlette_audit(args: argparse.Namespace) -> None:
+    from devai.starlette_analyzer import StarletteAnalyzer
+
+    analyzer = StarletteAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_litestar_audit(args: argparse.Namespace) -> None:
+    from devai.litestar_analyzer import LitestarAnalyzer
+
+    analyzer = LitestarAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_aiohttp_audit(args: argparse.Namespace) -> None:
+    from devai.aiohttp_analyzer import AiohttpAnalyzer
+
+    analyzer = AiohttpAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
     from devai.sveltekit_analyzer import SvelteKitAnalyzer
 
@@ -3593,6 +3641,48 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Django settings.py entry template",
     )
     p.set_defaults(func=cmd_django_audit)
+
+    p = sub.add_parser(
+        "starlette-audit",
+        help="Audit Starlette apps for hardcoded secrets, open CORS, unsafe StaticFiles mounts, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Starlette main.py entry template",
+    )
+    p.set_defaults(func=cmd_starlette_audit)
+
+    p = sub.add_parser(
+        "litestar-audit",
+        help="Audit Litestar apps for hardcoded secrets, open CORS, disabled CSRF, exposed OpenAPI, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Litestar main.py entry template",
+    )
+    p.set_defaults(func=cmd_litestar_audit)
+
+    p = sub.add_parser(
+        "aiohttp-audit",
+        help="Audit aiohttp apps for hardcoded secrets, open CORS, debug mode, disabled TLS verification, and SSRF risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened aiohttp main.py entry template",
+    )
+    p.set_defaults(func=cmd_aiohttp_audit)
 
     p = sub.add_parser(
         "sveltekit-audit",
