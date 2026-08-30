@@ -749,6 +749,12 @@ from devai.cherrypy_analyzer import (
     CherryPyInfo,
     CherryPyStats,
 )
+from devai.bottle_analyzer import (
+    BottleAnalyzer,
+    BottleFinding,
+    BottleInfo,
+    BottleStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1906,6 +1912,10 @@ __all__ = [
     "CherryPyFinding",
     "CherryPyInfo",
     "CherryPyStats",
+    "BottleAnalyzer",
+    "BottleFinding",
+    "BottleInfo",
+    "BottleStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",

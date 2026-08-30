@@ -158,6 +158,7 @@ from devai.sanic_analyzer import SanicAnalyzer
 from devai.falcon_analyzer import FalconAnalyzer
 from devai.tornado_analyzer import TornadoAnalyzer
 from devai.cherrypy_analyzer import CherryPyAnalyzer
+from devai.bottle_analyzer import BottleAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -987,6 +988,10 @@ class DevAI:
     def cherrypy(self, path: str | Path = ".", **kwargs: Any) -> CherryPyAnalyzer:
         """Audit CherryPy apps for hardcoded secrets, development mode, open CORS, shell commands, and SSRF risks."""
         return CherryPyAnalyzer(str(path), **kwargs)
+
+    def bottle(self, path: str | Path = ".", **kwargs: Any) -> BottleAnalyzer:
+        """Audit Bottle apps for hardcoded secrets, debug mode, open CORS, SSTI, shell commands, and SSRF risks."""
+        return BottleAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""

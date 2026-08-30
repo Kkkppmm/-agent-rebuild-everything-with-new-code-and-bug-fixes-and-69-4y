@@ -152,6 +152,7 @@ from devai.sanic_analyzer import SanicAnalyzer
 from devai.falcon_analyzer import FalconAnalyzer
 from devai.tornado_analyzer import TornadoAnalyzer
 from devai.cherrypy_analyzer import CherryPyAnalyzer
+from devai.bottle_analyzer import BottleAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -2707,6 +2708,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_bottle(self, analyzer: BottleAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Bottle app files found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Bottle file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_sveltekit(self, analyzer: SvelteKitAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4496,6 +4515,10 @@ class ProjectHealth:
         cherrypy = CherryPyAnalyzer(root_str)
         score, summary, details = self._score_cherrypy(cherrypy)
         categories.append(HealthCategory("cherrypy", score, summary, details))
+
+        bottle = BottleAnalyzer(root_str)
+        score, summary, details = self._score_bottle(bottle)
+        categories.append(HealthCategory("bottle", score, summary, details))
 
         sveltekit = SvelteKitAnalyzer(root_str)
         score, summary, details = self._score_sveltekit(sveltekit)
