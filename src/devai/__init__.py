@@ -713,6 +713,12 @@ from devai.aiohttp_analyzer import (
     AiohttpInfo,
     AiohttpStats,
 )
+from devai.litestar_analyzer import (
+    LitestarAnalyzer,
+    LitestarFinding,
+    LitestarInfo,
+    LitestarStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1846,6 +1852,10 @@ __all__ = [
     "AiohttpFinding",
     "AiohttpInfo",
     "AiohttpStats",
+    "LitestarAnalyzer",
+    "LitestarFinding",
+    "LitestarInfo",
+    "LitestarStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",

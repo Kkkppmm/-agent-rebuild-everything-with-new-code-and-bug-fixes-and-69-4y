@@ -152,6 +152,7 @@ from devai.flask_analyzer import FlaskAnalyzer
 from devai.starlette_analyzer import StarletteAnalyzer
 from devai.django_analyzer import DjangoAnalyzer
 from devai.aiohttp_analyzer import AiohttpAnalyzer
+from devai.litestar_analyzer import LitestarAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -957,6 +958,10 @@ class DevAI:
     def aiohttp(self, path: str | Path = ".", **kwargs: Any) -> AiohttpAnalyzer:
         """Audit aiohttp apps for hardcoded secrets, open CORS, unsafe StaticRoute, and SSRF risks."""
         return AiohttpAnalyzer(str(path), **kwargs)
+
+    def litestar(self, path: str | Path = ".", **kwargs: Any) -> LitestarAnalyzer:
+        """Audit Litestar apps for hardcoded secrets, open CORS, disabled CSRF, and SSRF risks."""
+        return LitestarAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""
