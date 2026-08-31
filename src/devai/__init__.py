@@ -731,6 +731,12 @@ from devai.sanic_analyzer import (
     SanicInfo,
     SanicStats,
 )
+from devai.streamlit_analyzer import (
+    StreamlitAnalyzer,
+    StreamlitFinding,
+    StreamlitInfo,
+    StreamlitStats,
+)
 from devai.falcon_analyzer import (
     FalconAnalyzer,
     FalconFinding,
@@ -1267,7 +1273,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.91.0"
+__version__ = "7.92.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1918,6 +1924,10 @@ __all__ = [
     "SanicFinding",
     "SanicInfo",
     "SanicStats",
+    "StreamlitAnalyzer",
+    "StreamlitFinding",
+    "StreamlitInfo",
+    "StreamlitStats",
     "FalconAnalyzer",
     "FalconFinding",
     "FalconInfo",

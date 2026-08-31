@@ -146,6 +146,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **AiohttpAnalyzer** — Audit aiohttp apps for hardcoded secrets, open CORS with credentials, debug mode, disabled TLS verification, shell commands, and SSRF risks
 - **QuartAnalyzer** — Audit Quart apps for hardcoded secrets, open CORS, debug mode, SSTI via render_template_string, shell commands, and SSRF risks
 - **SanicAnalyzer** — Audit Sanic apps for hardcoded secrets, open CORS, debug/auto-reload mode, SSTI via template rendering, shell commands, and SSRF risks
+- **StreamlitAnalyzer** — Audit Streamlit apps for hardcoded secrets, unsafe HTML rendering, disabled XSRF protection, committed secrets.toml, unrestricted file uploads, and SSRF risks
 - **FalconAnalyzer** — Audit Falcon apps for hardcoded secrets, open CORS, debug mode, shell commands, path traversal, and SSRF risks
 - **TornadoAnalyzer** — Audit Tornado apps for hardcoded secrets, disabled XSRF, debug mode, shell commands, and SSRF risks
 - **CherryPyAnalyzer** — Audit CherryPy apps for hardcoded session secrets, development mode, open CORS with credentials, bind-all interfaces, shell commands, and SSRF risks

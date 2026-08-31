@@ -155,6 +155,7 @@ from devai.litestar_analyzer import LitestarAnalyzer
 from devai.aiohttp_analyzer import AiohttpAnalyzer
 from devai.quart_analyzer import QuartAnalyzer
 from devai.sanic_analyzer import SanicAnalyzer
+from devai.streamlit_analyzer import StreamlitAnalyzer
 from devai.falcon_analyzer import FalconAnalyzer
 from devai.tornado_analyzer import TornadoAnalyzer
 from devai.cherrypy_analyzer import CherryPyAnalyzer
@@ -979,6 +980,10 @@ class DevAI:
     def sanic(self, path: str | Path = ".", **kwargs: Any) -> SanicAnalyzer:
         """Audit Sanic apps for hardcoded secrets, open CORS, debug mode, SSTI, shell commands, and SSRF risks."""
         return SanicAnalyzer(str(path), **kwargs)
+
+    def streamlit(self, path: str | Path = ".", **kwargs: Any) -> StreamlitAnalyzer:
+        """Audit Streamlit apps for hardcoded secrets, unsafe HTML, disabled XSRF, committed secrets.toml, and SSRF risks."""
+        return StreamlitAnalyzer(str(path), **kwargs)
 
     def falcon(self, path: str | Path = ".", **kwargs: Any) -> FalconAnalyzer:
         """Audit Falcon apps for hardcoded secrets, open CORS, debug mode, shell commands, and SSRF risks."""
