@@ -86,6 +86,7 @@ from devai.pip_analyzer import PipAnalyzer
 from devai.pipfile_analyzer import PipfileAnalyzer
 from devai.conda_analyzer import CondaAnalyzer
 from devai.hatch_analyzer import HatchAnalyzer
+from devai.pdm_analyzer import PdmAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
@@ -1900,6 +1901,24 @@ class ProjectHealth:
             return 100.0, "No Hatch configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} Hatch config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_pdm(self, analyzer: PdmAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No PDM configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} PDM config(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4483,6 +4502,10 @@ class ProjectHealth:
         hatch = HatchAnalyzer(root_str)
         score, summary, details = self._score_hatch(hatch)
         categories.append(HealthCategory("hatch", score, summary, details))
+
+        pdm = PdmAnalyzer(root_str)
+        score, summary, details = self._score_pdm(pdm)
+        categories.append(HealthCategory("pdm", score, summary, details))
 
         uv = UvAnalyzer(root_str)
         score, summary, details = self._score_uv(uv)
