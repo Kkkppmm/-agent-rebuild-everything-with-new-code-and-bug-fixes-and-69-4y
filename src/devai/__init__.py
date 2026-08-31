@@ -797,6 +797,12 @@ from devai.chainlit_analyzer import (
     ChainlitInfo,
     ChainlitStats,
 )
+from devai.llamaindex_analyzer import (
+    LlamaIndexAnalyzer,
+    LlamaIndexFinding,
+    LlamaIndexInfo,
+    LlamaIndexStats,
+)
 from devai.sveltekit_analyzer import (
     SvelteKitAnalyzer,
     SvelteKitFinding,
@@ -1986,6 +1992,10 @@ __all__ = [
     "ChainlitFinding",
     "ChainlitInfo",
     "ChainlitStats",
+    "LlamaIndexAnalyzer",
+    "LlamaIndexFinding",
+    "LlamaIndexInfo",
+    "LlamaIndexStats",
     "SvelteKitAnalyzer",
     "SvelteKitFinding",
     "SvelteKitInfo",

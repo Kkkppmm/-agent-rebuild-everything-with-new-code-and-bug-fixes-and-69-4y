@@ -141,6 +141,7 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **FastAPIAnalyzer** — Audit FastAPI apps for hardcoded secrets, open CORS with credentials, exposed OpenAPI docs, debug/reload mode, disabled TLS verification, unprotected admin routes, raw SQL, and SSRF risks
 - **FlaskAnalyzer** — Audit Flask apps for hardcoded secrets, open CORS with credentials, debug mode, SSTI via render_template_string, shell command execution, path traversal in send_file, and SSRF risks
 - **DjangoAnalyzer** — Audit Django apps for hardcoded secrets, DEBUG mode, wildcard ALLOWED_HOSTS, CSRF bypass via @csrf_exempt, mark_safe XSS risks, raw SQL queries, insecure cookie settings, and SSRF risks
+- **LlamaIndexAnalyzer** — Audit LlamaIndex RAG pipelines for hardcoded API keys, dangerous deserialization, SQL injection in NLSQL retrievers, SSRF in web loaders, eval/exec usage, and pickle deserialization risks
 - **StarletteAnalyzer** — Audit Starlette apps for hardcoded secrets, open CORS with credentials, unsafe StaticFiles mounts, session secret leaks, and SSRF risks
 - **LitestarAnalyzer** — Audit Litestar apps for hardcoded secrets, open CORS, disabled CSRF, exposed OpenAPI docs, wildcard allowed_hosts, and SSRF risks
 - **AiohttpAnalyzer** — Audit aiohttp apps for hardcoded secrets, open CORS with credentials, debug mode, disabled TLS verification, shell commands, and SSRF risks

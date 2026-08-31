@@ -1413,6 +1413,22 @@ def cmd_chainlit_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_llamaindex_audit(args: argparse.Namespace) -> None:
+    from devai.llamaindex_analyzer import LlamaIndexAnalyzer
+
+    analyzer = LlamaIndexAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_sveltekit_audit(args: argparse.Namespace) -> None:
     from devai.sveltekit_analyzer import SvelteKitAnalyzer
 
@@ -4073,6 +4089,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Chainlit app.py entry template",
     )
     p.set_defaults(func=cmd_chainlit_audit)
+
+    p = sub.add_parser(
+        "llamaindex-audit",
+        help="Audit LlamaIndex RAG pipelines for hardcoded API keys, SQL injection, SSRF, and deserialization risks",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("-v", "--verbose", action="store_true", help="Print each finding")
+    p.add_argument("--context", action="store_true", help="Print LLM context summary")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened LlamaIndex RAG pipeline entry template",
+    )
+    p.set_defaults(func=cmd_llamaindex_audit)
 
     p = sub.add_parser(
         "sveltekit-audit",

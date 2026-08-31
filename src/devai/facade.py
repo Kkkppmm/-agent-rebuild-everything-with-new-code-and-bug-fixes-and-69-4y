@@ -166,6 +166,7 @@ from devai.blacksheep_analyzer import BlacksheepAnalyzer
 from devai.streamlit_analyzer import StreamlitAnalyzer
 from devai.gradio_analyzer import GradioAnalyzer
 from devai.chainlit_analyzer import ChainlitAnalyzer
+from devai.llamaindex_analyzer import LlamaIndexAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -1027,6 +1028,10 @@ class DevAI:
     def chainlit(self, path: str | Path = ".", **kwargs: Any) -> ChainlitAnalyzer:
         """Audit Chainlit apps for hardcoded secrets, missing auth, permissive CORS, and SSRF risks."""
         return ChainlitAnalyzer(str(path), **kwargs)
+
+    def llamaindex(self, path: str | Path = ".", **kwargs: Any) -> LlamaIndexAnalyzer:
+        """Audit LlamaIndex RAG pipelines for hardcoded API keys, SQL injection, SSRF, and deserialization risks."""
+        return LlamaIndexAnalyzer(str(path), **kwargs)
 
     def sveltekit(self, path: str | Path = ".", **kwargs: Any) -> SvelteKitAnalyzer:
         """Audit svelte.config.* for disabled CSRF checks, adapter credential leaks, and SSRF fetch targets."""

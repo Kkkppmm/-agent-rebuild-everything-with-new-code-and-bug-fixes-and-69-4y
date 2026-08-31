@@ -160,6 +160,7 @@ from devai.blacksheep_analyzer import BlacksheepAnalyzer
 from devai.streamlit_analyzer import StreamlitAnalyzer
 from devai.gradio_analyzer import GradioAnalyzer
 from devai.chainlit_analyzer import ChainlitAnalyzer
+from devai.llamaindex_analyzer import LlamaIndexAnalyzer
 from devai.sveltekit_analyzer import SvelteKitAnalyzer
 from devai.remix_analyzer import RemixAnalyzer
 from devai.solid_analyzer import SolidAnalyzer
@@ -2859,6 +2860,24 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_llamaindex(self, analyzer: LlamaIndexAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No LlamaIndex app files found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} LlamaIndex file(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_sveltekit(self, analyzer: SvelteKitAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -4680,6 +4699,10 @@ class ProjectHealth:
         chainlit = ChainlitAnalyzer(root_str)
         score, summary, details = self._score_chainlit(chainlit)
         categories.append(HealthCategory("chainlit", score, summary, details))
+
+        llamaindex = LlamaIndexAnalyzer(root_str)
+        score, summary, details = self._score_llamaindex(llamaindex)
+        categories.append(HealthCategory("llamaindex", score, summary, details))
 
         sveltekit = SvelteKitAnalyzer(root_str)
         score, summary, details = self._score_sveltekit(sveltekit)
