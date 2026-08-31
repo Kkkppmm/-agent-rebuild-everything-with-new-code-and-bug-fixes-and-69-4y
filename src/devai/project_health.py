@@ -83,6 +83,7 @@ from devai.gradle_analyzer import GradleAnalyzer
 from devai.maven_analyzer import MavenAnalyzer
 from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
+from devai.pipfile_analyzer import PipfileAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
@@ -1843,6 +1844,24 @@ class ProjectHealth:
             return 100.0, "No pip configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} pip config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_pipfile(self, analyzer: PipfileAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Pipenv configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Pipenv config(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4414,6 +4433,10 @@ class ProjectHealth:
         pip = PipAnalyzer(root_str)
         score, summary, details = self._score_pip(pip)
         categories.append(HealthCategory("pip", score, summary, details))
+
+        pipfile = PipfileAnalyzer(root_str)
+        score, summary, details = self._score_pipfile(pipfile)
+        categories.append(HealthCategory("pipenv", score, summary, details))
 
         uv = UvAnalyzer(root_str)
         score, summary, details = self._score_uv(uv)

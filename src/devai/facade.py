@@ -89,6 +89,7 @@ from devai.gradle_analyzer import GradleAnalyzer
 from devai.maven_analyzer import MavenAnalyzer
 from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
+from devai.pipfile_analyzer import PipfileAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
@@ -801,6 +802,10 @@ class DevAI:
     def pip(self, path: str | Path = ".", **kwargs: Any) -> PipAnalyzer:
         """Audit pip requirements.txt, constraints.txt, and pip.conf for secrets and unpinned deps."""
         return PipAnalyzer(str(path), **kwargs)
+
+    def pipfile(self, path: str | Path = ".", **kwargs: Any) -> PipfileAnalyzer:
+        """Audit Pipenv Pipfile and Pipfile.lock for secrets, insecure sources, and unpinned deps."""
+        return PipfileAnalyzer(str(path), **kwargs)
 
     def uv(self, path: str | Path = ".", **kwargs: Any) -> UvAnalyzer:
         """Audit uv pyproject.toml and uv.toml for secrets, insecure indexes, and unpinned deps."""

@@ -449,6 +449,12 @@ from devai.pip_analyzer import (
     PipInfo,
     PipStats,
 )
+from devai.pipfile_analyzer import (
+    PipfileAnalyzer,
+    PipfileFinding,
+    PipfileInfo,
+    PipfileStats,
+)
 from devai.uv_analyzer import (
     UvAnalyzer,
     UvFinding,
@@ -1770,6 +1776,10 @@ __all__ = [
     "PipFinding",
     "PipInfo",
     "PipStats",
+    "PipfileAnalyzer",
+    "PipfileFinding",
+    "PipfileInfo",
+    "PipfileStats",
     "UvAnalyzer",
     "UvFinding",
     "UvInfo",
