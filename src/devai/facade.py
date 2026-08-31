@@ -91,6 +91,7 @@ from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
 from devai.pipfile_analyzer import PipfileAnalyzer
 from devai.conda_analyzer import CondaAnalyzer
+from devai.hatch_analyzer import HatchAnalyzer
 from devai.uv_analyzer import UvAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
@@ -811,6 +812,10 @@ class DevAI:
     def conda(self, path: str | Path = ".", **kwargs: Any) -> CondaAnalyzer:
         """Audit Conda environment.yml and recipe meta.yaml for secrets, insecure channels, and unpinned deps."""
         return CondaAnalyzer(str(path), **kwargs)
+
+    def hatch(self, path: str | Path = ".", **kwargs: Any) -> HatchAnalyzer:
+        """Audit Hatch pyproject.toml and hatch.toml for secrets, insecure indexes, and unpinned deps."""
+        return HatchAnalyzer(str(path), **kwargs)
 
     def uv(self, path: str | Path = ".", **kwargs: Any) -> UvAnalyzer:
         """Audit uv pyproject.toml and uv.toml for secrets, insecure indexes, and unpinned deps."""

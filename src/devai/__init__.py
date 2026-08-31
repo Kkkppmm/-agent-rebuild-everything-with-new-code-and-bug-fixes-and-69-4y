@@ -461,6 +461,12 @@ from devai.conda_analyzer import (
     CondaInfo,
     CondaStats,
 )
+from devai.hatch_analyzer import (
+    HatchAnalyzer,
+    HatchFinding,
+    HatchInfo,
+    HatchStats,
+)
 from devai.uv_analyzer import (
     UvAnalyzer,
     UvFinding,
@@ -1315,7 +1321,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.99.0"
+__version__ = "8.0.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1790,6 +1796,10 @@ __all__ = [
     "CondaFinding",
     "CondaInfo",
     "CondaStats",
+    "HatchAnalyzer",
+    "HatchFinding",
+    "HatchInfo",
+    "HatchStats",
     "UvAnalyzer",
     "UvFinding",
     "UvInfo",
