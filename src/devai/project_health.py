@@ -84,6 +84,14 @@ from devai.maven_analyzer import MavenAnalyzer
 from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
+from devai.setuptools_analyzer import SetuptoolsAnalyzer
+from devai.hatch_analyzer import HatchAnalyzer
+from devai.flit_analyzer import FlitAnalyzer
+from devai.pdm_analyzer import PdmAnalyzer
+from devai.pipfile_analyzer import PipfileAnalyzer
+from devai.conda_analyzer import CondaAnalyzer
+from devai.rye_analyzer import RyeAnalyzer
+from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -1855,6 +1863,26 @@ class ProjectHealth:
             return 100.0, "No uv configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} uv config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_packaging_tool(self, analyzer: object, tool_name: str) -> tuple[float, str, dict]:
+        analyze = getattr(analyzer, "analyze")
+        health_score = getattr(analyzer, "health_score")
+        analyze()
+        score = health_score()
+        stats = analyzer.stats  # type: ignore[attr-defined]
+        if stats.configs == 0:
+            return 100.0, f"No {tool_name} configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} {tool_name} config(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4304,6 +4332,38 @@ class ProjectHealth:
         uv = UvAnalyzer(root_str)
         score, summary, details = self._score_uv(uv)
         categories.append(HealthCategory("uv", score, summary, details))
+
+        setuptools = SetuptoolsAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(setuptools, "setuptools")
+        categories.append(HealthCategory("setuptools", score, summary, details))
+
+        hatch = HatchAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(hatch, "hatch")
+        categories.append(HealthCategory("hatch", score, summary, details))
+
+        flit = FlitAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(flit, "flit")
+        categories.append(HealthCategory("flit", score, summary, details))
+
+        pdm = PdmAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(pdm, "pdm")
+        categories.append(HealthCategory("pdm", score, summary, details))
+
+        pipfile = PipfileAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(pipfile, "pipfile")
+        categories.append(HealthCategory("pipfile", score, summary, details))
+
+        conda = CondaAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(conda, "conda")
+        categories.append(HealthCategory("conda", score, summary, details))
+
+        rye = RyeAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(rye, "rye")
+        categories.append(HealthCategory("rye", score, summary, details))
+
+        piptools = PipToolsAnalyzer(root_str)
+        score, summary, details = self._score_packaging_tool(piptools, "pip-tools")
+        categories.append(HealthCategory("pip-tools", score, summary, details))
 
         npm = NpmAnalyzer(root_str)
         score, summary, details = self._score_npm(npm)

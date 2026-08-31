@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "7.91.0"
+        assert devai.__version__ == "8.0.0"
 
     def test_exports(self):
         expected = {
@@ -469,6 +469,38 @@ class TestPublicAPI:
             "UvFinding",
             "UvInfo",
             "UvStats",
+            "SetuptoolsAnalyzer",
+            "SetuptoolsFinding",
+            "SetuptoolsInfo",
+            "SetuptoolsStats",
+            "HatchAnalyzer",
+            "HatchFinding",
+            "HatchInfo",
+            "HatchStats",
+            "FlitAnalyzer",
+            "FlitFinding",
+            "FlitInfo",
+            "FlitStats",
+            "PdmAnalyzer",
+            "PdmFinding",
+            "PdmInfo",
+            "PdmStats",
+            "PipfileAnalyzer",
+            "PipfileFinding",
+            "PipfileInfo",
+            "PipfileStats",
+            "CondaAnalyzer",
+            "CondaFinding",
+            "CondaInfo",
+            "CondaStats",
+            "RyeAnalyzer",
+            "RyeFinding",
+            "RyeInfo",
+            "RyeStats",
+            "PipToolsAnalyzer",
+            "PipToolsFinding",
+            "PipToolsInfo",
+            "PipToolsStats",
             "NpmAnalyzer",
             "NpmFinding",
             "NpmInfo",

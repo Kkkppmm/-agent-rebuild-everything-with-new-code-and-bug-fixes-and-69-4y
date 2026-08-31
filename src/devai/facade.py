@@ -90,6 +90,14 @@ from devai.maven_analyzer import MavenAnalyzer
 from devai.poetry_analyzer import PoetryAnalyzer
 from devai.pip_analyzer import PipAnalyzer
 from devai.uv_analyzer import UvAnalyzer
+from devai.setuptools_analyzer import SetuptoolsAnalyzer
+from devai.hatch_analyzer import HatchAnalyzer
+from devai.flit_analyzer import FlitAnalyzer
+from devai.pdm_analyzer import PdmAnalyzer
+from devai.pipfile_analyzer import PipfileAnalyzer
+from devai.conda_analyzer import CondaAnalyzer
+from devai.rye_analyzer import RyeAnalyzer
+from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -799,6 +807,38 @@ class DevAI:
     def uv(self, path: str | Path = ".", **kwargs: Any) -> UvAnalyzer:
         """Audit uv pyproject.toml and uv.toml for secrets, insecure indexes, and unpinned deps."""
         return UvAnalyzer(str(path), **kwargs)
+
+    def setuptools(self, path: str | Path = ".", **kwargs: Any) -> SetuptoolsAnalyzer:
+        """Audit setup.py, setup.cfg, and setuptools pyproject.toml for secrets and unpinned deps."""
+        return SetuptoolsAnalyzer(str(path), **kwargs)
+
+    def hatch(self, path: str | Path = ".", **kwargs: Any) -> HatchAnalyzer:
+        """Audit Hatch pyproject.toml and hatch.toml for secrets, insecure indexes, and unpinned deps."""
+        return HatchAnalyzer(str(path), **kwargs)
+
+    def flit(self, path: str | Path = ".", **kwargs: Any) -> FlitAnalyzer:
+        """Audit Flit pyproject.toml and flit.ini for secrets and unpinned deps."""
+        return FlitAnalyzer(str(path), **kwargs)
+
+    def pdm(self, path: str | Path = ".", **kwargs: Any) -> PdmAnalyzer:
+        """Audit PDM pyproject.toml, .pdm.toml, and pdm.lock for secrets and unpinned deps."""
+        return PdmAnalyzer(str(path), **kwargs)
+
+    def pipfile(self, path: str | Path = ".", **kwargs: Any) -> PipfileAnalyzer:
+        """Audit Pipenv Pipfile and Pipfile.lock for secrets and unpinned deps."""
+        return PipfileAnalyzer(str(path), **kwargs)
+
+    def conda(self, path: str | Path = ".", **kwargs: Any) -> CondaAnalyzer:
+        """Audit Conda environment.yml and recipe meta.yaml for secrets and unpinned deps."""
+        return CondaAnalyzer(str(path), **kwargs)
+
+    def rye(self, path: str | Path = ".", **kwargs: Any) -> RyeAnalyzer:
+        """Audit Rye pyproject.toml and rye.lock for secrets and unpinned deps."""
+        return RyeAnalyzer(str(path), **kwargs)
+
+    def piptools(self, path: str | Path = ".", **kwargs: Any) -> PipToolsAnalyzer:
+        """Audit pip-tools requirements.in and compiled requirements for secrets and unpinned deps."""
+        return PipToolsAnalyzer(str(path), **kwargs)
 
     def npm(self, path: str | Path = ".", **kwargs: Any) -> NpmAnalyzer:
         """Audit package.json and .npmrc for secrets, insecure registries, and unpinned deps."""

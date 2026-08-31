@@ -455,6 +455,54 @@ from devai.uv_analyzer import (
     UvInfo,
     UvStats,
 )
+from devai.setuptools_analyzer import (
+    SetuptoolsAnalyzer,
+    SetuptoolsFinding,
+    SetuptoolsInfo,
+    SetuptoolsStats,
+)
+from devai.hatch_analyzer import (
+    HatchAnalyzer,
+    HatchFinding,
+    HatchInfo,
+    HatchStats,
+)
+from devai.flit_analyzer import (
+    FlitAnalyzer,
+    FlitFinding,
+    FlitInfo,
+    FlitStats,
+)
+from devai.pdm_analyzer import (
+    PdmAnalyzer,
+    PdmFinding,
+    PdmInfo,
+    PdmStats,
+)
+from devai.pipfile_analyzer import (
+    PipfileAnalyzer,
+    PipfileFinding,
+    PipfileInfo,
+    PipfileStats,
+)
+from devai.conda_analyzer import (
+    CondaAnalyzer,
+    CondaFinding,
+    CondaInfo,
+    CondaStats,
+)
+from devai.rye_analyzer import (
+    RyeAnalyzer,
+    RyeFinding,
+    RyeInfo,
+    RyeStats,
+)
+from devai.piptools_analyzer import (
+    PipToolsAnalyzer,
+    PipToolsFinding,
+    PipToolsInfo,
+    PipToolsStats,
+)
 from devai.npm_analyzer import (
     NpmAnalyzer,
     NpmFinding,
@@ -1267,7 +1315,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "7.91.0"
+__version__ = "8.0.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1738,6 +1786,38 @@ __all__ = [
     "UvFinding",
     "UvInfo",
     "UvStats",
+    "SetuptoolsAnalyzer",
+    "SetuptoolsFinding",
+    "SetuptoolsInfo",
+    "SetuptoolsStats",
+    "HatchAnalyzer",
+    "HatchFinding",
+    "HatchInfo",
+    "HatchStats",
+    "FlitAnalyzer",
+    "FlitFinding",
+    "FlitInfo",
+    "FlitStats",
+    "PdmAnalyzer",
+    "PdmFinding",
+    "PdmInfo",
+    "PdmStats",
+    "PipfileAnalyzer",
+    "PipfileFinding",
+    "PipfileInfo",
+    "PipfileStats",
+    "CondaAnalyzer",
+    "CondaFinding",
+    "CondaInfo",
+    "CondaStats",
+    "RyeAnalyzer",
+    "RyeFinding",
+    "RyeInfo",
+    "RyeStats",
+    "PipToolsAnalyzer",
+    "PipToolsFinding",
+    "PipToolsInfo",
+    "PipToolsStats",
     "NpmAnalyzer",
     "NpmFinding",
     "NpmInfo",
