@@ -467,6 +467,12 @@ from devai.hatch_analyzer import (
     HatchInfo,
     HatchStats,
 )
+from devai.flit_analyzer import (
+    FlitAnalyzer,
+    FlitFinding,
+    FlitInfo,
+    FlitStats,
+)
 from devai.pdm_analyzer import (
     PdmAnalyzer,
     PdmFinding,
@@ -1824,6 +1830,10 @@ __all__ = [
     "HatchFinding",
     "HatchInfo",
     "HatchStats",
+    "FlitAnalyzer",
+    "FlitFinding",
+    "FlitInfo",
+    "FlitStats",
     "PdmAnalyzer",
     "PdmFinding",
     "PdmInfo",
