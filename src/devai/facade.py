@@ -94,6 +94,7 @@ from devai.conda_analyzer import CondaAnalyzer
 from devai.hatch_analyzer import HatchAnalyzer
 from devai.pdm_analyzer import PdmAnalyzer
 from devai.uv_analyzer import UvAnalyzer
+from devai.rye_analyzer import RyeAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -825,6 +826,10 @@ class DevAI:
     def uv(self, path: str | Path = ".", **kwargs: Any) -> UvAnalyzer:
         """Audit uv pyproject.toml and uv.toml for secrets, insecure indexes, and unpinned deps."""
         return UvAnalyzer(str(path), **kwargs)
+
+    def rye(self, path: str | Path = ".", **kwargs: Any) -> RyeAnalyzer:
+        """Audit Rye pyproject.toml, rye.lock, and requirements.lock for secrets and unpinned deps."""
+        return RyeAnalyzer(str(path), **kwargs)
 
     def npm(self, path: str | Path = ".", **kwargs: Any) -> NpmAnalyzer:
         """Audit package.json and .npmrc for secrets, insecure registries, and unpinned deps."""

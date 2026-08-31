@@ -88,6 +88,7 @@ from devai.conda_analyzer import CondaAnalyzer
 from devai.hatch_analyzer import HatchAnalyzer
 from devai.pdm_analyzer import PdmAnalyzer
 from devai.uv_analyzer import UvAnalyzer
+from devai.rye_analyzer import RyeAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -360,6 +361,7 @@ class ProjectHealth:
         "poetry": 0.02,
         "pip": 0.02,
         "uv": 0.02,
+        "rye": 0.02,
         "pnpm": 0.02,
         "bun": 0.02,
         "deno": 0.02,
@@ -1937,6 +1939,24 @@ class ProjectHealth:
             return 100.0, "No uv configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} uv config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_rye(self, analyzer: RyeAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Rye configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Rye project(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -3977,6 +3997,10 @@ class ProjectHealth:
                 recs.append(
                     "Harden uv — commit uv.lock, use HTTPS index URLs, pin git dependencies to tags/commits, store PyPI tokens via UV_INDEX_URL or CI secrets, keep native-tls enabled, and avoid curl-pipe-to-shell in scripts"
                 )
+            elif cat.name == "rye" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden Rye — commit rye.lock, use HTTPS index URLs, pin git dependencies to tags/commits, store PyPI tokens via keyring or CI secrets, keep managed=true, and avoid curl-pipe-to-shell in script hooks"
+                )
             elif cat.name == "cargo" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Cargo — commit Cargo.lock for binaries, use HTTPS registry URLs, pin git dependencies to commits, store tokens via CARGO_REGISTRY_TOKEN or credentials.toml, disable git-fetch-with-cli, and keep TLS revocation checks enabled"
@@ -4510,6 +4534,10 @@ class ProjectHealth:
         uv = UvAnalyzer(root_str)
         score, summary, details = self._score_uv(uv)
         categories.append(HealthCategory("uv", score, summary, details))
+
+        rye = RyeAnalyzer(root_str)
+        score, summary, details = self._score_rye(rye)
+        categories.append(HealthCategory("rye", score, summary, details))
 
         npm = NpmAnalyzer(root_str)
         score, summary, details = self._score_npm(npm)

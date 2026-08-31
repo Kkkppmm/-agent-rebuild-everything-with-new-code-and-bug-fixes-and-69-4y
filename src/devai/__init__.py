@@ -479,6 +479,12 @@ from devai.uv_analyzer import (
     UvInfo,
     UvStats,
 )
+from devai.rye_analyzer import (
+    RyeAnalyzer,
+    RyeFinding,
+    RyeInfo,
+    RyeStats,
+)
 from devai.npm_analyzer import (
     NpmAnalyzer,
     NpmFinding,
@@ -1814,6 +1820,10 @@ __all__ = [
     "UvFinding",
     "UvInfo",
     "UvStats",
+    "RyeAnalyzer",
+    "RyeFinding",
+    "RyeInfo",
+    "RyeStats",
     "NpmAnalyzer",
     "NpmFinding",
     "NpmInfo",
