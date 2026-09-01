@@ -98,6 +98,7 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.rye_analyzer import RyeAnalyzer
 from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.setuptools_analyzer import SetuptoolsAnalyzer
+from devai.cibuildwheel_analyzer import CibuildwheelAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -845,6 +846,10 @@ class DevAI:
     def setuptools(self, path: str | Path = ".", **kwargs: Any) -> SetuptoolsAnalyzer:
         """Audit setuptools setup.py, setup.cfg, and pyproject.toml for secrets, insecure indexes, and unpinned deps."""
         return SetuptoolsAnalyzer(str(path), **kwargs)
+
+    def cibuildwheel(self, path: str | Path = ".", **kwargs: Any) -> CibuildwheelAnalyzer:
+        """Audit cibuildwheel pyproject.toml and cibuildwheel.toml for secrets, insecure hooks, and unpinned deps."""
+        return CibuildwheelAnalyzer(str(path), **kwargs)
 
     def npm(self, path: str | Path = ".", **kwargs: Any) -> NpmAnalyzer:
         """Audit package.json and .npmrc for secrets, insecure registries, and unpinned deps."""

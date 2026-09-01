@@ -503,6 +503,12 @@ from devai.setuptools_analyzer import (
     SetuptoolsInfo,
     SetuptoolsStats,
 )
+from devai.cibuildwheel_analyzer import (
+    CibuildwheelAnalyzer,
+    CibuildwheelFinding,
+    CibuildwheelInfo,
+    CibuildwheelStats,
+)
 from devai.npm_analyzer import (
     NpmAnalyzer,
     NpmFinding,
@@ -1854,6 +1860,10 @@ __all__ = [
     "SetuptoolsFinding",
     "SetuptoolsInfo",
     "SetuptoolsStats",
+    "CibuildwheelAnalyzer",
+    "CibuildwheelFinding",
+    "CibuildwheelInfo",
+    "CibuildwheelStats",
     "NpmAnalyzer",
     "NpmFinding",
     "NpmInfo",

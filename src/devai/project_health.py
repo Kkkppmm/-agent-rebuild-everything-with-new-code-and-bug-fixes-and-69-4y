@@ -92,6 +92,7 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.rye_analyzer import RyeAnalyzer
 from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.setuptools_analyzer import SetuptoolsAnalyzer
+from devai.cibuildwheel_analyzer import CibuildwheelAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -367,6 +368,7 @@ class ProjectHealth:
         "rye": 0.02,
         "piptools": 0.02,
         "setuptools": 0.02,
+        "cibuildwheel": 0.02,
         "pnpm": 0.02,
         "bun": 0.02,
         "deno": 0.02,
@@ -2016,6 +2018,24 @@ class ProjectHealth:
             return 100.0, "No setuptools configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} setuptools config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_cibuildwheel(self, analyzer: CibuildwheelAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No cibuildwheel configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} cibuildwheel config(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4068,6 +4088,10 @@ class ProjectHealth:
                 recs.append(
                     "Harden setuptools — migrate to pyproject.toml with pinned dependencies, use HTTPS index URLs, pin git dependencies to tags/commits, store PyPI tokens via TWINE_PASSWORD or CI secrets, avoid exec/subprocess in setup.py, remove dependency_links, and pin setup_requires"
                 )
+            elif cat.name == "cibuildwheel" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden cibuildwheel — pin dependency-versions, use official quay.io/pypa images, store PyPI tokens via CIBW_* env vars from CI secrets, avoid curl-pipe-to-shell in before-all/before-build hooks, pin pip installs in test-command, and limit environment-pass to required vars"
+                )
             elif cat.name == "cargo" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Cargo — commit Cargo.lock for binaries, use HTTPS registry URLs, pin git dependencies to commits, store tokens via CARGO_REGISTRY_TOKEN or credentials.toml, disable git-fetch-with-cli, and keep TLS revocation checks enabled"
@@ -4617,6 +4641,10 @@ class ProjectHealth:
         setuptools = SetuptoolsAnalyzer(root_str)
         score, summary, details = self._score_setuptools(setuptools)
         categories.append(HealthCategory("setuptools", score, summary, details))
+
+        cibuildwheel = CibuildwheelAnalyzer(root_str)
+        score, summary, details = self._score_cibuildwheel(cibuildwheel)
+        categories.append(HealthCategory("cibuildwheel", score, summary, details))
 
         npm = NpmAnalyzer(root_str)
         score, summary, details = self._score_npm(npm)
