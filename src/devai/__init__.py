@@ -503,6 +503,24 @@ from devai.setuptools_analyzer import (
     SetuptoolsInfo,
     SetuptoolsStats,
 )
+from devai.cibuildwheel_analyzer import (
+    CibuildwheelAnalyzer,
+    CibuildwheelFinding,
+    CibuildwheelInfo,
+    CibuildwheelStats,
+)
+from devai.maturin_analyzer import (
+    MaturinAnalyzer,
+    MaturinFinding,
+    MaturinInfo,
+    MaturinStats,
+)
+from devai.scikit_build_analyzer import (
+    ScikitBuildAnalyzer,
+    ScikitBuildFinding,
+    ScikitBuildInfo,
+    ScikitBuildStats,
+)
 from devai.npm_analyzer import (
     NpmAnalyzer,
     NpmFinding,
@@ -1854,6 +1872,18 @@ __all__ = [
     "SetuptoolsFinding",
     "SetuptoolsInfo",
     "SetuptoolsStats",
+    "CibuildwheelAnalyzer",
+    "CibuildwheelFinding",
+    "CibuildwheelInfo",
+    "CibuildwheelStats",
+    "MaturinAnalyzer",
+    "MaturinFinding",
+    "MaturinInfo",
+    "MaturinStats",
+    "ScikitBuildAnalyzer",
+    "ScikitBuildFinding",
+    "ScikitBuildInfo",
+    "ScikitBuildStats",
     "NpmAnalyzer",
     "NpmFinding",
     "NpmInfo",

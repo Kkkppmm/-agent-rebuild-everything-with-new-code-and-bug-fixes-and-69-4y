@@ -92,6 +92,9 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.rye_analyzer import RyeAnalyzer
 from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.setuptools_analyzer import SetuptoolsAnalyzer
+from devai.cibuildwheel_analyzer import CibuildwheelAnalyzer
+from devai.maturin_analyzer import MaturinAnalyzer
+from devai.scikit_build_analyzer import ScikitBuildAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -2016,6 +2019,60 @@ class ProjectHealth:
             return 100.0, "No setuptools configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} setuptools config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_cibuildwheel(self, analyzer: CibuildwheelAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No cibuildwheel configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} cibuildwheel config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_maturin(self, analyzer: MaturinAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No maturin configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} maturin config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_scikit_build(self, analyzer: ScikitBuildAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No scikit-build configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} scikit-build config(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4617,6 +4674,18 @@ class ProjectHealth:
         setuptools = SetuptoolsAnalyzer(root_str)
         score, summary, details = self._score_setuptools(setuptools)
         categories.append(HealthCategory("setuptools", score, summary, details))
+
+        cibuildwheel = CibuildwheelAnalyzer(root_str)
+        score, summary, details = self._score_cibuildwheel(cibuildwheel)
+        categories.append(HealthCategory("cibuildwheel", score, summary, details))
+
+        maturin = MaturinAnalyzer(root_str)
+        score, summary, details = self._score_maturin(maturin)
+        categories.append(HealthCategory("maturin", score, summary, details))
+
+        scikit_build = ScikitBuildAnalyzer(root_str)
+        score, summary, details = self._score_scikit_build(scikit_build)
+        categories.append(HealthCategory("scikit_build", score, summary, details))
 
         npm = NpmAnalyzer(root_str)
         score, summary, details = self._score_npm(npm)

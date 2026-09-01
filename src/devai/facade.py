@@ -98,6 +98,9 @@ from devai.uv_analyzer import UvAnalyzer
 from devai.rye_analyzer import RyeAnalyzer
 from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.setuptools_analyzer import SetuptoolsAnalyzer
+from devai.cibuildwheel_analyzer import CibuildwheelAnalyzer
+from devai.maturin_analyzer import MaturinAnalyzer
+from devai.scikit_build_analyzer import ScikitBuildAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -845,6 +848,18 @@ class DevAI:
     def setuptools(self, path: str | Path = ".", **kwargs: Any) -> SetuptoolsAnalyzer:
         """Audit setuptools setup.py, setup.cfg, and pyproject.toml for secrets, insecure indexes, and unpinned deps."""
         return SetuptoolsAnalyzer(str(path), **kwargs)
+
+    def cibuildwheel(self, path: str | Path = ".", **kwargs: Any) -> CibuildwheelAnalyzer:
+        """Audit cibuildwheel configs for secrets, privileged Docker, and dangerous test commands."""
+        return CibuildwheelAnalyzer(str(path), **kwargs)
+
+    def maturin(self, path: str | Path = ".", **kwargs: Any) -> MaturinAnalyzer:
+        """Audit maturin pyproject.toml and Cargo.toml for secrets, insecure indexes, and unpinned deps."""
+        return MaturinAnalyzer(str(path), **kwargs)
+
+    def scikit_build(self, path: str | Path = ".", **kwargs: Any) -> ScikitBuildAnalyzer:
+        """Audit scikit-build-core pyproject.toml and CMakeLists.txt for secrets and insecure FetchContent."""
+        return ScikitBuildAnalyzer(str(path), **kwargs)
 
     def npm(self, path: str | Path = ".", **kwargs: Any) -> NpmAnalyzer:
         """Audit package.json and .npmrc for secrets, insecure registries, and unpinned deps."""
