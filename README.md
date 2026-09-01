@@ -200,6 +200,8 @@ A Python AI library built for developers and programmers. DevAI provides a clean
 - **PytestAnalyzer** — Audit pytest.ini, pyproject.toml, and conftest.py for hardcoded secrets, eval/exec, --pdb in CI, security test exclusions, disabled coverage, and TLS bypass
 - **ToxAnalyzer** — Audit tox.ini for passenv=*, allowlist_externals=*, insecure pip indexes, indexserver credentials, changedir outside project, and dangerous commands
 - **NoxAnalyzer** — Audit noxfile.py for reuse_venv, venv_backend='none', os.environ forwarding, insecure pip indexes, HTTP git deps, chdir outside project, and dangerous commands
+- **InvokeAnalyzer** — Audit tasks.py for sudo usage, warn_only, prompt=False, pty=True, os.environ forwarding, insecure pip indexes, and dangerous commands
+- **FabricAnalyzer** — Audit fabfile.py for SSH password auth, disabled host key checking, agent forwarding, gateway credentials, remote sudo, and dangerous shell commands
 - **WebdriverIOAnalyzer** — Audit wdio.conf.* for acceptInsecureCerts, --no-sandbox, remote debugging, insecure baseUrl/protocol, specs outside the project, and excessive maxInstances
 - **AppVeyorCIAnalyzer** — Audit AppVeyor CI configs for hardcoded secrets, enable_rdp, cleartext deploy api_key, and APPVEYOR_* variable injection
 - **GoCDCIAnalyzer** — Audit GoCD pipeline YAML for hardcoded secrets, privileged containers, insecure_skip_verify, and GO_* variable injection

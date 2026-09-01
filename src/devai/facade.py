@@ -135,6 +135,7 @@ from devai.pytest_analyzer import PytestAnalyzer
 from devai.tox_analyzer import ToxAnalyzer
 from devai.nox_analyzer import NoxAnalyzer
 from devai.invoke_analyzer import InvokeAnalyzer
+from devai.fabric_analyzer import FabricAnalyzer
 from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
@@ -918,6 +919,10 @@ class DevAI:
     def invoke(self, path: str | Path = ".", **kwargs: Any) -> InvokeAnalyzer:
         """Audit tasks.py for sudo usage, warn_only, prompt=False, insecure indexes, and dangerous commands."""
         return InvokeAnalyzer(str(path), **kwargs)
+
+    def fabric(self, path: str | Path = ".", **kwargs: Any) -> FabricAnalyzer:
+        """Audit fabfile.py for SSH password auth, disabled host key checking, agent forwarding, and remote sudo."""
+        return FabricAnalyzer(str(path), **kwargs)
 
     def ruff(self, path: str | Path = ".", **kwargs: Any) -> RuffAnalyzer:
         """Audit ruff.toml and pyproject.toml [tool.ruff] for unsafe-fixes, disabled S rules, and broad ignores."""

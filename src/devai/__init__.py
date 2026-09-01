@@ -605,6 +605,12 @@ from devai.invoke_analyzer import (
     InvokeInfo,
     InvokeStats,
 )
+from devai.fabric_analyzer import (
+    FabricAnalyzer,
+    FabricFinding,
+    FabricInfo,
+    FabricStats,
+)
 from devai.ruff_analyzer import (
     RuffAnalyzer,
     RuffFinding,
@@ -1952,6 +1958,10 @@ __all__ = [
     "InvokeFinding",
     "InvokeInfo",
     "InvokeStats",
+    "FabricAnalyzer",
+    "FabricFinding",
+    "FabricInfo",
+    "FabricStats",
     "RuffAnalyzer",
     "RuffFinding",
     "RuffInfo",
