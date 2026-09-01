@@ -1,0 +1,8 @@
+"""Example: audit RuboCop configuration with DevAI."""
+
+from devai import DevAI
+
+ai = DevAI.mock()
+analyzer = ai.rubocop(".")
+print(analyzer.summary())
+print(analyzer.to_context())
