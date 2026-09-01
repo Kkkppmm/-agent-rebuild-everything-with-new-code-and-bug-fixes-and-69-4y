@@ -509,6 +509,12 @@ from devai.cibuildwheel_analyzer import (
     CibuildwheelInfo,
     CibuildwheelStats,
 )
+from devai.maturin_analyzer import (
+    MaturinAnalyzer,
+    MaturinFinding,
+    MaturinInfo,
+    MaturinStats,
+)
 from devai.npm_analyzer import (
     NpmAnalyzer,
     NpmFinding,
@@ -1864,6 +1870,10 @@ __all__ = [
     "CibuildwheelFinding",
     "CibuildwheelInfo",
     "CibuildwheelStats",
+    "MaturinAnalyzer",
+    "MaturinFinding",
+    "MaturinInfo",
+    "MaturinStats",
     "NpmAnalyzer",
     "NpmFinding",
     "NpmInfo",
