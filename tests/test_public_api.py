@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "8.0.0"
+        assert devai.__version__ == "8.7.0"
 
     def test_exports(self):
         expected = {
@@ -505,6 +505,10 @@ class TestPublicAPI:
             "CibuildwheelFinding",
             "CibuildwheelInfo",
             "CibuildwheelStats",
+            "MaturinAnalyzer",
+            "MaturinFinding",
+            "MaturinInfo",
+            "MaturinStats",
             "NpmAnalyzer",
             "NpmFinding",
             "NpmInfo",

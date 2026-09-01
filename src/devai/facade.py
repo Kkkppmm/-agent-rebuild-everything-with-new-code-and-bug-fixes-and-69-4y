@@ -99,6 +99,7 @@ from devai.rye_analyzer import RyeAnalyzer
 from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.setuptools_analyzer import SetuptoolsAnalyzer
 from devai.cibuildwheel_analyzer import CibuildwheelAnalyzer
+from devai.maturin_analyzer import MaturinAnalyzer
 from devai.npm_analyzer import NpmAnalyzer
 from devai.pnpm_analyzer import PnpmAnalyzer
 from devai.bun_analyzer import BunAnalyzer
@@ -850,6 +851,10 @@ class DevAI:
     def cibuildwheel(self, path: str | Path = ".", **kwargs: Any) -> CibuildwheelAnalyzer:
         """Audit cibuildwheel pyproject.toml and cibuildwheel.toml for secrets, insecure hooks, and unpinned deps."""
         return CibuildwheelAnalyzer(str(path), **kwargs)
+
+    def maturin(self, path: str | Path = ".", **kwargs: Any) -> MaturinAnalyzer:
+        """Audit maturin pyproject.toml, maturin.toml, and Cargo.toml for secrets, path traversal, and build risks."""
+        return MaturinAnalyzer(str(path), **kwargs)
 
     def npm(self, path: str | Path = ".", **kwargs: Any) -> NpmAnalyzer:
         """Audit package.json and .npmrc for secrets, insecure registries, and unpinned deps."""
