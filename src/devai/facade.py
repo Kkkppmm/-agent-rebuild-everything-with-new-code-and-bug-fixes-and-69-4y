@@ -134,6 +134,7 @@ from devai.mocha_analyzer import MochaAnalyzer
 from devai.pytest_analyzer import PytestAnalyzer
 from devai.tox_analyzer import ToxAnalyzer
 from devai.nox_analyzer import NoxAnalyzer
+from devai.invoke_analyzer import InvokeAnalyzer
 from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
@@ -913,6 +914,10 @@ class DevAI:
     def nox(self, path: str | Path = ".", **kwargs: Any) -> NoxAnalyzer:
         """Audit noxfile.py for reuse_venv, venv_backend='none', insecure indexes, and dangerous commands."""
         return NoxAnalyzer(str(path), **kwargs)
+
+    def invoke(self, path: str | Path = ".", **kwargs: Any) -> InvokeAnalyzer:
+        """Audit tasks.py for sudo usage, warn_only, prompt=False, insecure indexes, and dangerous commands."""
+        return InvokeAnalyzer(str(path), **kwargs)
 
     def ruff(self, path: str | Path = ".", **kwargs: Any) -> RuffAnalyzer:
         """Audit ruff.toml and pyproject.toml [tool.ruff] for unsafe-fixes, disabled S rules, and broad ignores."""

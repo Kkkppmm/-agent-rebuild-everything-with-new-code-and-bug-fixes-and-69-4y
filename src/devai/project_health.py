@@ -128,6 +128,7 @@ from devai.mocha_analyzer import MochaAnalyzer
 from devai.pytest_analyzer import PytestAnalyzer
 from devai.tox_analyzer import ToxAnalyzer
 from devai.nox_analyzer import NoxAnalyzer
+from devai.invoke_analyzer import InvokeAnalyzer
 from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
@@ -405,6 +406,7 @@ class ProjectHealth:
         "pytest": 0.02,
         "tox": 0.02,
         "nox": 0.02,
+        "invoke": 0.02,
         "ruff": 0.02,
         "flake8": 0.02,
         "pyright": 0.02,
@@ -2311,6 +2313,24 @@ class ProjectHealth:
             return 100.0, "No nox configs found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} nox config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_invoke(self, analyzer: InvokeAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Invoke configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Invoke config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4852,6 +4872,10 @@ class ProjectHealth:
         nox = NoxAnalyzer(root_str)
         score, summary, details = self._score_nox(nox)
         categories.append(HealthCategory("nox", score, summary, details))
+
+        invoke = InvokeAnalyzer(root_str)
+        score, summary, details = self._score_invoke(invoke)
+        categories.append(HealthCategory("invoke", score, summary, details))
 
         ruff = RuffAnalyzer(root_str)
         score, summary, details = self._score_ruff(ruff)

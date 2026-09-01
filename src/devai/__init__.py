@@ -599,6 +599,12 @@ from devai.nox_analyzer import (
     NoxInfo,
     NoxStats,
 )
+from devai.invoke_analyzer import (
+    InvokeAnalyzer,
+    InvokeFinding,
+    InvokeInfo,
+    InvokeStats,
+)
 from devai.ruff_analyzer import (
     RuffAnalyzer,
     RuffFinding,
@@ -1942,6 +1948,10 @@ __all__ = [
     "NoxFinding",
     "NoxInfo",
     "NoxStats",
+    "InvokeAnalyzer",
+    "InvokeFinding",
+    "InvokeInfo",
+    "InvokeStats",
     "RuffAnalyzer",
     "RuffFinding",
     "RuffInfo",

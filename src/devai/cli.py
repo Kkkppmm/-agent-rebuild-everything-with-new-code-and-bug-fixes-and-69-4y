@@ -725,6 +725,22 @@ def cmd_nox_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_invoke_audit(args: argparse.Namespace) -> None:
+    from devai.invoke_analyzer import InvokeAnalyzer
+
+    analyzer = InvokeAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_ruff_audit(args: argparse.Namespace) -> None:
     from devai.ruff_analyzer import RuffAnalyzer
 
@@ -3503,6 +3519,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened noxfile.py template",
     )
     p.set_defaults(func=cmd_nox_audit)
+
+    p = sub.add_parser(
+        "invoke-audit",
+        help="Audit tasks.py for sudo usage, warn_only, prompt=False, insecure indexes, and dangerous commands",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened tasks.py template",
+    )
+    p.set_defaults(func=cmd_invoke_audit)
 
     p = sub.add_parser(
         "ruff-audit",
