@@ -1,0 +1,8 @@
+{
+  "name": "pr-review",
+  "tasks": [
+    {"name": "diff_review", "action": "review_diff", "input_key": "diff"},
+    {"name": "security", "action": "security", "input_key": "code"},
+    {"name": "performance", "action": "performance", "input_key": "code"}
+  ]
+}
