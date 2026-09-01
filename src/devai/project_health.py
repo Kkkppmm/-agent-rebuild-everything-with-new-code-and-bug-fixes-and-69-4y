@@ -89,6 +89,9 @@ from devai.hatch_analyzer import HatchAnalyzer
 from devai.flit_analyzer import FlitAnalyzer
 from devai.pdm_analyzer import PdmAnalyzer
 from devai.uv_analyzer import UvAnalyzer
+from devai.cibuildwheel_analyzer import CibuildwheelAnalyzer
+from devai.maturin_analyzer import MaturinAnalyzer
+from devai.scikit_build_analyzer import ScikitBuildAnalyzer
 from devai.rye_analyzer import RyeAnalyzer
 from devai.piptools_analyzer import PipToolsAnalyzer
 from devai.setuptools_analyzer import SetuptoolsAnalyzer
@@ -364,6 +367,9 @@ class ProjectHealth:
         "poetry": 0.02,
         "pip": 0.02,
         "uv": 0.02,
+        "cibuildwheel": 0.02,
+        "maturin": 0.02,
+        "scikit_build": 0.02,
         "rye": 0.02,
         "piptools": 0.02,
         "setuptools": 0.02,
@@ -1962,6 +1968,60 @@ class ProjectHealth:
             return 100.0, "No uv configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} uv config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_cibuildwheel(self, analyzer: CibuildwheelAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No cibuildwheel configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} cibuildwheel config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_maturin(self, analyzer: MaturinAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No maturin configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} maturin config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_scikit_build(self, analyzer: ScikitBuildAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No scikit-build configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} scikit-build config(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4056,6 +4116,18 @@ class ProjectHealth:
                 recs.append(
                     "Harden uv — commit uv.lock, use HTTPS index URLs, pin git dependencies to tags/commits, store PyPI tokens via UV_INDEX_URL or CI secrets, keep native-tls enabled, and avoid curl-pipe-to-shell in scripts"
                 )
+            elif cat.name == "cibuildwheel" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden cibuildwheel — keep auditwheel repair enabled, run platform-specific tests, store secrets via CI not CIBW_ENVIRONMENT, use HTTPS indexes, and avoid curl-pipe-to-shell in before/after-build hooks"
+                )
+            elif cat.name == "maturin" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden maturin — exclude secrets from sdist-include, pin explicit Rust features, use HTTPS crate registries, store PyPI tokens via MATURIN_PYPI_TOKEN or CI secrets, and pin git dependencies to commits"
+                )
+            elif cat.name == "scikit_build" and cat.details.get("high_severity", 0) > 0:
+                recs.append(
+                    "Harden scikit-build — never embed secrets in cmake.args, pin FetchContent to commit SHAs, keep CMAKE_TLS_VERIFY enabled, review execute_process calls, and avoid insecure compile flags"
+                )
             elif cat.name == "rye" and cat.details.get("high_severity", 0) > 0:
                 recs.append(
                     "Harden Rye — commit rye.lock, use HTTPS index URLs, pin git dependencies to tags/commits, store PyPI tokens via keyring or CI secrets, keep managed=true, and avoid curl-pipe-to-shell in script hooks"
@@ -4605,6 +4677,18 @@ class ProjectHealth:
         uv = UvAnalyzer(root_str)
         score, summary, details = self._score_uv(uv)
         categories.append(HealthCategory("uv", score, summary, details))
+
+        cibuildwheel = CibuildwheelAnalyzer(root_str)
+        score, summary, details = self._score_cibuildwheel(cibuildwheel)
+        categories.append(HealthCategory("cibuildwheel", score, summary, details))
+
+        maturin = MaturinAnalyzer(root_str)
+        score, summary, details = self._score_maturin(maturin)
+        categories.append(HealthCategory("maturin", score, summary, details))
+
+        scikit_build = ScikitBuildAnalyzer(root_str)
+        score, summary, details = self._score_scikit_build(scikit_build)
+        categories.append(HealthCategory("scikit_build", score, summary, details))
 
         rye = RyeAnalyzer(root_str)
         score, summary, details = self._score_rye(rye)

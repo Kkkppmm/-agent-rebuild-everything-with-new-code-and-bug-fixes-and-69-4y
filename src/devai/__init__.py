@@ -485,6 +485,24 @@ from devai.uv_analyzer import (
     UvInfo,
     UvStats,
 )
+from devai.cibuildwheel_analyzer import (
+    CibuildwheelAnalyzer,
+    CibuildwheelFinding,
+    CibuildwheelInfo,
+    CibuildwheelStats,
+)
+from devai.maturin_analyzer import (
+    MaturinAnalyzer,
+    MaturinFinding,
+    MaturinInfo,
+    MaturinStats,
+)
+from devai.scikit_build_analyzer import (
+    ScikitBuildAnalyzer,
+    ScikitBuildFinding,
+    ScikitBuildInfo,
+    ScikitBuildStats,
+)
 from devai.rye_analyzer import (
     RyeAnalyzer,
     RyeFinding,
@@ -1351,7 +1369,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "8.0.0"
+__version__ = "8.6.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1842,6 +1860,18 @@ __all__ = [
     "UvFinding",
     "UvInfo",
     "UvStats",
+    "CibuildwheelAnalyzer",
+    "CibuildwheelFinding",
+    "CibuildwheelInfo",
+    "CibuildwheelStats",
+    "MaturinAnalyzer",
+    "MaturinFinding",
+    "MaturinInfo",
+    "MaturinStats",
+    "ScikitBuildAnalyzer",
+    "ScikitBuildFinding",
+    "ScikitBuildInfo",
+    "ScikitBuildStats",
     "RyeAnalyzer",
     "RyeFinding",
     "RyeInfo",
