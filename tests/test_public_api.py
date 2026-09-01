@@ -5,7 +5,7 @@ import devai
 
 class TestPublicAPI:
     def test_version(self):
-        assert devai.__version__ == "8.0.0"
+        assert devai.__version__ == "8.6.0"
 
     def test_exports(self):
         expected = {
@@ -477,6 +477,10 @@ class TestPublicAPI:
             "HatchFinding",
             "HatchInfo",
             "HatchStats",
+            "MaturinAnalyzer",
+            "MaturinFinding",
+            "MaturinInfo",
+            "MaturinStats",
             "FlitAnalyzer",
             "FlitFinding",
             "FlitInfo",

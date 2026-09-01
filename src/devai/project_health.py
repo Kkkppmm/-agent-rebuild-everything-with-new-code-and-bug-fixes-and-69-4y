@@ -86,6 +86,7 @@ from devai.pip_analyzer import PipAnalyzer
 from devai.pipfile_analyzer import PipfileAnalyzer
 from devai.conda_analyzer import CondaAnalyzer
 from devai.hatch_analyzer import HatchAnalyzer
+from devai.maturin_analyzer import MaturinAnalyzer
 from devai.flit_analyzer import FlitAnalyzer
 from devai.pdm_analyzer import PdmAnalyzer
 from devai.uv_analyzer import UvAnalyzer
@@ -1908,6 +1909,24 @@ class ProjectHealth:
             return 100.0, "No Hatch configs found", {"configs": 0, "findings": 0}
         summary = (
             f"{stats.configs} Hatch config(s), "
+            f"{stats.findings} finding(s) ({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "configs": stats.configs,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_maturin(self, analyzer: MaturinAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.configs == 0:
+            return 100.0, "No Maturin configs found", {"configs": 0, "findings": 0}
+        summary = (
+            f"{stats.configs} Maturin config(s), "
             f"{stats.findings} finding(s) ({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4593,6 +4612,10 @@ class ProjectHealth:
         hatch = HatchAnalyzer(root_str)
         score, summary, details = self._score_hatch(hatch)
         categories.append(HealthCategory("hatch", score, summary, details))
+
+        maturin = MaturinAnalyzer(root_str)
+        score, summary, details = self._score_maturin(maturin)
+        categories.append(HealthCategory("maturin", score, summary, details))
 
         flit = FlitAnalyzer(root_str)
         score, summary, details = self._score_flit(flit)

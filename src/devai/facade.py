@@ -92,6 +92,7 @@ from devai.pip_analyzer import PipAnalyzer
 from devai.pipfile_analyzer import PipfileAnalyzer
 from devai.conda_analyzer import CondaAnalyzer
 from devai.hatch_analyzer import HatchAnalyzer
+from devai.maturin_analyzer import MaturinAnalyzer
 from devai.flit_analyzer import FlitAnalyzer
 from devai.pdm_analyzer import PdmAnalyzer
 from devai.uv_analyzer import UvAnalyzer
@@ -821,6 +822,10 @@ class DevAI:
     def hatch(self, path: str | Path = ".", **kwargs: Any) -> HatchAnalyzer:
         """Audit Hatch pyproject.toml and hatch.toml for secrets, insecure indexes, and unpinned deps."""
         return HatchAnalyzer(str(path), **kwargs)
+
+    def maturin(self, path: str | Path = ".", **kwargs: Any) -> MaturinAnalyzer:
+        """Audit maturin pyproject.toml and Cargo.toml for secrets, insecure registries, and unpinned deps."""
+        return MaturinAnalyzer(str(path), **kwargs)
 
     def flit(self, path: str | Path = ".", **kwargs: Any) -> FlitAnalyzer:
         """Audit Flit pyproject.toml and flit.ini for secrets, insecure indexes, and unpinned deps."""

@@ -467,6 +467,12 @@ from devai.hatch_analyzer import (
     HatchInfo,
     HatchStats,
 )
+from devai.maturin_analyzer import (
+    MaturinAnalyzer,
+    MaturinFinding,
+    MaturinInfo,
+    MaturinStats,
+)
 from devai.flit_analyzer import (
     FlitAnalyzer,
     FlitFinding,
@@ -1351,7 +1357,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "8.0.0"
+__version__ = "8.6.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -1830,6 +1836,10 @@ __all__ = [
     "HatchFinding",
     "HatchInfo",
     "HatchStats",
+    "MaturinAnalyzer",
+    "MaturinFinding",
+    "MaturinInfo",
+    "MaturinStats",
     "FlitAnalyzer",
     "FlitFinding",
     "FlitInfo",
