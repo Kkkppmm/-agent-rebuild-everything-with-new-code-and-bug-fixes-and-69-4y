@@ -139,6 +139,7 @@ from devai.fabric_analyzer import FabricAnalyzer
 from devai.doit_analyzer import DoitAnalyzer
 from devai.taskipy_analyzer import TaskipyAnalyzer
 from devai.commitizen_analyzer import CommitizenAnalyzer
+from devai.towncrier_analyzer import TowncrierAnalyzer
 from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
@@ -938,6 +939,10 @@ class DevAI:
     def commitizen(self, path: str | Path = ".", **kwargs: Any) -> CommitizenAnalyzer:
         """Audit Commitizen configs for bump hooks, unsigned tags, custom version providers, and dangerous commands."""
         return CommitizenAnalyzer(str(path), **kwargs)
+
+    def towncrier(self, path: str | Path = ".", **kwargs: Any) -> TowncrierAnalyzer:
+        """Audit Towncrier configs for path traversal, secrets, insecure URLs, and unsafe format strings."""
+        return TowncrierAnalyzer(str(path), **kwargs)
 
     def ruff(self, path: str | Path = ".", **kwargs: Any) -> RuffAnalyzer:
         """Audit ruff.toml and pyproject.toml [tool.ruff] for unsafe-fixes, disabled S rules, and broad ignores."""

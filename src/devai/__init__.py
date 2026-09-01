@@ -629,6 +629,12 @@ from devai.commitizen_analyzer import (
     CommitizenInfo,
     CommitizenStats,
 )
+from devai.towncrier_analyzer import (
+    TowncrierAnalyzer,
+    TowncrierFinding,
+    TowncrierInfo,
+    TowncrierStats,
+)
 from devai.ruff_analyzer import (
     RuffAnalyzer,
     RuffFinding,
@@ -1992,6 +1998,10 @@ __all__ = [
     "CommitizenFinding",
     "CommitizenInfo",
     "CommitizenStats",
+    "TowncrierAnalyzer",
+    "TowncrierFinding",
+    "TowncrierInfo",
+    "TowncrierStats",
     "RuffAnalyzer",
     "RuffFinding",
     "RuffInfo",

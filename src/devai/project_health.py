@@ -133,6 +133,7 @@ from devai.fabric_analyzer import FabricAnalyzer
 from devai.doit_analyzer import DoitAnalyzer
 from devai.taskipy_analyzer import TaskipyAnalyzer
 from devai.commitizen_analyzer import CommitizenAnalyzer
+from devai.towncrier_analyzer import TowncrierAnalyzer
 from devai.ruff_analyzer import RuffAnalyzer
 from devai.mypy_analyzer import MypyAnalyzer
 from devai.coverage_analyzer import CoverageAnalyzer
@@ -415,6 +416,7 @@ class ProjectHealth:
         "doit": 0.02,
         "taskipy": 0.02,
         "commitizen": 0.02,
+        "towncrier": 0.02,
         "ruff": 0.02,
         "flake8": 0.02,
         "pyright": 0.02,
@@ -2411,6 +2413,24 @@ class ProjectHealth:
             return 100.0, "No Commitizen configs found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} Commitizen config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_towncrier(self, analyzer: TowncrierAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Towncrier configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Towncrier config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
         )
         return score, summary, {
@@ -4972,6 +4992,10 @@ class ProjectHealth:
         commitizen = CommitizenAnalyzer(root_str)
         score, summary, details = self._score_commitizen(commitizen)
         categories.append(HealthCategory("commitizen", score, summary, details))
+
+        towncrier = TowncrierAnalyzer(root_str)
+        score, summary, details = self._score_towncrier(towncrier)
+        categories.append(HealthCategory("towncrier", score, summary, details))
 
         ruff = RuffAnalyzer(root_str)
         score, summary, details = self._score_ruff(ruff)

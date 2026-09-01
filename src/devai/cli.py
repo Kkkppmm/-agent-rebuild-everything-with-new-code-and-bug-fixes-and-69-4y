@@ -805,6 +805,22 @@ def cmd_commitizen_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_towncrier_audit(args: argparse.Namespace) -> None:
+    from devai.towncrier_analyzer import TowncrierAnalyzer
+
+    analyzer = TowncrierAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_ruff_audit(args: argparse.Namespace) -> None:
     from devai.ruff_analyzer import RuffAnalyzer
 
@@ -3653,6 +3669,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened pyproject.toml [tool.commitizen] template",
     )
     p.set_defaults(func=cmd_commitizen_audit)
+
+    p = sub.add_parser(
+        "towncrier-audit",
+        help="Audit Towncrier configs for path traversal, secrets, insecure URLs, and unsafe format strings",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened pyproject.toml [tool.towncrier] template",
+    )
+    p.set_defaults(func=cmd_towncrier_audit)
 
     p = sub.add_parser(
         "ruff-audit",
