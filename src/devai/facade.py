@@ -151,6 +151,7 @@ from devai.isort_analyzer import IsortAnalyzer
 from devai.flake8_analyzer import Flake8Analyzer
 from devai.pyright_analyzer import PyrightAnalyzer
 from devai.basedpyright_analyzer import BasedpyrightAnalyzer
+from devai.pyrefly_analyzer import PyreflyAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
@@ -983,6 +984,10 @@ class DevAI:
     def basedpyright(self, path: str | Path = ".", **kwargs: Any) -> BasedpyrightAnalyzer:
         """Audit pyproject.toml [tool.basedpyright] for relaxed type checking and disabled rules."""
         return BasedpyrightAnalyzer(str(path), **kwargs)
+
+    def pyrefly(self, path: str | Path = ".", **kwargs: Any) -> PyreflyAnalyzer:
+        """Audit pyrefly.toml and pyproject.toml [tool.pyrefly] for disabled presets and relaxed type checking."""
+        return PyreflyAnalyzer(str(path), **kwargs)
 
     def pylint(self, path: str | Path = ".", **kwargs: Any) -> PylintAnalyzer:
         """Audit Pylint configs for broad disables, unsafe init-hook, and security rule suppression."""

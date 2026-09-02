@@ -689,6 +689,12 @@ from devai.basedpyright_analyzer import (
     BasedpyrightInfo,
     BasedpyrightStats,
 )
+from devai.pyrefly_analyzer import (
+    PyreflyAnalyzer,
+    PyreflyFinding,
+    PyreflyInfo,
+    PyreflyStats,
+)
 from devai.pylint_analyzer import (
     PylintAnalyzer,
     PylintFinding,
@@ -2062,6 +2068,10 @@ __all__ = [
     "BasedpyrightFinding",
     "BasedpyrightInfo",
     "BasedpyrightStats",
+    "PyreflyAnalyzer",
+    "PyreflyFinding",
+    "PyreflyInfo",
+    "PyreflyStats",
     "PylintAnalyzer",
     "PylintFinding",
     "PylintInfo",
