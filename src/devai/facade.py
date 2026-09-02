@@ -149,6 +149,7 @@ from devai.black_analyzer import BlackAnalyzer
 from devai.isort_analyzer import IsortAnalyzer
 from devai.flake8_analyzer import Flake8Analyzer
 from devai.pyright_analyzer import PyrightAnalyzer
+from devai.ty_analyzer import TyAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
@@ -977,6 +978,10 @@ class DevAI:
     def pyright(self, path: str | Path = ".", **kwargs: Any) -> PyrightAnalyzer:
         """Audit pyrightconfig.json and pyproject.toml [tool.pyright] for relaxed type checking."""
         return PyrightAnalyzer(str(path), **kwargs)
+
+    def ty(self, path: str | Path = ".", **kwargs: Any) -> TyAnalyzer:
+        """Audit ty.toml and pyproject.toml [tool.ty] for relaxed type checking."""
+        return TyAnalyzer(str(path), **kwargs)
 
     def pylint(self, path: str | Path = ".", **kwargs: Any) -> PylintAnalyzer:
         """Audit Pylint configs for broad disables, unsafe init-hook, and security rule suppression."""
