@@ -119,6 +119,7 @@ from devai.conan_analyzer import ConanAnalyzer
 from devai.vcpkg_analyzer import VcpkgAnalyzer
 from devai.nix_analyzer import NixAnalyzer
 from devai.mise_analyzer import MiseAnalyzer
+from devai.pep723_analyzer import Pep723Analyzer
 from devai.turbo_analyzer import TurboAnalyzer
 from devai.nx_analyzer import NxAnalyzer
 from devai.direnv_analyzer import DirenvAnalyzer
@@ -1204,6 +1205,10 @@ class DevAI:
     def mise(self, path: str | Path = ".", **kwargs: Any) -> MiseAnalyzer:
         """Audit mise.toml and .tool-versions for secrets, insecure plugin URLs, and dangerous tasks."""
         return MiseAnalyzer(str(path), **kwargs)
+
+    def pep723(self, path: str | Path = ".", **kwargs: Any) -> Pep723Analyzer:
+        """Audit PEP 723 inline script metadata for insecure deps and embedded secrets."""
+        return Pep723Analyzer(str(path), **kwargs)
 
     def turbo(self, path: str | Path = ".", **kwargs: Any) -> TurboAnalyzer:
         """Audit turbo.json and turbo.jsonc for secrets, cache signature bypasses, and sensitive env vars."""

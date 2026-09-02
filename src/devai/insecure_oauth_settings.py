@@ -64,8 +64,6 @@ class InsecureOAuthSettingsStats:
 def _bool_value(node: ast.AST) -> bool | None:
     if isinstance(node, ast.Constant) and isinstance(node.value, bool):
         return node.value
-    if isinstance(node, ast.NameConstant):  # noqa: SIM114 — py310 compat
-        return node.value
     return None
 
 
