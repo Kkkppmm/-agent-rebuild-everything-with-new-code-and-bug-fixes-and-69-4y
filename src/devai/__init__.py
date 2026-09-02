@@ -1031,6 +1031,12 @@ from devai.pep723_analyzer import (
     Pep723Info,
     Pep723Stats,
 )
+from devai.ty_analyzer import (
+    TyAnalyzer,
+    TyFinding,
+    TyInfo,
+    TyStats,
+)
 from devai.turbo_analyzer import (
     TurboAnalyzer,
     TurboFinding,
@@ -2278,6 +2284,10 @@ __all__ = [
     "Pep723Finding",
     "Pep723Info",
     "Pep723Stats",
+    "TyAnalyzer",
+    "TyFinding",
+    "TyInfo",
+    "TyStats",
     "TurboAnalyzer",
     "TurboFinding",
     "TurboInfo",

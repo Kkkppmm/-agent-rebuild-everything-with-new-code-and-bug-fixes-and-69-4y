@@ -949,6 +949,22 @@ def cmd_pyright_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_ty_audit(args: argparse.Namespace) -> None:
+    from devai.ty_analyzer import TyAnalyzer
+
+    analyzer = TyAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_pylint_audit(args: argparse.Namespace) -> None:
     from devai.pylint_analyzer import PylintAnalyzer
 
@@ -3811,6 +3827,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Pyright configuration template",
     )
     p.set_defaults(func=cmd_pyright_audit)
+
+    p = sub.add_parser(
+        "ty-audit",
+        help="Audit Astral ty configs for disabled rules and relaxed type checking",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened ty configuration template",
+    )
+    p.set_defaults(func=cmd_ty_audit)
 
     p = sub.add_parser(
         "pylint-audit",
