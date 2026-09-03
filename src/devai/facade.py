@@ -157,6 +157,8 @@ from devai.sphinx_analyzer import SphinxAnalyzer
 from devai.hugo_analyzer import HugoAnalyzer
 from devai.jekyll_analyzer import JekyllAnalyzer
 from devai.pelican_analyzer import PelicanAnalyzer
+from devai.zola_analyzer import ZolaAnalyzer
+from devai.mdbook_analyzer import MdBookAnalyzer
 from devai.vitepress_analyzer import VitePressAnalyzer
 from devai.docusaurus_analyzer import DocusaurusAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
@@ -1015,6 +1017,14 @@ class DevAI:
     def pelican(self, path: str | Path = ".", **kwargs: Any) -> PelicanAnalyzer:
         """Audit pelicanconf.py for unsafe plugins, disabled autoescape, and hardcoded secrets."""
         return PelicanAnalyzer(str(path), **kwargs)
+
+    def zola(self, path: str | Path = ".", **kwargs: Any) -> ZolaAnalyzer:
+        """Audit config.toml for exposed dev servers, remote themes, and insecure base URLs."""
+        return ZolaAnalyzer(str(path), **kwargs)
+
+    def mdbook(self, path: str | Path = ".", **kwargs: Any) -> MdBookAnalyzer:
+        """Audit book.toml for remote scripts, git tokens, and editable Rust playgrounds."""
+        return MdBookAnalyzer(str(path), **kwargs)
 
     def vitepress(self, path: str | Path = ".", **kwargs: Any) -> VitePressAnalyzer:
         """Audit .vitepress/config.* for hardcoded secrets, remote head scripts, and unsafe markdown."""

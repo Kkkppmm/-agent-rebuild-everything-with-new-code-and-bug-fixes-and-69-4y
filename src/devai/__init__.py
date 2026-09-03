@@ -725,6 +725,18 @@ from devai.pelican_analyzer import (
     PelicanInfo,
     PelicanStats,
 )
+from devai.zola_analyzer import (
+    ZolaAnalyzer,
+    ZolaFinding,
+    ZolaInfo,
+    ZolaStats,
+)
+from devai.mdbook_analyzer import (
+    MdBookAnalyzer,
+    MdBookFinding,
+    MdBookInfo,
+    MdBookStats,
+)
 from devai.vitepress_analyzer import (
     VitePressAnalyzer,
     VitePressFinding,
@@ -2134,6 +2146,14 @@ __all__ = [
     "PelicanFinding",
     "PelicanInfo",
     "PelicanStats",
+    "ZolaAnalyzer",
+    "ZolaFinding",
+    "ZolaInfo",
+    "ZolaStats",
+    "MdBookAnalyzer",
+    "MdBookFinding",
+    "MdBookInfo",
+    "MdBookStats",
     "VitePressAnalyzer",
     "VitePressFinding",
     "VitePressInfo",

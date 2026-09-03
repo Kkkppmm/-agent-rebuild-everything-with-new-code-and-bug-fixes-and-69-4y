@@ -150,6 +150,8 @@ from devai.sphinx_analyzer import SphinxAnalyzer
 from devai.hugo_analyzer import HugoAnalyzer
 from devai.jekyll_analyzer import JekyllAnalyzer
 from devai.pelican_analyzer import PelicanAnalyzer
+from devai.zola_analyzer import ZolaAnalyzer
+from devai.mdbook_analyzer import MdBookAnalyzer
 from devai.vitepress_analyzer import VitePressAnalyzer
 from devai.docusaurus_analyzer import DocusaurusAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
@@ -440,6 +442,8 @@ class ProjectHealth:
         "hugo": 0.02,
         "jekyll": 0.02,
         "pelican": 0.02,
+        "zola": 0.02,
+        "mdbook": 0.02,
         "vitepress": 0.02,
         "docusaurus": 0.02,
         "pylint": 0.02,
@@ -2743,6 +2747,42 @@ class ProjectHealth:
             return 100.0, "No Pelican configs found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} Pelican config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_zola(self, analyzer: ZolaAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Zola configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Zola config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_mdbook(self, analyzer: MdBookAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No mdBook configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} mdBook config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
         )
         return score, summary, {
@@ -5282,6 +5322,14 @@ class ProjectHealth:
         pelican = PelicanAnalyzer(root_str)
         score, summary, details = self._score_pelican(pelican)
         categories.append(HealthCategory("pelican", score, summary, details))
+
+        zola = ZolaAnalyzer(root_str)
+        score, summary, details = self._score_zola(zola)
+        categories.append(HealthCategory("zola", score, summary, details))
+
+        mdbook = MdBookAnalyzer(root_str)
+        score, summary, details = self._score_mdbook(mdbook)
+        categories.append(HealthCategory("mdbook", score, summary, details))
 
         vitepress = VitePressAnalyzer(root_str)
         score, summary, details = self._score_vitepress(vitepress)
