@@ -707,6 +707,24 @@ from devai.sphinx_analyzer import (
     SphinxInfo,
     SphinxStats,
 )
+from devai.hugo_analyzer import (
+    HugoAnalyzer,
+    HugoFinding,
+    HugoInfo,
+    HugoStats,
+)
+from devai.vitepress_analyzer import (
+    VitePressAnalyzer,
+    VitePressFinding,
+    VitePressInfo,
+    VitePressStats,
+)
+from devai.docusaurus_analyzer import (
+    DocusaurusAnalyzer,
+    DocusaurusFinding,
+    DocusaurusInfo,
+    DocusaurusStats,
+)
 from devai.pylint_analyzer import (
     PylintAnalyzer,
     PylintFinding,
@@ -2092,6 +2110,18 @@ __all__ = [
     "SphinxFinding",
     "SphinxInfo",
     "SphinxStats",
+    "HugoAnalyzer",
+    "HugoFinding",
+    "HugoInfo",
+    "HugoStats",
+    "VitePressAnalyzer",
+    "VitePressFinding",
+    "VitePressInfo",
+    "VitePressStats",
+    "DocusaurusAnalyzer",
+    "DocusaurusFinding",
+    "DocusaurusInfo",
+    "DocusaurusStats",
     "PylintAnalyzer",
     "PylintFinding",
     "PylintInfo",
