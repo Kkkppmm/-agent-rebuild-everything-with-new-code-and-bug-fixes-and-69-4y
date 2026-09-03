@@ -1029,6 +1029,22 @@ def cmd_docsify_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_docusaurus_audit(args: argparse.Namespace) -> None:
+    from devai.docusaurus_analyzer import DocusaurusAnalyzer
+
+    analyzer = DocusaurusAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_pylint_audit(args: argparse.Namespace) -> None:
     from devai.pylint_analyzer import PylintAnalyzer
 
@@ -3961,6 +3977,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Docsify index.html template",
     )
     p.set_defaults(func=cmd_docsify_audit)
+
+    p = sub.add_parser(
+        "docusaurus-audit",
+        help="Audit Docusaurus configs for Algolia keys, remote scripts, and relaxed link validation",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened docusaurus.config.js template",
+    )
+    p.set_defaults(func=cmd_docusaurus_audit)
 
     p = sub.add_parser(
         "pylint-audit",

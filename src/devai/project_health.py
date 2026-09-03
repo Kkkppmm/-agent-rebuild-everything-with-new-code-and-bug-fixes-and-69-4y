@@ -148,6 +148,7 @@ from devai.pyrefly_analyzer import PyreflyAnalyzer
 from devai.mkdocs_analyzer import MkDocsAnalyzer
 from devai.sphinx_analyzer import SphinxAnalyzer
 from devai.docsify_analyzer import DocsifyAnalyzer
+from devai.docusaurus_analyzer import DocusaurusAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
@@ -434,6 +435,7 @@ class ProjectHealth:
         "mkdocs": 0.02,
         "sphinx": 0.02,
         "docsify": 0.02,
+        "docusaurus": 0.02,
         "pylint": 0.02,
         "golangci": 0.02,
         "rubocop": 0.02,
@@ -2699,6 +2701,24 @@ class ProjectHealth:
             return 100.0, "No Docsify configs found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} Docsify config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_docusaurus(self, analyzer: DocusaurusAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Docusaurus configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Docusaurus config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
         )
         return score, summary, {
@@ -5194,6 +5214,10 @@ class ProjectHealth:
         docsify = DocsifyAnalyzer(root_str)
         score, summary, details = self._score_docsify(docsify)
         categories.append(HealthCategory("docsify", score, summary, details))
+
+        docusaurus = DocusaurusAnalyzer(root_str)
+        score, summary, details = self._score_docusaurus(docusaurus)
+        categories.append(HealthCategory("docusaurus", score, summary, details))
 
         pylint = PylintAnalyzer(root_str)
         score, summary, details = self._score_pylint(pylint)

@@ -155,6 +155,7 @@ from devai.pyrefly_analyzer import PyreflyAnalyzer
 from devai.mkdocs_analyzer import MkDocsAnalyzer
 from devai.sphinx_analyzer import SphinxAnalyzer
 from devai.docsify_analyzer import DocsifyAnalyzer
+from devai.docusaurus_analyzer import DocusaurusAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
@@ -1003,6 +1004,10 @@ class DevAI:
     def docsify(self, path: str | Path = ".", **kwargs: Any) -> DocsifyAnalyzer:
         """Audit Docsify index.html for executeScript, remote plugins, CDN scripts, and hardcoded tokens."""
         return DocsifyAnalyzer(str(path), **kwargs)
+
+    def docusaurus(self, path: str | Path = ".", **kwargs: Any) -> DocusaurusAnalyzer:
+        """Audit docusaurus.config.js/ts for Algolia keys, remote scripts, and relaxed link validation."""
+        return DocusaurusAnalyzer(str(path), **kwargs)
 
     def pylint(self, path: str | Path = ".", **kwargs: Any) -> PylintAnalyzer:
         """Audit Pylint configs for broad disables, unsafe init-hook, and security rule suppression."""

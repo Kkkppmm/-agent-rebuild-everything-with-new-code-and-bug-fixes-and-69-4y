@@ -713,6 +713,12 @@ from devai.docsify_analyzer import (
     DocsifyInfo,
     DocsifyStats,
 )
+from devai.docusaurus_analyzer import (
+    DocusaurusAnalyzer,
+    DocusaurusFinding,
+    DocusaurusInfo,
+    DocusaurusStats,
+)
 from devai.pylint_analyzer import (
     PylintAnalyzer,
     PylintFinding,
@@ -2102,6 +2108,10 @@ __all__ = [
     "DocsifyFinding",
     "DocsifyInfo",
     "DocsifyStats",
+    "DocusaurusAnalyzer",
+    "DocusaurusFinding",
+    "DocusaurusInfo",
+    "DocusaurusStats",
     "PylintAnalyzer",
     "PylintFinding",
     "PylintInfo",
