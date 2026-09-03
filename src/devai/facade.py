@@ -155,6 +155,7 @@ from devai.pyrefly_analyzer import PyreflyAnalyzer
 from devai.mkdocs_analyzer import MkDocsAnalyzer
 from devai.sphinx_analyzer import SphinxAnalyzer
 from devai.hugo_analyzer import HugoAnalyzer
+from devai.jekyll_analyzer import JekyllAnalyzer
 from devai.vitepress_analyzer import VitePressAnalyzer
 from devai.docusaurus_analyzer import DocusaurusAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
@@ -1005,6 +1006,10 @@ class DevAI:
     def hugo(self, path: str | Path = ".", **kwargs: Any) -> HugoAnalyzer:
         """Audit Hugo hugo.toml/config.* for unsafe markup, exposed dev servers, and remote assets."""
         return HugoAnalyzer(str(path), **kwargs)
+
+    def jekyll(self, path: str | Path = ".", **kwargs: Any) -> JekyllAnalyzer:
+        """Audit Jekyll _config.yml for unsafe plugins, disabled safe mode, and remote assets."""
+        return JekyllAnalyzer(str(path), **kwargs)
 
     def vitepress(self, path: str | Path = ".", **kwargs: Any) -> VitePressAnalyzer:
         """Audit .vitepress/config.* for hardcoded secrets, remote head scripts, and unsafe markdown."""

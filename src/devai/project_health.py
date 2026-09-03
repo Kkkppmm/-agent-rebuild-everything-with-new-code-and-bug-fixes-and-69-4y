@@ -148,6 +148,7 @@ from devai.pyrefly_analyzer import PyreflyAnalyzer
 from devai.mkdocs_analyzer import MkDocsAnalyzer
 from devai.sphinx_analyzer import SphinxAnalyzer
 from devai.hugo_analyzer import HugoAnalyzer
+from devai.jekyll_analyzer import JekyllAnalyzer
 from devai.vitepress_analyzer import VitePressAnalyzer
 from devai.docusaurus_analyzer import DocusaurusAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
@@ -436,6 +437,7 @@ class ProjectHealth:
         "mkdocs": 0.02,
         "sphinx": 0.02,
         "hugo": 0.02,
+        "jekyll": 0.02,
         "vitepress": 0.02,
         "docusaurus": 0.02,
         "pylint": 0.02,
@@ -2703,6 +2705,24 @@ class ProjectHealth:
             return 100.0, "No Hugo configs found", {"config_files": 0, "findings": 0}
         summary = (
             f"{stats.config_files} Hugo config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_jekyll(self, analyzer: JekyllAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Jekyll configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Jekyll config(s), {stats.findings} finding(s) "
             f"({stats.high_severity} high)"
         )
         return score, summary, {
@@ -5234,6 +5254,10 @@ class ProjectHealth:
         hugo = HugoAnalyzer(root_str)
         score, summary, details = self._score_hugo(hugo)
         categories.append(HealthCategory("hugo", score, summary, details))
+
+        jekyll = JekyllAnalyzer(root_str)
+        score, summary, details = self._score_jekyll(jekyll)
+        categories.append(HealthCategory("jekyll", score, summary, details))
 
         vitepress = VitePressAnalyzer(root_str)
         score, summary, details = self._score_vitepress(vitepress)

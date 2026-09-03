@@ -713,6 +713,12 @@ from devai.hugo_analyzer import (
     HugoInfo,
     HugoStats,
 )
+from devai.jekyll_analyzer import (
+    JekyllAnalyzer,
+    JekyllFinding,
+    JekyllInfo,
+    JekyllStats,
+)
 from devai.vitepress_analyzer import (
     VitePressAnalyzer,
     VitePressFinding,
@@ -2114,6 +2120,10 @@ __all__ = [
     "HugoFinding",
     "HugoInfo",
     "HugoStats",
+    "JekyllAnalyzer",
+    "JekyllFinding",
+    "JekyllInfo",
+    "JekyllStats",
     "VitePressAnalyzer",
     "VitePressFinding",
     "VitePressInfo",
