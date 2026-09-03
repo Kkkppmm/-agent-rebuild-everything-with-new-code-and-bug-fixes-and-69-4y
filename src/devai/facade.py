@@ -154,6 +154,8 @@ from devai.basedpyright_analyzer import BasedpyrightAnalyzer
 from devai.pyrefly_analyzer import PyreflyAnalyzer
 from devai.mkdocs_analyzer import MkDocsAnalyzer
 from devai.sphinx_analyzer import SphinxAnalyzer
+from devai.gitbook_analyzer import GitBookAnalyzer
+from devai.readthedocs_analyzer import ReadTheDocsAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
@@ -998,6 +1000,14 @@ class DevAI:
     def sphinx(self, path: str | Path = ".", **kwargs: Any) -> SphinxAnalyzer:
         """Audit Sphinx conf.py for unsafe sys.path, eval/exec, insecure URLs, and permissive autodoc."""
         return SphinxAnalyzer(str(path), **kwargs)
+
+    def gitbook(self, path: str | Path = ".", **kwargs: Any) -> GitBookAnalyzer:
+        """Audit .gitbook.yaml and book.json for open redirects, embedded credentials, and exposed secrets."""
+        return GitBookAnalyzer(str(path), **kwargs)
+
+    def readthedocs(self, path: str | Path = ".", **kwargs: Any) -> ReadTheDocsAnalyzer:
+        """Audit .readthedocs.yaml for pipe-to-shell builds, git credentials, and untrusted pip URLs."""
+        return ReadTheDocsAnalyzer(str(path), **kwargs)
 
     def pylint(self, path: str | Path = ".", **kwargs: Any) -> PylintAnalyzer:
         """Audit Pylint configs for broad disables, unsafe init-hook, and security rule suppression."""

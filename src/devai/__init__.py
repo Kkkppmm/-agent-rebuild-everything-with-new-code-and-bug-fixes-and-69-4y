@@ -707,6 +707,18 @@ from devai.sphinx_analyzer import (
     SphinxInfo,
     SphinxStats,
 )
+from devai.gitbook_analyzer import (
+    GitBookAnalyzer,
+    GitBookFinding,
+    GitBookInfo,
+    GitBookStats,
+)
+from devai.readthedocs_analyzer import (
+    ReadTheDocsAnalyzer,
+    ReadTheDocsFinding,
+    ReadTheDocsInfo,
+    ReadTheDocsStats,
+)
 from devai.pylint_analyzer import (
     PylintAnalyzer,
     PylintFinding,
@@ -2092,6 +2104,14 @@ __all__ = [
     "SphinxFinding",
     "SphinxInfo",
     "SphinxStats",
+    "GitBookAnalyzer",
+    "GitBookFinding",
+    "GitBookInfo",
+    "GitBookStats",
+    "ReadTheDocsAnalyzer",
+    "ReadTheDocsFinding",
+    "ReadTheDocsInfo",
+    "ReadTheDocsStats",
     "PylintAnalyzer",
     "PylintFinding",
     "PylintInfo",

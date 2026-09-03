@@ -147,6 +147,8 @@ from devai.ty_analyzer import TyAnalyzer
 from devai.pyrefly_analyzer import PyreflyAnalyzer
 from devai.mkdocs_analyzer import MkDocsAnalyzer
 from devai.sphinx_analyzer import SphinxAnalyzer
+from devai.gitbook_analyzer import GitBookAnalyzer
+from devai.readthedocs_analyzer import ReadTheDocsAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
@@ -2689,6 +2691,42 @@ class ProjectHealth:
             "low_severity": stats.low_severity,
         }
 
+    def _score_gitbook(self, analyzer: GitBookAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No GitBook configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} GitBook config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
+    def _score_readthedocs(self, analyzer: ReadTheDocsAnalyzer) -> tuple[float, str, dict]:
+        analyzer.analyze()
+        score = analyzer.health_score()
+        stats = analyzer.stats
+        if stats.config_files == 0:
+            return 100.0, "No Read the Docs configs found", {"config_files": 0, "findings": 0}
+        summary = (
+            f"{stats.config_files} Read the Docs config(s), {stats.findings} finding(s) "
+            f"({stats.high_severity} high)"
+        )
+        return score, summary, {
+            "config_files": stats.config_files,
+            "findings": stats.findings,
+            "high_severity": stats.high_severity,
+            "medium_severity": stats.medium_severity,
+            "low_severity": stats.low_severity,
+        }
+
     def _score_pylint(self, analyzer: PylintAnalyzer) -> tuple[float, str, dict]:
         analyzer.analyze()
         score = analyzer.health_score()
@@ -5170,6 +5208,14 @@ class ProjectHealth:
         sphinx = SphinxAnalyzer(root_str)
         score, summary, details = self._score_sphinx(sphinx)
         categories.append(HealthCategory("sphinx", score, summary, details))
+
+        gitbook = GitBookAnalyzer(root_str)
+        score, summary, details = self._score_gitbook(gitbook)
+        categories.append(HealthCategory("gitbook", score, summary, details))
+
+        readthedocs = ReadTheDocsAnalyzer(root_str)
+        score, summary, details = self._score_readthedocs(readthedocs)
+        categories.append(HealthCategory("readthedocs", score, summary, details))
 
         pylint = PylintAnalyzer(root_str)
         score, summary, details = self._score_pylint(pylint)

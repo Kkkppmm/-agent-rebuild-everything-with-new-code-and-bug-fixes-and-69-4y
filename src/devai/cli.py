@@ -1013,6 +1013,38 @@ def cmd_mkdocs_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_gitbook_audit(args: argparse.Namespace) -> None:
+    from devai.gitbook_analyzer import GitBookAnalyzer
+
+    analyzer = GitBookAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
+def cmd_readthedocs_audit(args: argparse.Namespace) -> None:
+    from devai.readthedocs_analyzer import ReadTheDocsAnalyzer
+
+    analyzer = ReadTheDocsAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_pylint_audit(args: argparse.Namespace) -> None:
     from devai.pylint_analyzer import PylintAnalyzer
 
@@ -3931,6 +3963,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened MkDocs configuration template",
     )
     p.set_defaults(func=cmd_mkdocs_audit)
+
+    p = sub.add_parser(
+        "gitbook-audit",
+        help="Audit GitBook configs for open redirects, embedded credentials, and exposed secrets",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened GitBook configuration template",
+    )
+    p.set_defaults(func=cmd_gitbook_audit)
+
+    p = sub.add_parser(
+        "readthedocs-audit",
+        help="Audit Read the Docs configs for pipe-to-shell builds, git credentials, and untrusted pip URLs",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Read the Docs configuration template",
+    )
+    p.set_defaults(func=cmd_readthedocs_audit)
 
     p = sub.add_parser(
         "pylint-audit",
