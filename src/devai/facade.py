@@ -164,6 +164,7 @@ from devai.gitbook_analyzer import GitBookAnalyzer
 from devai.vitepress_analyzer import VitePressAnalyzer
 from devai.docusaurus_analyzer import DocusaurusAnalyzer
 from devai.starlight_analyzer import StarlightAnalyzer
+from devai.readthedocs_analyzer import ReadTheDocsAnalyzer
 from devai.pylint_analyzer import PylintAnalyzer
 from devai.golangci_analyzer import GolangciLintAnalyzer
 from devai.rubocop_analyzer import RuboCopAnalyzer
@@ -1048,6 +1049,10 @@ class DevAI:
     def starlight(self, path: str | Path = ".", **kwargs: Any) -> StarlightAnalyzer:
         """Audit Astro Starlight configs for hardcoded secrets, remote head scripts, and unsafe expressiveCode."""
         return StarlightAnalyzer(str(path), **kwargs)
+
+    def readthedocs(self, path: str | Path = ".", **kwargs: Any) -> ReadTheDocsAnalyzer:
+        """Audit .readthedocs.yaml for unsafe build commands, system packages, and relaxed Sphinx warnings."""
+        return ReadTheDocsAnalyzer(str(path), **kwargs)
 
     def pylint(self, path: str | Path = ".", **kwargs: Any) -> PylintAnalyzer:
         """Audit Pylint configs for broad disables, unsafe init-hook, and security rule suppression."""

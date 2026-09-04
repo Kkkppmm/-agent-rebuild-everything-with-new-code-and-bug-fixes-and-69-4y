@@ -1029,6 +1029,22 @@ def cmd_starlight_audit(args: argparse.Namespace) -> None:
             print(finding.format())
 
 
+def cmd_readthedocs_audit(args: argparse.Namespace) -> None:
+    from devai.readthedocs_analyzer import ReadTheDocsAnalyzer
+
+    analyzer = ReadTheDocsAnalyzer(args.directory)
+    if args.generate_template:
+        print(analyzer.generate_hardened_template())
+        return
+    if args.context:
+        print(analyzer.to_context())
+        return
+    print(analyzer.summary())
+    if args.verbose:
+        for finding in analyzer.analyze():
+            print(finding.format())
+
+
 def cmd_pylint_audit(args: argparse.Namespace) -> None:
     from devai.pylint_analyzer import PylintAnalyzer
 
@@ -3961,6 +3977,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print a hardened Astro Starlight configuration template",
     )
     p.set_defaults(func=cmd_starlight_audit)
+
+    p = sub.add_parser(
+        "readthedocs-audit",
+        help="Audit .readthedocs.yaml for unsafe build commands, system packages, and relaxed Sphinx warnings",
+    )
+    p.add_argument("directory", nargs="?", default=".", help="Project directory")
+    p.add_argument("--context", action="store_true", help="Output LLM-ready context")
+    p.add_argument("--verbose", "-v", action="store_true", help="List all findings")
+    p.add_argument(
+        "--generate-template",
+        action="store_true",
+        help="Print a hardened Read the Docs configuration template",
+    )
+    p.set_defaults(func=cmd_readthedocs_audit)
 
     p = sub.add_parser(
         "pylint-audit",

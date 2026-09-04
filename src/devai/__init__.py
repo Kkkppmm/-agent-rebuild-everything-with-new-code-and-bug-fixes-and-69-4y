@@ -767,6 +767,12 @@ from devai.starlight_analyzer import (
     StarlightInfo,
     StarlightStats,
 )
+from devai.readthedocs_analyzer import (
+    ReadTheDocsAnalyzer,
+    ReadTheDocsFinding,
+    ReadTheDocsInfo,
+    ReadTheDocsStats,
+)
 from devai.pylint_analyzer import (
     PylintAnalyzer,
     PylintFinding,
@@ -1513,7 +1519,7 @@ from devai.schemas import (
     SecurityFinding,
 )
 
-__version__ = "8.7.0"
+__version__ = "8.34.0"
 __all__ = [
     "Agent",
     "AssertSecurityAnalyzer",
@@ -2192,6 +2198,10 @@ __all__ = [
     "StarlightFinding",
     "StarlightInfo",
     "StarlightStats",
+    "ReadTheDocsAnalyzer",
+    "ReadTheDocsFinding",
+    "ReadTheDocsInfo",
+    "ReadTheDocsStats",
     "PylintAnalyzer",
     "PylintFinding",
     "PylintInfo",
